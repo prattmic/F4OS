@@ -1,4 +1,4 @@
-/* STM32F4-OS boot loader.
+/* F4OS boot loader.
    Everything starts here!
 
    Michael Pratt <michael@pratt.im> */

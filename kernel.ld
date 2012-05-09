@@ -1,4 +1,4 @@
-/* Simple linker script for stm32f4-os
+/* Simple linker script for F4OS
  * Michael Pratt <michael@pratt.im> */
 
 OUTPUT_FORMAT ("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
