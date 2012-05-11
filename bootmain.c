@@ -6,17 +6,27 @@
 #include "registers.h"
 
 /* From boot.S */
+void user_mode(void);
 void panic(void);
 
-static void clock(void);
-static void power_led();
+void unprivileged_test(void);
+
+static void clock(void) __attribute__((section(".kernel")));
+static void power_led(void) __attribute__((section(".kernel")));
+static void mpu_setup(void) __attribute__((section(".kernel")));
+static uint16_t mpu_size(uint32_t size) __attribute__((section(".kernel")));
+
+int main(void) __attribute__((section(".kernel")));
 
 int main(void) {
     clock();
     power_led();
+    mpu_setup();
+    unprivileged_test();
 
     return 0;
 }
+
 
 #define HSE_STARTUP_TIMEOUT     (uint16_t) (0x0500)         /* Time out for HSE start up */
 /* PLL Options - See RM0090 Reference Manual pg. 95 */
@@ -107,6 +117,9 @@ static void clock(void) {
         /* If HSE fails to start-up, the application will have wrong clock configuration. */
         panic();
     }
+
+    /* Enable the CCM RAM clock */
+    RCC_AHB1ENR |= (1 << 20);
 }
 
 /* Turns on the red LED to show the device is booting */
@@ -121,4 +134,57 @@ static void power_led() {
 
     /* Enable LED */
     LED_ODR |= (1 << 14);
+}
+
+/* Enables the MPU and sets the default memory map. */
+static void mpu_setup(void) {
+    /* The defualt memory map sets everything as accessible only to privileged access
+     * Any unprivileged accesses will need to be explicitly allowed through a region. */
+    extern const uint32_t _skernel;
+    extern const uint32_t _ekernel;
+    uint32_t kernel_size = mpu_size((uint32_t) (&_ekernel) - (uint32_t) (&_skernel));
+
+    /* Set entire flash to unprivileged read only */
+    MPU_RNR = (uint32_t) 0x01;   /* Region 0 */
+    MPU_RBAR = FLASH_BASE;
+    /* (Enable = 1) | (SIZE = 19 (1MB)) | (B = 1) | (C = 1) | (S = 1) | (AP = 2 (priv rw, unpriv ro)) */
+    MPU_RASR = (1 << 0) | (19 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (2 << 24);
+
+    /* Set .kernel section to privileged access only */
+    MPU_RNR = (uint32_t) 0x02;   /* Region 1 */
+    MPU_RBAR = (uint32_t) (&_skernel);
+    /* (Enable = 1) | (SIZE = kernel_size) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
+    MPU_RASR = (1 << 0) | (kernel_size << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
+    
+    /* For now, let every one access general peripherals, system peripherals and registers are protected. */
+    MPU_RNR = (uint32_t) 0x04;   /* Region 2 */
+    MPU_RBAR = PERIPH_BASE;
+    /* (Enable = 1) | (SIZE = 28 (512MB)) | (B = 1) | (C = 0) | (S = 1) | (AP = 3 (all rw)) | (XN = 1) */
+    MPU_RASR = (1 << 0) | (28 << 1) | (1 << 16) | (0 << 17) | (1 << 18) | (3 << 24) | (1 << 28);
+
+
+    /* Enable the MPU and allow privileged access to the background map */
+    MPU_CTRL |= (1 << 0) | (1 << 2);
+
+    /* Enable the memory management fault */
+    SCB_SHCSR |= (1 << 16);
+}
+
+static uint16_t mpu_size(uint32_t size) {
+    /* Calculates the best region size for a given actual size.
+     * the MPU register takes a value N, where 2^(N+1) is the
+     * region size, where 4 <= N < 32. */
+    uint32_t region = 32;/* Note this, is 2^5.  We start N at 4 because the resulting size is 2^(N+1) */
+    uint16_t N = 4;      /* This is the minimum setting */
+
+    while (region < size) {
+        region <<= 1;
+        N += 1;
+
+        if (N >= 31) {  /* 31 is the max value for N */
+            break;
+        }
+    }
+
+    return N;
 }

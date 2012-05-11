@@ -29,10 +29,10 @@
 .word   hang        /* 19 ...   */
 
 /* Bootloader */
-.section    .text
+.section    .kernel, "ax"
 
 .thumb_func
-.global _start
+.global     _start
 _start:
     bl      enable_float
 
@@ -40,10 +40,11 @@ _start:
     bl      main
     b       hang
 
+#define SCB_CPACR   0xE000ED88  /* Coprocessor Access Control Register - Enables FPU */
 .thumb_func
 enable_float:
     /* Enable the floating point unit */
-    ldr.w   r0, =0xE000ED88
+    ldr.w   r0, =SCB_CPACR
     ldr     r1, [r0]
     orr     r1, r1, #(0xF << 20)
     str     r1, [r0]
@@ -51,23 +52,11 @@ enable_float:
     isb
     bx      lr
 
-.thumb_func
-.global user_mode
-.type user_mode, %function
-user_mode:
-    /* Enter unprivileged mode */
-    mrs     r0, control
-    orr     r0, r0, #1
-    msr     control, r0
-    dsb
-    isb
-    bx      lr
-
 
 /* Exception Handlers */
 .thumb_func
-.global panic
-.type panic, %function
+.global     panic
+.type       panic, %function
 panic:
 hang:   
     mrs     r7, psr     /* For debugging */
@@ -76,3 +65,19 @@ hang:
 .thumb_func
 _reset:
     b _start
+
+/* This needs to be in .text so it has permissions to finish running itself */
+.thumb_func
+.section    .text
+.global     user_mode
+.type       user_mode, %function
+user_mode:
+    /* Enter unprivileged mode 
+       An illegal instruction in unprivileged mode
+       results in a hard fault. */
+    mrs     r0, control
+    orr     r0, r0, #1
+    msr     control, r0
+    dsb
+    isb
+    bx      lr

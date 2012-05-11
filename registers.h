@@ -1,5 +1,11 @@
 /* STM32F4 Registers */
 
+/* Memory Map */
+#define FLASH_BASE          (uint32_t) (0x08000000)                     /* Flash Memory Base Address */
+#define RAM_BASE            (uint32_t) (0x20000000)                     /* RAM Base Address */
+#define ETHRAM_BASE         (uint32_t) (0x2001C000)                     /* ETHRAM Base Address */
+#define CCMRAM_BASE         (uint32_t) (0x10000000)                     /* CCMRAM Base Address - Accessable only to CPU */
+
 /* Peripheral Map */
 #define PERIPH_BASE         (uint32_t) (0x40000000)                     /* Peripheral base address */
 #define APB1PERIPH_BASE     (PERIPH_BASE)
@@ -13,6 +19,7 @@
 /* System Control Map */
 #define SCS_BASE            (uint32_t) (0xE000E000)                     /* System Control Space Base Address */
 #define SCB_BASE            (SCS_BASE + 0x0D00)                         /* System Control Block Base Address */
+#define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
 
 /* GPIO Port D (GPIOD) */
 #define GPIOD_MODER         *(volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
@@ -35,7 +42,16 @@
 
 /* System Control Block (SCB) */
 #define SCB_VTOR            *(volatile uint32_t *) (SCB_BASE + 0x008)   /* Vector Table Offset Register */
-#define SCB_CPACR           *(volatile uint32_t *) (SCB_BASE + 0x088)   /* Coprocessor Access Control Register */
+#define SCB_CPACR           *(volatile uint32_t *) (SCB_BASE + 0x088)   /* Coprocessor (FPU) Access Control Register */
+#define SCB_SHCSR           *(volatile uint32_t *) (SCB_BASE + 0x024)   /* System Handler Control and State Register */
+
+/* Memory Protection Unit (MPU) 
+ * ST PM0214 (Cortex M$ Programming Manual) pg. 195 */
+#define MPU_TYPER           *(volatile uint32_t *) (MPU_BASE + 0x00)    /* MPU Type Register - Describes HW MPU */
+#define MPU_CTRL            *(volatile uint32_t *) (MPU_BASE + 0x04)    /* MPU Control Register */
+#define MPU_RNR             *(volatile uint32_t *) (MPU_BASE + 0x08)    /* MPU Region Number Register */
+#define MPU_RBAR            *(volatile uint32_t *) (MPU_BASE + 0x0C)    /* MPU Region Base Address Register */
+#define MPU_RASR            *(volatile uint32_t *) (MPU_BASE + 0x10)    /* MPU Region Attribute and Size Register */
 
 
 
