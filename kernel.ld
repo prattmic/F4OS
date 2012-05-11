@@ -10,8 +10,8 @@ MEMORY
   CCMRAM (xrw)    : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
-/* Highest address of the user mode stack */
-_estack = 0x20020000;    /* end of 128K RAM on AHB bus*/
+/* Highest address of the kernel stack */
+_estack = 0x1000FFFF;    /* end of 64K CCM RAM */
 
 SECTIONS {
     /* Vectors first */

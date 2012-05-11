@@ -155,9 +155,15 @@ static void mpu_setup(void) {
     MPU_RBAR = (uint32_t) (&_skernel);
     /* (Enable = 1) | (SIZE = kernel_size) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
     MPU_RASR = (1 << 0) | (kernel_size << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
+
+    /* Set CCM RAM (kernel stack) to privileged access only */
+    MPU_RNR = (uint32_t) 0x04;   /* Region 2 */
+    MPU_RBAR = CCMRAM_BASE;
+    /* (Enable = 1) | (SIZE = 15 (64KB)) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
+    MPU_RASR = (1 << 0) | (15 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
     
     /* For now, let every one access general peripherals, system peripherals and registers are protected. */
-    MPU_RNR = (uint32_t) 0x04;   /* Region 2 */
+    MPU_RNR = (uint32_t) 0x08;   /* Region 3 */
     MPU_RBAR = PERIPH_BASE;
     /* (Enable = 1) | (SIZE = 28 (512MB)) | (B = 1) | (C = 0) | (S = 1) | (AP = 3 (all rw)) | (XN = 1) */
     MPU_RASR = (1 << 0) | (28 << 1) | (1 << 16) | (0 << 17) | (1 << 18) | (3 << 24) | (1 << 28);
