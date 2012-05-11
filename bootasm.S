@@ -11,7 +11,7 @@
 .word   _reset      /* 1 Reset */
 .word   hang        /* 2 NMI */
 .word   hang        /* 3 HardFault */
-.word   hang        /* 4 MemManage */
+.word   panic       /* 4 MemManage */
 .word   hang        /* 5 BusFault */
 .word   hang        /* 6 UsageFault */
 .word   hang        /* 7 RESERVED */
@@ -52,15 +52,29 @@ enable_float:
     isb
     bx      lr
 
+.thumb_func
+.global     raise_privilege
+.type       raise_privilege, %function
+raise_privilege:
+    mrs     r0, control
+    bic     r0, r0, #1
+    msr     control, r0
+    dsb
+    isb
+    bx      lr
 
 /* Exception Handlers */
 .thumb_func
 .global     panic
 .type       panic, %function
 panic:
-hang:   
-    mrs     r7, psr     /* For debugging */
-    b .
+    bl      raise_privilege
+    bl      toggle_led_delay
+    b       panic 
+
+.thumb_func
+hang:
+    b       .
 
 .thumb_func
 _reset:

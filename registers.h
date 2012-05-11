@@ -22,36 +22,36 @@
 #define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
 
 /* GPIO Port D (GPIOD) */
-#define GPIOD_MODER         *(volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
-#define LED_ODR             *(volatile uint32_t *) (GPIOD_BASE + 0x14)  /* LED Output Data Register */
+#define GPIOD_MODER         (volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
+#define LED_ODR             (volatile uint32_t *) (GPIOD_BASE + 0x14)  /* LED Output Data Register */
 
 /* Power Control (PWR) */
-#define PWR_CR              *(volatile uint32_t *) (PWR_BASE + 0x00)    /* Power Control Register */
-#define PWR_CSR             *(volatile uint32_t *) (PWR_BASE + 0x04)    /* Power Control/Status Register */
+#define PWR_CR              (volatile uint32_t *) (PWR_BASE + 0x00)    /* Power Control Register */
+#define PWR_CSR             (volatile uint32_t *) (PWR_BASE + 0x04)    /* Power Control/Status Register */
 
 /* Reset and Clock Control (RCC) */
-#define RCC_CR              *(volatile uint32_t *) (RCC_BASE + 0x00)    /* Clock Control Register */
-#define RCC_PLLCFGR         *(volatile uint32_t *) (RCC_BASE + 0x04)    /* PLL Configuration Register */
-#define RCC_CFGR            *(volatile uint32_t *) (RCC_BASE + 0x08)    /* Clock Configuration Register */
-#define RCC_CIR             *(volatile uint32_t *) (RCC_BASE + 0x0C)    /* Clock Interrupt Register */
-#define RCC_AHB1ENR         *(volatile uint32_t *) (RCC_BASE + 0x30)    /* AHB1 Enable Register */
-#define RCC_APB1ENR         *(volatile uint32_t *) (RCC_BASE + 0x40)    /* APB1 Peripheral Clock Enable Register */
+#define RCC_CR              (volatile uint32_t *) (RCC_BASE + 0x00)    /* Clock Control Register */
+#define RCC_PLLCFGR         (volatile uint32_t *) (RCC_BASE + 0x04)    /* PLL Configuration Register */
+#define RCC_CFGR            (volatile uint32_t *) (RCC_BASE + 0x08)    /* Clock Configuration Register */
+#define RCC_CIR             (volatile uint32_t *) (RCC_BASE + 0x0C)    /* Clock Interrupt Register */
+#define RCC_AHB1ENR         (volatile uint32_t *) (RCC_BASE + 0x30)    /* AHB1 Enable Register */
+#define RCC_APB1ENR         (volatile uint32_t *) (RCC_BASE + 0x40)    /* APB1 Peripheral Clock Enable Register */
 
 /* Flash Registers (FLASH) */
-#define FLASH_ACR           *(volatile uint32_t *) (FLASH_R_BASE + 0x00)/* Flash Access Control Register */
+#define FLASH_ACR           (volatile uint32_t *) (FLASH_R_BASE + 0x00)/* Flash Access Control Register */
 
 /* System Control Block (SCB) */
-#define SCB_VTOR            *(volatile uint32_t *) (SCB_BASE + 0x008)   /* Vector Table Offset Register */
-#define SCB_CPACR           *(volatile uint32_t *) (SCB_BASE + 0x088)   /* Coprocessor (FPU) Access Control Register */
-#define SCB_SHCSR           *(volatile uint32_t *) (SCB_BASE + 0x024)   /* System Handler Control and State Register */
+#define SCB_VTOR            (volatile uint32_t *) (SCB_BASE + 0x008)   /* Vector Table Offset Register */
+#define SCB_CPACR           (volatile uint32_t *) (SCB_BASE + 0x088)   /* Coprocessor (FPU) Access Control Register */
+#define SCB_SHCSR           (volatile uint32_t *) (SCB_BASE + 0x024)   /* System Handler Control and State Register */
 
 /* Memory Protection Unit (MPU) 
  * ST PM0214 (Cortex M$ Programming Manual) pg. 195 */
-#define MPU_TYPER           *(volatile uint32_t *) (MPU_BASE + 0x00)    /* MPU Type Register - Describes HW MPU */
-#define MPU_CTRL            *(volatile uint32_t *) (MPU_BASE + 0x04)    /* MPU Control Register */
-#define MPU_RNR             *(volatile uint32_t *) (MPU_BASE + 0x08)    /* MPU Region Number Register */
-#define MPU_RBAR            *(volatile uint32_t *) (MPU_BASE + 0x0C)    /* MPU Region Base Address Register */
-#define MPU_RASR            *(volatile uint32_t *) (MPU_BASE + 0x10)    /* MPU Region Attribute and Size Register */
+#define MPU_TYPER           (volatile uint32_t *) (MPU_BASE + 0x00)    /* MPU Type Register - Describes HW MPU */
+#define MPU_CTRL            (volatile uint32_t *) (MPU_BASE + 0x04)    /* MPU Control Register */
+#define MPU_RNR             (volatile uint32_t *) (MPU_BASE + 0x08)    /* MPU Region Number Register */
+#define MPU_RBAR            (volatile uint32_t *) (MPU_BASE + 0x0C)    /* MPU Region Base Address Register */
+#define MPU_RASR            (volatile uint32_t *) (MPU_BASE + 0x10)    /* MPU Region Attribute and Size Register */
 
 
 

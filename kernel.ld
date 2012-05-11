@@ -11,7 +11,7 @@ MEMORY
 }
 
 /* Highest address of the kernel stack */
-_estack = 0x1000FFFF;    /* end of 64K CCM RAM */
+_estack = 0x10010000;    /* end of 64K CCM RAM */
 
 SECTIONS {
     /* Vectors first */
