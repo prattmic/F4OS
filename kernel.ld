@@ -13,6 +13,9 @@ MEMORY
 /* Highest address of the kernel stack */
 _estack = 0x10010000;    /* end of 64K CCM RAM */
 
+/* Highest address of the user stack */
+_euserstack = 0x2001C000;    /* end of 112K SRAM */
+
 SECTIONS {
     /* Vectors first */
     .isr_vector :
@@ -52,7 +55,7 @@ SECTIONS {
 
         . = ALIGN(4);
         _edata = .;        /* define a global symbol at data end */
-    } > RAM
+    } > CCMRAM
 
     /* Uninitialized data section */
     .bss :
@@ -63,7 +66,7 @@ SECTIONS {
 
         . = ALIGN(4);
         _ebss = .;         /* define a global symbol at bss end */
-    } > RAM
+    } > CCMRAM
 
 }
 

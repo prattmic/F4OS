@@ -52,16 +52,6 @@ enable_float:
     isb
     bx      lr
 
-.thumb_func
-.global     raise_privilege
-.type       raise_privilege, %function
-raise_privilege:
-    mrs     r0, control
-    bic     r0, r0, #1
-    msr     control, r0
-    dsb
-    isb
-    bx      lr
 
 /* Exception Handlers */
 .thumb_func
@@ -79,19 +69,3 @@ hang:
 .thumb_func
 _reset:
     b _start
-
-/* This needs to be in .text so it has permissions to finish running itself */
-.thumb_func
-.section    .text
-.global     user_mode
-.type       user_mode, %function
-user_mode:
-    /* Enter unprivileged mode 
-       An illegal instruction in unprivileged mode
-       results in a hard fault. */
-    mrs     r0, control
-    orr     r0, r0, #1
-    msr     control, r0
-    dsb
-    isb
-    bx      lr
