@@ -13,8 +13,9 @@ MEMORY
 /* Highest address of the kernel stack */
 _estack = 0x10010000;    /* end of 64K CCM RAM */
 
-/* Highest address of the user stack */
-_euserstack = 0x2001C000;    /* end of 112K SRAM */
+/* User stack */
+_suserstack = 0x20000000;    /* beginning of 112K CCCRAM */
+_euserstack = 0x2001C000;    /* end of 112K CCMRAM */
 
 SECTIONS {
     /* Vectors first */
@@ -58,16 +59,16 @@ SECTIONS {
     } > CCMRAM
 
     /* Uninitialized data section */
-    .bss :
+    _sibss = .;
+    .bss : AT ( _sibss )
     {
         . = ALIGN(4);
         _sbss = .;         /* define a global symbol at bss start */
         *(.bss*)
 
         . = ALIGN(4);
-        _ebss = .;         /* define a global symbol at bss end */
     } > CCMRAM
-
+    _ebss = .;         /* define a global symbol at bss end */
 }
 
 PROVIDE(end = .);

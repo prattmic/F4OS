@@ -68,7 +68,7 @@ hang:
 
 .thumb_func
 _reset:
-/* Copy the data segment initializers from flash to SRAM */  
+/* Copy the data segment initializers from flash to CCM RAM */  
     movs  r1, #0
     b  LoopCopyDataInit
 

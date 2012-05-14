@@ -1,18 +1,75 @@
 /* mem.c: memory specific kernel operations */
 
 #include "types.h"
+#include "mem.h"
 
-uint16_t mpu_size(uint32_t size) __attribute__((section(".kernel")));
+void panic(void);
 
-struct stacklist {
-    uint32_t *top;
-    uint32_t size;
-    struct stacklist *next;
-};
+/* The freelist is stored is the actual free space,
+ * since nothing else is using it. */
+struct memlist *freelist = NULL;
 
-struct stacklist freelist = { (uint32_t *) 0x2001C000,
-                              (uint32_t)   256,
-                              (struct stacklist *) 0x0};
+void stack_setup(void) {
+    extern uint32_t _suserstack;
+    extern uint32_t _euserstack;
+
+    freerange(&_suserstack, &_euserstack);
+}
+
+/* Frees one page of memory */
+void free(uint32_t *v) {
+    struct memlist *r;
+
+    /* Value must be aligned with the pagesize. */
+    if ( (uint32_t) v % PGSIZE) {
+        panic();
+    }
+
+    /* Zero the page */
+    memset32(v, 0, PGSIZE);
+
+    /* Put this list entry at the actual location on the memory. */
+    r = (struct memlist *) v;
+
+    r->next = freelist;
+    freelist = r;
+}
+
+/* Frees a range of pages */
+void freerange(uint32_t *start, uint32_t *end) {
+    if ( (uint32_t) start % PGSIZE || (uint32_t) end % PGSIZE ) {
+        panic();
+    }
+
+    while (start < end) {
+        free(start);
+        start += PGSIZE;
+    }
+}
+
+/* Returns the address of one page of allocated memory. */
+void *alloc(void) {
+    void *address = (void *) freelist;
+
+    freelist = freelist->next;
+
+    return address;
+}
+
+/* Set size bytes to value from p */
+void memset32(uint32_t *p, int32_t value, uint32_t size) {
+    uint32_t *end = p + size;
+
+    /* Disallowed unaligned addresses */
+    if ( (uint32_t) p % 4 ) {
+        panic();
+    }
+
+    while ( p < end ) {
+        *p = value;
+        p++;
+    }
+}
 
 uint16_t mpu_size(uint32_t size) {
     /* Calculates the best region size for a given actual size.

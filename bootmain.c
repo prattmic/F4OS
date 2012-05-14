@@ -15,15 +15,31 @@ static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
 static void mpu_setup(void) __attribute__((section(".kernel")));
 
+static void not_panic(void) __attribute__((section(".kernel")));
+
 int main(void) __attribute__((section(".kernel")));
 
 int main(void) {
+    uint32_t *memory;
+
     clock();
     power_led();
     mpu_setup();
-    unprivileged_test();
+    stack_setup();
+    /* unprivileged_test(); */
 
+    memory = (uint32_t *) alloc();
+    free(memory);
+
+    not_panic();
     return 0;
+}
+
+/* Temporary function to prevent main from returning */
+void not_panic(void) {
+    while (1) {
+        ;
+    }
 }
 
 
