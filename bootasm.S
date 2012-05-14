@@ -18,7 +18,7 @@
 .word   hang        /* 8 RESERVED */
 .word   hang        /* 9 RESERVED*/
 .word   hang        /* 10 RESERVED */
-.word   hang        /* 11 SVCall */
+.word   _svc_handler/* 11 SVCall */
 .word   hang        /* 12 Debug Monitor */
 .word   hang        /* 13 RESERVED */
 .word   hang        /* 14 PendSV */
@@ -69,31 +69,40 @@ hang:
 .thumb_func
 _reset:
 /* Copy the data segment initializers from flash to CCM RAM */  
-    movs  r1, #0
-    b  LoopCopyDataInit
+    movs    r1, #0
+    b       LoopCopyDataInit
 
 CopyDataInit:
-    ldr  r3, =_sidata
-    ldr  r3, [r3, r1]
-    str  r3, [r0, r1]
-    adds  r1, r1, #4
+    ldr     r3, =_sidata
+    ldr     r3, [r3, r1]
+    str     r3, [r0, r1]
+    adds    r1, r1, #4
     
 LoopCopyDataInit:
-    ldr  r0, =_sdata
-    ldr  r3, =_edata
-    adds  r2, r0, r1
-    cmp  r2, r3
-    bcc  CopyDataInit
-    ldr  r2, =_sbss
-    b  LoopFillZerobss
+    ldr     r0, =_sdata
+    ldr     r3, =_edata
+    adds    r2, r0, r1
+    cmp     r2, r3
+    bcc     CopyDataInit
+    ldr     r2, =_sbss
+    b       LoopFillZerobss
 /* Zero fill the bss segment. */  
 FillZerobss:
-    movs  r3, #0
-    str  r3, [r2], #4
+    movs    r3, #0
+    str     r3, [r2], #4
     
 LoopFillZerobss:
-    ldr  r3, = _ebss
-    cmp  r2, r3
-    bcc  FillZerobss
+    ldr     r3, = _ebss
+    cmp     r2, r3
+    bcc     FillZerobss
 
-    b _start
+    b       _start
+
+.thumb_func
+.global     _svc_handler
+.type       _svc_handler, %function
+_svc_handler:
+    mov     r1, lr
+    bl      raise_privilege
+    mov     lr, r1
+    bx  lr

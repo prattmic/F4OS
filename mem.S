@@ -37,3 +37,32 @@ raise_privilege:
     dsb
     isb
     bx      lr
+
+/* Sets and enables the PSP for user mode processes 
+ * The stack address is given as an argument and is
+ * at r0. */
+.thumb_func
+.section    .kernel
+.global     enable_psp
+.type       enable_psp, %function
+enable_psp:
+    msr     psp, r0
+    mrs     r1, control
+    orr     r1, r1, #2
+    msr     control, r1
+    dsb
+    isb
+    bx      lr
+
+/* Switchs from PSP to MSP */
+.thumb_func
+.section    .kernel
+.global     disable_psp
+.type       disable_psp, %function
+disable_psp:
+    mrs     r0, control
+    bic     r0, r0, #2
+    msr     control, r1
+    dsb
+    isb
+    bx      lr

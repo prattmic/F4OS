@@ -5,11 +5,10 @@
 #include "types.h"
 #include "registers.h"
 #include "mem.h"
+#include "context.h"
 
 /* From boot.S */
 void panic(void);
-
-void unprivileged_test(void);
 
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
@@ -20,16 +19,12 @@ static void not_panic(void) __attribute__((section(".kernel")));
 int main(void) __attribute__((section(".kernel")));
 
 int main(void) {
-    uint32_t *memory;
-
     clock();
     power_led();
     mpu_setup();
     stack_setup();
-    /* unprivileged_test(); */
 
-    memory = (uint32_t *) alloc();
-    free(memory);
+    user_prefix();
 
     not_panic();
     return 0;
@@ -160,25 +155,25 @@ static void mpu_setup(void) {
     uint32_t kernel_size = mpu_size((uint32_t) (&_ekernel) - (uint32_t) (&_skernel));
 
     /* Set entire flash to unprivileged read only */
-    *MPU_RNR = (uint32_t) 0x01;   /* Region 0 */
+    *MPU_RNR = (uint32_t) (1 << 0);   /* Region 0 */
     *MPU_RBAR = FLASH_BASE;
     /* (Enable = 1) | (SIZE = 19 (1MB)) | (B = 1) | (C = 1) | (S = 1) | (AP = 2 (priv rw, unpriv ro)) */
     *MPU_RASR = (1 << 0) | (19 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (2 << 24);
 
     /* Set .kernel section to privileged access only */
-    *MPU_RNR = (uint32_t) 0x02;   /* Region 1 */
+    *MPU_RNR = (uint32_t) (1 << 1);   /* Region 1 */
     *MPU_RBAR = (uint32_t) (&_skernel);
     /* (Enable = 1) | (SIZE = kernel_size) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
     *MPU_RASR = (1 << 0) | (kernel_size << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
 
     /* Set CCM RAM (kernel stack) to privileged access only */
-    *MPU_RNR = (uint32_t) 0x04;   /* Region 2 */
+    *MPU_RNR = (uint32_t) (1 << 2);   /* Region 2 */
     *MPU_RBAR = CCMRAM_BASE;
     /* (Enable = 1) | (SIZE = 15 (64KB)) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
     *MPU_RASR = (1 << 0) | (15 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
     
     /* For now, let every one access general peripherals, system peripherals and registers are protected. */
-    *MPU_RNR = (uint32_t) 0x08;   /* Region 3 */
+    *MPU_RNR = (uint32_t) (1 << 3);   /* Region 3 */
     *MPU_RBAR = PERIPH_BASE;
     /* (Enable = 1) | (SIZE = 28 (512MB)) | (B = 1) | (C = 0) | (S = 1) | (AP = 3 (all rw)) | (XN = 1) */
     *MPU_RASR = (1 << 0) | (28 << 1) | (1 << 16) | (0 << 17) | (1 << 18) | (3 << 24) | (1 << 28);

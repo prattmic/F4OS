@@ -14,6 +14,10 @@ void stack_setup(void) {
     extern uint32_t _euserstack;
 
     freerange(&_suserstack, &_euserstack);
+
+    /* We will need the mpu_size of one page often,
+     * so lets go ahead and compute it. */
+    pg_mpu_size = mpu_size(4*PGSIZE);
 }
 
 /* Frees one page of memory */

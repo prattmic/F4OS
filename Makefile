@@ -1,6 +1,6 @@
 # put your *.o targets here, make should handle the rest!
 
-SRCS = bootasm.S bootmain.c usermode.c mem.S mem.c
+SRCS = bootasm.S bootmain.c usermode.c mem.S mem.c context.c
 LINK_SCRIPT = kernel.ld
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
