@@ -3,6 +3,9 @@
 extern const uint32_t _skernel;
 extern const uint32_t _ekernel;
 
+/* Make a SVC call */
+#define _svc(x)     asm volatile ("svc  %0  \n" :: "i" (x))
+
 /* Memory Map */
 #define FLASH_BASE          (uint32_t) (0x08000000)                     /* Flash Memory Base Address */
 #define RAM_BASE            (uint32_t) (0x20000000)                     /* RAM Base Address */
