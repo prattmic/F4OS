@@ -18,7 +18,7 @@
 .word   hang        /* 8 RESERVED */
 .word   hang        /* 9 RESERVED*/
 .word   hang        /* 10 RESERVED */
-.word   _svc_handler/* 11 SVCall */
+.word   _svc        /* 11 SVCall */
 .word   hang        /* 12 Debug Monitor */
 .word   hang        /* 13 RESERVED */
 .word   hang        /* 14 PendSV */
@@ -99,10 +99,9 @@ LoopFillZerobss:
     b       _start
 
 .thumb_func
-.global     _svc_handler
-.type       _svc_handler, %function
-_svc_handler:
-    mov     r1, lr
-    bl      raise_privilege
-    mov     lr, r1
-    bx  lr
+.global     _svc
+.type       _svc, %function
+_svc:
+    mrs     r0, psp
+    b       svc_handler
+    bx      lr

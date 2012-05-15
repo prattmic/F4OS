@@ -7,6 +7,7 @@
 #include "context.h"
 
 void unprivileged_test(void);
+void panic(void);
 
 void user_prefix(void) {
     uint32_t *memory;
@@ -27,7 +28,32 @@ void user_prefix(void) {
     unprivileged_test();
 
     /* Raise privilege */
-    asm ("svc   #0");
+    _svc(0);
 
     disable_psp();
+}
+
+void svc_handler(uint32_t *svc_args) {
+    uint32_t svc_number;
+    uint32_t return_address;
+
+    /* Stack contains:
+     * r0, r1, r2, r3, r12, r14, the return address and xPSR
+     * First argument (r0) is svc_args[0] */
+    svc_number = ((char *)svc_args[6])[-2];
+    return_address = svc_args[6];
+
+    switch (svc_number) {
+        case 0x0:
+            /* Raise Privilege, but only if request came from the kernel */
+            if (return_address >= (uint32_t) &_skernel && return_address < (uint32_t) &_ekernel) {
+                raise_privilege();
+            }
+            else {
+                panic();
+            }
+            break;
+        default:
+            break;
+    }
 }

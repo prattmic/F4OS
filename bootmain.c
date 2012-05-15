@@ -150,8 +150,6 @@ static void power_led() {
 static void mpu_setup(void) {
     /* The defualt memory map sets everything as accessible only to privileged access
      * Any unprivileged accesses will need to be explicitly allowed through a region. */
-    extern const uint32_t _skernel;
-    extern const uint32_t _ekernel;
     uint32_t kernel_size = mpu_size((uint32_t) (&_ekernel) - (uint32_t) (&_skernel));
 
     /* Set entire flash to unprivileged read only */

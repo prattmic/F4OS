@@ -1,4 +1,7 @@
-/* STM32F4 Registers */
+/* STM32F4 Registers and Memory Locations */
+
+extern const uint32_t _skernel;
+extern const uint32_t _ekernel;
 
 /* Memory Map */
 #define FLASH_BASE          (uint32_t) (0x08000000)                     /* Flash Memory Base Address */
