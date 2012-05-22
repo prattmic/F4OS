@@ -159,13 +159,13 @@ static void mpu_setup(void) {
     *MPU_RASR = (1 << 0) | (19 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (2 << 24);
 
     /* Set .kernel section to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << 1);   /* Region 1 */
+    *MPU_RNR = (uint32_t) (1 << 7);   /* Region 7 -- Higher region has precedence in case of overlap. We dont want an overlapper to get kernel write access! */
     *MPU_RBAR = (uint32_t) (&_skernel);
     /* (Enable = 1) | (SIZE = kernel_size) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
     *MPU_RASR = (1 << 0) | (kernel_size << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
 
     /* Set CCM RAM (kernel stack) to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << 2);   /* Region 2 */
+    *MPU_RNR = (uint32_t) (1 << 6);   /* Region 6 -- Higher region has precedence. Dont want overlappers to write to kernel stack! */
     *MPU_RBAR = CCMRAM_BASE;
     /* (Enable = 1) | (SIZE = 15 (64KB)) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
     *MPU_RASR = (1 << 0) | (15 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
