@@ -155,31 +155,27 @@ static void mpu_setup(void) {
     /* Set entire flash to unprivileged read only */
     *MPU_RNR = (uint32_t) (1 << 0);   /* Region 0 */
     *MPU_RBAR = FLASH_BASE;
-    /* (Enable = 1) | (SIZE = 19 (1MB)) | (B = 1) | (C = 1) | (S = 1) | (AP = 2 (priv rw, unpriv ro)) */
-    *MPU_RASR = (1 << 0) | (19 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (2 << 24);
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(19) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RO;
 
     /* Set .kernel section to privileged access only */
     *MPU_RNR = (uint32_t) (1 << 1);   /* Region 1 */
     *MPU_RBAR = (uint32_t) (&_skernel);
-    /* (Enable = 1) | (SIZE = kernel_size) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
-    *MPU_RASR = (1 << 0) | (kernel_size << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(kernel_size) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
 
     /* Set CCM RAM (kernel stack) to privileged access only */
     *MPU_RNR = (uint32_t) (1 << 2);   /* Region 2 */
     *MPU_RBAR = CCMRAM_BASE;
-    /* (Enable = 1) | (SIZE = 15 (64KB)) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
-    *MPU_RASR = (1 << 0) | (15 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(15) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
     
     /* For now, let every one access general peripherals, system peripherals and registers are protected. */
     *MPU_RNR = (uint32_t) (1 << 3);   /* Region 3 */
     *MPU_RBAR = PERIPH_BASE;
-    /* (Enable = 1) | (SIZE = 28 (512MB)) | (B = 1) | (C = 0) | (S = 1) | (AP = 3 (all rw)) | (XN = 1) */
-    *MPU_RASR = (1 << 0) | (28 << 1) | (1 << 16) | (0 << 17) | (1 << 18) | (3 << 24) | (1 << 28);
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(28) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
 
 
     /* Enable the MPU and allow privileged access to the background map */
-    *MPU_CTRL |= (1 << 0) | (1 << 2);
+    *MPU_CTRL |= MPU_CTRL_ENABLE | MPU_CTRL_PRIVDEFENA;
 
     /* Enable the memory management fault */
-    *SCB_SHCSR |= (1 << 16);
+    *SCB_SHCSR |= SCB_SHCSR_MEMFAULTENA;
 }

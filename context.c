@@ -18,8 +18,7 @@ void user_prefix(void) {
     /* Give unprivileged access to the allocated stack */
     *MPU_RNR = (uint32_t) (1 << 7);   /* Region 7 */
     *MPU_RBAR = (uint32_t) memory;
-    /* (Enable = 1) | (SIZE = Size for 1 PG) | (B = 1) | (C = 0) | (S = 1) | (AP = 3 (all rw)) | (XN = 1) */
-    *MPU_RASR = (1 << 0) | (pg_mpu_size << 1) | (1 << 16) | (0 << 17) | (1 << 18) | (3 << 24) | (1 << 28);
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(pg_mpu_size) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
 
     /* Switch to the process stack and set it to the
      * top of the allocated memory */
