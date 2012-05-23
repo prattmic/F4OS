@@ -14,7 +14,7 @@ static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
 static void mpu_setup(void) __attribute__((section(".kernel")));
 
-static void not_panic(void) __attribute__((section(".kernel")));
+static void dont_panic(void) __attribute__((section(".kernel")));
 
 int main(void) __attribute__((section(".kernel")));
 
@@ -26,12 +26,12 @@ int main(void) {
 
     user_prefix();
 
-    not_panic();
+    dont_panic();
     return 0;
 }
 
 /* Temporary function to prevent main from returning */
-void not_panic(void) {
+void dont_panic(void) {
     while (1) {
         ;
     }

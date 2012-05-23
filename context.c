@@ -28,7 +28,10 @@ void user_prefix(void) {
     unprivileged_test();
 
     /* Raise privilege */
-    _svc(0);
+    /* _svc(0); */
+
+    /* Test context switching */
+    _svc(1);
 
     disable_psp();
 }
@@ -36,6 +39,8 @@ void user_prefix(void) {
 void svc_handler(uint32_t *svc_args) {
     uint32_t svc_number;
     uint32_t return_address;
+
+    uint32_t *psp_addr;
 
     /* Stack contains:
      * r0, r1, r2, r3, r12, r14, the return address and xPSR
@@ -46,6 +51,8 @@ void svc_handler(uint32_t *svc_args) {
     switch (svc_number) {
         case 0x0:
             /* Raise Privilege, but only if request came from the kernel */
+            /* DEPRECATED: All code executed until _svc returns is privileged,
+             * so raising privileges shouldn't ever be necessary. */
             if (return_address >= (uint32_t) &_skernel && return_address < (uint32_t) &_ekernel) {
                 raise_privilege();
             }
@@ -53,6 +60,11 @@ void svc_handler(uint32_t *svc_args) {
                 panic();
             }
             break;
+        case 0x1:
+            /* Save context, do something, and restore context */
+            psp_addr = save_context();
+            asm ("mov r5, #5    \n");
+            restore_context(psp_addr);
         default:
             break;
     }
