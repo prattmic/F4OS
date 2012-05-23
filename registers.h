@@ -26,6 +26,7 @@ extern const uint32_t _ekernel;
 #define SCS_BASE            (uint32_t) (0xE000E000)                     /* System Control Space Base Address */
 #define SCB_BASE            (SCS_BASE + 0x0D00)                         /* System Control Block Base Address */
 #define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
+#define SYSTICK_BASE         (volatile uint32_t *) 0xE000E010
 
 /* GPIO Port D (GPIOD) */
 #define GPIOD_MODER         (volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
@@ -51,8 +52,14 @@ extern const uint32_t _ekernel;
 #define SCB_CPACR           (volatile uint32_t *) (SCB_BASE + 0x088)   /* Coprocessor (FPU) Access Control Register */
 #define SCB_SHCSR           (volatile uint32_t *) (SCB_BASE + 0x024)   /* System Handler Control and State Register */
 
+/* SysTick Timer */
+#define SYSTICK_CTL         (volatile uint32_t *) (SYSTICK_BASE)        /* Control register for SysTick timer peripheral */
+#define SYSTICK_RELOAD      (volatile uint32_t *) (SYSTICK_BASE + 0x04) /* Value assumed by timer upon reload */
+#define SYSTICK_VAL         (volatile uint32_t *) (SYSTICK_BASE + 0x08) /* Current value of timer */
+#define SYSTICK_CAL         (volatile uint32_t *) (SYSTICK_BASE + 0x0C) /* Calibration settings/value register */
+
 /* Memory Protection Unit (MPU) 
- * ST PM0214 (Cortex M$ Programming Manual) pg. 195 */
+ * ST PM0214 (Cortex M4 Programming Manual) pg. 195 */
 #define MPU_TYPER           (volatile uint32_t *) (MPU_BASE + 0x00)    /* MPU Type Register - Describes HW MPU */
 #define MPU_CTRL            (volatile uint32_t *) (MPU_BASE + 0x04)    /* MPU Control Register */
 #define MPU_RNR             (volatile uint32_t *) (MPU_BASE + 0x08)    /* MPU Region Number Register */

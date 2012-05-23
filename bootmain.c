@@ -6,6 +6,7 @@
 #include "registers.h"
 #include "mem.h"
 #include "context.h"
+#include "systick.h"
 
 /* From boot.S */
 void panic(void);
@@ -23,7 +24,7 @@ int main(void) {
     power_led();
     mpu_setup();
     stack_setup();
-
+    systick_init();
     user_prefix();
 
     not_panic();
@@ -33,7 +34,9 @@ int main(void) {
 /* Temporary function to prevent main from returning */
 void not_panic(void) {
     while (1) {
-        ;
+        if((1 << 16) & *SYSTICK_CTL){
+            *LED_ODR |= (1 << 12);
+        }
     }
 }
 
@@ -140,7 +143,7 @@ static void power_led() {
 
     /* Set red LED pin to output
     * See docs/stm32f4_ref.pdf page 148 for description of GPIOD_MODER */
-    *GPIOD_MODER |= (1 << (14 * 2));
+    *GPIOD_MODER |= (1 << (14 * 2)) | (1 << (12 * 2));
 
     /* Enable LED */
     *LED_ODR |= (1 << 14);
@@ -159,13 +162,13 @@ static void mpu_setup(void) {
     *MPU_RASR = (1 << 0) | (19 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (2 << 24);
 
     /* Set .kernel section to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << 7);   /* Region 7 -- Higher region has precedence in case of overlap. We dont want an overlapper to get kernel write access! */
+    *MPU_RNR = (uint32_t) (1 << KERNEL_CODE_REGION);   /* Region 7 -- Higher region has precedence in case of overlap. We dont want an overlapper to get kernel write access! */
     *MPU_RBAR = (uint32_t) (&_skernel);
     /* (Enable = 1) | (SIZE = kernel_size) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
     *MPU_RASR = (1 << 0) | (kernel_size << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
 
     /* Set CCM RAM (kernel stack) to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << 6);   /* Region 6 -- Higher region has precedence. Dont want overlappers to write to kernel stack! */
+    *MPU_RNR = (uint32_t) (1 << KERNEL_STACK_REGION);   /* Region 6 -- Higher region has precedence. Dont want overlappers to write to kernel stack! */
     *MPU_RBAR = CCMRAM_BASE;
     /* (Enable = 1) | (SIZE = 15 (64KB)) | (B = 1) | (C = 1) | (S = 1) | (AP = 1 (priv rw)) */
     *MPU_RASR = (1 << 0) | (15 << 1) | (1 << 16) | (1 << 17) | (1 << 18) | (1 << 24);
