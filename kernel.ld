@@ -14,8 +14,8 @@ MEMORY
 _estack = 0x10010000;    /* end of 64K CCM RAM */
 
 /* User stack */
-_suserstack = 0x20000000;    /* beginning of 112K CCCRAM */
-_euserstack = 0x2001C000;    /* end of 112K CCMRAM */
+_suserstack = 0x20000000;    /* beginning of 112K SRAM */
+_euserstack = 0x2001C000;    /* end of 112K SRAM */
 
 SECTIONS {
     /* Vectors first */
