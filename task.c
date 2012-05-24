@@ -40,7 +40,7 @@ void idle_task(void){
 }
 
 void register_task(void (*task_ptr)(void)){
-    taskNode* new_task = malloc(sizeof(taskNode));
+    taskNode* new_task = kmalloc(sizeof(taskNode));
     taskNode* end_task = task_list.tail;
     end_task->next_node = new_task;
     
@@ -78,6 +78,7 @@ taskNodeList sort_by_priority(taskNodeList list){
         ret.tail->next_node = pre_min_node->next_node;
         ret.tail = ret.tail->next_node;
     }
+    return ret;
 }
 
 taskNode* find_last_taskNode(taskNode* init_node){

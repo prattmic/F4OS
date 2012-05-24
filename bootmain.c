@@ -7,6 +7,7 @@
 #include "mem.h"
 #include "context.h"
 #include "systick.h"
+#include "heap.h"
 
 /* From boot.S */
 void panic(void);
@@ -25,9 +26,9 @@ int main(void) {
     mpu_setup();
     stack_setup();
     systick_init();
-
     user_prefix();
-
+    init_kheap();
+    void* lol = malloc_test();
     dont_panic();
     return 0;
 }

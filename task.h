@@ -20,7 +20,7 @@ typedef struct k_task_struct{
 
 void idle_task(void);
 void register_task(void(*task_ptr)(void));
-inline void k_set_ct_delay(unsigned long new_delay) __attribute__((always_inline));
+//inline void k_set_ct_delay(unsigned long new_delay) __attribute__((always_inline));
 taskNode* find_last_taskNode(taskNode* init_node);
 void append_task_to_queue(taskNode* new_task);
 
