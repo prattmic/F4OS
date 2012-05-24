@@ -16,7 +16,7 @@ void user_prefix(void) {
     memory = (uint32_t *) alloc();
 
     /* Give unprivileged access to the allocated stack */
-    *MPU_RNR = (uint32_t) (1 << 7);   /* Region 7 */
+    *MPU_RNR = (uint32_t) (1 << USER_STACK_REGION);   /* Region 7 */
     *MPU_RBAR = (uint32_t) memory;
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(pg_mpu_size) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
 
@@ -24,19 +24,15 @@ void user_prefix(void) {
      * top of the allocated memory */
     enable_psp(memory+PGSIZE);
 
-    unprivileged_test();
+    //unprivileged_test();
 
     /* Raise privilege */
     _svc(0);
 
     /* Test context switching */
-    _svc(1);
+    //_svc(1);
 
     disable_psp();
-}
-
-void systick_handler(void) {
-    *LED_ODR ^= (1 << 15);
 }
 
 void svc_handler(uint32_t *svc_args) {

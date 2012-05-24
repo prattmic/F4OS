@@ -1,15 +1,11 @@
 # put your *.o targets here, make should handle the rest!
 
-SRCS = bootasm.S bootmain.c usermode.c mem.S mem.c context.c
+SRCS = bootasm.S bootmain.c usermode.c mem.S mem.c context.c systick.c
 LINK_SCRIPT = kernel.ld
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 
 PROJ_NAME=os
-
-# Put your stlink folder here so make burn will work.
-
-STLINK=/mnt/share/Programming/embedded/stm32/stlink
 
 # that's it, no need to change anything below this line!
 
@@ -39,7 +35,7 @@ again: clean all
 
 # Flash the STM32F4
 burn:
-	$(STLINK)/flash/st-flash write $(PROJ_NAME).bin 0x8000000
+	st-flash write $(PROJ_NAME).bin 0x8000000
 
 # Create tags; assumes ctags exists
 ctags:

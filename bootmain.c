@@ -6,11 +6,10 @@
 #include "registers.h"
 #include "mem.h"
 #include "context.h"
+#include "systick.h"
 
 /* From boot.S */
 void panic(void);
-
-void systick_enable(void) __attribute__((section(".kernel")));
 
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
@@ -22,10 +21,10 @@ int main(void) __attribute__((section(".kernel")));
 
 int main(void) {
     clock();
-    systick_enable();
     power_led();
     mpu_setup();
     stack_setup();
+    systick_init();
 
     user_prefix();
 
@@ -36,20 +35,8 @@ int main(void) {
 /* Temporary function to prevent main from returning */
 void dont_panic(void) {
     while (1) {
-        ;
     }
 }
-
-void systick_enable(void) {
-    *STK_LOAD = (uint32_t) 0xFFFF;
-    *STK_VAL = (uint32_t) 0x0;
-    *STK_CTRL = (uint32_t) 0x7;
-
-    /* Enable LED for handler */
-    *RCC_AHB1ENR |= (1 << 3);
-    *GPIOD_MODER |= (1 << (15 * 2));
-}
-
 
 #define HSE_STARTUP_TIMEOUT     (uint16_t) (0x0500)         /* Time out for HSE start up */
 /* PLL Options - See RM0090 Reference Manual pg. 95 */
@@ -171,12 +158,12 @@ static void mpu_setup(void) {
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(19) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RO;
 
     /* Set .kernel section to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << 1);   /* Region 1 */
+    *MPU_RNR = (uint32_t) (1 << KERNEL_CODE_REGION);   /* Region 7 -- Higher region has precedence in case of overlap. We dont want an overlapper to get kernel write access! */
     *MPU_RBAR = (uint32_t) (&_skernel);
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(kernel_size) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
 
     /* Set CCM RAM (kernel stack) to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << 2);   /* Region 2 */
+    *MPU_RNR = (uint32_t) (1 << KERNEL_STACK_REGION);   /* Region 6 -- Higher region has precedence. Dont want overlappers to write to kernel stack! */
     *MPU_RBAR = CCMRAM_BASE;
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(15) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
     
