@@ -84,6 +84,6 @@ save_context:
 .global     restore_context
 .type       restore_context, %function
 restore_context:
-    ldmdb   r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
+    ldm     r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
     msr     psp, r0
     bx      lr

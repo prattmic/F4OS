@@ -10,6 +10,8 @@
 /* From boot.S */
 void panic(void);
 
+void systick_enable(void) __attribute__((section(".kernel")));
+
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
 static void mpu_setup(void) __attribute__((section(".kernel")));
@@ -20,6 +22,7 @@ int main(void) __attribute__((section(".kernel")));
 
 int main(void) {
     clock();
+    systick_enable();
     power_led();
     mpu_setup();
     stack_setup();
@@ -35,6 +38,16 @@ void dont_panic(void) {
     while (1) {
         ;
     }
+}
+
+void systick_enable(void) {
+    *STK_LOAD = (uint32_t) 0xFFFF;
+    *STK_VAL = (uint32_t) 0x0;
+    *STK_CTRL = (uint32_t) 0x7;
+
+    /* Enable LED for handler */
+    *RCC_AHB1ENR |= (1 << 3);
+    *GPIOD_MODER |= (1 << (15 * 2));
 }
 
 

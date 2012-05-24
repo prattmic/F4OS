@@ -27,12 +27,16 @@ void user_prefix(void) {
     unprivileged_test();
 
     /* Raise privilege */
-    /* _svc(0); */
+    _svc(0);
 
     /* Test context switching */
     _svc(1);
 
     disable_psp();
+}
+
+void systick_handler(void) {
+    *LED_ODR ^= (1 << 15);
 }
 
 void svc_handler(uint32_t *svc_args) {

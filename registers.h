@@ -27,6 +27,10 @@ extern const uint32_t _ekernel;
 #define SCB_BASE            (SCS_BASE + 0x0D00)                         /* System Control Block Base Address */
 #define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
 
+/* SysTick Base */
+#define STK_BASE            (uint32_t) (0xE000E010)                     /* SysTick */
+
+
 /* GPIO Port D (GPIOD) */
 #define GPIOD_MODER         (volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
 #define LED_ODR             (volatile uint32_t *) (GPIOD_BASE + 0x14)  /* LED Output Data Register */
@@ -58,6 +62,12 @@ extern const uint32_t _ekernel;
 #define MPU_RNR             (volatile uint32_t *) (MPU_BASE + 0x08)    /* MPU Region Number Register */
 #define MPU_RBAR            (volatile uint32_t *) (MPU_BASE + 0x0C)    /* MPU Region Base Address Register */
 #define MPU_RASR            (volatile uint32_t *) (MPU_BASE + 0x10)    /* MPU Region Attribute and Size Register */
+
+/* SysTick Registers */
+#define STK_CTRL            (volatile uint32_t *) (STK_BASE + 0x00)    /* SysTick Control Register */
+#define STK_LOAD            (volatile uint32_t *) (STK_BASE + 0x04)    /* SysTick Reload Register */
+#define STK_VAL             (volatile uint32_t *) (STK_BASE + 0x08)    /* SysTick Value Register */
+#define STK_CALIB           (volatile uint32_t *) (STK_BASE + 0x0C)    /* SysTick Calibration Register */
 
 
 
