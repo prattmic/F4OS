@@ -26,7 +26,7 @@ extern const uint32_t _ekernel;
 #define SCS_BASE            (uint32_t) (0xE000E000)                     /* System Control Space Base Address */
 #define SCB_BASE            (SCS_BASE + 0x0D00)                         /* System Control Block Base Address */
 #define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
-#define SYSTICK_BASE         (volatile uint32_t *) 0xE000E010
+#define SYSTICK_BASE        0xE000E010
 
 /* GPIO Port D (GPIOD) */
 #define GPIOD_MODER         (volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
@@ -69,25 +69,46 @@ extern const uint32_t _ekernel;
 
 
 /* Bit Masks - See RM0090 Reference Manual for STM32F4 for details */
-#define  PWR_CR_VOS             (uint16_t) (0x4000)         /* Regulator voltage scaling output selection */
+#define PWR_CR_VOS              (uint16_t) (0x4000)         /* Regulator voltage scaling output selection */
 
-#define  RCC_CR_HSEON           (uint32_t) (0x00010000)     /* Enable HSE */
-#define  RCC_CR_HSERDY          (uint32_t) (0x00020000)     /* HSE Ready */
-#define  RCC_CR_PLLON           (uint32_t) (0x01000000)     /* Main PLL Enable */
-#define  RCC_CR_PLLRDY          (uint32_t) (0x02000000)     /* Main PLL clock ready */
+#define RCC_CR_HSEON            (uint32_t) (0x00010000)     /* Enable HSE */
+#define RCC_CR_HSERDY           (uint32_t) (0x00020000)     /* HSE Ready */
+#define RCC_CR_PLLON            (uint32_t) (0x01000000)     /* Main PLL Enable */
+#define RCC_CR_PLLRDY           (uint32_t) (0x02000000)     /* Main PLL clock ready */
 
-#define  RCC_CFGR_SW            (uint32_t) (0x00000003)     /* SW[1:0] bits (System clock Switch) */
-#define  RCC_CFGR_SW_PLL        (uint32_t) (0x00000002)     /* PLL selected as system clock */
-#define  RCC_CFGR_SWS           (uint32_t) (0x0000000C)     /* SWS[1:0] bits (System Clock Switch Status) */
-#define  RCC_CFGR_SWS_PLL       (uint32_t) (0x00000008)     /* PLL used as system clock */
-#define  RCC_CFGR_HPRE_DIV1     (uint32_t) (0x00000000)     /* SYSCLK not divided (highest frequency) */
-#define  RCC_CFGR_PPRE2_DIV2    (uint32_t) (0x00008000)     /* HCLK divided by 2 */
-#define  RCC_CFGR_PPRE1_DIV4    (uint32_t) (0x00001400)     /* HCLK divided by 4 */
+#define RCC_CFGR_SW             (uint32_t) (0x00000003)     /* SW[1:0] bits (System clock Switch) */
+#define RCC_CFGR_SW_PLL         (uint32_t) (0x00000002)     /* PLL selected as system clock */
+#define RCC_CFGR_SWS            (uint32_t) (0x0000000C)     /* SWS[1:0] bits (System Clock Switch Status) */
+#define RCC_CFGR_SWS_PLL        (uint32_t) (0x00000008)     /* PLL used as system clock */
+#define RCC_CFGR_HPRE_DIV1      (uint32_t) (0x00000000)     /* SYSCLK not divided (highest frequency) */
+#define RCC_CFGR_PPRE2_DIV2     (uint32_t) (0x00008000)     /* HCLK divided by 2 */
+#define RCC_CFGR_PPRE1_DIV4     (uint32_t) (0x00001400)     /* HCLK divided by 4 */
 
-#define  RCC_PLLCFGR_PLLSRC_HSE (uint32_t) (0x00400000)     /* HSE oscillator selected as clock entry */
+#define RCC_PLLCFGR_PLLSRC_HSE  (uint32_t) (0x00400000)     /* HSE oscillator selected as clock entry */
 
-#define  RCC_APB1ENR_PWREN      (uint32_t) (0x10000000)     /* Power Interface Clock Enable */
+#define RCC_APB1ENR_PWREN       (uint32_t) (0x10000000)     /* Power Interface Clock Enable */
 
-#define  FLASH_ACR_ICEN         (uint32_t) (0x00000200)     /* Instruction Cache Enable */
-#define  FLASH_ACR_DCEN         (uint32_t) (0x00000400)     /* Data Cache Enable */
-#define  FLASH_ACR_LATENCY_5WS  (uint32_t) (0x00000005)     /* 5 Wait States Latency */
+#define FLASH_ACR_ICEN          (uint32_t) (0x00000200)     /* Instruction Cache Enable */
+#define FLASH_ACR_DCEN          (uint32_t) (0x00000400)     /* Data Cache Enable */
+#define FLASH_ACR_LATENCY_5WS   (uint32_t) (0x00000005)     /* 5 Wait States Latency */
+
+/* System Control Block */
+#define SCB_SHCSR_MEMFAULTENA   (uint32_t) (1 << 16)        /* Enables Memory Management Fault */
+
+/* Memory Protection Unit */
+/* See pg. 183 in STM32F4 Prog Ref (PM0214) */
+#define MPU_CTRL_ENABLE                 (uint32_t) (1 << 0)         /* Enables MPU */
+#define MPU_CTRL_HFNMIENA               (uint32_t) (1 << 1)         /* Enables MPU during Hardfault, NMI, and Faultmask handlers */
+#define MPU_CTRL_PRIVDEFENA             (uint32_t) (1 << 2)         /* Enable privileged software access to default memory map */
+
+#define MPU_RASR_ENABLE                 (uint32_t) (1 << 0)         /* Enable region */
+#define MPU_RASR_SIZE(x)                (uint32_t) (x << 1)         /* Region size (2^(x+1) bytes) */
+#define MPU_RASR_SHARE_CACHE_WBACK      (uint32_t) (1 << 16) | (1 << 17) | (1 << 18)    /* Sharable, Cachable, Write-Back */
+#define MPU_RASR_SHARE_NOCACHE_WBACK    (uint32_t) (1 << 16) | (0 << 17) | (1 << 18)    /* Sharable, Not Cachable, Write-Back */
+#define MPU_RASR_AP_PRIV_NO_UN_NO       (uint32_t) (0 << 24)        /* No access for any */
+#define MPU_RASR_AP_PRIV_RW_UN_NO       (uint32_t) (1 << 24)        /* No access for any */
+#define MPU_RASR_AP_PRIV_RW_UN_RO       (uint32_t) (2 << 24)        /* Unprivileged Read Only Permissions */
+#define MPU_RASR_AP_PRIV_RW_UN_RW       (uint32_t) (3 << 24)        /* All RW Permissions */
+#define MPU_RASR_AP_PRIV_RO_UN_NO       (uint32_t) (5 << 24)        /* Privileged RO Permissions, Unpriv no access */
+#define MPU_RASR_AP_PRIV_RO_UN_RO       (uint32_t) (6 << 24)        /* All RO Permissions */
+#define MPU_RASR_XN                     (uint32_t) (1 << 28)        /* MPU Region Execute Never */
