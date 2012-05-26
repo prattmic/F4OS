@@ -28,7 +28,8 @@ int main(void) {
     systick_init();
     user_prefix();
     init_kheap();
-    void* lol = malloc_test();
+    char* lol = (char *) kmalloc(20);
+    lol = "Hello World!";
     dont_panic();
     return 0;
 }
