@@ -5,13 +5,15 @@
 extern uint32_t _skernelheap;
 extern uint32_t _ekernelheap;
 
+/*-------------------------- Simple heap, by mgyenik -----------------------------*/
 
+/* This struct can be made larger to enlarge the minimum block used for allocation. Decreases overhead for defragmentation,
+   but increases how much memory silly little things use. */
 typedef struct heap_node_struct{
     struct heap_node_struct* next_node;
-    uint8_t mem[HEAP_MEM_SIZE];
 }heapNode;
 
-#define HEAP_BLOCK_SIZE (HEAP_MEM_SIZE + sizeof(heapNode*)) /* Total size (in bytes) of one heapNode for use in allocing mem. */
+#define HEAP_BLOCK_SIZE sizeof(heapNode) /* Total size (in bytes) of one heapNode for use in allocing mem. */
 
 typedef struct heap_list_struct{
     heapNode* head;
@@ -39,7 +41,7 @@ void init_kheap(void){
     heapNode* heap_end  = (heapNode *)&_ekernelheap;                /* This is the end of the heap. We don't frack with mem after this address. */
     heapNode* curr_node = k_heapList.head;          /* Pointer to heap block we are setting up. */
     while(curr_node < heap_end){
-        curr_node->next_node = curr_node + sizeof(heapNode);
+        curr_node->next_node = curr_node + HEAP_BLOCK_SIZE;
         curr_node = curr_node->next_node;
     }
 }
