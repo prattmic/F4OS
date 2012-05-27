@@ -5,6 +5,7 @@
 #include "registers.h"
 #include "mem.h"
 #include "context.h"
+#include "heap.h"
 
 void unprivileged_test(void);
 void panic(void);
@@ -13,18 +14,18 @@ void user_prefix(void) {
     uint32_t *memory;
 
     /* Allocate memory for the stack */
-    memory = (uint32_t *) alloc();
+    memory = malloc(STKSIZE*4);
 
     /* Give unprivileged access to the allocated stack */
-    *MPU_RNR = (uint32_t) (1 << USER_STACK_REGION);   /* Region 7 */
+    *MPU_RNR = (uint32_t) (1 << USER_MEM_REGION);   /* Region 7 */
     *MPU_RBAR = (uint32_t) memory;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(pg_mpu_size) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(mpu_size(4*STKSIZE)) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
 
     /* Switch to the process stack and set it to the
      * top of the allocated memory */
-    enable_psp(memory+PGSIZE);
+    enable_psp(memory+STKSIZE*4);
 
-    //unprivileged_test();
+    unprivileged_test();
 
     /* Raise privilege */
     _svc(0);

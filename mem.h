@@ -9,10 +9,10 @@ extern void disable_psp();
 
 /* mem.c */
 #define NULL                    (void *) 0x00000000
-#define PGSIZE                  32                      /* This is in words */
+#define STKSIZE                 32                      /* This is in words */
 
 /* For MPU */
-#define USER_STACK_REGION       0
+#define USER_MEM_REGION         0
 #define KERNEL_CODE_REGION      7
 #define KERNEL_STACK_REGION     6
 

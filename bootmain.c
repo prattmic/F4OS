@@ -24,9 +24,8 @@ int main(void) {
     clock();
     power_led();
     mpu_setup();
-    stack_setup();
+    /* stack_setup(); */
     systick_init();
-    user_prefix();
     init_kheap();
     init_heap();
 
@@ -34,6 +33,8 @@ int main(void) {
     *kern = 3.14159;
     float* use = (float *) malloc(sizeof(float));
     *use = 1.41421;
+
+    user_prefix();
 
     dont_panic();
     return 0;

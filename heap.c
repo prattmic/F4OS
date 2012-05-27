@@ -12,10 +12,9 @@ extern uint32_t _ekernelheap;
 
 typedef struct heap_node_struct{
     struct heap_node_struct* next_node;
-    uint8_t mem[HEAP_MEM_SIZE];
 }heapNode;
 
-#define HEAP_BLOCK_SIZE (HEAP_MEM_SIZE + sizeof(heapNode*)) /* Total size (in bytes) of one heapNode for use in allocing mem. */
+#define HEAP_BLOCK_SIZE (sizeof(heapNode*)) /* Total size (in bytes) of one heapNode for use in allocing mem. */
 
 typedef struct heap_list_struct{
     heapNode* head;

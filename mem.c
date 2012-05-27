@@ -17,7 +17,7 @@ void stack_setup(void) {
 
     /* We will need the mpu_size of one page often,
      * so lets go ahead and compute it. */
-    pg_mpu_size = mpu_size(4*PGSIZE);
+    pg_mpu_size = mpu_size(4*STKSIZE);
 }
 
 /* Frees one page of memory */
@@ -25,12 +25,12 @@ void free(uint32_t *v) {
     struct memlist *r;
 
     /* Value must be aligned with the pagesize. */
-    if ( (uint32_t) v % PGSIZE) {
+    if ( (uint32_t) v % STKSIZE) {
         panic();
     }
 
     /* Zero the page */
-    memset32(v, 0, PGSIZE);
+    memset32(v, 0, STKSIZE);
 
     /* Put this list entry at the actual location on the memory. */
     r = (struct memlist *) v;
@@ -41,13 +41,13 @@ void free(uint32_t *v) {
 
 /* Frees a range of pages */
 void freerange(uint32_t *start, uint32_t *end) {
-    if ( (uint32_t) start % PGSIZE || (uint32_t) end % PGSIZE ) {
+    if ( (uint32_t) start % STKSIZE || (uint32_t) end % STKSIZE ) {
         panic();
     }
 
     while (start < end) {
         free(start);
-        start += PGSIZE;
+        start += STKSIZE;
     }
 }
 
