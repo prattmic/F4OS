@@ -17,7 +17,7 @@ void user_prefix(void) {
     memory = malloc(STKSIZE*4);
 
     /* Give unprivileged access to the allocated stack */
-    *MPU_RNR = (uint32_t) (1 << USER_MEM_REGION);   /* Region 7 */
+    *MPU_RNR = (uint32_t) (1 << USER_MEM_REGION);
     *MPU_RBAR = (uint32_t) memory;
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(mpu_size(4*STKSIZE)) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
 
