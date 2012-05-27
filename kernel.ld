@@ -14,8 +14,12 @@ MEMORY
 _estack = 0x10010000;    /* end of 64K CCM RAM */
 
 /* User stack */
+/* Depracated */
 _suserstack = 0x20000000;    /* beginning of 112K SRAM */
 _euserstack = 0x2001C000;    /* end of 112K SRAM */
+
+_suserheap = 0x20000000;    /* beginning of 112K SRAM */
+_euserheap = 0x2001C000;    /* end of 112K SRAM */
 _skernelheap = 0x10000000;
 _ekernelheap = 0x10008000;
 

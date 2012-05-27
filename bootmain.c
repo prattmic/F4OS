@@ -28,8 +28,13 @@ int main(void) {
     systick_init();
     user_prefix();
     init_kheap();
-    char* lol = (char *) kmalloc(20);
-    lol = "Hello World!";
+    init_heap();
+
+    float* kern = (float *) kmalloc(sizeof(float));
+    *kern = 3.14159;
+    float* use = (float *) malloc(sizeof(float));
+    *use = 1.41421;
+
     dont_panic();
     return 0;
 }
