@@ -155,22 +155,22 @@ static void mpu_setup(void) {
     uint32_t kernel_size = mpu_size((uint32_t) (&_ekernel) - (uint32_t) (&_skernel));
 
     /* Set entire flash to unprivileged read only */
-    *MPU_RNR = (uint32_t) (1 << 0);   /* Region 0 */
+    *MPU_RNR = (uint32_t) (1 << FLASH_REGION);
     *MPU_RBAR = FLASH_BASE;
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(19) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RO;
 
     /* Set .kernel section to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << KERNEL_CODE_REGION);   /* Region 7 -- Higher region has precedence in case of overlap. We dont want an overlapper to get kernel write access! */
+    *MPU_RNR = (uint32_t) (1 << KERNEL_CODE_REGION);
     *MPU_RBAR = (uint32_t) (&_skernel);
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(kernel_size) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
 
     /* Set CCM RAM (kernel stack) to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << KERNEL_STACK_REGION);   /* Region 6 -- Higher region has precedence. Dont want overlappers to write to kernel stack! */
+    *MPU_RNR = (uint32_t) (1 << KERNEL_STACK_REGION);
     *MPU_RBAR = CCMRAM_BASE;
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(15) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
     
     /* For now, let every one access general peripherals, system peripherals and registers are protected. */
-    *MPU_RNR = (uint32_t) (1 << 3);   /* Region 3 */
+    *MPU_RNR = (uint32_t) (1 << PERIPH_REGION);
     *MPU_RBAR = PERIPH_BASE;
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(28) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
 
