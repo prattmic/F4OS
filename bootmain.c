@@ -28,7 +28,8 @@ int main(void) {
     systick_init();
     user_prefix();
     init_kheap();
-    void* lol = malloc_test();
+    float* lol = (float *) kmalloc(sizeof(float));
+    *lol = 3.14159;
     dont_panic();
     return 0;
 }
