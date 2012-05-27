@@ -26,11 +26,22 @@ extern const uint32_t _ekernel;
 #define SCS_BASE            (uint32_t) (0xE000E000)                     /* System Control Space Base Address */
 #define SCB_BASE            (SCS_BASE + 0x0D00)                         /* System Control Block Base Address */
 #define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
-#define SYSTICK_BASE        (0xE000E010)
+#define SYSTICK_BASE        0xE000E010
+#define USART2_BASE         0x40004400
 
 /* GPIO Port D (GPIOD) */
 #define GPIOD_MODER         (volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
 #define LED_ODR             (volatile uint32_t *) (GPIOD_BASE + 0x14)  /* LED Output Data Register */
+
+/* USART 2 */
+#define USART2_SR           (volatile uint32_t *) (USART2_BASE + 0x00)
+#define USART2_DR           (volatile uint32_t *) (USART2_BASE + 0x04)
+#define USART2_BRR          (volatile uint32_t *) (USART2_BASE + 0x08)
+#define USART2_CR1          (volatile uint32_t *) (USART2_BASE + 0x0C)
+#define USART2_CR2          (volatile uint32_t *) (USART2_BASE + 0x10)
+#define USART2_CR3          (volatile uint32_t *) (USART2_BASE + 0x14)
+#define USART2_GTPR         (volatile uint32_t *) (USART2_BASE + 0x18)
+
 
 /* Power Control (PWR) */
 #define PWR_CR              (volatile uint32_t *) (PWR_BASE + 0x00)    /* Power Control Register */
