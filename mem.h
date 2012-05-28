@@ -21,8 +21,6 @@ extern void disable_psp();
 void memset32(uint32_t *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
 uint16_t mpu_size(uint32_t size) __attribute__((section(".kernel")));
 
-uint16_t pg_mpu_size;
-
 struct memlist {
     struct memlist *next;
 };
