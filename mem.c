@@ -5,61 +5,6 @@
 
 void panic(void);
 
-/* The freelist is stored is the actual free space,
- * since nothing else is using it. */
-struct memlist *freelist = NULL;
-
-void stack_setup(void) {
-    extern uint32_t _suserstack;
-    extern uint32_t _euserstack;
-
-    freerange(&_suserstack, &_euserstack);
-
-    /* We will need the mpu_size of one page often,
-     * so lets go ahead and compute it. */
-    pg_mpu_size = mpu_size(4*STKSIZE);
-}
-
-/* Frees one page of memory */
-void free(uint32_t *v) {
-    struct memlist *r;
-
-    /* Value must be aligned with the pagesize. */
-    if ( (uint32_t) v % STKSIZE) {
-        panic();
-    }
-
-    /* Zero the page */
-    memset32(v, 0, STKSIZE);
-
-    /* Put this list entry at the actual location on the memory. */
-    r = (struct memlist *) v;
-
-    r->next = freelist;
-    freelist = r;
-}
-
-/* Frees a range of pages */
-void freerange(uint32_t *start, uint32_t *end) {
-    if ( (uint32_t) start % STKSIZE || (uint32_t) end % STKSIZE ) {
-        panic();
-    }
-
-    while (start < end) {
-        free(start);
-        start += STKSIZE;
-    }
-}
-
-/* Returns the address of one page of allocated memory. */
-void *alloc(void) {
-    void *address = (void *) freelist;
-
-    freelist = freelist->next;
-
-    return address;
-}
-
 /* Set size bytes to value from p */
 void memset32(uint32_t *p, int32_t value, uint32_t size) {
     uint32_t *end = p + size;

@@ -18,10 +18,6 @@ extern void disable_psp();
 #define KERNEL_STACK_REGION     6
 #define PERIPH_REGION           3
 
-void stack_setup(void) __attribute__((section(".kernel")));
-void free(uint32_t *v) __attribute__((section(".kernel")));
-void freerange(uint32_t *start, uint32_t *end) __attribute__((section(".kernel")));
-void *alloc(void) __attribute__((section(".kernel")));
 void memset32(uint32_t *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
 uint16_t mpu_size(uint32_t size) __attribute__((section(".kernel")));
 
