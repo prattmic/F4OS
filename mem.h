@@ -12,9 +12,11 @@ extern void disable_psp();
 #define STKSIZE                 32                      /* This is in words */
 
 /* For MPU */
-#define USER_MEM_REGION         0
+#define FLASH_REGION            0
+#define USER_MEM_REGION         1
 #define KERNEL_CODE_REGION      7
 #define KERNEL_STACK_REGION     6
+#define PERIPH_REGION           3
 
 void stack_setup(void) __attribute__((section(".kernel")));
 void free(uint32_t *v) __attribute__((section(".kernel")));

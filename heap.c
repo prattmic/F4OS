@@ -35,7 +35,17 @@ void init_heap(void){
     heapNode* heap_end  = (heapNode *)&_euserheap;                /* This is the end of the heap. We don't frack with mem after this address. */
     heapNode* curr_node = u_heapList.head;          /* Pointer to heap block we are setting up. */
     while(curr_node < heap_end){
-        curr_node->next_node = curr_node + sizeof(heapNode);
+        curr_node->next_node = curr_node + HEAP_BLOCK_SIZE/4;  /* UGLY HACK We want to add bytes, but GCC tries to add words instead, so this fixes that */ /* TODO: Fix this */
+        curr_node = curr_node->next_node;
+    }
+}
+
+void init_kheap(void){
+    k_heapList.head = (heapNode *)&_skernelheap;                /* Set heap to first address in heap area. */
+    heapNode* heap_end  = (heapNode *)&_ekernelheap;                /* This is the end of the heap. We don't frack with mem after this address. */
+    heapNode* curr_node = k_heapList.head;          /* Pointer to heap block we are setting up. */
+    while(curr_node < heap_end){
+        curr_node->next_node = curr_node + HEAP_BLOCK_SIZE/4;  /* UGLY HACK We want to add bytes, but GCC tries to add words instead, so this fixes that */ /* TODO: Fix this */
         curr_node = curr_node->next_node;
     }
 }
@@ -64,16 +74,6 @@ void* kmalloc(int size){
     ret_node = k_heapList.head;                     /* Head now points to alloc'd mem. Get ready to return that mem. */
     k_heapList.head = break_node;                   /* Move head forward to break node. Heap has grown upwards. */
     return ret_node;
-}
-
-void init_kheap(void){
-    k_heapList.head = (heapNode *)&_skernelheap;                /* Set heap to first address in heap area. */
-    heapNode* heap_end  = (heapNode *)&_ekernelheap;                /* This is the end of the heap. We don't frack with mem after this address. */
-    heapNode* curr_node = k_heapList.head;          /* Pointer to heap block we are setting up. */
-    while(curr_node < heap_end){
-        curr_node->next_node = curr_node + HEAP_BLOCK_SIZE;
-        curr_node = curr_node->next_node;
-    }
 }
 
 void* kmalloc_test(void){
