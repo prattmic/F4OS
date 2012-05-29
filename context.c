@@ -13,17 +13,14 @@ void panic(void);
 void user_prefix(void) {
     uint32_t *memory;
 
-    /* Allocate memory for the stack */
-    memory = malloc(STKSIZE*4);
+    /* Allocate memory for the stack, must be aligned to stack size for MPU */
+    memory = malloc(STKSIZE*4, 1);
 
     /* Give unprivileged access to the allocated stack */
     *MPU_RNR = (uint32_t) (1 << USER_MEM_REGION);
     *MPU_RBAR = (uint32_t) memory;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE((mpu_size(STKSIZE*4)+1)) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
-    /* UGLY ASS HACK HERE ------------------------------------------^^ */
-    /* An MPU region has to be aligned to its size, otherwise it is rounded down.  Stacks were getting allocated at unaligned locations, and the
-     * region was rounded down, so the top of the stack had the wrong permissions */
-    /* TODO: Create special malloc that will return aligned memory */
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE((mpu_size(STKSIZE*4))) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
+    /* MPU Base address must be aligned with the MPU region size */
 
     /* Switch to the process stack and set it to the
      * top of the allocated memory */

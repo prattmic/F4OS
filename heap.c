@@ -50,16 +50,31 @@ void init_kheap(void){
     }
 }
 
-void* malloc(int size){
+void* malloc(int size, uint16_t aligned){
     int needed_blocks = size/(HEAP_BLOCK_SIZE)+ 1;
+    heapNode* prev_node = NULL;
     heapNode* break_node = u_heapList.head;         /* Node at which we jump to after the break */
-    heapNode* ret_node = NULL;
+    if (aligned) {
+        /* Start at an aligned memory location */
+        while ((uint32_t) break_node % size) {
+            prev_node = break_node;
+            break_node = break_node->next_node;
+        }
+    }
+    heapNode* ret_node = break_node;
     /* Find which node will be new head, then return old head, which is first mem location in newly alloc'd mem */
     for(int i = 0; i < needed_blocks; i++){
         break_node = break_node->next_node;
     }
-    ret_node = u_heapList.head;                     /* Head now points to alloc'd mem. Get ready to return that mem. */
-    u_heapList.head = break_node;                   /* Move head forward to break node. Heap has grown upwards. */
+
+    if (prev_node != NULL) {
+        /* Connect list, skipping returned region */
+        prev_node->next_node = break_node;
+    }
+    else {
+        /* Move head */
+        u_heapList.head = break_node;
+    }
     return ret_node;
 }
 

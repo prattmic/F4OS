@@ -2,7 +2,7 @@
 
 
 /* User Heap */
-void* malloc(int size) __attribute__((section(".kernel")));
+void* malloc(int size, uint16_t aligned) __attribute__((section(".kernel")));
 void init_heap(void)    __attribute__((section(".kernel")));
 
 /* Kernel Heap */

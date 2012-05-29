@@ -31,7 +31,7 @@ int main(void) {
 
     float* kern = (float *) kmalloc(sizeof(float));
     *kern = 3.14159;
-    float* use = (float *) malloc(sizeof(float));
+    float* use = (float *) malloc(sizeof(float), 0);
     *use = 1.41421;
 
     user_prefix();
@@ -155,6 +155,7 @@ static void power_led() {
 }
 
 /* Enables the MPU and sets the default memory map. */
+/* MPU Base address must be aligned with the MPU region size */
 static void mpu_setup(void) {
     /* The defualt memory map sets everything as accessible only to privileged access
      * Any unprivileged accesses will need to be explicitly allowed through a region. */
@@ -167,7 +168,8 @@ static void mpu_setup(void) {
 
     /* Set .kernel section to privileged access only */
     *MPU_RNR = (uint32_t) (1 << KERNEL_CODE_REGION);
-    *MPU_RBAR = (uint32_t) (&_skernel);
+    /* TODO: Ensure this is aligned with the kernel size.  Usually the kernel is at the bottom of the flash, with only the vector table below, so it isn't a big deal */
+    *MPU_RBAR = (uint32_t) (&_skernel); 
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(kernel_size) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
 
     /* Set CCM RAM (kernel stack) to privileged access only */
