@@ -17,7 +17,7 @@ OBJCOPY=arm-none-eabi-objcopy
 
 CFLAGS  = -g -Wall -T$(LINK_SCRIPT) --std=gnu99
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
-CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib
+CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 ###################################################
