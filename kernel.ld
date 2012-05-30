@@ -15,9 +15,9 @@ _estack = 0x10010000;    /* end of 64K CCM RAM */
 
 /* Heap */
 _suserheap = 0x20000000;    /* beginning of 112K SRAM */
-_euserheap = 0x2001C000;    /* end of 112K SRAM */
-_skernelheap = 0x10000000;
-_ekernelheap = 0x10008000;
+_euserheap = 0x2001BFFC;    /* end of 112K SRAM */
+_skernelheap = _ebss;
+_ekernelheap = 0x10007FFC;
 
 SECTIONS {
     /* Vectors first */

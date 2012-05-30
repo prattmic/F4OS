@@ -28,26 +28,28 @@ static heapList k_heapList = {  NULL ,
                                 NULL };
 
 static heapList u_heapList = {  NULL ,
-                              NULL };
+                                NULL };
 
 void init_uheap(void){
     u_heapList.head = (heapNode *)&_suserheap;                /* Set heap to first address in heap area. */
-    heapNode* heap_end  = (heapNode *)&_euserheap;                /* This is the end of the heap. We don't frack with mem after this address. */
+    u_heapList.tail  = (heapNode *)&_euserheap;                /* This is the end of the heap. We don't frack with mem after this address. */
     heapNode* curr_node = u_heapList.head;          /* Pointer to heap block we are setting up. */
-    while(curr_node < heap_end){
+    while(curr_node < u_heapList.tail){
         curr_node->next_node = (heapNode*) ((uint32_t) curr_node + HEAP_BLOCK_SIZE);  /* Hack to ensure that HEAP_BLOCK_SIZE is added as bytes instead of words */
         curr_node = curr_node->next_node;
     }
+    u_heapList.tail->next_node = NULL;              /* Clear next node of tail */
 }
 
 void init_kheap(void){
     k_heapList.head = (heapNode *)&_skernelheap;                /* Set heap to first address in heap area. */
-    heapNode* heap_end  = (heapNode *)&_ekernelheap;                /* This is the end of the heap. We don't frack with mem after this address. */
+    k_heapList.tail  = (heapNode *)&_ekernelheap;                /* This is the end of the heap. We don't frack with mem after this address. */
     heapNode* curr_node = k_heapList.head;          /* Pointer to heap block we are setting up. */
-    while(curr_node < heap_end){
+    while(curr_node < k_heapList.tail){
         curr_node->next_node = (heapNode*) ((uint32_t) curr_node + HEAP_BLOCK_SIZE);  /* Hack to ensure that HEAP_BLOCK_SIZE is added as bytes instead of words */
         curr_node = curr_node->next_node;
     }
+    k_heapList.tail->next_node = NULL;              /* Clear next node of tail */
 }
 
 void* malloc(int size, uint16_t aligned){
