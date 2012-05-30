@@ -30,12 +30,12 @@ static heapList k_heapList = {  NULL ,
 static heapList u_heapList = {  NULL ,
                               NULL };
 
-void init_heap(void){
+void init_uheap(void){
     u_heapList.head = (heapNode *)&_suserheap;                /* Set heap to first address in heap area. */
     heapNode* heap_end  = (heapNode *)&_euserheap;                /* This is the end of the heap. We don't frack with mem after this address. */
     heapNode* curr_node = u_heapList.head;          /* Pointer to heap block we are setting up. */
     while(curr_node < heap_end){
-        curr_node->next_node = curr_node + HEAP_BLOCK_SIZE/4;  /* UGLY HACK We want to add bytes, but GCC tries to add words instead, so this fixes that */ /* TODO: Fix this */
+        curr_node->next_node = (heapNode*) ((uint32_t) curr_node + HEAP_BLOCK_SIZE);  /* Hack to ensure that HEAP_BLOCK_SIZE is added as bytes instead of words */
         curr_node = curr_node->next_node;
     }
 }
@@ -45,7 +45,7 @@ void init_kheap(void){
     heapNode* heap_end  = (heapNode *)&_ekernelheap;                /* This is the end of the heap. We don't frack with mem after this address. */
     heapNode* curr_node = k_heapList.head;          /* Pointer to heap block we are setting up. */
     while(curr_node < heap_end){
-        curr_node->next_node = curr_node + HEAP_BLOCK_SIZE/4;  /* UGLY HACK We want to add bytes, but GCC tries to add words instead, so this fixes that */ /* TODO: Fix this */
+        curr_node->next_node = (heapNode*) ((uint32_t) curr_node + HEAP_BLOCK_SIZE);  /* Hack to ensure that HEAP_BLOCK_SIZE is added as bytes instead of words */
         curr_node = curr_node->next_node;
     }
 }

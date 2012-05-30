@@ -27,7 +27,7 @@ int main(void) {
     /* stack_setup(); */
     systick_init();
     init_kheap();
-    init_heap();
+    init_uheap();
 
     float* kern = (float *) kmalloc(sizeof(float));
     *kern = 3.14159;
