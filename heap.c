@@ -53,6 +53,8 @@ void init_kheap(void){
 }
 
 void* malloc(int size, uint16_t aligned){
+    /* TODO: Ensure memory block returned is contiguous */
+    /* TODO: Return errors; Corollary: Add error checking to everything using malloc */
     int needed_blocks = size/(HEAP_BLOCK_SIZE)+ 1;
     heapNode* prev_node = NULL;
     heapNode* break_node = u_heapList.head;         /* Node at which we jump to after the break */
@@ -81,6 +83,8 @@ void* malloc(int size, uint16_t aligned){
 }
 
 void* kmalloc(int size){
+    /* TODO: Ensure memory block returned is contiguous */
+    /* TODO: Return errors; Corollary: Add error checking to everything using malloc */
     int needed_blocks = size/(HEAP_BLOCK_SIZE)+ 1;
     heapNode* break_node = k_heapList.head;         /* Node at which we jump to after the break */
     heapNode* ret_node = NULL;
