@@ -17,8 +17,6 @@ void init_kernel(void){
     (sys_idle_task.task)->fptr =        &idle_task;
     (sys_idle_task.task)->stack_base =  IDLE_TASK_BASE;
     (sys_idle_task.task)->stack_top =   IDLE_TASK_BASE;
-    
-
 }
 
 taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) {
@@ -38,9 +36,19 @@ taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until
 }
 
 void append_task_to_klist(taskNode* new_task){
-    taskNode* last_node = task_list.tail;
+    /* Check if head is set */
+    if (task_list.head == NULL) {
+        task_list.head = new_task;
+    }
+    if (task_list.tail == NULL) {
+        task_list.tail = new_task;
+    }
+    else {
+        task_list.tail->next_node = new_task;
+        task_list.tail = new_task;
+    }
+
     new_task->next_node = NULL;
-    last_node->next_node = new_task;
 }
 
 void append_task_to_queue(taskNode* new_task){
@@ -57,14 +65,9 @@ void idle_task(void){
 
 void register_task(taskCtrl *task_ptr){
     taskNode* new_task = kmalloc(sizeof(taskNode));
-    taskNode* end_task = task_list.tail;
-
-    end_task->next_node = new_task;
 
     new_task->task = task_ptr;
-    new_task->next_node = NULL;
-
-    task_list.tail = new_task;
+    append_task_to_klist(new_task);
 }
 
 taskNodeList sort_by_priority(taskNodeList list){
