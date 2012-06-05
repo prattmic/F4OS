@@ -29,8 +29,8 @@ int main(void) {
     init_kheap();
     init_uheap();
 
-    user_prefix();
-    /* led_tasks(); */
+    /* user_prefix(); */
+    led_tasks();
 
     dont_panic();
     return 0;
@@ -164,7 +164,6 @@ static void mpu_setup(void) {
 
     /* Set .kernel section to privileged access only */
     *MPU_RNR = (uint32_t) (1 << KERNEL_CODE_REGION);
-    /* TODO: Ensure this is aligned with the kernel size.  Usually the kernel is at the bottom of the flash, with only the vector table below, so it isn't a big deal */
     *MPU_RBAR = (uint32_t) (&_skernel); 
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(kernel_size) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
 

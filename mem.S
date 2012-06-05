@@ -24,6 +24,22 @@ user_mode:
     isb
     bx      lr
 
+/* Switches to user mode and branches to R0 */
+.thumb_func
+.section    .text
+.global     user_mode_branch
+.type       user_mode_branch, %function
+user_mode_branch:
+    /* Enter unprivileged mode 
+       An illegal instruction in unprivileged mode
+       results in a hard fault. */
+    mrs     r1, control
+    orr     r1, r1, #1
+    msr     control, r1
+    dsb
+    isb
+    bx      r0
+
 /* Changes from unprivileged to privileged mode.
    This needs to be in .kernel so only the kernel can call it. */
 .thumb_func

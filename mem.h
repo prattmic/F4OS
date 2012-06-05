@@ -4,6 +4,7 @@
 /* mem.S */
 extern void raise_privilege(void);
 extern void user_mode(void);
+extern void user_mode_branch(void (*fptr)(void));
 extern void enable_psp(uint32_t *);
 extern void disable_psp();
 

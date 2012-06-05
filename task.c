@@ -11,8 +11,6 @@ taskNode sys_idle_task;
 taskNodeList task_list;
 taskNodeList task_queue;
 
-void user_mode(void);
-
 void init_kernel(void){
     sys_idle_task.next_node = NULL;
     (sys_idle_task.task)->fptr =        &idle_task;
@@ -26,8 +24,7 @@ void start_task_switching(void) {
     mpu_stack_set(task->stack_base);
     enable_psp(task->stack_top);
 
-    /* user_mode(); */
-    task->fptr();
+    user_mode_branch(task->fptr);
 }
 
 taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) {

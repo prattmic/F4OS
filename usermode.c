@@ -1,10 +1,8 @@
 #include "types.h"
 #include "registers.h"
 #include "task.h"
+#include "mem.h"
 #include "usermode.h"
-
-void user_mode(void);
-
 
 void unprivileged_test(void) {
     int test = 0;
@@ -43,13 +41,9 @@ void led_tasks(void) {
     register_task(orange_led_task);
 
     start_task_switching();
-
-    /* blue_led();
-    orange_led(); */
 }
 
 void blue_led(void) {
-    user_mode();
     while (1) {
         uint32_t count = 10000000;
 
