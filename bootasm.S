@@ -10,8 +10,8 @@
 .word   _estack             /* stack top address */
 .word   _reset              /* 1 Reset */
 .word   hang                /* 2 NMI */
-.word   hang                /* 3 HardFault */
-.word   panic               /* 4 MemManage */
+.word   _hardfault          /* 3 HardFault */
+.word   _memmanage          /* 4 MemManage */
 .word   hang                /* 5 BusFault */
 .word   hang                /* 6 UsageFault */
 .word   hang                /* 7 RESERVED */
@@ -61,6 +61,26 @@ panic:
     bl      raise_privilege
     bl      toggle_led_delay
     b       panic 
+
+/* Load the MMFSR and MMFAR into R10 and R11
+   on a MemManage fault, then panics */
+#define SCB_CFSR    0xE000ED28  /* Configurable Fault Status Register - Describes Usage, Bus, and Mem faults */
+#define SCB_MMFAR   0xE000ED34  /* Memory management fault address register - Contains address that caused fault */
+.thumb_func
+_memmanage:
+    ldr.w   r0, =SCB_CFSR
+    ldrb    r10, [r0]
+    ldr.w   r0, =SCB_MMFAR
+    ldr     r11, [r0]
+    b       panic
+
+/* Loads the HFSR into R10, then panics */
+#define SCB_HFSR    0xE000ED2C  /* Hard fault status register - Describes hard fault */
+.thumb_func
+_hardfault:
+    ldr.w   r0, =SCB_HFSR
+    ldr     r10, [r0]
+    b       panic
 
 .thumb_func
 hang:
