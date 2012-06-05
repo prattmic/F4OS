@@ -20,7 +20,7 @@ _skernelheap = _ebss;
 _ekernelheap = 0x10007FFC;
 
 SECTIONS {
-    /* Vectors first */
+    /* Vectors first - Always permitted by MPU */
     .isr_vector :
     {
         . = ALIGN(4);
@@ -28,25 +28,35 @@ SECTIONS {
         . = ALIGN(4);
     } > FLASH
 
+    /* .kernel comes before .text so .text can be aligned to its
+     * size and avoid any MPU effects */
+    .kernel :
+    {
+        . = ALIGN(8);
+        _skernel = .;
+        *(.kernel*)
+        . = ALIGN(8);
+        _ekernel = .;
+    } > FLASH
+
+    /* Round kernel size to nearest power of 2 */
+    kernel_size = SIZEOF(.kernel);
+    kernel_size -= 1;
+    kernel_size = kernel_size | (kernel_size >> 1);
+    kernel_size = kernel_size | (kernel_size >> 2);
+    kernel_size = kernel_size | (kernel_size >> 4);
+    kernel_size = kernel_size | (kernel_size >> 8);
+    kernel_size = kernel_size | (kernel_size >> 16);
+    kernel_size += 1;
+
     .text :
     {
-        . = ALIGN(4);
+        . = ALIGN(kernel_size);
         _stext = .;
         *(.text*)
         . = ALIGN(8);
 
         _etext = .;
-    } > FLASH
-
-    /* .kernel comes after .text because it will be set to privileged only, and we don't want
-     * to overreach with the MPU and ban user .text */
-    .kernel :
-    {
-        . = ALIGN(4);
-        _skernel = .;
-        *(.kernel*)
-        . = ALIGN(8);
-        _ekernel = .;
     } > FLASH
 
     _sidata = .;

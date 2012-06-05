@@ -178,7 +178,6 @@ static void mpu_setup(void) {
     *MPU_RBAR = PERIPH_BASE;
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(28) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
 
-
     /* Enable the MPU and allow privileged access to the background map */
     *MPU_CTRL |= MPU_CTRL_ENABLE | MPU_CTRL_PRIVDEFENA;
 

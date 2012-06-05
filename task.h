@@ -19,10 +19,9 @@ typedef struct k_task_struct{
 }taskCtrl;
 
 void idle_task(void);
-void start_task_switching(void);
-taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake);
-void register_task(taskCtrl *task_ptr);
+void start_task_switching(void) __attribute__((section(".kernel")));;
+taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) __attribute__((section(".kernel")));
+void register_task(taskCtrl *task_ptr) __attribute__((section(".kernel")));
 //inline void k_set_ct_delay(unsigned long new_delay) __attribute__((always_inline));
-taskNode* find_last_taskNode(taskNode* init_node);
-void append_task_to_queue(taskNode* new_task);
-
+taskNode* find_last_taskNode(taskNode* init_node) __attribute__((section(".kernel")));
+void append_task_to_queue(taskNode* new_task) __attribute__((section(".kernel")));
