@@ -3,8 +3,8 @@
 #include "task.h"
 #include "heap.h"
 
-taskCtl k_currentTask;
-taskCtl k_idle_task;
+taskCtrl k_currentTask;
+taskCtrl k_idle_task;
 
 
 taskNode sys_idle_task;
@@ -19,6 +19,22 @@ void init_kernel(void){
     (sys_idle_task.task)->stack_top =   IDLE_TASK_BASE;
     
 
+}
+
+taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) {
+    taskCtrl *task;
+    uint32_t *memory;
+
+    task = (taskCtrl *) kmalloc(sizeof(taskCtrl));
+    memory = (uint32_t *) malloc(STKSIZE*4, 1);
+
+    task->stack_base = memory;
+    task->stack_top  = memory + STKSIZE;
+    task->fptr       = fptr;
+    task->priority   = priority;
+    task->ticks_until_wake = ticks_until_wake;
+
+    return task;
 }
 
 void append_task_to_klist(taskNode* new_task){
@@ -39,13 +55,16 @@ void idle_task(void){
     }
 }
 
-void register_task(void (*task_ptr)(void)){
+void register_task(taskCtrl *task_ptr){
     taskNode* new_task = kmalloc(sizeof(taskNode));
     taskNode* end_task = task_list.tail;
+
     end_task->next_node = new_task;
-    
-    //DOSHIT
-    return;
+
+    new_task->task = task_ptr;
+    new_task->next_node = NULL;
+
+    task_list.tail = new_task;
 }
 
 taskNodeList sort_by_priority(taskNodeList list){

@@ -8,6 +8,7 @@
 #include "context.h"
 #include "systick.h"
 #include "heap.h"
+#include "usermode.h"
 
 /* From boot.S */
 void panic(void);
@@ -24,17 +25,12 @@ int main(void) {
     clock();
     power_led();
     mpu_setup();
-    /* stack_setup(); */
     systick_init();
     init_kheap();
     init_uheap();
 
-    float* kern = (float *) kmalloc(sizeof(float));
-    *kern = 3.14159;
-    float* use = (float *) malloc(sizeof(float), 0);
-    *use = 1.41421;
-
-    user_prefix();
+    /* user_prefix(); */
+    led_tasks();
 
     dont_panic();
     return 0;
