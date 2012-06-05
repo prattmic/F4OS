@@ -19,6 +19,7 @@ extern void disable_psp();
 #define PERIPH_REGION           3
 
 void memset32(uint32_t *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
+void mpu_stack_set(uint32_t *stack_base);
 uint16_t mpu_size(uint32_t size) __attribute__((section(".kernel")));
 
 struct memlist {

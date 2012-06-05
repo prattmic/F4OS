@@ -19,6 +19,7 @@ typedef struct k_task_struct{
 }taskCtrl;
 
 void idle_task(void);
+void start_task_switching(void);
 taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake);
 void register_task(taskCtrl *task_ptr);
 //inline void k_set_ct_delay(unsigned long new_delay) __attribute__((always_inline));

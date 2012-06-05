@@ -29,8 +29,8 @@ int main(void) {
     init_kheap();
     init_uheap();
 
-    /* user_prefix(); */
-    led_tasks();
+    user_prefix();
+    /* led_tasks(); */
 
     dont_panic();
     return 0;

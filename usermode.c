@@ -42,11 +42,14 @@ void led_tasks(void) {
     register_task(blue_led_task);
     register_task(orange_led_task);
 
-    blue_led();
-    orange_led();
+    start_task_switching();
+
+    /* blue_led();
+    orange_led(); */
 }
 
 void blue_led(void) {
+    user_mode();
     while (1) {
         uint32_t count = 10000000;
 

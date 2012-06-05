@@ -2,6 +2,7 @@
 
 #include "types.h"
 #include "mem.h"
+#include "registers.h"
 
 void panic(void);
 
@@ -18,6 +19,14 @@ void memset32(uint32_t *p, int32_t value, uint32_t size) {
         *p = value;
         p++;
     }
+}
+
+void mpu_stack_set(uint32_t *stack_base) {
+    /* Give unprivileged access to the allocated stack */
+    *MPU_RNR = (uint32_t) (1 << USER_MEM_REGION);
+    *MPU_RBAR = (uint32_t) stack_base;
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE((mpu_size(STKSIZE*4))) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
+    /* MPU Base address must be aligned with the MPU region size */
 }
 
 uint16_t mpu_size(uint32_t size) {

@@ -11,12 +11,23 @@ taskNode sys_idle_task;
 taskNodeList task_list;
 taskNodeList task_queue;
 
+void user_mode(void);
 
 void init_kernel(void){
     sys_idle_task.next_node = NULL;
     (sys_idle_task.task)->fptr =        &idle_task;
     (sys_idle_task.task)->stack_base =  IDLE_TASK_BASE;
     (sys_idle_task.task)->stack_top =   IDLE_TASK_BASE;
+}
+
+void start_task_switching(void) {
+    taskCtrl *task = task_list.head->task;
+
+    mpu_stack_set(task->stack_base);
+    enable_psp(task->stack_top);
+
+    /* user_mode(); */
+    task->fptr();
 }
 
 taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) {
