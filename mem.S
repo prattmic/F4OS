@@ -90,7 +90,7 @@ disable_psp:
 .type       save_context, %function
 save_context:
     mrs     r0, psp
-    stmdb   r0!, {r4-r11}   /* Saves multiple registers and writes the final address back to Rn */
+    stmfd   r0!, {r4-r11}   /* Saves multiple registers and writes the final address back to Rn */
     msr     psp, r0
     bx      lr
 
@@ -100,45 +100,54 @@ save_context:
 .global     restore_context
 .type       restore_context, %function
 restore_context:
-    ldm     r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
+    mrs     r0, psp
+    ldmfd   r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
     msr     psp, r0
     bx      lr
 
 /* Creates a fake context for the processor to restore */
 .thumb_func
 .section    .kernel
-.global     faux_restore_context
-.type       faux_restore_context, %function
-faux_restore_context:
-    mrs     r3, psp
-    mov     r4, #0
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    ldr.w   r4, =0x21000000
-    stmdb   r3!, {r4}   /* xPSR */
-    mov     r4, #0
-    stmdb   r3!, {r0}   /* PC */
-    stmdb   r3!, {r1}   /* LR */
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    stmdb   r3!, {r4}
-    msr     psp, r3
+.global     create_context
+.type       create_context, %function
+create_context:
+    mrs     r4, psp
+    mov     r5, #0
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    stmdb   r4!, {r5}
+    ldr.w   r5, =0x21000000
+    stmdb   r4!, {r5}   /* xPSR */
+    mov     r5, #0
+    stmdb   r4!, {r0}   /* PC */
+    stmdb   r4!, {r1}   /* LR */
+    stmdb   r4!, {r5}   /* R12 */
+    stmdb   r4!, {r5}   /* R3 */
+    stmdb   r4!, {r5}   /* R2 */
+    stmdb   r4!, {r5}   /* R1 */
+    stmdb   r4!, {r5}   /* R0 */
+    stmdb   r4!, {r5}   /* R11 */
+    stmdb   r4!, {r5}   /* R10 */
+    stmdb   r4!, {r5}   /* R9 */
+    stmdb   r4!, {r5}   /* R8 */
+    stmdb   r4!, {r3}   /* R7 - Frame Pointer*/
+    stmdb   r4!, {r5}   /* R6 */
+    stmdb   r4!, {r5}   /* R5 */
+    stmdb   r4!, {r5}   /* R4 */
+    msr     psp, r4
     bx      lr

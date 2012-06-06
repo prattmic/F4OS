@@ -45,7 +45,7 @@ void led_tasks(void) {
 
 void blue_led(void) {
     while (1) {
-        uint32_t count = 10000000;
+        uint32_t count = 05000000;
 
         /* Toggle LED */
         *LED_ODR ^= (1 << 15);

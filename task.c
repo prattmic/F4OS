@@ -40,12 +40,12 @@ void switch_task(void) {
         tasknode = tasknode->next_node;
     }
 
+    k_currentTask = tasknode->task;
+
     mpu_stack_set(tasknode->task->stack_base);
 
     if (tasknode->task->running) {
         uint32_t *psp_addr = tasknode->task->stack_top;
-
-        psp_addr = restore_context(psp_addr);
         enable_psp(psp_addr);
         return;
     }
@@ -53,7 +53,7 @@ void switch_task(void) {
         enable_psp(tasknode->task->stack_top);
         tasknode->task->running = 1;
         /*user_mode_branch(tasknode->task->fptr);*/
-        faux_restore_context(tasknode->task->fptr, &idle_task);
+        create_context(tasknode->task->fptr, &idle_task, tasknode->task->stack_top);
         return;
     }
 }
