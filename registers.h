@@ -59,6 +59,7 @@ extern const uint32_t _ekernel;
 #define FLASH_ACR           (volatile uint32_t *) (FLASH_R_BASE + 0x00)/* Flash Access Control Register */
 
 /* System Control Block (SCB) */
+#define SCB_ICSR            (volatile uint32_t *) (SCB_BASE + 0x004)   /* Interrupt Control and State Register */
 #define SCB_VTOR            (volatile uint32_t *) (SCB_BASE + 0x008)   /* Vector Table Offset Register */
 #define SCB_CPACR           (volatile uint32_t *) (SCB_BASE + 0x088)   /* Coprocessor (FPU) Access Control Register */
 #define SCB_SHCSR           (volatile uint32_t *) (SCB_BASE + 0x024)   /* System Handler Control and State Register */
@@ -105,6 +106,8 @@ extern const uint32_t _ekernel;
 
 /* System Control Block */
 #define SCB_SHCSR_MEMFAULTENA   (uint32_t) (1 << 16)        /* Enables Memory Management Fault */
+#define SCB_SHCSR_BUSFAULTENA   (uint32_t) (1 << 17)        /* Enables Bus Fault */
+#define SCB_SHCSR_USEFAULTENA   (uint32_t) (1 << 18)        /* Enables Usage Fault */
 
 /* Memory Protection Unit */
 /* See pg. 183 in STM32F4 Prog Ref (PM0214) */

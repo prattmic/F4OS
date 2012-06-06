@@ -1,5 +1,8 @@
 #include "types.h"
 #include "registers.h"
+#include "mem.h"
+#include "context.h"
+#include "task.h"
 #include "systick.h"
 
 
@@ -15,5 +18,14 @@ void systick_init(void){
 }
 
 void systick_handler(void){
+    uint32_t *psp_addr;
+
+    /* Blink an LED, for the LOLs */
     *LED_ODR ^= (1<<12);
+
+    psp_addr = save_context();
+    k_currentTask->stack_top = psp_addr;
+
+    switch_task();
+    __asm__ ("isb");
 }

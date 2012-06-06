@@ -10,7 +10,7 @@ extern void disable_psp();
 
 /* mem.c */
 #define NULL                    (void *) 0x00000000
-#define STKSIZE                 32                      /* This is in words */
+#define STKSIZE                 64                      /* This is in words */
 
 /* For MPU */
 #define FLASH_REGION            0

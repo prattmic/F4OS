@@ -1,9 +1,9 @@
 #include "types.h"
 #include "mem.h"
+#include "context.h"
 #include "task.h"
 #include "heap.h"
 
-taskCtrl k_currentTask;
 taskCtrl k_idle_task;
 
 
@@ -21,10 +21,41 @@ void init_kernel(void){
 void start_task_switching(void) {
     taskCtrl *task = task_list.head->task;
 
+    k_currentTask = task;
+
     mpu_stack_set(task->stack_base);
     enable_psp(task->stack_top);
 
+    task->running = 1;
     user_mode_branch(task->fptr);
+}
+
+void switch_task(void) {
+    taskNode *tasknode = task_list.head;
+
+    while (tasknode->task == k_currentTask) {
+        if (tasknode->next_node == NULL) {
+            break;
+        }
+        tasknode = tasknode->next_node;
+    }
+
+    mpu_stack_set(tasknode->task->stack_base);
+
+    if (tasknode->task->running) {
+        uint32_t *psp_addr = tasknode->task->stack_top;
+
+        psp_addr = restore_context(psp_addr);
+        enable_psp(psp_addr);
+        return;
+    }
+    else {
+        enable_psp(tasknode->task->stack_top);
+        tasknode->task->running = 1;
+        /*user_mode_branch(tasknode->task->fptr);*/
+        faux_restore_context(tasknode->task->fptr, &idle_task);
+        return;
+    }
 }
 
 taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) {
@@ -39,6 +70,7 @@ taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until
     task->fptr       = fptr;
     task->priority   = priority;
     task->ticks_until_wake = ticks_until_wake;
+    task->running    = 0;
 
     return task;
 }

@@ -25,11 +25,10 @@ int main(void) {
     clock();
     power_led();
     mpu_setup();
-    systick_init();
     init_kheap();
     init_uheap();
 
-    /* user_prefix(); */
+    systick_init();
     led_tasks();
 
     dont_panic();
@@ -134,6 +133,10 @@ static void clock(void) {
 
     /* Enable the CCM RAM clock */
     *RCC_AHB1ENR |= (1 << 20);
+
+    /* Enable Bus and Usage Faults */
+    *SCB_SHCSR |= SCB_SHCSR_BUSFAULTENA;
+    *SCB_SHCSR |= SCB_SHCSR_USEFAULTENA;
 }
 
 /* Turns on the red LED to show the device is booting */

@@ -103,3 +103,42 @@ restore_context:
     ldm     r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
     msr     psp, r0
     bx      lr
+
+/* Creates a fake context for the processor to restore */
+.thumb_func
+.section    .kernel
+.global     faux_restore_context
+.type       faux_restore_context, %function
+faux_restore_context:
+    mrs     r3, psp
+    mov     r4, #0
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    ldr.w   r4, =0x21000000
+    stmdb   r3!, {r4}   /* xPSR */
+    mov     r4, #0
+    stmdb   r3!, {r0}   /* PC */
+    stmdb   r3!, {r1}   /* LR */
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    stmdb   r3!, {r4}
+    msr     psp, r3
+    bx      lr

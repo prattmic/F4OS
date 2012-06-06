@@ -16,10 +16,14 @@ typedef struct k_task_struct{
     uint8_t priority;
     void(*fptr)(void);
     uint32_t ticks_until_wake;
+    uint8_t running;
 }taskCtrl;
 
+taskCtrl *k_currentTask;
+
 void idle_task(void);
-void start_task_switching(void) __attribute__((section(".kernel")));;
+void start_task_switching(void) __attribute__((section(".kernel")));
+void switch_task(void) __attribute__((section(".kernel")));
 taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) __attribute__((section(".kernel")));
 void register_task(taskCtrl *task_ptr) __attribute__((section(".kernel")));
 //inline void k_set_ct_delay(unsigned long new_delay) __attribute__((always_inline));
