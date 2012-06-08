@@ -15,10 +15,13 @@ extern const uint32_t _ekernel;
 /* Peripheral Map */
 #define PERIPH_BASE         (uint32_t) (0x40000000)                     /* Peripheral base address */
 #define APB1PERIPH_BASE     (PERIPH_BASE)
+#define APB2PERIPH_BASE     (PERIPH_BASE + 0x00010000)
 #define AHB1PERIPH_BASE     (PERIPH_BASE + 0x00020000)
 
-#define GPIOD_BASE          (AHB1PERIPH_BASE + 0x0C00)                  /* GPIO Port D base address */
 #define PWR_BASE            (APB1PERIPH_BASE + 0x7000)                  /* Power Control base address */
+#define USART1_BASE         (APB2PERIPH_BASE + 0x1000)                  /* USART1 Base Address */
+#define GPIOB_BASE          (AHB1PERIPH_BASE + 0x0400)                  /* GPIO Port B base address */
+#define GPIOD_BASE          (AHB1PERIPH_BASE + 0x0C00)                  /* GPIO Port D base address */
 #define RCC_BASE            (AHB1PERIPH_BASE + 0x3800)                  /* Reset and Clock Control base address */
 #define FLASH_R_BASE        (AHB1PERIPH_BASE + 0x3C00)                  /* Flash registers base address */
 
@@ -26,22 +29,28 @@ extern const uint32_t _ekernel;
 #define SCS_BASE            (uint32_t) (0xE000E000)                     /* System Control Space Base Address */
 #define SCB_BASE            (SCS_BASE + 0x0D00)                         /* System Control Block Base Address */
 #define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
-#define SYSTICK_BASE        0xE000E010
-#define USART2_BASE         0x40004400
+#define SYSTICK_BASE        (SCS_BASE + 0x0010)                         /* Systick Registers Base Address */
+
+/* GPIO Port B (GPIOB) */
+#define GPIOB_MODER         (volatile uint32_t *) (GPIOB_BASE + 0x00)   /* Port B mode register */
+#define GPIOB_OTYPER        (volatile uint32_t *) (GPIOB_BASE + 0x04)   /* Port B output type register */
+#define GPIOB_OSPEEDR       (volatile uint32_t *) (GPIOB_BASE + 0x08)   /* Port B output speed register */
+#define GPIOB_PUPDR         (volatile uint32_t *) (GPIOB_BASE + 0x0C)   /* Port B pull up/down register */
+#define GPIOB_AFRL          (volatile uint32_t *) (GPIOB_BASE + 0x20)   /* Port B alternate function low register */
+#define GPIOB_AFRH          (volatile uint32_t *) (GPIOB_BASE + 0x24)   /* Port B alternate function high register */
 
 /* GPIO Port D (GPIOD) */
-#define GPIOD_MODER         (volatile uint32_t *) (GPIOD_BASE + 0x00)  /* Port D mode register */
-#define LED_ODR             (volatile uint32_t *) (GPIOD_BASE + 0x14)  /* LED Output Data Register */
+#define GPIOD_MODER         (volatile uint32_t *) (GPIOD_BASE + 0x00)   /* Port D mode register */
+#define LED_ODR             (volatile uint32_t *) (GPIOD_BASE + 0x14)   /* LED Output Data Register */
 
-/* USART 2 */
-#define USART2_SR           (volatile uint32_t *) (USART2_BASE + 0x00)
-#define USART2_DR           (volatile uint32_t *) (USART2_BASE + 0x04)
-#define USART2_BRR          (volatile uint32_t *) (USART2_BASE + 0x08)
-#define USART2_CR1          (volatile uint32_t *) (USART2_BASE + 0x0C)
-#define USART2_CR2          (volatile uint32_t *) (USART2_BASE + 0x10)
-#define USART2_CR3          (volatile uint32_t *) (USART2_BASE + 0x14)
-#define USART2_GTPR         (volatile uint32_t *) (USART2_BASE + 0x18)
-
+/* USART 1 */
+#define USART1_SR           (volatile uint32_t *) (USART1_BASE + 0x00)
+#define USART1_DR           (volatile uint32_t *) (USART1_BASE + 0x04)
+#define USART1_BRR          (volatile uint32_t *) (USART1_BASE + 0x08)
+#define USART1_CR1          (volatile uint32_t *) (USART1_BASE + 0x0C)
+#define USART1_CR2          (volatile uint32_t *) (USART1_BASE + 0x10)
+#define USART1_CR3          (volatile uint32_t *) (USART1_BASE + 0x14)
+#define USART1_GTPR         (volatile uint32_t *) (USART1_BASE + 0x18)
 
 /* Power Control (PWR) */
 #define PWR_CR              (volatile uint32_t *) (PWR_BASE + 0x00)    /* Power Control Register */
@@ -54,6 +63,7 @@ extern const uint32_t _ekernel;
 #define RCC_CIR             (volatile uint32_t *) (RCC_BASE + 0x0C)    /* Clock Interrupt Register */
 #define RCC_AHB1ENR         (volatile uint32_t *) (RCC_BASE + 0x30)    /* AHB1 Enable Register */
 #define RCC_APB1ENR         (volatile uint32_t *) (RCC_BASE + 0x40)    /* APB1 Peripheral Clock Enable Register */
+#define RCC_APB2ENR         (volatile uint32_t *) (RCC_BASE + 0x44)    /* APB2 Peripheral Clock Enable Register */
 
 /* Flash Registers (FLASH) */
 #define FLASH_ACR           (volatile uint32_t *) (FLASH_R_BASE + 0x00)/* Flash Access Control Register */
@@ -103,6 +113,16 @@ extern const uint32_t _ekernel;
 #define FLASH_ACR_ICEN          (uint32_t) (0x00000200)     /* Instruction Cache Enable */
 #define FLASH_ACR_DCEN          (uint32_t) (0x00000400)     /* Data Cache Enable */
 #define FLASH_ACR_LATENCY_5WS   (uint32_t) (0x00000005)     /* 5 Wait States Latency */
+
+/* GPIO */
+#define GPIO_MODER_ALT          (uint32_t) (0x2)            /* Sets GPIO pin to alternative function mode */
+#define GPIO_AF_USART13         (uint32_t) (0x7)            /* GPIO USART1-3 mode */
+
+/* USART */
+#define USART_SR_TC             (uint32_t) (1 << 6)         /* USART Transmission Complete */
+#define USART_CR1_UE            (uint32_t) (1 << 13)        /* USART Enable */
+#define USART_CR1_RE            (uint32_t) (1 << 2)         /* USART Receive Enable */
+#define USART_CR1_TE            (uint32_t) (1 << 3)         /* USART Transmit Enable */
 
 /* System Control Block */
 #define SCB_SHCSR_MEMFAULTENA   (uint32_t) (1 << 16)        /* Enables Memory Management Fault */

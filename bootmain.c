@@ -9,6 +9,7 @@
 #include "systick.h"
 #include "heap.h"
 #include "usermode.h"
+#include "usart.h"
 
 /* From boot.S */
 void panic(void);
@@ -28,8 +29,11 @@ int main(void) {
     init_kheap();
     init_uheap();
 
-    systick_init();
-    led_tasks();
+    /* systick_init();
+    led_tasks(); */
+
+    init_usart();
+    puts("Hello World!");
 
     dont_panic();
     return 0;
