@@ -36,16 +36,34 @@ void init_usart(void) {
     /* 1 stop bit */
     *USART1_CR2 &= ~(3 << 12);
 
-    /* Set baud rate to 9600bps
-     * Mantissa: 546 Fraction: 0.875 */
-    //*USART1_BRR = (uint16_t) (0x222D);
-
-    /* Set baud rate to 115200bps
-     * Mantissa: 45 Fraction: 0.573 */
-    *USART1_BRR = (uint16_t) (0x2D9);
+    /* Set baud rate */
+    *USART1_BRR = usart_baud(115200);
 
     /* Enable reciever */
     *USART1_CR1 |= USART_CR1_RE;
+}
+
+/* Calculates the value for the USART_BRR */
+uint16_t usart_baud(uint32_t baud) {
+    float usartdiv = (84000000)/(16*(float)baud);
+    uint16_t mantissa = (uint16_t) usartdiv;
+    float fraction = 16 * (usartdiv-mantissa);
+    uint16_t int_fraction = (uint16_t) fraction;
+
+    /* Round fraction */
+    while (fraction > 1) {
+        fraction--;
+    }
+    if (fraction >= 0.5) {
+        int_fraction += 1;
+    }
+
+    if (int_fraction == 16) {
+        mantissa += 1;
+        int_fraction = 0;
+    }
+
+    return (mantissa << 4) | int_fraction;
 }
 
 void putc(char letter) {
