@@ -48,6 +48,27 @@ void init_usart(void) {
     *USART1_CR1 |= USART_CR1_RE;
 }
 
+void printx(char* s, unsigned char* x, int n){
+    char buf[128];
+    static char hextable[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    for (int i = 0; i < 128; i++){
+        if(*s == '%'){
+            for(int j = 0; j < n; j++){
+                buf[i++%128] = hextable[(*(x+j)>>4)&0xf];
+                buf[i++%128] = hextable[*(x+j)&0xf];
+            }
+            i--;
+        }
+        else{
+            buf[i] = *s;
+        }
+        s++;
+    }
+    puts(buf);
+}
+
+
+
 void putc(char letter) {
     /* Enable transmit */
     *USART1_CR1 |= USART_CR1_TE;
