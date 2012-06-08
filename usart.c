@@ -48,14 +48,16 @@ void init_usart(void) {
     *USART1_CR1 |= USART_CR1_RE;
 }
 
+#define PS 256
+
 void printx(char* s, unsigned char* x, int n){
-    char buf[128];
+    char buf[PS];
     static char hextable[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-    for (int i = 0; i < 128; i++){
+    for (int i = 0; i < PS; i++){
         if(*s == '%'){
             for(int j = 0; j < n; j++){
-                buf[i++%128] = hextable[(*(x+j)>>4)&0xf];
-                buf[i++%128] = hextable[*(x+j)&0xf];
+                buf[i++%PS] = hextable[(*(x+j)>>4)&0xf];
+                buf[i++%PS] = hextable[*(x+j)&0xf];
             }
             i--;
         }
