@@ -15,9 +15,9 @@ extern void disable_psp();
 /* For MPU */
 #define FLASH_REGION            0
 #define USER_MEM_REGION         1
-#define KERNEL_CODE_REGION      7
+#define KERNEL_CODE_REGION      2       /* This MUST be 2, because WTF?! */
 #define KERNEL_STACK_REGION     6
-#define PERIPH_REGION           3
+#define PERIPH_REGION           5
 
 void memset32(uint32_t *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
 void mpu_stack_set(uint32_t *stack_base);

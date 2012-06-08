@@ -26,14 +26,13 @@ int main(void) {
     clock();
     power_led();
     mpu_setup();
+    init_usart();
     init_kheap();
     init_uheap();
 
-    /* systick_init();
-    led_tasks(); */
-
-    init_usart();
     puts("Hello World!");
+    systick_init();
+    led_tasks();
 
     dont_panic();
     return 0;
