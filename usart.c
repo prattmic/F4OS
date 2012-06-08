@@ -66,6 +66,27 @@ uint16_t usart_baud(uint32_t baud) {
     return (mantissa << 4) | int_fraction;
 }
 
+#define PS 256
+
+void printx(char* s, unsigned char* x, int n){
+    char buf[PS];
+    static char hextable[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    for (int i = 0; i < PS; i++){
+        if(*s == '%'){
+            for(int j = 0; j < n; j++){
+                buf[i++%PS] = hextable[(*(x+j)>>4)&0xf];
+                buf[i++%PS] = hextable[*(x+j)&0xf];
+            }
+            i--;
+        }
+        else{
+            buf[i] = *s;
+        }
+        s++;
+    }
+    puts(buf);
+}
+
 void putc(char letter) {
     /* Enable transmit */
     *USART1_CR1 |= USART_CR1_TE;
