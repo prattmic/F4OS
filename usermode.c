@@ -2,6 +2,7 @@
 #include "registers.h"
 #include "task.h"
 #include "mem.h"
+#include "usart.h"
 #include "usermode.h"
 
 void unprivileged_test(void) {
@@ -47,6 +48,8 @@ void blue_led(void) {
     while (1) {
         uint32_t count = 05000000;
 
+        puts("Toggling blue LED.\r\n");
+
         /* Toggle LED */
         *LED_ODR ^= (1 << 15);
 
@@ -60,6 +63,8 @@ void blue_led(void) {
 void orange_led(void) {
     while (1) {
         uint32_t count = 10000000;
+
+        puts("Toggling orange LED.\r\n");
 
         /* Toggle LED */
         *LED_ODR ^= (1 << 13);

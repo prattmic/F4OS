@@ -30,7 +30,8 @@ int main(void) {
     init_kheap();
     init_uheap();
 
-    puts("Hello World!");
+    puts("Welcome to F4OS!\r\n");
+
     systick_init();
     led_tasks();
 

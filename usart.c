@@ -38,7 +38,11 @@ void init_usart(void) {
 
     /* Set baud rate to 9600bps
      * Mantissa: 546 Fraction: 0.875 */
-    *USART1_BRR = (uint16_t) (0x222D);
+    //*USART1_BRR = (uint16_t) (0x222D);
+
+    /* Set baud rate to 115200bps
+     * Mantissa: 45 Fraction: 0.573 */
+    *USART1_BRR = (uint16_t) (0x2D9);
 
     /* Enable reciever */
     *USART1_CR1 |= USART_CR1_RE;
