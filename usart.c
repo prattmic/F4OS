@@ -68,7 +68,7 @@ uint16_t usart_baud(uint32_t baud) {
 
 #define PS 256
 
-void printx(char* s, unsigned char* x, int n){
+void printx(char* s, uint8_t *x, int n){
     char buf[PS];
     static char hextable[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
     for (int i = 0; i < PS; i++){
