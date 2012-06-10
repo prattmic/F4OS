@@ -27,9 +27,10 @@ extern const uint32_t _ekernel;
 
 /* System Control Map */
 #define SCS_BASE            (uint32_t) (0xE000E000)                     /* System Control Space Base Address */
+#define SYSTICK_BASE        (SCS_BASE + 0x0010)                         /* Systick Registers Base Address */
+#define NVIC_BASE           (SCS_BASE + 0x0100)                         /* Nested Vector Interrupt Control */
 #define SCB_BASE            (SCS_BASE + 0x0D00)                         /* System Control Block Base Address */
 #define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
-#define SYSTICK_BASE        (SCS_BASE + 0x0010)                         /* Systick Registers Base Address */
 
 /* GPIO Port B (GPIOB) */
 #define GPIOB_MODER         (volatile uint32_t *) (GPIOB_BASE + 0x00)   /* Port B mode register */
@@ -68,17 +69,22 @@ extern const uint32_t _ekernel;
 /* Flash Registers (FLASH) */
 #define FLASH_ACR           (volatile uint32_t *) (FLASH_R_BASE + 0x00)/* Flash Access Control Register */
 
-/* System Control Block (SCB) */
-#define SCB_ICSR            (volatile uint32_t *) (SCB_BASE + 0x004)   /* Interrupt Control and State Register */
-#define SCB_VTOR            (volatile uint32_t *) (SCB_BASE + 0x008)   /* Vector Table Offset Register */
-#define SCB_CPACR           (volatile uint32_t *) (SCB_BASE + 0x088)   /* Coprocessor (FPU) Access Control Register */
-#define SCB_SHCSR           (volatile uint32_t *) (SCB_BASE + 0x024)   /* System Handler Control and State Register */
-
 /* SysTick Timer */
 #define SYSTICK_CTL         (volatile uint32_t *) (SYSTICK_BASE)        /* Control register for SysTick timer peripheral */
 #define SYSTICK_RELOAD      (volatile uint32_t *) (SYSTICK_BASE + 0x04) /* Value assumed by timer upon reload */
 #define SYSTICK_VAL         (volatile uint32_t *) (SYSTICK_BASE + 0x08) /* Current value of timer */
 #define SYSTICK_CAL         (volatile uint32_t *) (SYSTICK_BASE + 0x0C) /* Calibration settings/value register */
+
+/* Nested Vector Interrupt Controller */
+#define NVIC_ISER0          (volatile uint32_t *) (NVIC_BASE + 0x00)    /* Interrupt set-enable register 0 */
+#define NVIC_ISER1          (volatile uint32_t *) (NVIC_BASE + 0x04)    /* Interrupt set-enable register 1 */
+#define NVIC_ISER2          (volatile uint32_t *) (NVIC_BASE + 0x08)    /* Interrupt set-enable register 2 */
+
+/* System Control Block (SCB) */
+#define SCB_ICSR            (volatile uint32_t *) (SCB_BASE + 0x004)   /* Interrupt Control and State Register */
+#define SCB_VTOR            (volatile uint32_t *) (SCB_BASE + 0x008)   /* Vector Table Offset Register */
+#define SCB_CPACR           (volatile uint32_t *) (SCB_BASE + 0x088)   /* Coprocessor (FPU) Access Control Register */
+#define SCB_SHCSR           (volatile uint32_t *) (SCB_BASE + 0x024)   /* System Handler Control and State Register */
 
 /* Memory Protection Unit (MPU) 
  * ST PM0214 (Cortex M4 Programming Manual) pg. 195 */
@@ -122,8 +128,9 @@ extern const uint32_t _ekernel;
 #define USART_SR_TC             (uint32_t) (1 << 6)         /* USART Transmission Complete */
 #define USART_SR_RXNE           (uint32_t) (1 << 5)         /* USART Read data register not empty */
 #define USART_CR1_UE            (uint32_t) (1 << 13)        /* USART Enable */
-#define USART_CR1_RE            (uint32_t) (1 << 2)         /* USART Receive Enable */
+#define USART_CR1_RXNEIE        (uint32_t) (1 << 5)         /* RXNE Interrupt Enablr */
 #define USART_CR1_TE            (uint32_t) (1 << 3)         /* USART Transmit Enable */
+#define USART_CR1_RE            (uint32_t) (1 << 2)         /* USART Receive Enable */
 
 /* System Control Block */
 #define SCB_SHCSR_MEMFAULTENA   (uint32_t) (1 << 16)        /* Enables Memory Management Fault */

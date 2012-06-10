@@ -2,6 +2,8 @@
 #include "registers.h"
 #include "usart.h"
 
+void panic(void);
+
 void init_usart(void) {
     *RCC_APB2ENR |= (1 << 4);   /* Enable USART1 Clock */
     *RCC_AHB1ENR |= (1 << 1);   /* Enable GPIOB Clock */
@@ -39,6 +41,11 @@ void init_usart(void) {
     /* Set baud rate */
     *USART1_BRR = usart_baud(115200);
 
+    /* Enable recieve interrupt */
+    *USART1_CR1 |= USART_CR1_RXNEIE;
+    /* Enable in NVIC.  USART1 is interrupt 37, so 37-32 is bit 5 in second ISER */
+    *NVIC_ISER1 |= (1 << 5);
+
     /* Enable reciever */
     *USART1_CR1 |= USART_CR1_RE;
 }
@@ -66,15 +73,14 @@ uint16_t usart_baud(uint32_t baud) {
     return (mantissa << 4) | int_fraction;
 }
 
-void usart_read(void) {
-    char c;
-
-    while (1) {
-        /* Wait for a byte */
-        while (! (*USART1_SR & USART_SR_RXNE));
-
-        c = (char) *USART1_DR;
-        putc(c);
+/* Handle USART1 Global Interrupt */
+void usart1_handler(void) {
+    /* Receive interrupt */
+    if (*USART1_SR & USART_SR_RXNE) {
+        putc(*USART1_DR);       /* Echo character */
+    }
+    else {
+        panic();        /* No other interrupts are enabled */
     }
 }
 
@@ -83,8 +89,7 @@ void putc(char letter) {
     *USART1_CR1 |= USART_CR1_TE;
 
     /* Wait for transmit to clear */
-    while (!(*USART1_SR & USART_SR_TC)) {
-    }
+    while (!(*USART1_SR & USART_SR_TC));
 
     *USART1_DR = (uint8_t) letter;
 }

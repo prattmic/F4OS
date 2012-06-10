@@ -23,10 +23,46 @@
 .word   hang                /* 13 RESERVED */
 .word   hang                /* 14 PendSV */
 .word   systick_handler     /* 15 SysTick */
-.word   hang                /* 16 External Interrupt(0) */
-.word   hang                /* 17 External Interrupt(1) */
-.word   hang                /* 18 External Interrupt(2) */
-.word   hang                /* 19 ...   */
+/* NVIC */
+.word   hang                /* 0 ... */
+.word   hang                /* 1 ... */
+.word   hang                /* 2 ... */
+.word   hang                /* 3 ... */
+.word   hang                /* 4 ... */
+.word   hang                /* 5 ... */
+.word   hang                /* 6 ... */
+.word   hang                /* 7 ... */
+.word   hang                /* 8 ... */
+.word   hang                /* 9 ... */
+.word   hang                /* 10 ... */
+.word   hang                /* 11 ... */
+.word   hang                /* 12 ... */
+.word   hang                /* 13 ... */
+.word   hang                /* 14 ... */
+.word   hang                /* 15 ... */
+.word   hang                /* 16 ... */
+.word   hang                /* 17 ... */
+.word   hang                /* 18 ... */
+.word   hang                /* 19 ... */
+.word   hang                /* 20 ... */
+.word   hang                /* 21 ... */
+.word   hang                /* 22 ... */
+.word   hang                /* 23 ... */
+.word   hang                /* 24 ... */
+.word   hang                /* 25 ... */
+.word   hang                /* 26 ... */
+.word   hang                /* 27 ... */
+.word   hang                /* 28 ... */
+.word   hang                /* 29 ... */
+.word   hang                /* 30 ... */
+.word   hang                /* 31 ... */
+.word   hang                /* 32 ... */
+.word   hang                /* 33 ... */
+.word   hang                /* 34 ... */
+.word   hang                /* 35 ... */
+.word   hang                /* 36 ... */
+.word   usart1_handler      /* 37 USART1 Global Interrupt */
+.word   hang                /* 38 ... */
 
 /* Bootloader */
 .section    .kernel, "ax"
