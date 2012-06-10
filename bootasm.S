@@ -10,10 +10,10 @@
 .word   _estack             /* stack top address */
 .word   _reset              /* 1 Reset */
 .word   hang                /* 2 NMI */
-.word   _hardfault          /* 3 HardFault */
-.word   _memmanage          /* 4 MemManage */
-.word   _busfault           /* 5 BusFault */
-.word   _usagefault         /* 6 UsageFault */
+.word   hardfault_handler   /* 3 HardFault */
+.word   memmanage_handler   /* 4 MemManage */
+.word   busfault_handler    /* 5 BusFault */
+.word   usagefault_handler  /* 6 UsageFault */
 .word   hang                /* 7 RESERVED */
 .word   hang                /* 8 RESERVED */
 .word   hang                /* 9 RESERVED*/
@@ -96,45 +96,6 @@ panic:
     bl      raise_privilege
     bl      toggle_led_delay
     b       panic 
-
-/* Load the MMFSR and MMFAR into R10 and R11
-   on a MemManage fault, then panics */
-#define SCB_CFSR    0xE000ED28  /* Configurable Fault Status Register - Describes Usage, Bus, and Mem faults */
-#define SCB_MMFAR   0xE000ED34  /* Memory management fault address register - Contains address that caused fault */
-.thumb_func
-_memmanage:
-    ldr.w   r0, =SCB_CFSR
-    ldrb    r10, [r0]
-    ldr.w   r0, =SCB_MMFAR
-    ldr     r11, [r0]
-    b       panic
-
-/* Loads the HFSR into R10, then panics */
-#define SCB_HFSR    0xE000ED2C  /* Hard fault status register - Describes hard fault */
-.thumb_func
-_hardfault:
-    ldr.w   r0, =SCB_HFSR
-    ldr     r10, [r0]
-    b       panic
-
-/* Loads the BFSR and BFAR into R10 and R11, then panics */
-#define SCB_CFSR_B  0xE000ED29  /* Configurable Fault Status Register (Bus Part) - Describes Usage, Bus, and Mem faults */
-#define SCB_BFAR    0xE000ED38  /* Bus Fault Address Register - address of location that generated fault*/
-.thumb_func
-_busfault:
-    ldr.w   r0, =SCB_CFSR_B
-    ldrb    r10, [r0]
-    ldr.w   r0, =SCB_BFAR
-    ldr     r11, [r0]
-    b       panic
-
-/* Loads the UFSR into R10 , then panics */
-#define SCB_CFSR_U  0xE000ED2A  /* Configurable Fault Status Register (Usage Part) - Describes Usage, Bus, and Mem faults */
-.thumb_func
-_usagefault:
-    ldr.w   r0, =SCB_CFSR_U
-    ldrh    r10, [r0]
-    b       panic
 
 .thumb_func
 hang:

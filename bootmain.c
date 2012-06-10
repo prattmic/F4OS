@@ -31,6 +31,8 @@ int main(void) {
     init_uheap();
 
     puts("Welcome to F4OS!\r\n");
+    unsigned char buf[] = {0xDE,0xAD,0xBE,0xEF};
+    printx("You want hex? %\r\n", buf, 4);
 
     systick_init();
     led_tasks();

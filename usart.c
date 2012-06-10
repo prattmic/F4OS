@@ -80,8 +80,31 @@ void usart1_handler(void) {
         putc(*USART1_DR);       /* Echo character */
     }
     else {
-        panic();        /* No other interrupts are enabled */
+        /* Something bad happened, disable interrupt to save the rest of system. */
+        *NVIC_ICER1 |= (1 << 5);
+        puts("\r\n----USART read error, dropping to write-only mode.----\r\n");
     }
+}
+
+#define PS 256
+
+void printx(char* s, uint8_t *x, int n){
+    char buf[PS];
+    static char hextable[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    for (int i = 0; i < PS; i++){
+        if(*s == '%'){
+            for(int j = 0; j < n; j++){
+                buf[i++%PS] = hextable[(*(x+j)>>4)&0xf];
+                buf[i++%PS] = hextable[*(x+j)&0xf];
+            }
+            i--;
+        }
+        else{
+            buf[i] = *s;
+        }
+        s++;
+    }
+    puts(buf);
 }
 
 void putc(char letter) {
