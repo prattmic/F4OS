@@ -66,6 +66,18 @@ uint16_t usart_baud(uint32_t baud) {
     return (mantissa << 4) | int_fraction;
 }
 
+void usart_read(void) {
+    char c;
+
+    while (1) {
+        /* Wait for a byte */
+        while (! (*USART1_SR & USART_SR_RXNE));
+
+        c = (char) *USART1_DR;
+        putc(c);
+    }
+}
+
 void putc(char letter) {
     /* Enable transmit */
     *USART1_CR1 |= USART_CR1_TE;

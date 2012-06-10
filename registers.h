@@ -120,6 +120,7 @@ extern const uint32_t _ekernel;
 
 /* USART */
 #define USART_SR_TC             (uint32_t) (1 << 6)         /* USART Transmission Complete */
+#define USART_SR_RXNE           (uint32_t) (1 << 5)         /* USART Read data register not empty */
 #define USART_CR1_UE            (uint32_t) (1 << 13)        /* USART Enable */
 #define USART_CR1_RE            (uint32_t) (1 << 2)         /* USART Receive Enable */
 #define USART_CR1_TE            (uint32_t) (1 << 3)         /* USART Transmit Enable */
