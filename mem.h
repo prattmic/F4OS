@@ -15,7 +15,7 @@ extern void disable_psp();
 /* For MPU */
 #define FLASH_REGION            0
 #define USER_MEM_REGION         1
-#define KERNEL_CODE_REGION      2       /* This MUST be 2, because WTF?! */
+#define KERNEL_CODE_REGION      2       /* This MUST be 2, because WTF?! */ /* Actually, this effectively disabled this MPU section */
 #define KERNEL_STACK_REGION     6
 #define PERIPH_REGION           5
 
