@@ -30,7 +30,19 @@ int main(void) {
     init_kheap();
     init_uheap();
 
-    puts("Welcome to F4OS!\r\n");
+    puts("\r\n\r\n\r\nWelcome to...\r\n");
+
+    puts("                                                     \r\n"
+         "88888888888      ,d8      ,ad8888ba,     ad88888ba   \r\n"
+         "88             ,d888     d8\"\'    `\"8b   d8\"     \"8b  \r\n"
+         "88           ,d8\" 88    d8\'        `8b  Y8,          \r\n"
+         "88aaaaa    ,d8\"   88    88          88  `Y8aaaaa,    \r\n"
+         "88\"\"\"\"\"  ,d8\"     88    88          88    `\"\"\"\"\"8b,  \r\n"
+         "88       8888888888888  Y8,        ,8P          `8b  \r\n"
+         "88                88     Y8a.    .a8P   Y8a     a8P  \r\n"
+         "88                88      `\"Y8888Y\"\'     \"Y88888P\"   \r\n"
+         "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
+         "                                                     \r\n");
     unsigned char buf[] = {0xDE,0xAD,0xBE,0xEF};
     printx("You want hex? %\r\n", buf, 4);
 
