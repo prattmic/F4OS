@@ -54,6 +54,7 @@ SECTIONS {
         . = ALIGN(kernel_size);
         _stext = .;
         *(.text*)
+        *(.rodata*)
         . = ALIGN(8);
 
         _etext = .;
