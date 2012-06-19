@@ -7,6 +7,7 @@ extern const uint32_t _ekernel;
 #define _svc(x)     asm volatile ("svc  %0  \n" :: "i" (x))
 
 /* Memory Map */
+#define MEMORY_BASE         (uint32_t) (0x00000000)                     /* Base of memory map */
 #define FLASH_BASE          (uint32_t) (0x08000000)                     /* Flash Memory Base Address */
 #define RAM_BASE            (uint32_t) (0x20000000)                     /* RAM Base Address */
 #define ETHRAM_BASE         (uint32_t) (0x2001C000)                     /* ETHRAM Base Address */
@@ -14,6 +15,7 @@ extern const uint32_t _ekernel;
 
 /* Peripheral Map */
 #define PERIPH_BASE         (uint32_t) (0x40000000)                     /* Peripheral base address */
+#define PRIV_PERIPH_BASE    (uint32_t) (0xED000000)                     /* Private peripheral base address */
 #define APB1PERIPH_BASE     (PERIPH_BASE)
 #define APB2PERIPH_BASE     (PERIPH_BASE + 0x00010000)
 #define AHB1PERIPH_BASE     (PERIPH_BASE + 0x00020000)

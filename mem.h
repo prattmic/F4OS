@@ -13,11 +13,14 @@ extern void disable_psp();
 #define STKSIZE                 64                      /* This is in words */
 
 /* For MPU */
-#define FLASH_REGION            0
+#define BASE_REGION             0
 #define USER_MEM_REGION         1
-#define KERNEL_CODE_REGION      2       /* This MUST be 2, because WTF?! */ /* Actually, this effectively disabled this MPU section */
-#define KERNEL_STACK_REGION     6
-#define PERIPH_REGION           5
+#define VECTFLASH_REGION        2
+#define RAM_REGION              4
+#define PRIV_PERIPH_REGION      5
+#define KERNEL_CODE_REGION      6
+#define KERNEL_MEM_REGION       7
+
 
 void memset32(uint32_t *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
 void mpu_stack_set(uint32_t *stack_base);

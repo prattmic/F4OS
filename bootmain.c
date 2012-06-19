@@ -48,6 +48,9 @@ int main(void) {
 
     systick_init();
     led_tasks();
+    
+    //user_prefix();
+    //puts("Unit test passsed!\r\n");
 
     dont_panic();
     return 0;
@@ -134,7 +137,8 @@ static void clock(void) {
         }
 
         /* Configure Flash prefetch, Instruction cache, Data cache and wait state */
-        *FLASH_ACR = FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_LATENCY_5WS;
+        //*FLASH_ACR = FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_LATENCY_5WS;
+        *FLASH_ACR = FLASH_ACR_LATENCY_5WS;
 
         /* Select the main PLL as system clock source */
         *RCC_CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
@@ -178,29 +182,41 @@ static void mpu_setup(void) {
      * Any unprivileged accesses will need to be explicitly allowed through a region. */
     uint32_t kernel_size = mpu_size((uint32_t) (&_ekernel) - (uint32_t) (&_skernel));
 
-    /* Set entire flash to unprivileged read only */
-    *MPU_RNR = (uint32_t) (1 << FLASH_REGION);
-    *MPU_RBAR = FLASH_BASE;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(19) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RO;
+    /* Base - Privileged permissions only */
+    *MPU_RNR = (uint32_t) (1 << BASE_REGION);
+    *MPU_RBAR = MEMORY_BASE;
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(31) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW;
 
-    /* Set .kernel section to privileged access only */
+    /* Vectors and flash */
+    /* This shouldn't be required, but is */
+    *MPU_RNR = (uint32_t) (1 << VECTFLASH_REGION);
+    *MPU_RBAR = MEMORY_BASE;
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(27) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RO;
+
+    /* .text memory */
+    *MPU_RNR = (uint32_t) (1 << RAM_REGION);
+    *MPU_RBAR = RAM_BASE;
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(15) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO | MPU_RASR_XN;
+
+    /* Private peripherals */
+    *MPU_RNR = (uint32_t) (1 << PRIV_PERIPH_REGION);
+    *MPU_RBAR = PRIV_PERIPH_BASE;
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(28) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO | MPU_RASR_XN;
+
+    /* .kernel section */
+    /* This doesn't work, probably related to above */
     *MPU_RNR = (uint32_t) (1 << KERNEL_CODE_REGION);
-    *MPU_RBAR = (uint32_t) (&_skernel); 
+    *MPU_RBAR = (uint32_t) &_skernel;
     *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(kernel_size) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
 
-    /* Set CCM RAM (kernel stack) to privileged access only */
-    *MPU_RNR = (uint32_t) (1 << KERNEL_STACK_REGION);
+    /* .kernel memory */
+    *MPU_RNR = (uint32_t) (1 << KERNEL_MEM_REGION);
     *MPU_RBAR = CCMRAM_BASE;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(15) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
-    
-    /* For now, let every one access general peripherals, system peripherals and registers are protected. */
-    *MPU_RNR = (uint32_t) (1 << PERIPH_REGION);
-    *MPU_RBAR = PERIPH_BASE;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(28) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW | MPU_RASR_XN;
-
-    /* Enable the MPU and allow privileged access to the background map */
-    *MPU_CTRL |= MPU_CTRL_ENABLE | MPU_CTRL_PRIVDEFENA;
+    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(15) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO | MPU_RASR_XN;
 
     /* Enable the memory management fault */
     *SCB_SHCSR |= SCB_SHCSR_MEMFAULTENA;
+
+    /* Enable the MPU and allow privileged access to the background map */
+    *MPU_CTRL |= MPU_CTRL_ENABLE ;//| MPU_CTRL_PRIVDEFENA;
 }
