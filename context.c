@@ -6,6 +6,7 @@
 #include "mem.h"
 #include "context.h"
 #include "heap.h"
+#include "mpu.h"
 
 void unprivileged_test(void);
 void panic(void);

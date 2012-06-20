@@ -23,7 +23,7 @@ void start_task_switching(void) {
 
     k_currentTask = task;
 
-    mpu_stack_set(task->stack_base);
+    //mpu_stack_set(task->stack_base);
     enable_psp(task->stack_top);
 
     task->running = 1;
@@ -42,7 +42,7 @@ void switch_task(void) {
 
     k_currentTask = tasknode->task;
 
-    mpu_stack_set(tasknode->task->stack_base);
+    //mpu_stack_set(tasknode->task->stack_base);
 
     if (tasknode->task->running) {
         uint32_t *psp_addr = tasknode->task->stack_top;

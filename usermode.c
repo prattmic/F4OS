@@ -50,7 +50,6 @@ void blue_led(void) {
         uint32_t count = 05000000;
 
         puts("Toggling blue LED.\r\n");
-        kmalloc(12);
 
         /* Toggle LED */
         *LED_ODR ^= (1 << 15);
@@ -66,7 +65,7 @@ void orange_led(void) {
     while (1) {
         uint32_t count = 10000000;
 
-        //puts("Toggling orange LED.\r\n");
+        puts("Toggling orange LED.\r\n");
 
         /* Toggle LED */
         *LED_ODR ^= (1 << 13);

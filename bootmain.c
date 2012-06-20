@@ -16,7 +16,6 @@ void panic(void);
 
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
-static void mpu_setup(void) __attribute__((section(".kernel")));
 
 static void dont_panic(void) __attribute__((section(".kernel")));
 
@@ -25,7 +24,7 @@ int main(void) __attribute__((section(".kernel")));
 int main(void) {
     clock();
     power_led();
-    mpu_setup();
+    //mpu_setup();
     init_usart();
     init_kheap();
     init_uheap();
@@ -43,14 +42,8 @@ int main(void) {
          "88                88      `\"Y8888Y\"\'     \"Y88888P\"   \r\n"
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
          "                                                     \r\n");
-    unsigned char buf[] = {0xDE,0xAD,0xBE,0xEF};
-    printx("You want hex? %\r\n", buf, 4);
-
     systick_init();
     led_tasks();
-    
-    //user_prefix();
-    //puts("Unit test passsed!\r\n");
 
     dont_panic();
     return 0;
@@ -173,50 +166,4 @@ static void power_led() {
 
     /* Enable LED */
     *LED_ODR |= (1 << 14);
-}
-
-/* Enables the MPU and sets the default memory map. */
-/* MPU Base address must be aligned with the MPU region size */
-static void mpu_setup(void) {
-    /* The defualt memory map sets everything as accessible only to privileged access
-     * Any unprivileged accesses will need to be explicitly allowed through a region. */
-    uint32_t kernel_size = mpu_size((uint32_t) (&_ekernel) - (uint32_t) (&_skernel));
-
-    /* Base - Privileged permissions only */
-    *MPU_RNR = (uint32_t) (1 << BASE_REGION);
-    *MPU_RBAR = MEMORY_BASE;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(31) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RW;
-
-    /* Vectors and flash */
-    /* This shouldn't be required, but is */
-    *MPU_RNR = (uint32_t) (1 << VECTFLASH_REGION);
-    *MPU_RBAR = MEMORY_BASE;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(27) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_RO;
-
-    /* .text memory */
-    *MPU_RNR = (uint32_t) (1 << RAM_REGION);
-    *MPU_RBAR = RAM_BASE;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(15) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO | MPU_RASR_XN;
-
-    /* Private peripherals */
-    *MPU_RNR = (uint32_t) (1 << PRIV_PERIPH_REGION);
-    *MPU_RBAR = PRIV_PERIPH_BASE;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(28) | MPU_RASR_SHARE_NOCACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO | MPU_RASR_XN;
-
-    /* .kernel section */
-    /* This doesn't work, probably related to above */
-    *MPU_RNR = (uint32_t) (1 << KERNEL_CODE_REGION);
-    *MPU_RBAR = (uint32_t) &_skernel;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(kernel_size) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO;
-
-    /* .kernel memory */
-    *MPU_RNR = (uint32_t) (1 << KERNEL_MEM_REGION);
-    *MPU_RBAR = CCMRAM_BASE;
-    *MPU_RASR = MPU_RASR_ENABLE | MPU_RASR_SIZE(15) | MPU_RASR_SHARE_CACHE_WBACK | MPU_RASR_AP_PRIV_RW_UN_NO | MPU_RASR_XN;
-
-    /* Enable the memory management fault */
-    *SCB_SHCSR |= SCB_SHCSR_MEMFAULTENA;
-
-    /* Enable the MPU and allow privileged access to the background map */
-    *MPU_CTRL |= MPU_CTRL_ENABLE ;//| MPU_CTRL_PRIVDEFENA;
 }
