@@ -127,12 +127,18 @@ void end_task(void){
     disable_psp();
     __asm__("pop {lr}");
 
+    k_task_to_free = k_currentTask;
+
     __asm__("push {lr}");
     remove_task(k_currentTask);
     __asm__("pop {lr}");
 
     __asm__("push {lr}");
     switch_task();
+    __asm__("pop {lr}");
+
+    __asm__("push {lr}");
+    free_task(k_task_to_free);
     __asm__("pop {lr}");
     
     __asm__("push {lr}");
@@ -170,6 +176,13 @@ void remove_task(taskNode *tasknode) {
     if (task_list.tail == tasknode) {
         task_list.tail = tasknode->prev_node;
     }
+}
+
+void free_task(taskNode *tasknode) {
+    /* Free memory */
+    free(tasknode->task->stack_base, STKSIZE*4);
+    kfree(tasknode->task, sizeof(taskCtrl));
+    kfree(tasknode, sizeof(taskNode));
 }
 
 taskNodeList sort_by_priority(taskNodeList list){

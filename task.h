@@ -21,6 +21,7 @@ typedef struct k_task_struct{
 }taskCtrl;
 
 taskNode *k_currentTask;
+taskNode *k_task_to_free;   /* Ugly hack to get around needing this value after k_currentTask has changed */
 
 void idle_task(void);
 void end_task(void) __attribute__((section(".kernel"),naked));;
@@ -29,6 +30,7 @@ void switch_task(void) __attribute__((section(".kernel")));
 taskCtrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) __attribute__((section(".kernel")));
 void register_task(taskCtrl *task_ptr) __attribute__((section(".kernel")));
 void remove_task(taskNode *tasknode) __attribute__((section(".kernel")));
+void free_task(taskNode *tasknode) __attribute__((section(".kernel")));
 //inline void k_set_ct_delay(unsigned long new_delay) __attribute__((always_inline));
 taskNode* find_last_taskNode(taskNode* init_node) __attribute__((section(".kernel")));
 void append_task_to_queue(taskNode* new_task) __attribute__((section(".kernel")));
