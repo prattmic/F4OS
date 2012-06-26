@@ -42,8 +42,17 @@ int main(void) {
          "88                88      `\"Y8888Y\"\'     \"Y88888P\"   \r\n"
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
          "                                                     \r\n");
-    systick_init();
-    led_tasks();
+    
+    char *text;
+    text = malloc(50, 0);
+    for (int i = 0; i < 50; i++) {
+        text[i] = 'A';
+    }
+    puts(text);
+    free(text, 50);
+
+    //systick_init();
+    //led_tasks();
 
     dont_panic();
     return 0;

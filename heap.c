@@ -52,7 +52,7 @@ void init_kheap(void){
     k_heapList.tail->next_node = NULL;              /* Clear next node of tail */
 }
 
-void* malloc(int size, uint16_t aligned){
+void* malloc(uint32_t size, uint16_t aligned){
     /* TODO: Ensure memory block returned is contiguous */
     /* TODO: Return errors; Corollary: Add error checking to everything using malloc */
     int needed_blocks = size/(HEAP_BLOCK_SIZE)+ 1;
@@ -82,7 +82,22 @@ void* malloc(int size, uint16_t aligned){
     return ret_node;
 }
 
-void* kmalloc(int size){
+void free(void *mem, uint32_t size) {
+    heapNode *new_node = mem;
+    heapNode *curr_node = mem;
+    uint32_t blocks = size/(HEAP_BLOCK_SIZE);
+
+    for (int i = 0; i < blocks; i++) {
+        curr_node->next_node = (heapNode *) ((uint32_t) curr_node + HEAP_BLOCK_SIZE);
+        curr_node = curr_node->next_node;
+    }
+    curr_node->next_node = NULL;
+
+    u_heapList.tail->next_node = new_node;
+    u_heapList.tail = curr_node;
+}
+
+void* kmalloc(uint32_t size){
     /* TODO: Ensure memory block returned is contiguous */
     /* TODO: Return errors; Corollary: Add error checking to everything using malloc */
     int needed_blocks = size/(HEAP_BLOCK_SIZE)+ 1;
@@ -97,7 +112,17 @@ void* kmalloc(int size){
     return ret_node;
 }
 
-void* kmalloc_test(void){
-    void* stuff = kmalloc(20);
-    return stuff;
+void kfree(void *mem, uint32_t size) {
+    heapNode *new_node = mem;
+    heapNode *curr_node = mem;
+    uint32_t blocks = size/(HEAP_BLOCK_SIZE);
+
+    for (int i = 0; i < blocks; i++) {
+        curr_node->next_node = (heapNode *) ((uint32_t) curr_node + HEAP_BLOCK_SIZE);
+        curr_node = curr_node->next_node;
+    }
+    curr_node->next_node = NULL;
+
+    k_heapList.tail->next_node = new_node;
+    k_heapList.tail = curr_node;
 }
