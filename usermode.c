@@ -30,9 +30,9 @@ void toggle_led_delay(void) {
 }
 
 void led_tasks(void) {
-    taskCtrl *blue_led_task;
-    taskCtrl *orange_led_task;
-    taskCtrl *hello_print_task;
+    task_ctrl *blue_led_task;
+    task_ctrl *orange_led_task;
+    task_ctrl *hello_print_task;
 
     /* Enable blue and orange LEDs */
     *GPIOD_MODER |= (1 << (13 * 2)) | (1 << (15 * 2));

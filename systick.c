@@ -26,7 +26,7 @@ void systick_handler(void){
     __asm__("push {lr}");
     psp_addr = save_context();
     __asm__("pop {lr}");
-    k_currentTask->task->stack_top = psp_addr;
+    k_curr_task->task->stack_top = psp_addr;
 
     __asm__("push {lr}");
     switch_task();

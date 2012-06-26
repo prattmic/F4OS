@@ -3,13 +3,12 @@
 
 #include "types.h"
 #include "registers.h"
+#include "interrupt.h"
 #include "mem.h"
 #include "context.h"
 #include "heap.h"
 #include "mpu.h"
-
-void unprivileged_test(void);
-void panic(void);
+#include "usermode.h"
 
 void user_prefix(void) {
     uint32_t *memory;

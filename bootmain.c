@@ -4,15 +4,13 @@
 
 #include "types.h"
 #include "registers.h"
+#include "interrupt.h"
 #include "mem.h"
 #include "context.h"
 #include "systick.h"
 #include "heap.h"
 #include "usermode.h"
 #include "usart.h"
-
-/* From boot.S */
-void panic(void);
 
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
@@ -91,25 +89,25 @@ static void clock(void) {
 
     /******* Set up the clock *************/
 
-    volatile uint32_t StartUpCounter = 0, HSEStatus = 0;
+    volatile uint32_t startup_count = 0, HSE_status = 0;
 
     /* Enable HSE */
     *RCC_CR |= RCC_CR_HSEON;
 
     /* Wait till HSE is ready and if Time out is reached exit */
     do {
-        HSEStatus = *RCC_CR & RCC_CR_HSERDY;
-        StartUpCounter++;
-    } while((HSEStatus == 0) && (StartUpCounter != HSE_STARTUP_TIMEOUT));
+        HSE_status = *RCC_CR & RCC_CR_HSERDY;
+        startup_count++;
+    } while((HSE_status == 0) && (startup_count != HSE_STARTUP_TIMEOUT));
 
     if ((*RCC_CR & RCC_CR_HSERDY) != 0) {
-        HSEStatus = (uint32_t)0x01;
+        HSE_status = (uint32_t)0x01;
     }
     else {
-        HSEStatus = (uint32_t)0x00;
+        HSE_status = (uint32_t)0x00;
     }
 
-    if (HSEStatus == (uint32_t)0x01) {
+    if (HSE_status == (uint32_t)0x01) {
         /* Enable high performance mode, System frequency up to 168 MHz */
         *RCC_APB1ENR |= RCC_APB1ENR_PWREN;
         *PWR_CR |= PWR_CR_VOS;  

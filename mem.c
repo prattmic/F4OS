@@ -3,8 +3,7 @@
 #include "types.h"
 #include "mem.h"
 #include "registers.h"
-
-void panic(void);
+#include "interrupt.h"
 
 /* Set size bytes to value from p */
 void memset32(uint32_t *p, int32_t value, uint32_t size) {

@@ -15,8 +15,8 @@
 .type       user_mode, %function
 user_mode:
     /* Enter unprivileged mode 
-       An illegal instruction in unprivileged mode
-       results in a hard fault. */
+     * An illegal instruction in unprivileged mode
+     * results in a hard fault. */
     mrs     r0, control
     orr     r0, r0, #1
     msr     control, r0
@@ -31,8 +31,8 @@ user_mode:
 .type       user_mode_branch, %function
 user_mode_branch:
     /* Enter unprivileged mode 
-       An illegal instruction in unprivileged mode
-       results in a hard fault. */
+     * An illegal instruction in unprivileged mode
+     * results in a hard fault. */
     mrs     r1, control
     orr     r1, r1, #1
     msr     control, r1
@@ -41,7 +41,7 @@ user_mode_branch:
     bx      r0
 
 /* Changes from unprivileged to privileged mode.
-   This needs to be in .kernel so only the kernel can call it. */
+ * This needs to be in .kernel so only the kernel can call it. */
 .thumb_func
 .section    .kernel
 .global     raise_privilege
@@ -119,8 +119,7 @@ restore_full_context:
     isb
     
     mrs     r0, psp
-    /*and     r0, r0, #0
-    add     r0, r0, sp*/
+
     ldmfd   r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
     add     r0, r0, #100    /* 25 words */
     msr     psp, r0

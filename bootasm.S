@@ -89,33 +89,34 @@ hang:
 
 .thumb_func
 _reset:
-/* Copy the data segment initializers from flash to CCM RAM */  
+    /* Copy the data segment initializers from flash to CCM RAM */  
     movs    r1, #0
-    b       LoopCopyDataInit
+    b       loop_copy_data
 
-CopyDataInit:
+copy_data_init:
     ldr     r3, =_sidata
     ldr     r3, [r3, r1]
     str     r3, [r0, r1]
     adds    r1, r1, #4
     
-LoopCopyDataInit:
+loop_copy_data:
     ldr     r0, =_sdata
     ldr     r3, =_edata
     adds    r2, r0, r1
     cmp     r2, r3
-    bcc     CopyDataInit
+    bcc     copy_data_init
     ldr     r2, =_sbss
-    b       LoopFillZerobss
+    b       loop_zero_bss
+
 /* Zero fill the bss segment. */  
-FillZerobss:
+zero_bss:
     movs    r3, #0
     str     r3, [r2], #4
     
-LoopFillZerobss:
+loop_zero_bss:
     ldr     r3, = _ebss
     cmp     r2, r3
-    bcc     FillZerobss
+    bcc     zero_bss
 
     b       _start
 
