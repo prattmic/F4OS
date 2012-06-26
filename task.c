@@ -1,11 +1,13 @@
 #include "types.h"
+#include "registers.h"
 #include "mem.h"
 #include "context.h"
 #include "task.h"
 #include "heap.h"
 
-taskCtrl k_idle_task;
+void panic(void);
 
+taskCtrl k_idle_task;
 
 taskNode sys_idle_task;
 taskNodeList task_list;
@@ -21,7 +23,7 @@ void init_kernel(void){
 void start_task_switching(void) {
     taskCtrl *task = task_list.head->task;
 
-    k_currentTask = task;
+    k_currentTask = task_list.head;
 
     //mpu_stack_set(task->stack_base);
     enable_psp(task->stack_top);
@@ -31,16 +33,25 @@ void start_task_switching(void) {
 }
 
 void switch_task(void) {
-    taskNode *tasknode = task_list.head;
+    taskNode *tasknode = k_currentTask;
 
-    while (tasknode->task == k_currentTask) {
+    while (tasknode == k_currentTask) {
         if (tasknode->next_node == NULL) {
-            break;
+            if (tasknode == task_list.head) {
+                break;
+            }
+            tasknode = task_list.head;
         }
-        tasknode = tasknode->next_node;
+        else {
+            tasknode = tasknode->next_node;
+        }
     }
 
-    k_currentTask = tasknode->task;
+    k_currentTask = tasknode;
+    if (k_currentTask == NULL) {
+        /* Uh-oh, no tasks! */
+        panic();
+    }
 
     //mpu_stack_set(tasknode->task->stack_base);
 
@@ -53,7 +64,7 @@ void switch_task(void) {
         enable_psp(tasknode->task->stack_top);
         tasknode->task->running = 1;
         /*user_mode_branch(tasknode->task->fptr);*/
-        create_context(tasknode->task->fptr, &idle_task, tasknode->task->stack_top);
+        create_context(tasknode->task->fptr, &end_task, tasknode->task->stack_top);
         return;
     }
 }
@@ -79,11 +90,13 @@ void append_task_to_klist(taskNode* new_task){
     /* Check if head is set */
     if (task_list.head == NULL) {
         task_list.head = new_task;
+        new_task->prev_node = NULL;
     }
     if (task_list.tail == NULL) {
         task_list.tail = new_task;
     }
     else {
+        new_task->prev_node = task_list.tail;
         task_list.tail->next_node = new_task;
         task_list.tail = new_task;
     }
@@ -103,11 +116,60 @@ void idle_task(void){
     }
 }
 
+void end_task(void){
+
+    /* Raise privilege */
+    __asm__("push {lr}");
+    _svc(0);
+    __asm__("pop {lr}");
+
+    __asm__("push {lr}");
+    disable_psp();
+    __asm__("pop {lr}");
+
+    __asm__("push {lr}");
+    remove_task(k_currentTask);
+    __asm__("pop {lr}");
+
+    __asm__("push {lr}");
+    switch_task();
+    __asm__("pop {lr}");
+    
+    __asm__("push {lr}");
+    enable_psp(k_currentTask->task->stack_top);
+    restore_full_context();
+    /* This shouldn't return */
+
+    __asm__("pop {lr} \n"
+            "bx lr\n");
+}
+
 void register_task(taskCtrl *task_ptr){
     taskNode* new_task = kmalloc(sizeof(taskNode));
 
     new_task->task = task_ptr;
     append_task_to_klist(new_task);
+}
+
+void remove_task(taskNode *tasknode) {
+    /* Remove from end/middle/beginning of list */
+    if (tasknode->next_node == NULL && tasknode->prev_node) {
+        tasknode->prev_node->next_node = NULL;
+    }
+    if (tasknode->prev_node) {
+        tasknode->prev_node->next_node = tasknode->next_node;
+    }
+    else {
+        tasknode->next_node->prev_node = NULL;
+    }
+
+    /* Remove from head/tail of task_list */
+    if (task_list.head == tasknode) {
+        task_list.head = tasknode->next_node;
+    }
+    if (task_list.tail == tasknode) {
+        task_list.tail = tasknode->prev_node;
+    }
 }
 
 taskNodeList sort_by_priority(taskNodeList list){

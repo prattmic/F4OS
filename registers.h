@@ -33,6 +33,7 @@ extern const uint32_t _ekernel;
 #define NVIC_BASE           (SCS_BASE + 0x0100)                         /* Nested Vector Interrupt Control */
 #define SCB_BASE            (SCS_BASE + 0x0D00)                         /* System Control Block Base Address */
 #define MPU_BASE            (SCB_BASE + 0x0090)                         /* MPU Block Base Address */
+#define FPU_BASE            (SCB_BASE + 0x0230)                         /* FPU Block Base Address */
 
 /* GPIO Port B (GPIOB) */
 #define GPIOB_MODER         (volatile uint32_t *) (GPIOB_BASE + 0x00)   /* Port B mode register */
@@ -106,6 +107,10 @@ extern const uint32_t _ekernel;
 #define MPU_RBAR            (volatile uint32_t *) (MPU_BASE + 0x0C)    /* MPU Region Base Address Register */
 #define MPU_RASR            (volatile uint32_t *) (MPU_BASE + 0x10)    /* MPU Region Attribute and Size Register */
 
+/* Floating Point Unit (FPU)
+ * ST PM0214 (Cortex M4 Programming Manual) pg. 236 */
+#define FPU_CCR             (volatile uint32_t *) (FPU_BASE + 0x04)    /* FPU Context Control Register */
+#define FPU_CAR             (volatile uint32_t *) (FPU_BASE + 0x08)    /* FPU Context Address Register */
 
 
 /* Bit Masks - See RM0090 Reference Manual for STM32F4 for details */
@@ -195,3 +200,7 @@ extern const uint32_t _ekernel;
 #define MPU_RASR_AP_PRIV_RO_UN_NO       (uint32_t) (5 << 24)        /* Privileged RO Permissions, Unpriv no access */
 #define MPU_RASR_AP_PRIV_RO_UN_RO       (uint32_t) (6 << 24)        /* All RO Permissions */
 #define MPU_RASR_XN                     (uint32_t) (1 << 28)        /* MPU Region Execute Never */
+
+/* Floating Point Unit (FPU)
+ * ST PM0214 (Cortex M4 Programming Manual) pg. 236 */
+#define FPU_CCR_ASPEN                         (uint32_t) (1 << 31)        /* FPU Automatic State Preservation */

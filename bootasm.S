@@ -70,23 +70,9 @@
 .thumb_func
 .global     _start
 _start:
-    bl      enable_float
-
     /* main should never return */
     bl      main
     b       hang
-
-#define SCB_CPACR   0xE000ED88  /* Coprocessor Access Control Register - Enables FPU */
-.thumb_func
-enable_float:
-    /* Enable the floating point unit */
-    ldr.w   r0, =SCB_CPACR
-    ldr     r1, [r0]
-    orr     r1, r1, #(0xF << 20)
-    str     r1, [r0]
-    dsb     /* Wait for write to finish */
-    isb
-    bx      lr
 
 /* Exception Handlers */
 .thumb_func

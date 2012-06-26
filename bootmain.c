@@ -64,6 +64,11 @@ void dont_panic(void) {
 
 /* Sets the clock */
 static void clock(void) {
+    /* Enable the FPU */
+    *SCB_CPACR |= (0xf << 20);
+    /* Enable floating point state preservation */
+    *FPU_CCR |= FPU_CCR_ASPEN;
+
     /********* Reset clock registers ************/
     /* Set HSION bit */
     *RCC_CR |= (uint32_t)0x00000001;
