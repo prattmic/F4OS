@@ -93,12 +93,12 @@ void printx(char *s, uint8_t *x, int n){
     for (int i = 0; i < PS; i++){
         if(*s == '%'){
             for(int j = n-1; j >= 0; j--){
-            buf[i++%128] = ((*(x+j)>>4)&0xf)[
-                "0123456789ABCDEF"
-            ];
-            buf[i++%128] = (*(x+j)&0xf)[
-                "0123456789ABCDEF"
-            ];
+                buf[i++%128] = ((*(x+j)>>4)&0xf)[
+                    "0123456789ABCDEF"
+                ];
+                buf[i++%128] = (*(x+j)&0xf)[
+                    "0123456789ABCDEF"
+                ];
             }
             i--;
         }

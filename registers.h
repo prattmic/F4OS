@@ -21,6 +21,7 @@ extern const uint32_t _ekernel;
 #define AHB1PERIPH_BASE                 (PERIPH_BASE + 0x00020000)
 
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                  /* Power Control base address */
+#define SPI2_BASE                       (APB1PERIPH_BASE + 0x3800)                  /* SPI2 base address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                  /* USART1 Base Address */
 #define GPIOB_BASE                      (AHB1PERIPH_BASE + 0x0400)                  /* GPIO Port B base address */
 #define GPIOD_BASE                      (AHB1PERIPH_BASE + 0x0C00)                  /* GPIO Port D base address */
@@ -57,17 +58,15 @@ extern const uint32_t _ekernel;
 #define USART1_GTPR                     (volatile uint32_t *) (USART1_BASE + 0x18)  /* USART1 gaurd time and prescale register */
 
 /* SPI2 */
-#define SPI2_APB1EN 0x00004000
-#define SPI2        0x40003800
-#define SPI2_CR1     *(volatile uint32_t *) (SPI2 + 0x00)
-#define SPI2_CR2     *(volatile uint32_t *) (SPI2 + 0x04)
-#define SPI2_SR      *(volatile uint32_t *) (SPI2 + 0x08)
-#define SPI2_DR      *(volatile uint32_t *) (SPI2 + 0x0c)
-#define SPI2_CRCPR   *(volatile uint32_t *) (SPI2 + 0x10)
-#define SPI2_RXCRCR  *(volatile uint32_t *) (SPI2 + 0x14)
-#define SPI2_TXCRCR  *(volatile uint32_t *) (SPI2 + 0x18)
-#define SPI2_I2SCFGR *(volatile uint32_t *) (SPI2 + 0x1c)
-#define SPI2_I2SPR   *(volatile uint32_t *) (SPI2 + 0x20)
+#define SPI2_CR1                        (volatile uint32_t *) (SPI2_BASE + 0x00)    /* SPI2 control register 1 */
+#define SPI2_CR2                        (volatile uint32_t *) (SPI2_BASE + 0x04)    /* SPI2 control register 2 */
+#define SPI2_SR                         (volatile uint32_t *) (SPI2_BASE + 0x08)    /* SPI2 status register */
+#define SPI2_DR                         (volatile uint32_t *) (SPI2_BASE + 0x0c)    /* SPI2 data register */
+#define SPI2_CRCPR                      (volatile uint32_t *) (SPI2_BASE + 0x10)    /* SPI2 CRC polynomial register */
+#define SPI2_RXCRCR                     (volatile uint32_t *) (SPI2_BASE + 0x14)    /* SPI2 RX CRC register */
+#define SPI2_TXCRCR                     (volatile uint32_t *) (SPI2_BASE + 0x18)    /* SPI2 TX CRC register */
+#define SPI2_I2SCFGR                    (volatile uint32_t *) (SPI2_BASE + 0x1c)    /* SPI2 I2C configuration register */
+#define SPI2_I2SPR                      (volatile uint32_t *) (SPI2_BASE + 0x20)    /* SPI2 I2C prescaler register */
 
 /* Power Control (PWR) */
 #define PWR_CR                          (volatile uint32_t *) (PWR_BASE + 0x00)     /* Power Control Register */
@@ -144,6 +143,7 @@ extern const uint32_t _ekernel;
 
 #define RCC_PLLCFGR_PLLSRC_HSE          (uint32_t) (0x00400000)                     /* HSE oscillator selected as clock entry */
 
+#define RCC_APB1ENR_SPI2EN              (uint32_t) (0x00004000)                     /* SPI2 clock enable */
 #define RCC_APB1ENR_PWREN               (uint32_t) (0x10000000)                     /* Power Interface Clock Enable */
 
 #define FLASH_ACR_ICEN                  (uint32_t) (0x00000200)                     /* Instruction Cache Enable */
