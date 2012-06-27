@@ -1,0 +1,27 @@
+* Indentation is in the 1TBS variant of K&R style, with the execption that functions have their opening brace on the same line as the function declaration.
+    * There should be a space before an opening brace
+    * http://en.wikipedia.org/wiki/Indent_style#Variant:_1TBS
+    * Example:
+
+    int main(int argc, char *argv[]) {
+        ...
+        while (x == y) {
+            something();
+            somethingelse();
+     
+            if (some_error) {
+                do_correct();
+            } 
+            else {
+                continue_as_usual();
+            }
+        }
+     
+        finalthing();
+        ...
+    }
+
+* Macros are in ALL_CAPS
+* The preferred naming convention is lower_case_with_userscores
+    * Caps are fine if referencing something uppercase, like a register
+* Dereferences go with variable name, not type (char *name)

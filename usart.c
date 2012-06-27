@@ -1,5 +1,6 @@
 #include "types.h"
 #include "registers.h"
+#include "interrupt.h"
 #include "usart.h"
 
 void init_usart(void) {
@@ -36,26 +37,63 @@ void init_usart(void) {
     /* 1 stop bit */
     *USART1_CR2 &= ~(3 << 12);
 
-    /* Set baud rate to 9600bps
-     * Mantissa: 546 Fraction: 0.875 */
-    //*USART1_BRR = (uint16_t) (0x222D);
+    /* Set baud rate */
+    *USART1_BRR = usart_baud(115200);
 
-    /* Set baud rate to 115200bps
-     * Mantissa: 45 Fraction: 0.573 */
-    *USART1_BRR = (uint16_t) (0x2D9);
+    /* Enable recieve interrupt */
+    *USART1_CR1 |= USART_CR1_RXNEIE;
+    /* Enable in NVIC.  USART1 is interrupt 37, so 37-32 is bit 5 in second ISER */
+    *NVIC_ISER1 |= (1 << 5);
 
     /* Enable reciever */
     *USART1_CR1 |= USART_CR1_RE;
 }
 
+/* Calculates the value for the USART_BRR */
+uint16_t usart_baud(uint32_t baud) {
+    float usartdiv = (84000000)/(16*(float)baud);
+    uint16_t mantissa = (uint16_t) usartdiv;
+    float fraction = 16 * (usartdiv-mantissa);
+    uint16_t int_fraction = (uint16_t) fraction;
+
+    /* Round fraction */
+    while (fraction > 1) {
+        fraction--;
+    }
+    if (fraction >= 0.5) {
+        int_fraction += 1;
+    }
+
+    if (int_fraction == 16) {
+        mantissa += 1;
+        int_fraction = 0;
+    }
+
+    return (mantissa << 4) | int_fraction;
+}
+
+/* Handle USART1 Global Interrupt */
+void usart1_handler(void) {
+    /* Receive interrupt */
+    if (*USART1_SR & USART_SR_RXNE) {
+        putc(*USART1_DR);       /* Echo character */
+    }
+    else {
+        /* Something bad happened, disable interrupt to save the rest of system. */
+        *NVIC_ICER1 |= (1 << 5);
+        puts("\r\n----USART read error, dropping to write-only mode.----\r\n");
+    }
+}
+
 #define PS 256
 
-void printx(char* s, unsigned char* x, int n){
+void printx(char *s, uint8_t *x, int n){
     char buf[PS];
     static char hextable[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
     for (int i = 0; i < PS; i++){
         if(*s == '%'){
-            for(int j = 0; j < n; j++){
+            for(int j = n-1; j >= 0; j--){
                 buf[i++%PS] = hextable[(*(x+j)>>4)&0xf];
                 buf[i++%PS] = hextable[*(x+j)&0xf];
             }
@@ -69,15 +107,12 @@ void printx(char* s, unsigned char* x, int n){
     puts(buf);
 }
 
-
-
 void putc(char letter) {
     /* Enable transmit */
     *USART1_CR1 |= USART_CR1_TE;
 
     /* Wait for transmit to clear */
-    while (!(*USART1_SR & USART_SR_TC)) {
-    }
+    while (!(*USART1_SR & USART_SR_TC));
 
     *USART1_DR = (uint8_t) letter;
 }

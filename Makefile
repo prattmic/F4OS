@@ -1,6 +1,6 @@
 # put your *.o targets here, make should handle the rest!
 
-SRCS = bootasm.S bootmain.c usermode.c mem.S mem.c context.c systick.c task.c heap.c usart.c
+SRCS = bootasm.S bootmain.c usermode.c mem.S mem.c mpu.c context.c systick.c task.c heap.c usart.c interrupt.c
 
 LINK_SCRIPT = kernel.ld
 
@@ -15,7 +15,7 @@ PROJ_NAME=os
 CC=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g -Wall -T$(LINK_SCRIPT) --std=gnu99
+CFLAGS  = -g3 -Wall -T$(LINK_SCRIPT) --std=gnu99
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 #CFLAGS += -save-temps --verbose -Xlinker --verbose

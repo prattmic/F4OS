@@ -12,16 +12,7 @@ extern void disable_psp();
 #define NULL                    (void *) 0x00000000
 #define STKSIZE                 64                      /* This is in words */
 
-/* For MPU */
-#define FLASH_REGION            0
-#define USER_MEM_REGION         1
-#define KERNEL_CODE_REGION      2       /* This MUST be 2, because WTF?! */
-#define KERNEL_STACK_REGION     6
-#define PERIPH_REGION           5
-
 void memset32(uint32_t *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
-void mpu_stack_set(uint32_t *stack_base);
-uint16_t mpu_size(uint32_t size) __attribute__((section(".kernel")));
 
 struct memlist {
     struct memlist *next;

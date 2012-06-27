@@ -10,10 +10,10 @@
 .word   _estack             /* stack top address */
 .word   _reset              /* 1 Reset */
 .word   hang                /* 2 NMI */
-.word   _hardfault          /* 3 HardFault */
-.word   _memmanage          /* 4 MemManage */
-.word   _busfault           /* 5 BusFault */
-.word   _usagefault         /* 6 UsageFault */
+.word   hardfault_handler   /* 3 HardFault */
+.word   memmanage_handler   /* 4 MemManage */
+.word   busfault_handler    /* 5 BusFault */
+.word   usagefault_handler  /* 6 UsageFault */
 .word   hang                /* 7 RESERVED */
 .word   hang                /* 8 RESERVED */
 .word   hang                /* 9 RESERVED*/
@@ -23,10 +23,46 @@
 .word   hang                /* 13 RESERVED */
 .word   hang                /* 14 PendSV */
 .word   systick_handler     /* 15 SysTick */
-.word   hang                /* 16 External Interrupt(0) */
-.word   hang                /* 17 External Interrupt(1) */
-.word   hang                /* 18 External Interrupt(2) */
-.word   hang                /* 19 ...   */
+/* NVIC */
+.word   hang                /* 0 ... */
+.word   hang                /* 1 ... */
+.word   hang                /* 2 ... */
+.word   hang                /* 3 ... */
+.word   hang                /* 4 ... */
+.word   hang                /* 5 ... */
+.word   hang                /* 6 ... */
+.word   hang                /* 7 ... */
+.word   hang                /* 8 ... */
+.word   hang                /* 9 ... */
+.word   hang                /* 10 ... */
+.word   hang                /* 11 ... */
+.word   hang                /* 12 ... */
+.word   hang                /* 13 ... */
+.word   hang                /* 14 ... */
+.word   hang                /* 15 ... */
+.word   hang                /* 16 ... */
+.word   hang                /* 17 ... */
+.word   hang                /* 18 ... */
+.word   hang                /* 19 ... */
+.word   hang                /* 20 ... */
+.word   hang                /* 21 ... */
+.word   hang                /* 22 ... */
+.word   hang                /* 23 ... */
+.word   hang                /* 24 ... */
+.word   hang                /* 25 ... */
+.word   hang                /* 26 ... */
+.word   hang                /* 27 ... */
+.word   hang                /* 28 ... */
+.word   hang                /* 29 ... */
+.word   hang                /* 30 ... */
+.word   hang                /* 31 ... */
+.word   hang                /* 32 ... */
+.word   hang                /* 33 ... */
+.word   hang                /* 34 ... */
+.word   hang                /* 35 ... */
+.word   hang                /* 36 ... */
+.word   usart1_handler      /* 37 USART1 Global Interrupt */
+.word   hang                /* 38 ... */
 
 /* Bootloader */
 .section    .kernel, "ax"
@@ -34,23 +70,9 @@
 .thumb_func
 .global     _start
 _start:
-    bl      enable_float
-
     /* main should never return */
     bl      main
     b       hang
-
-#define SCB_CPACR   0xE000ED88  /* Coprocessor Access Control Register - Enables FPU */
-.thumb_func
-enable_float:
-    /* Enable the floating point unit */
-    ldr.w   r0, =SCB_CPACR
-    ldr     r1, [r0]
-    orr     r1, r1, #(0xF << 20)
-    str     r1, [r0]
-    dsb     /* Wait for write to finish */
-    isb
-    bx      lr
 
 /* Exception Handlers */
 .thumb_func
@@ -61,78 +83,40 @@ panic:
     bl      toggle_led_delay
     b       panic 
 
-/* Load the MMFSR and MMFAR into R10 and R11
-   on a MemManage fault, then panics */
-#define SCB_CFSR    0xE000ED28  /* Configurable Fault Status Register - Describes Usage, Bus, and Mem faults */
-#define SCB_MMFAR   0xE000ED34  /* Memory management fault address register - Contains address that caused fault */
-.thumb_func
-_memmanage:
-    ldr.w   r0, =SCB_CFSR
-    ldrb    r10, [r0]
-    ldr.w   r0, =SCB_MMFAR
-    ldr     r11, [r0]
-    b       panic
-
-/* Loads the HFSR into R10, then panics */
-#define SCB_HFSR    0xE000ED2C  /* Hard fault status register - Describes hard fault */
-.thumb_func
-_hardfault:
-    ldr.w   r0, =SCB_HFSR
-    ldr     r10, [r0]
-    b       panic
-
-/* Loads the BFSR and BFAR into R10 and R11, then panics */
-#define SCB_CFSR_B  0xE000ED29  /* Configurable Fault Status Register (Bus Part) - Describes Usage, Bus, and Mem faults */
-#define SCB_BFAR    0xE000ED38  /* Bus Fault Address Register - address of location that generated fault*/
-.thumb_func
-_busfault:
-    ldr.w   r0, =SCB_CFSR_B
-    ldrb    r10, [r0]
-    ldr.w   r0, =SCB_BFAR
-    ldr     r11, [r0]
-    b       panic
-
-/* Loads the UFSR into R10 , then panics */
-#define SCB_CFSR_U  0xE000ED2A  /* Configurable Fault Status Register (Usage Part) - Describes Usage, Bus, and Mem faults */
-.thumb_func
-_usagefault:
-    ldr.w   r0, =SCB_CFSR_U
-    ldrh    r10, [r0]
-    b       panic
-
 .thumb_func
 hang:
     b       .
 
 .thumb_func
 _reset:
-/* Copy the data segment initializers from flash to CCM RAM */  
+    /* Copy the data segment initializers from flash to CCM RAM */  
     movs    r1, #0
-    b       LoopCopyDataInit
+    b       loop_copy_data
 
-CopyDataInit:
+copy_data_init:
     ldr     r3, =_sidata
     ldr     r3, [r3, r1]
     str     r3, [r0, r1]
     adds    r1, r1, #4
     
-LoopCopyDataInit:
+loop_copy_data:
     ldr     r0, =_sdata
     ldr     r3, =_edata
     adds    r2, r0, r1
     cmp     r2, r3
-    bcc     CopyDataInit
+    bcc     copy_data_init
     ldr     r2, =_sbss
-    b       LoopFillZerobss
+    b       loop_zero_bss
+
 /* Zero fill the bss segment. */  
-FillZerobss:
+zero_bss:
     movs    r3, #0
     str     r3, [r2], #4
     
-LoopFillZerobss:
+loop_zero_bss:
     ldr     r3, = _ebss
     cmp     r2, r3
-    bcc     FillZerobss
+    bcc     zero_bss
 
     b       _start
 

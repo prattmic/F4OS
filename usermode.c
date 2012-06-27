@@ -3,6 +3,7 @@
 #include "task.h"
 #include "mem.h"
 #include "usart.h"
+#include "heap.h"
 #include "usermode.h"
 
 void unprivileged_test(void) {
@@ -29,24 +30,27 @@ void toggle_led_delay(void) {
 }
 
 void led_tasks(void) {
-    taskCtrl *blue_led_task;
-    taskCtrl *orange_led_task;
+    task_ctrl *blue_led_task;
+    task_ctrl *orange_led_task;
+    task_ctrl *hello_print_task;
 
     /* Enable blue and orange LEDs */
     *GPIOD_MODER |= (1 << (13 * 2)) | (1 << (15 * 2));
 
     blue_led_task = create_task(&blue_led, 1, 0);
     orange_led_task = create_task(&orange_led, 1, 0);
+    hello_print_task = create_task(&hello_print, 1, 0);
 
     register_task(blue_led_task);
     register_task(orange_led_task);
+    register_task(hello_print_task);
 
     start_task_switching();
 }
 
 void blue_led(void) {
     while (1) {
-        uint32_t count = 05000000;
+        uint32_t count = 9000000;
 
         puts("Toggling blue LED.\r\n");
 
@@ -62,7 +66,7 @@ void blue_led(void) {
 
 void orange_led(void) {
     while (1) {
-        uint32_t count = 10000000;
+        uint32_t count = 9000000;
 
         puts("Toggling orange LED.\r\n");
 
@@ -74,4 +78,21 @@ void orange_led(void) {
             delay *= 3.14f;
         }
     }
+}
+
+void hello_print(void) {
+    uint8_t num = 3;
+    while (num) {
+        uint32_t count = 9000000;
+
+        puts("Hello World.\r\n");
+
+        while (--count) {
+            float delay = 2.81;
+            delay *= 3.14f;
+        }
+
+        num--;
+    }
+    puts("Goodbye World!\r\n");
 }
