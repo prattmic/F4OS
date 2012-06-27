@@ -68,9 +68,6 @@ extern const uint32_t _ekernel;
 #define SPI2_TXCRCR  *(volatile uint32_t *) (SPI2 + 0x18)
 #define SPI2_I2SCFGR *(volatile uint32_t *) (SPI2 + 0x1c)
 #define SPI2_I2SPR   *(volatile uint32_t *) (SPI2 + 0x20)
-#define GPIOD       0x40020c00  /* Port D base address */
-#define GPIOD_MODER *(volatile uint32_t *) (GPIOD + 0x00)   /* Port D mode register */
-#define LED_ODR     *(volatile uint32_t *) (GPIOD + 0x14)   /* LED Output Data Register */
 
 /* Power Control (PWR) */
 #define PWR_CR                          (volatile uint32_t *) (PWR_BASE + 0x00)     /* Power Control Register */
