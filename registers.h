@@ -52,6 +52,22 @@ extern const uint32_t _ekernel;
 #define USART1_CR3          (volatile uint32_t *) (USART1_BASE + 0x14)
 #define USART1_GTPR         (volatile uint32_t *) (USART1_BASE + 0x18)
 
+/* SPI2 */
+#define SPI2_APB1EN 0x00004000
+#define SPI2        0x40003800
+#define SPI2_CR1     *(volatile uint32_t *) (SPI2 + 0x00)
+#define SPI2_CR2     *(volatile uint32_t *) (SPI2 + 0x04)
+#define SPI2_SR      *(volatile uint32_t *) (SPI2 + 0x08)
+#define SPI2_DR      *(volatile uint32_t *) (SPI2 + 0x0c)
+#define SPI2_CRCPR   *(volatile uint32_t *) (SPI2 + 0x10)
+#define SPI2_RXCRCR  *(volatile uint32_t *) (SPI2 + 0x14)
+#define SPI2_TXCRCR  *(volatile uint32_t *) (SPI2 + 0x18)
+#define SPI2_I2SCFGR *(volatile uint32_t *) (SPI2 + 0x1c)
+#define SPI2_I2SPR   *(volatile uint32_t *) (SPI2 + 0x20)
+#define GPIOD       0x40020c00  /* Port D base address */
+#define GPIOD_MODER *(volatile uint32_t *) (GPIOD + 0x00)   /* Port D mode register */
+#define LED_ODR     *(volatile uint32_t *) (GPIOD + 0x14)   /* LED Output Data Register */
+
 /* Power Control (PWR) */
 #define PWR_CR              (volatile uint32_t *) (PWR_BASE + 0x00)    /* Power Control Register */
 #define PWR_CSR             (volatile uint32_t *) (PWR_BASE + 0x04)    /* Power Control/Status Register */
