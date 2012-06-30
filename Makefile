@@ -1,6 +1,5 @@
-# put your *.o targets here, make should handle the rest!
-
-SRCS = bootasm.S bootmain.c mem.S mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c
+SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c
+ASM_SRCS = bootasm.S mem.S
 
 LINK_SCRIPT = kernel.ld
 
@@ -13,18 +12,20 @@ PROJ_NAME=os
 ###################################################
 
 CC=arm-none-eabi-gcc
+LD=arm-none-eabi-ld
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g3 -Wall -T$(LINK_SCRIPT) --std=gnu99
+CFLAGS  = -g3 -Wall --std=gnu99
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
+LFLAGS=
+
 ###################################################
 
-ROOT=$(shell pwd)
-
 OBJS = $(SRCS:.c=.o)
+OBJS += $(ASM_SRCS:.S=.o)
 
 ###################################################
 
@@ -38,14 +39,20 @@ again: clean all
 burn:
 	st-flash write $(PROJ_NAME).bin 0x8000000
 
-# Create tags; assumes ctags exists
+# Create tags
 ctags:
 	ctags -R .
 
+%.o : %.S
+	$(CC) -c $(CFLAGS) $< -o $@ 
+
+%.o : %.c
+	$(CC) -c $(CFLAGS) $< -o $@ 
+
 proj: 	$(PROJ_NAME).elf
 
-$(PROJ_NAME).elf: $(SRCS)
-	$(CC) $(CFLAGS) $^ -o $@
+$(PROJ_NAME).elf: $(OBJS)
+	$(LD) $(LFLAGS) -T $(LINK_SCRIPT) $^ -o $@ 
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 
