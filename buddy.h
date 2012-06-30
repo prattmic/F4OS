@@ -1,5 +1,5 @@
-#define MAX_ORDER   17
-#define MIN_ORDER   4
+#define USER_MAX_ORDER   17
+#define USER_MIN_ORDER   4
 
 #define BUDDY_HEADER_SIZE   sizeof(uint8_t)
 
@@ -8,11 +8,17 @@ struct heapnode {
     struct heapnode *next;
 };
 
-struct heapnode *buddy_list[MAX_ORDER+1];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
+struct buddy {
+    uint8_t max_order;
+    uint8_t min_order;
+    struct heapnode **list;
+};
 
-void init_buddy(void) __attribute__((section(".kernel")));
-struct heapnode *buddy_split(struct heapnode *node) __attribute__((section(".kernel")));
+void init_heap(void) __attribute__((section(".kernel")));
+void init_buddy(struct buddy *buddy, uint32_t *address) __attribute__((section(".kernel")));
+struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
 uint8_t size_to_order(uint32_t size) __attribute__((section(".kernel")));
+void *alloc(uint8_t order, struct buddy *buddy) __attribute__((section(".kernel")));
 void *malloc(uint32_t size) __attribute__((section(".kernel")));
-void buddy_merge(struct heapnode *node) __attribute__((section(".kernel")));
+void buddy_merge(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
 void free(void *address) __attribute__((section(".kernel")));

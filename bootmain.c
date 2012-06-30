@@ -27,7 +27,7 @@ int main(void) {
     init_usart();
     //init_kheap();
     //init_uheap();
-    init_buddy();
+    init_heap();
 
     puts("\r\n\r\n\r\nWelcome to...\r\n");
 
