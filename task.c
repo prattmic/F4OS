@@ -2,7 +2,7 @@
 #include "registers.h"
 #include "mem.h"
 #include "context.h"
-#include "heap.h"
+#include "buddy.h"
 #include "interrupt.h"
 #include "task.h"
 
@@ -73,7 +73,7 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_unti
     uint32_t *memory;
 
     task = (task_ctrl *) kmalloc(sizeof(task_ctrl));
-    memory = (uint32_t *) malloc(STKSIZE*4, 1);
+    memory = (uint32_t *) malloc(STKSIZE*4);
 
     task->stack_base = memory;
     task->stack_top  = memory + STKSIZE;
@@ -178,9 +178,9 @@ void remove_task(task_node *node) {
 
 void free_task(task_node *node) {
     /* Free memory */
-    free(node->task->stack_base, STKSIZE*4);
-    kfree(node->task, sizeof(task_ctrl));
-    kfree(node, sizeof(task_node));
+    free(node->task->stack_base);
+    kfree(node->task);
+    kfree(node);
 }
 
 task_node_list sort_by_priority(task_node_list list) {

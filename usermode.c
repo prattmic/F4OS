@@ -3,7 +3,7 @@
 #include "task.h"
 #include "mem.h"
 #include "usart.h"
-#include "heap.h"
+#include "buddy.h"
 #include "usermode.h"
 
 void unprivileged_test(void) {

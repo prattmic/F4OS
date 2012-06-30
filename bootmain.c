@@ -6,11 +6,10 @@
 #include "registers.h"
 #include "interrupt.h"
 #include "mem.h"
-/*#include "context.h"*/
-/*#include "systick.h"*/
-/*#include "heap.h"*/
+#include "context.h"
+#include "systick.h"
 #include "buddy.h"
-/*#include "usermode.h"*/
+#include "usermode.h"
 #include "usart.h"
 
 static void clock(void) __attribute__((section(".kernel")));
@@ -25,8 +24,6 @@ int main(void) {
     power_led();
     //mpu_setup();
     init_usart();
-    //init_kheap();
-    //init_uheap();
     init_heap();
 
     puts("\r\n\r\n\r\nWelcome to...\r\n");
@@ -43,23 +40,8 @@ int main(void) {
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
          "                                                     \r\n");
 
-    char *hello;
-    hello = malloc(10);
-    for (int i = 0; i < 9; i++) {
-        hello[i] = 'A';
-    }
-    hello[9] = '\0';
-    free(hello);
-
-    hello = kmalloc(10);
-    for (int i = 0; i < 9; i++) {
-        hello[i] = 'A';
-    }
-    hello[9] = '\0';
-    kfree(hello);
-
-    //systick_init();
-    //led_tasks();
+    systick_init();
+    led_tasks();
 
     dont_panic();
     return 0;

@@ -6,7 +6,7 @@
 #include "interrupt.h"
 #include "mem.h"
 #include "context.h"
-#include "heap.h"
+#include "buddy.h"
 #include "mpu.h"
 #include "usermode.h"
 
@@ -14,7 +14,7 @@ void user_prefix(void) {
     uint32_t *memory;
 
     /* Allocate memory for the stack, must be aligned to stack size for MPU */
-    memory = malloc(STKSIZE*4, 1);
+    memory = malloc(STKSIZE*4);
 
     /* Give unprivileged access to the allocated stack */
     *MPU_RNR = (uint32_t) (1 << USER_MEM_REGION);

@@ -57,6 +57,11 @@ struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) {
 uint8_t size_to_order(uint32_t size) {
     uint8_t order = 0;
 
+    /* If size isn't a power of two, round up */
+    if (size & (size - 1)) {
+        order = 1;
+    }
+
     while (size >>= 1) {
         order += 1;
     }
