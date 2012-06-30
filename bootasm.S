@@ -22,7 +22,8 @@
 .word   hang                /* 12 Debug Monitor */
 .word   hang                /* 13 RESERVED */
 .word   hang                /* 14 PendSV */
-.word   systick_handler     /* 15 SysTick */
+/*.word   systick_handler*/     /* 15 SysTick */
+.word   hang     /* 15 SysTick */
 /* NVIC */
 .word   hang                /* 0 ... */
 .word   hang                /* 1 ... */
@@ -80,7 +81,7 @@ _start:
 .type       panic, %function
 panic:
     bl      raise_privilege
-    bl      toggle_led_delay
+    /*bl      toggle_led_delay*/
     b       panic 
 
 .thumb_func
@@ -125,5 +126,5 @@ loop_zero_bss:
 .type       _svc, %function
 _svc:
     mrs     r0, psp
-    b       svc_handler
+    /*b       svc_handler*/
     bx      lr

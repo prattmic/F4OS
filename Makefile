@@ -1,6 +1,6 @@
 # put your *.o targets here, make should handle the rest!
 
-SRCS = bootasm.S bootmain.c usermode.c mem.S mem.c mpu.c context.c systick.c task.c heap.c usart.c interrupt.c
+SRCS = bootasm.S bootmain.c mem.S mem.c mpu.c buddy.c usart.c interrupt.c #usermode.c #systick.c #context.c #task.c #heap.c 
 
 LINK_SCRIPT = kernel.ld
 
