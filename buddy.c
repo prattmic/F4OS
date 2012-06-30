@@ -11,6 +11,9 @@ extern uint32_t _ekernelheap;
 struct buddy user_buddy;
 struct heapnode *user_buddy_list[USER_MAX_ORDER+1];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
 
+struct buddy kernel_buddy;
+struct heapnode *kernel_buddy_list[KERNEL_MAX_ORDER+1];
+
 void init_heap(void) {
     /* User buddy */
     user_buddy.max_order = USER_MAX_ORDER;
@@ -18,6 +21,13 @@ void init_heap(void) {
     user_buddy.list = user_buddy_list;
 
     init_buddy(&user_buddy, &_suserheap);
+
+    /* Kernel buddy */
+    kernel_buddy.max_order = KERNEL_MAX_ORDER;
+    kernel_buddy.min_order = KERNEL_MIN_ORDER;
+    kernel_buddy.list = kernel_buddy_list;
+
+    init_buddy(&kernel_buddy, &_skernelheap);
 }
 
 void init_buddy(struct buddy *buddy, uint32_t *address) {
@@ -97,6 +107,12 @@ void *malloc(uint32_t size) {
     return alloc(order, &user_buddy);
 }
 
+void *kmalloc(uint32_t size) {
+    uint8_t order = size_to_order(size + BUDDY_HEADER_SIZE);
+
+    return alloc(order, &kernel_buddy);
+}
+
 void buddy_merge(struct heapnode *node, struct buddy *buddy) {
     struct heapnode *buddy_node = (struct heapnode *) ((uint32_t) node ^ (1 << node->order));     /* Note: this is not necessarily free */
     struct heapnode *curr_node = buddy->list[node->order];
@@ -170,6 +186,10 @@ void free(void *address) {
     struct heapnode *node = (struct heapnode *) ((uint32_t) address - BUDDY_HEADER_SIZE);
 
     buddy_merge(node, &user_buddy);
+}
 
-    /* Well, that was fun */
+void kfree(void *address) {
+    struct heapnode *node = (struct heapnode *) ((uint32_t) address - BUDDY_HEADER_SIZE);
+
+    buddy_merge(node, &kernel_buddy);
 }

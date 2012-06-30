@@ -1,6 +1,9 @@
 #define USER_MAX_ORDER   17
 #define USER_MIN_ORDER   4
 
+#define KERNEL_MAX_ORDER   15
+#define KERNEL_MIN_ORDER   4
+
 #define BUDDY_HEADER_SIZE   sizeof(uint8_t)
 
 struct heapnode {
@@ -20,5 +23,7 @@ struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) __attri
 uint8_t size_to_order(uint32_t size) __attribute__((section(".kernel")));
 void *alloc(uint8_t order, struct buddy *buddy) __attribute__((section(".kernel")));
 void *malloc(uint32_t size) __attribute__((section(".kernel")));
+void *kmalloc(uint32_t size) __attribute__((section(".kernel")));
 void buddy_merge(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
 void free(void *address) __attribute__((section(".kernel")));
+void kfree(void *address) __attribute__((section(".kernel")));

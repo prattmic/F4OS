@@ -51,6 +51,13 @@ int main(void) {
     hello[9] = '\0';
     free(hello);
 
+    hello = kmalloc(10);
+    for (int i = 0; i < 9; i++) {
+        hello[i] = 'A';
+    }
+    hello[9] = '\0';
+    kfree(hello);
+
     //systick_init();
     //led_tasks();
 

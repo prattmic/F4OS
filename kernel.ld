@@ -11,13 +11,13 @@ MEMORY
 }
 
 /* Highest address of the kernel stack */
-_estack = 0x10010000;    /* end of 64K CCM RAM */
+_estack = 0x10008000;    /* middle of 64K CCM RAM */
 
 /* Heap */
 _suserheap = 0x20000000;    /* beginning of 112K SRAM */
-_euserheap = 0x2001FFFC;    /* end of 64K ETHRAM */
-_skernelheap = _ebss;
-_ekernelheap = 0x10007FFC;
+_euserheap = 0x2001FFFC;    /* end of 16K ETHRAM */
+_skernelheap = 0x10008000;  /* Middle of 64K CCM RAM */
+_ekernelheap = 0x1000FFFC;  /* End of 64K CCM RAM */
 
 SECTIONS {
     /* Vectors first - Always permitted by MPU */
