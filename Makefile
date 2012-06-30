@@ -15,9 +15,10 @@ CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g3 -Wall --std=gnu99
+CFLAGS  = -g3 -Wall --std=gnu99 
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
+CFLAGS += -O1 #-fno-peephole2
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=
