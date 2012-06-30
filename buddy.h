@@ -1,6 +1,8 @@
 #define MAX_ORDER   17
 #define MIN_ORDER   4
 
+#define BUDDY_HEADER_SIZE   sizeof(uint8_t)
+
 struct heapnode {
     uint8_t order;
     struct heapnode *next;

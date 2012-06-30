@@ -43,7 +43,7 @@ uint8_t size_to_order(uint32_t size) {
 }
 
 void *malloc(uint32_t size) {
-    uint8_t order = size_to_order(size + sizeof(uint8_t));
+    uint8_t order = size_to_order(size + BUDDY_HEADER_SIZE);
     struct heapnode *node = NULL;
 
     if (order < MIN_ORDER) {
@@ -56,7 +56,7 @@ void *malloc(uint32_t size) {
     if (buddy_list[order] != NULL) {
         node = buddy_list[order];
         buddy_list[order] = buddy_list[order]->next;
-        return ((uint32_t *) node) + sizeof(uint8_t);
+        return ((uint32_t *) node) + BUDDY_HEADER_SIZE;
     }
     else {
         uint8_t new_order = order+1;
@@ -76,7 +76,7 @@ void *malloc(uint32_t size) {
             new_order--;
         }
 
-        return (void *) ((uint32_t) node) + sizeof(uint8_t);
+        return (void *) ((uint32_t) node) + BUDDY_HEADER_SIZE;
     }
 }
 
@@ -91,10 +91,10 @@ void buddy_merge(struct heapnode *node) {
 
     /* Look for node and buddy */
     uint8_t found = 0;
-    struct heapnode *node_curr_node;
-    struct heapnode *node_prev_node;
-    struct heapnode *buddy_curr_node;
-    struct heapnode *buddy_prev_node;
+    struct heapnode *node_curr_node = NULL;
+    struct heapnode *node_prev_node = NULL;
+    struct heapnode *buddy_curr_node = NULL;
+    struct heapnode *buddy_prev_node = NULL;
     while (found < 2 && curr_node != NULL) {
         if (curr_node == node) {
             node_curr_node = curr_node;
@@ -150,7 +150,7 @@ void buddy_merge(struct heapnode *node) {
 }
 
 void free(void *address) {
-    struct heapnode *node = (struct heapnode *) ((uint32_t) address - sizeof(uint8_t));
+    struct heapnode *node = (struct heapnode *) ((uint32_t) address - BUDDY_HEADER_SIZE);
 
     buddy_merge(node);
 
