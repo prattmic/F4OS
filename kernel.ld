@@ -15,7 +15,7 @@ _estack = 0x10010000;    /* end of 64K CCM RAM */
 
 /* Heap */
 _suserheap = 0x20000000;    /* beginning of 112K SRAM */
-_euserheap = 0x2001BFFC;    /* end of 112K SRAM */
+_euserheap = 0x2001FFFC;    /* end of 64K ETHRAM */
 _skernelheap = _ebss;
 _ekernelheap = 0x10007FFC;
 

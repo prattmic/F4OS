@@ -49,6 +49,7 @@ int main(void) {
         hello[i] = 'A';
     }
     hello[9] = '\0';
+    free(hello);
 
     //systick_init();
     //led_tasks();

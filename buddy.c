@@ -76,6 +76,83 @@ void *malloc(uint32_t size) {
             new_order--;
         }
 
-        return ((uint32_t *) node) + sizeof(uint8_t);
+        return (void *) ((uint32_t) node) + sizeof(uint8_t);
     }
+}
+
+void buddy_merge(struct heapnode *node) {
+    struct heapnode *buddy = (struct heapnode *) ((uint32_t) node ^ (1 << node->order));     /* Note: this is not necessarily free */
+    struct heapnode *curr_node = buddy_list[node->order];
+    struct heapnode *prev_node = NULL;
+
+    if (node->order >= MAX_ORDER) {
+        return;
+    }
+
+    /* Look for node and buddy */
+    uint8_t found = 0;
+    struct heapnode *node_curr_node;
+    struct heapnode *node_prev_node;
+    struct heapnode *buddy_curr_node;
+    struct heapnode *buddy_prev_node;
+    while (found < 2 && curr_node != NULL) {
+        if (curr_node == node) {
+            node_curr_node = curr_node;
+            node_prev_node = prev_node;
+            found += 1;
+        }
+        else if (curr_node == buddy) {
+            buddy_curr_node = curr_node;
+            buddy_prev_node = prev_node;
+            found += 1;
+        }
+
+        prev_node = curr_node;
+        curr_node = curr_node->next;
+    }
+
+
+    /* Buddy not free */
+    if (buddy_curr_node == NULL) {
+        if (node_curr_node == NULL) {
+            node->next = buddy_list[node->order];
+            buddy_list[node->order] = node;
+        }
+        return;
+    }
+    else {  /* Buddy free */
+        /* Remove from list */
+        if (buddy_prev_node == NULL) {
+            buddy_list[node->order] = buddy_curr_node->next;
+        }
+        else {
+            buddy_prev_node->next = buddy_curr_node->next;
+        }
+
+        /* Remove node if found */
+        if (node_curr_node != NULL) {
+            /* Remove from list */
+            if (node_prev_node == NULL) {
+                buddy_list[node->order] = node_curr_node->next;
+            }
+            else {
+                node_prev_node->next = node_curr_node->next;
+            }
+        }
+
+        node->order += 1;
+        node->next = buddy_list[node->order];
+        buddy_list[node->order] = node;
+
+        /* Recurse */
+        buddy_merge(node);
+    }
+}
+
+void free(void *address) {
+    struct heapnode *node = (struct heapnode *) ((uint32_t) address - sizeof(uint8_t));
+
+    buddy_merge(node);
+
+    /* Well, that was fun */
 }
