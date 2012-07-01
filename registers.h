@@ -97,9 +97,12 @@ extern const uint32_t _ekernel;
 #define NVIC_ICER0                      (volatile uint32_t *) (NVIC_BASE + 0x080)   /* Interrupt clear-enable register 0 */
 #define NVIC_ICER1                      (volatile uint32_t *) (NVIC_BASE + 0x084)   /* Interrupt clear-enable register 1 */
 #define NVIC_ICER2                      (volatile uint32_t *) (NVIC_BASE + 0x088)   /* Interrupt clear-enable register 2 */
+#define NVIC_ISPR0                      (volatile uint32_t *) (NVIC_BASE + 0x100)   /* Interrupt set-pending register 0 */
 #define NVIC_ICPR0                      (volatile uint32_t *) (NVIC_BASE + 0x180)   /* Interrupt clear-pending register 0 */
 #define NVIC_ICPR1                      (volatile uint32_t *) (NVIC_BASE + 0x184)   /* Interrupt clear-pending register 1 */
 #define NVIC_ICPR2                      (volatile uint32_t *) (NVIC_BASE + 0x188)   /* Interrupt clear-pending register 2 */
+#define NVIC_IPR0                       (volatile uint32_t *) (NVIC_BASE + 0x300)   /* Interrupt 0 priority register */
+#define NVIC_IPR14                      (volatile uint32_t *) (NVIC_BASE + 0x314)   /* Interrupt 14 priority register */
 
 /* System Control Block (SCB) */
 #define SCB_ICSR                        (volatile uint32_t *) (SCB_BASE + 0x004)    /* Interrupt Control and State Register */
@@ -163,6 +166,8 @@ extern const uint32_t _ekernel;
 #define USART_CR1_RE                    (uint32_t) (1 << 2)                         /* USART Receive Enable */
 
 /* System Control Block */
+#define SCB_ICSR_PENDSVCLR              (uint32_t) (1 << 27)                        /* Clear PendSV interrupt */
+#define SCB_ICSR_PENDSVSET              (uint32_t) (1 << 28)                        /* Set PendSV interrupt */
 #define SCB_SHCSR_MEMFAULTENA           (uint32_t) (1 << 16)                        /* Enables Memory Management Fault */
 #define SCB_SHCSR_BUSFAULTENA           (uint32_t) (1 << 17)                        /* Enables Bus Fault */
 #define SCB_SHCSR_USEFAULTENA           (uint32_t) (1 << 18)                        /* Enables Usage Fault */

@@ -1,6 +1,7 @@
 #include "types.h"
 #include "registers.h"
 #include "interrupt.h"
+#include "semaphore.h"
 #include "usart.h"
 
 void init_usart(void) {
@@ -47,6 +48,9 @@ void init_usart(void) {
 
     /* Enable reciever */
     *USART1_CR1 |= USART_CR1_RE;
+
+    /* Reset semaphore */
+    usart_semaphore = 0;
 }
 
 /* Calculates the value for the USART_BRR */
@@ -121,7 +125,9 @@ void putc(char letter) {
 }
 
 void puts(char *s) {
+    aquire(&usart_semaphore);
     while (*s) {
         putc(*s++);
     }
+    release(&usart_semaphore);
 }

@@ -116,6 +116,8 @@ void idle_task(void) {
 }
 
 void end_task(void) {
+    static task_node *k_task_to_free;   /* Ugly hack to get around needing this value after k_curr_task has changed */
+
     /* Raise privilege */
     __asm__("push {lr}");
     _svc(0);

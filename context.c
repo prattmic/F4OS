@@ -5,10 +5,11 @@
 #include "registers.h"
 #include "interrupt.h"
 #include "mem.h"
-#include "context.h"
 #include "buddy.h"
 #include "mpu.h"
 #include "usermode.h"
+#include "task.h"
+#include "context.h"
 
 void user_prefix(void) {
     uint32_t *memory;
@@ -37,11 +38,34 @@ void user_prefix(void) {
     disable_psp();
 }
 
+/* Like systick_handler, but clears the PendSV bit when complete */
+void pendsv_handler(void){
+    uint32_t *psp_addr;
+
+    /* Blink an LED, for the LOLs */
+    *LED_ODR ^= (1<<12);
+
+    __asm__("push {lr}");
+    psp_addr = save_context();
+    __asm__("pop {lr}");
+    k_curr_task->task->stack_top = psp_addr;
+
+    __asm__("push {lr}");
+    switch_task();
+    __asm__("pop {lr}");
+    
+    /* Clear the PendSV bit.  Unfortunately, this has to be done before restoring context */
+    *SCB_ICSR |= SCB_ICSR_PENDSVCLR;
+
+    __asm__("push {lr}");
+    restore_context();
+    __asm__("pop {lr} \n"
+            "bx lr\n");
+}
+
 void svc_handler(uint32_t *svc_args) {
     uint32_t svc_number;
     uint32_t return_address;
-
-    uint32_t *psp_addr;
 
     /* Stack contains:
      * r0, r1, r2, r3, r12, r14, the return address and xPSR
@@ -62,10 +86,8 @@ void svc_handler(uint32_t *svc_args) {
             }
             break;
         case 0x1:
-            /* Save context, do something, and restore context */
-            psp_addr = save_context();
-            asm ("mov r5, #5    \n");
-            restore_context(psp_addr);
+            /* Set PendSV to yield a task */
+            *SCB_ICSR |= SCB_ICSR_PENDSVSET;
         default:
             break;
     }

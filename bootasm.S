@@ -21,7 +21,7 @@
 .word   _svc                /* 11 SVCall */
 .word   hang                /* 12 Debug Monitor */
 .word   hang                /* 13 RESERVED */
-.word   hang                /* 14 PendSV */
+.word   pendsv_handler      /* 14 PendSV */
 .word   systick_handler     /* 15 SysTick */
 /* NVIC */
 .word   hang                /* 0 ... */

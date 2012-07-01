@@ -21,7 +21,6 @@ typedef struct k_task_struct {
 } task_ctrl;
 
 task_node *k_curr_task;
-task_node *k_task_to_free;   /* Ugly hack to get around needing this value after k_curr_task has changed */
 
 void idle_task(void);
 void end_task(void) __attribute__((section(".kernel"),naked));;
