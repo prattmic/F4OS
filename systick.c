@@ -20,23 +20,9 @@ void systick_init(void){
     *GPIOD_MODER |= (1 << (12 * 2));
 }
 
-void systick_handler(void){
-    uint32_t *psp_addr;
+void systick_handler(void) {
+    /* Call PendSV to do switching */
+    *SCB_ICSR |= SCB_ICSR_PENDSVSET;
 
-    /* Blink an LED, for the LOLs */
-    *LED_ODR ^= (1<<12);
-
-    __asm__("push {lr}");
-    psp_addr = save_context();
-    __asm__("pop {lr}");
-    k_curr_task->task->stack_top = psp_addr;
-
-    __asm__("push {lr}");
-    switch_task();
-    __asm__("pop {lr}");
-    
-    __asm__("push {lr}");
-    restore_context();
-    __asm__("pop {lr} \n"
-            "bx lr\n");
+    __asm__("bx lr");
 }

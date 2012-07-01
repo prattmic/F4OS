@@ -38,7 +38,7 @@ void user_prefix(void) {
     disable_psp();
 }
 
-/* Like systick_handler, but clears the PendSV bit when complete */
+/* systick_handler calls pendsv to service task switching */
 void pendsv_handler(void){
     uint32_t *psp_addr;
 
