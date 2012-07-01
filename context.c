@@ -30,7 +30,7 @@ void user_prefix(void) {
     unprivileged_test();
 
     /* Raise privilege */
-    _svc(0);
+    _svc(SVC_RAISE_PRIV);
 
     /* Test context switching */
     //_svc(1);
@@ -74,7 +74,7 @@ void svc_handler(uint32_t *svc_args) {
     return_address = svc_args[6];
 
     switch (svc_number) {
-        case 0x0:
+        case SVC_RAISE_PRIV: {
             /* Raise Privilege, but only if request came from the kernel */
             /* DEPRECATED: All code executed until _svc returns is privileged,
              * so raising privileges shouldn't ever be necessary. */
@@ -85,9 +85,23 @@ void svc_handler(uint32_t *svc_args) {
                 panic();
             }
             break;
-        case 0x1:
+        }
+        case SVC_YIELD: {
             /* Set PendSV to yield a task */
             *SCB_ICSR |= SCB_ICSR_PENDSVSET;
+            break;
+        }
+        case SVC_END_TASK: {
+            task_node *task_to_free = k_curr_task;
+
+            remove_task(k_curr_task);
+            switch_task();
+            free_task(task_to_free);
+            enable_psp(k_curr_task->task->stack_top);
+
+            restore_context();
+            break;
+        }
         default:
             break;
     }

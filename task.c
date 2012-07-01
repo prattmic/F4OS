@@ -116,37 +116,9 @@ void idle_task(void) {
 }
 
 void end_task(void) {
-    static task_node *k_task_to_free;   /* Ugly hack to get around needing this value after k_curr_task has changed */
-
-    /* Raise privilege */
     __asm__("push {lr}");
-    _svc(0);
-    __asm__("pop {lr}");
-
-    __asm__("push {lr}");
-    disable_psp();
-    __asm__("pop {lr}");
-
-    k_task_to_free = k_curr_task;
-
-    __asm__("push {lr}");
-    remove_task(k_curr_task);
-    __asm__("pop {lr}");
-
-    __asm__("push {lr}");
-    switch_task();
-    __asm__("pop {lr}");
-
-    __asm__("push {lr}");
-    free_task(k_task_to_free);
-    __asm__("pop {lr}");
-    
-    __asm__("push {lr}");
-    enable_psp(k_curr_task->task->stack_top);
-    restore_full_context(); /* This shouldn't return */
-
-    /* We should never get here */
-    __asm__("pop {lr} \n"
+    _svc(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
+    __asm__("pop {lr}\n"
             "bx lr\n");
 }
 

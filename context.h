@@ -1,3 +1,8 @@
+/* SVC case names */
+#define     SVC_RAISE_PRIV      0x0
+#define     SVC_YIELD           0x1
+#define     SVC_END_TASK        0x2
+
 void user_prefix(void) __attribute__((section(".kernel")));
 void pendsv_handler(void) __attribute__((section(".kernel"), naked));
 void svc_handler(uint32_t*) __attribute__((section(".kernel")));
@@ -9,5 +14,5 @@ extern uint32_t *create_context(void (*fptr)(void), void (*lptr)(void), uint32_t
 /* Sets a PendSV interrupt to yield a task */
 inline void yield(void) __attribute__((always_inline));
 inline void yield(void) {
-    _svc(0x1);
+    _svc(SVC_YIELD);
 }

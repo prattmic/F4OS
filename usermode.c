@@ -2,6 +2,7 @@
 #include "registers.h"
 #include "task.h"
 #include "mem.h"
+#include "systick.h"
 #include "usart.h"
 #include "buddy.h"
 #include "usermode.h"
@@ -45,6 +46,7 @@ void led_tasks(void) {
     register_task(orange_led_task);
     register_task(hello_print_task);
 
+    systick_init();
     start_task_switching();
 }
 

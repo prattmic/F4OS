@@ -40,7 +40,6 @@ int main(void) {
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
          "                                                     \r\n");
 
-    systick_init();
     led_tasks();
 
     dont_panic();
