@@ -25,7 +25,7 @@ task_node *k_curr_task;
 void idle_task(void);
 void end_task(void) __attribute__((section(".kernel"),naked));;
 void start_task_switching(void) __attribute__((section(".kernel")));
-void switch_task(void) __attribute__((section(".kernel"), optimize(0)));
+void switch_task(void) __attribute__((section(".kernel")));
 task_ctrl* create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) __attribute__((section(".kernel")));
 void register_task(task_ctrl *task_ptr) __attribute__((section(".kernel")));
 void remove_task(task_node *tasknode) __attribute__((section(".kernel")));
