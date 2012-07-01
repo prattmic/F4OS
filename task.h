@@ -14,9 +14,9 @@ typedef struct k_task_node_list {
 typedef struct k_task_struct {
     uint32_t *stack_top;
     uint32_t *stack_base;
-    uint8_t priority;
     void(*fptr)(void);
     uint32_t ticks_until_wake;
+    uint8_t priority;
     uint8_t running;
 } task_ctrl;
 
