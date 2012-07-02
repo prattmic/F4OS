@@ -15,13 +15,15 @@ CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g3 -Wall --std=gnu99 
+CFLAGS  = -g3 -Wall --std=gnu99 -I./inc/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -O2
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=
+
+VPATH = src/
 
 ###################################################
 
@@ -58,7 +60,7 @@ $(PROJ_NAME).elf: $(OBJS)
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 
 clean:
-	rm -f *.o *.i *.s
-	rm -f $(PROJ_NAME).elf
-	rm -f $(PROJ_NAME).hex
-	rm -f $(PROJ_NAME).bin
+	-rm -f *.o *.i *.s
+	-rm -f $(PROJ_NAME).elf
+	-rm -f $(PROJ_NAME).hex
+	-rm -f $(PROJ_NAME).bin
