@@ -3,7 +3,7 @@
 #include "context.h"
 #include "semaphore.h"
 
-void aquire(volatile uint8_t *semaphore) {
+void acquire(volatile uint8_t *semaphore) {
     while (*semaphore) {
         yield();
     }

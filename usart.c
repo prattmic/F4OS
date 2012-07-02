@@ -125,7 +125,7 @@ void putc(char letter) {
 }
 
 void puts(char *s) {
-    aquire(&usart_semaphore);
+    acquire(&usart_semaphore);
     while (*s) {
         putc(*s++);
     }

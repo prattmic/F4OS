@@ -113,7 +113,7 @@ void *malloc(uint32_t size) {
     uint8_t order = size_to_order(size + BUDDY_HEADER_SIZE);
     void *address;
 
-    aquire(&user_buddy.semaphore);
+    acquire(&user_buddy.semaphore);
     address = alloc(order, &user_buddy);
     release(&user_buddy.semaphore);
 
@@ -124,7 +124,7 @@ void *kmalloc(uint32_t size) {
     uint8_t order = size_to_order(size + BUDDY_HEADER_SIZE);
     void *address;
 
-    aquire(&kernel_buddy.semaphore);
+    acquire(&kernel_buddy.semaphore);
     address = alloc(order, &kernel_buddy);
     release(&kernel_buddy.semaphore);
 
@@ -203,7 +203,7 @@ void buddy_merge(struct heapnode *node, struct buddy *buddy) {
 void free(void *address) {
     struct heapnode *node = (struct heapnode *) ((uint32_t) address - BUDDY_HEADER_SIZE);
 
-    aquire(&user_buddy.semaphore);
+    acquire(&user_buddy.semaphore);
     buddy_merge(node, &user_buddy);
     release(&user_buddy.semaphore);
 }
@@ -211,7 +211,7 @@ void free(void *address) {
 void kfree(void *address) {
     struct heapnode *node = (struct heapnode *) ((uint32_t) address - BUDDY_HEADER_SIZE);
 
-    aquire(&kernel_buddy.semaphore);
+    acquire(&kernel_buddy.semaphore);
     buddy_merge(node, &kernel_buddy);
     release(&kernel_buddy.semaphore);
 }
