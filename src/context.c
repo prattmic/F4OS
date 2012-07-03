@@ -54,9 +54,6 @@ void pendsv_handler(void){
     switch_task();
     __asm__("pop {lr}");
     
-    /* Clear the PendSV bit.  Unfortunately, this has to be done before restoring context */
-    *SCB_ICSR |= SCB_ICSR_PENDSVCLR;
-
     __asm__("push {lr}");
     restore_context();
     __asm__("pop {lr} \n"
