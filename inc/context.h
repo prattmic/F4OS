@@ -3,10 +3,6 @@
 #define     SVC_YIELD           0x1
 #define     SVC_END_TASK        0x2
 
-/* Required to stringify macros */
-#define     XSTRING(x)          #x
-#define     STRING(x)           XSTRING(x)
-
 void user_prefix(void) __attribute__((section(".kernel")));
 void pendsv_handler(void) __attribute__((section(".kernel"), naked));
 void svc_handler(uint32_t*) __attribute__((section(".kernel")));

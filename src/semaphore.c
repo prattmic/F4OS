@@ -30,9 +30,9 @@ void acquire(volatile uint8_t *semaphore) {
             bne         giveup\r\n              \
             bx          lr\r\n                  \
         giveup:                                 \
-            svc         " STRING(SVC_YIELD) "\r\n   \
+            svc         %[yieldnum]\r\n         \
             b           try"
-            ::[addr] "l"(semaphore)
+            ::[addr] "l"(semaphore), [yieldnum] "I"(SVC_YIELD)
             :"r1", "r2", "r3", "cc", "memory");
 }
     
