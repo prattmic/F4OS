@@ -12,7 +12,7 @@ extern void disable_psp();
 #define NULL                    (void *) 0x00000000
 #define STKSIZE                 64                      /* This is in words */
 
-void memset32(uint32_t *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
+void memset32(void *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
 
 struct memlist {
     struct memlist *next;

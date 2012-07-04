@@ -1,5 +1,5 @@
 SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c
-ASM_SRCS = bootasm.S mem.S
+ASM_SRCS = bootasm.S memasm.S
 
 LINK_SCRIPT = kernel.ld
 

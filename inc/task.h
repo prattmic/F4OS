@@ -21,6 +21,7 @@ typedef struct k_task_struct {
 } task_ctrl;
 
 task_node *k_curr_task;
+extern uint8_t task_switching;
 
 void idle_task(void);
 void end_task(void) __attribute__((section(".kernel"),naked));;

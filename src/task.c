@@ -12,6 +12,8 @@ task_node sys_idle_task;
 task_node_list task_list;
 task_node_list task_queue;
 
+uint8_t task_switching = 0;
+
 void init_kernel(void) {
     sys_idle_task.next = NULL;
     (sys_idle_task.task)->fptr =        &idle_task;
@@ -27,6 +29,7 @@ void start_task_switching(void) {
     //mpu_stack_set(task->stack_base);
     enable_psp(task->stack_top);
 
+    task_switching = 1;
     task->running = 1;
     user_mode_branch(task->fptr);
 }

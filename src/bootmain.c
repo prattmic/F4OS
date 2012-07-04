@@ -23,8 +23,8 @@ int main(void) {
     clock();
     power_led();
     //mpu_setup();
-    init_usart();
     init_heap();
+    init_usart();
 
     puts("\r\n\r\n\r\nWelcome to...\r\n");
 

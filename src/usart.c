@@ -2,6 +2,10 @@
 #include "registers.h"
 #include "interrupt.h"
 #include "semaphore.h"
+#include "context.h"
+#include "task.h"
+#include "mem.h"
+#include "buddy.h"
 #include "usart.h"
 
 void init_usart(void) {
@@ -38,16 +42,72 @@ void init_usart(void) {
     /* 1 stop bit */
     *USART1_CR2 &= ~(3 << 12);
 
+    /** DMA set up **/
+    /* DMA2, Stream 2, Channel 4 is USART1_RX
+     * DMA2, Stream 7, Channel 4 is USART1_TX */
+    *USART1_CR3 |= USART_CR3_DMAR_EN | USART_CR3_DMAT_EN;
+
+    /* Enable DMA2 clock */
+    *RCC_AHB1ENR |= RCC_AHB1ENR_DMA2EN;
+    *RCC_AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+
+    /* Clear configuration registers enable bits and wait for them to be ready */
+    *DMA2_S2CR &= ~(DMA_SxCR_EN);
+    *DMA2_S7CR &= ~(DMA_SxCR_EN);
+    while ( (*DMA2_S2CR & DMA_SxCR_EN) || (*DMA2_S7CR & DMA_SxCR_EN) );
+
+    /* Select channel 4 */
+    *DMA2_S2CR |= DMA_SxCR_CHSEL(4);
+    *DMA2_S7CR |= DMA_SxCR_CHSEL(4);
+
+    /* Peripheral address - Both use USART data register */
+    *DMA2_S2PAR = (uint32_t) USART1_DR;    /* RX */
+    *DMA2_S7PAR = (uint32_t) USART1_DR;    /* TX */
+
+    /* Allocate buffer memory */
+    usart_rx_buf[0] = (char *) malloc(USART_DMA_MSIZE);
+    usart_rx_buf[1] = (char *) malloc(USART_DMA_MSIZE);
+    usart_tx_buf    = (char *) malloc(USART_DMA_MSIZE);
+    if ((usart_rx_buf[0] == NULL) || (usart_rx_buf[1] == NULL) || (usart_tx_buf == NULL)) {
+        panic();
+    }
+    else {
+        /* Clear buffers */
+        memset32(usart_rx_buf[0], 0, USART_DMA_MSIZE);
+        memset32(usart_rx_buf[1], 0, USART_DMA_MSIZE);
+        memset32(usart_tx_buf, 0, USART_DMA_MSIZE);
+        *DMA2_S2M0AR = (uint32_t) usart_rx_buf[0];
+        *DMA2_S2M1AR = (uint32_t) usart_rx_buf[1];
+        *DMA2_S7M0AR = (uint32_t) usart_tx_buf;
+    }
+
+    /* Number of data items to be transferred */
+    *DMA2_S2NDTR = (uint16_t) USART_DMA_MSIZE;
+
+    /* Priority */
+    *DMA2_S2CR |= DMA_SxCR_PL_HIGH;
+    *DMA2_S7CR |= DMA_SxCR_PL_HIGH;
+
+    /* Data direct, memory increment, double buffer */
+    *DMA2_S2CR |= DMA_SxCR_DIR_PM | DMA_SxCR_MINC | DMA_SxCR_DBM;
+    *DMA2_S7CR |= DMA_SxCR_DIR_MP | DMA_SxCR_MINC;
+
+    /* Enable DMAs */
+    *DMA2_S2CR |= DMA_SxCR_EN;
+
+    /** DMA End **/
+
     /* Set baud rate */
     *USART1_BRR = usart_baud(115200);
 
-    /* Enable recieve interrupt */
-    *USART1_CR1 |= USART_CR1_RXNEIE;
-    /* Enable in NVIC.  USART1 is interrupt 37, so 37-32 is bit 5 in second ISER */
-    *NVIC_ISER1 |= (1 << 5);
+    ///* Enable recieve interrupt */
+    //*USART1_CR1 |= USART_CR1_RXNEIE;
+    ///* Enable in NVIC.  USART1 is interrupt 37, so 37-32 is bit 5 in second ISER */
+    //*NVIC_ISER1 |= (1 << 5);
 
-    /* Enable reciever */
+    /* Enable reciever and transmitter */
     *USART1_CR1 |= USART_CR1_RE;
+    *USART1_CR1 |= USART_CR1_TE;
 
     /* Reset semaphore */
     usart_semaphore = 0;
@@ -115,19 +175,50 @@ void printx(char *s, uint8_t *x, int n){
 }
 
 void putc(char letter) {
-    /* Enable transmit */
-    *USART1_CR1 |= USART_CR1_TE;
+    char string[2];
+    string[0] = letter;
+    string[1] = '\0';
 
-    /* Wait for transmit to clear */
-    while (!(*USART1_SR & USART_SR_TC));
-
-    *USART1_DR = (uint8_t) letter;
+    puts(string);
 }
 
 void puts(char *s) {
     acquire(&usart_semaphore);
+
     while (*s) {
-        putc(*s++);
+        char *buf = usart_tx_buf;
+        uint8_t count = 0;
+
+        while (*s && count < USART_DMA_MSIZE) {
+            count += 1;
+            *buf++ = *s++;
+        }
+
+        /* Wait for DMA to be ready */
+        while (*DMA2_S7CR & DMA_SxCR_EN) {
+            if (task_switching) {
+                _svc(SVC_YIELD);
+            }
+        }
+
+        /* Number of bytes to write */
+        *DMA2_S7NDTR = (uint16_t) count;
+        /* Enable DMA */
+        *DMA2_S7CR |= DMA_SxCR_EN;
+
+        /* Wait for transfer to complete */
+        while (!(*DMA2_HISR & DMA_HISR_TCIF7)) {
+            if (task_switching) {
+                _svc(SVC_YIELD);
+            }
+        }
+
+        /* Clear transfer complete flag */
+        *DMA2_HIFCR |= DMA_HIFCR_CTCIF7;
+
+        /* Clear buffer */
+        memset32(usart_tx_buf, 0, (count % 4) ? (count/4 + 1) : (count/4));
     }
+
     release(&usart_semaphore);
 }
