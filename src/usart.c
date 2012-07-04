@@ -84,13 +84,12 @@ void init_usart(void) {
     /* Number of data items to be transferred */
     *DMA2_S2NDTR = (uint16_t) USART_DMA_MSIZE;
 
-    /* Priority */
-    *DMA2_S2CR |= DMA_SxCR_PL_HIGH;
-    *DMA2_S7CR |= DMA_SxCR_PL_HIGH;
+    /* FIFO setup */
+    *DMA2_S7FCR |= DMA_SxFCR_FTH_4 | DMA_SxFCR_DMDIS;
 
-    /* Data direct, memory increment, double buffer */
-    *DMA2_S2CR |= DMA_SxCR_DIR_PM | DMA_SxCR_MINC | DMA_SxCR_DBM;
-    *DMA2_S7CR |= DMA_SxCR_DIR_MP | DMA_SxCR_MINC;
+    /* Data direct, memory increment, high priority, memory burst, double buffer */
+    *DMA2_S2CR |= DMA_SxCR_DIR_PM | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_DBM;
+    *DMA2_S7CR |= DMA_SxCR_DIR_MP | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_MBURST_4;
 
     /* Enable DMAs */
     *DMA2_S2CR |= DMA_SxCR_EN;
