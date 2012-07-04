@@ -85,12 +85,12 @@ void *alloc(uint8_t order, struct buddy *buddy) {
     if (buddy->list[order] != NULL) {
         node = buddy->list[order];
         buddy->list[order] = buddy->list[order]->next;
-        return ((uint32_t *) node) + BUDDY_HEADER_SIZE;
+        return (void *) ((uint32_t) node) + BUDDY_HEADER_SIZE;
     }
     else {
-        uint8_t new_order = order+1;
+        uint8_t new_order = order;
 
-        while (node == NULL && new_order <= buddy->max_order) {
+        while (node == NULL && (new_order+1) <= buddy->max_order) {
             node = buddy->list[++new_order];
         }
 

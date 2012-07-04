@@ -73,7 +73,15 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_unti
     uint32_t *memory;
 
     task = (task_ctrl *) kmalloc(sizeof(task_ctrl));
+    if (task == NULL) {
+        return NULL;
+    }
+    
     memory = (uint32_t *) malloc(STKSIZE*4);
+    if (memory == NULL) {
+        kfree(task);
+        return NULL;
+    }
 
     task->stack_base = memory;
     task->stack_top  = memory + STKSIZE;
@@ -122,11 +130,16 @@ void end_task(void) {
             "bx lr\n");
 }
 
-void register_task(task_ctrl *task_ptr) {
+task_node *register_task(task_ctrl *task_ptr) {
     task_node *new_task = kmalloc(sizeof(task_node));
+    if (new_task == NULL) {
+        return NULL;
+    }
 
     new_task->task = task_ptr;
     append_task_to_klist(new_task);
+
+    return new_task;
 }
 
 void remove_task(task_node *node) {

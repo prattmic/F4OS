@@ -39,12 +39,49 @@ void led_tasks(void) {
     *GPIOD_MODER |= (1 << (13 * 2)) | (1 << (15 * 2));
 
     blue_led_task = create_task(&blue_led, 1, 0);
-    orange_led_task = create_task(&orange_led, 1, 0);
-    hello_print_task = create_task(&hello_print, 1, 0);
+    if (blue_led_task != NULL) {
+        task_node *reg_task;
 
-    register_task(blue_led_task);
-    register_task(orange_led_task);
-    register_task(hello_print_task);
+        reg_task = register_task(blue_led_task);
+        if (reg_task == NULL) {
+            free(blue_led_task->stack_base);
+            kfree(blue_led_task);
+            puts("Couldn't allocate blue_led_task, skipping.\r\n");
+        }
+    }
+    else {
+        puts("Couldn't allocate blue_led_task, skipping.\r\n");
+    }
+
+    orange_led_task = create_task(&orange_led, 1, 0);
+    if (orange_led_task != NULL) {
+        task_node *reg_task;
+
+        reg_task = register_task(orange_led_task);
+        if (reg_task == NULL) {
+            free(orange_led_task->stack_base);
+            kfree(orange_led_task);
+            puts("Couldn't allocate orange_led_task, skipping.\r\n");
+        }
+    }
+    else {
+        puts("Couldn't allocate orange_led_task, skipping.\r\n");
+    }
+
+    hello_print_task = create_task(&hello_print, 1, 0);
+    if (hello_print_task != NULL) {
+        task_node *reg_task;
+
+        reg_task = register_task(hello_print_task);
+        if (reg_task == NULL) {
+            free(hello_print_task->stack_base);
+            kfree(hello_print_task);
+            puts("Couldn't allocate hello_print_task, skipping.\r\n");
+        }
+    }
+    else {
+        puts("Couldn't allocate hello_led_task, skipping.\r\n");
+    }
 
     systick_init();
     start_task_switching();
