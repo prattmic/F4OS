@@ -91,12 +91,22 @@ void svc_handler(uint32_t *svc_args) {
         case SVC_END_TASK: {
             task_node *task_to_free = k_curr_task;
 
+            __asm__("push {lr}");
             remove_task(k_curr_task);
+            __asm__("pop {lr}");
+            __asm__("push {lr}");
             switch_task();
+            __asm__("pop {lr}");
+            __asm__("push {lr}");
             free_task(task_to_free);
+            __asm__("pop {lr}");
+            __asm__("push {lr}");
             enable_psp(k_curr_task->task->stack_top);
+            __asm__("pop {lr}");
 
-            restore_context();
+            __asm__("push {lr}\r\n"
+                    "b  restore_context\r\n");  /* Won't return */
+            __asm__("pop {lr}");
             break;
         }
         default:
