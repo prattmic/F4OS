@@ -202,12 +202,12 @@ void puts(char *s) {
 }
 
 void usart_echo(void) {
-    char buf[5];
+    char buf[17];
     uint16_t read = 0;
     uint16_t dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
     char *usart_buf = usart_rx_buf;
 
-    buf[4] = '\0';
+    buf[16] = '\0';
 
     /* Clear completion flag */
     *DMA2_LIFCR |= DMA_LIFCR_CTCIF2;
@@ -216,7 +216,7 @@ void usart_echo(void) {
         dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
         while ((read < dma_read) && !(*DMA2_LISR & DMA_LISR_TCIF2)) {
             uint8_t i = 0;
-            uint8_t j = ((dma_read - read) > 4) ? 4 : (dma_read - read);
+            uint8_t j = ((dma_read - read) > 16) ? 16 : (dma_read - read);
        
             for (i = 0; i < j; i++) {
                 if (usart_buf >= (usart_rx_buf + USART_DMA_MSIZE)) {
@@ -240,7 +240,7 @@ void usart_echo(void) {
 
             /* Read to end of buffer */
             while (read < USART_DMA_MSIZE) {
-                for (uint8_t i = 0; i < 4; i++) {
+                for (uint8_t i = 0; i < 16; i++) {
                     if (usart_buf >= (usart_rx_buf + USART_DMA_MSIZE)) {
                         buf[i] = '\0';
                     }
