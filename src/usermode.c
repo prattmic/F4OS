@@ -34,6 +34,7 @@ void led_tasks(void) {
     task_ctrl *blue_led_task;
     task_ctrl *orange_led_task;
     task_ctrl *hello_print_task;
+    task_ctrl *usart_echo_task;
 
     /* Enable blue and orange LEDs */
     *GPIOD_MODER |= (1 << (13 * 2)) | (1 << (15 * 2));
@@ -81,6 +82,21 @@ void led_tasks(void) {
     }
     else {
         puts("Couldn't allocate hello_led_task, skipping.\r\n");
+    }
+
+    usart_echo_task = create_task(&usart_echo, 1, 0);
+    if (usart_echo_task != NULL) {
+        task_node *reg_task;
+
+        reg_task = register_task(usart_echo_task);
+        if (reg_task == NULL) {
+            free(usart_echo_task->stack_base);
+            kfree(usart_echo_task);
+            puts("Couldn't allocate usart_echo_task, skipping.\r\n");
+        }
+    }
+    else {
+        puts("Couldn't allocate usart_echo_task, skipping.\r\n");
     }
 
     systick_init();

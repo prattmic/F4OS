@@ -300,7 +300,9 @@ extern const uint32_t _ekernel;
 #define USART_CR3_DMAT_EN               (uint32_t) (1 << 7)                                     /* USART DMA Transmit Enable */
 
 /* DMA */
+#define DMA_LISR_TCIF2                  (uint32_t) (1 << 21)                                    /* DMA stream 2 transfer complete flag */
 #define DMA_HISR_TCIF7                  (uint32_t) (1 << 27)                                    /* DMA stream 7 transfer complete flag */
+#define DMA_LIFCR_CTCIF2                (uint32_t) (1 << 21)                                    /* DMA clear stream 2 transfer complete flag */
 #define DMA_HIFCR_CTCIF7                (uint32_t) (1 << 27)                                    /* DMA clear stream 7 transfer complete flag */
 
 #define DMA_SxCR_EN                     (uint32_t) (1 << 0)                                     /* DMA stream enable */
@@ -339,10 +341,10 @@ extern const uint32_t _ekernel;
 #define DMA_SxCR_MBURST_16              (uint32_t) (3 << 23)                                    /* DMA stream memory burst of 16 beats */
 #define DMA_SxCR_CHSEL(x)               (uint32_t) (x << 25)                                    /* DMA stream channel select */
 
-#define DMA_SxFCR_FTH_1                  (uint32_t) (0 << 0)                                     /* DMA stream FIFO threshold 1/4 */
-#define DMA_SxFCR_FTH_2                  (uint32_t) (1 << 0)                                     /* DMA stream FIFO threshold 1/2 */
-#define DMA_SxFCR_FTH_3                  (uint32_t) (2 << 0)                                     /* DMA stream FIFO threshold 3/4 */
-#define DMA_SxFCR_FTH_4                  (uint32_t) (3 << 0)                                     /* DMA stream FIFO threshold full*/
+#define DMA_SxFCR_FTH_1                 (uint32_t) (0 << 0)                                     /* DMA stream FIFO threshold 1/4 */
+#define DMA_SxFCR_FTH_2                 (uint32_t) (1 << 0)                                     /* DMA stream FIFO threshold 1/2 */
+#define DMA_SxFCR_FTH_3                 (uint32_t) (2 << 0)                                     /* DMA stream FIFO threshold 3/4 */
+#define DMA_SxFCR_FTH_4                 (uint32_t) (3 << 0)                                     /* DMA stream FIFO threshold full*/
 #define DMA_SxFCR_DMDIS                 (uint32_t) (1 << 2)                                     /* DMA stream direct mode disable */
 #define DMA_SxFCR_FS                    (uint32_t) (7 << 3)                                     /* DMA stream FIFO status */
 #define DMA_SxFCR_FEIE                  (uint32_t) (1 << 7)                                     /* DMA stream FIFO error interrupt enable */

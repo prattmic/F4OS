@@ -61,7 +61,7 @@
 .word   hang                /* 34 ... */
 .word   hang                /* 35 ... */
 .word   hang                /* 36 ... */
-.word   usart1_handler      /* 37 USART1 Global Interrupt */
+.word   hang                /* 37 USART1 Global Interrupt */
 .word   hang                /* 38 ... */
 
 /* Bootloader */

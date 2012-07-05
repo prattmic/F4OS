@@ -65,19 +65,16 @@ void init_usart(void) {
     *DMA2_S7PAR = (uint32_t) USART1_DR;    /* TX */
 
     /* Allocate buffer memory */
-    usart_rx_buf[0] = (char *) malloc(USART_DMA_MSIZE);
-    usart_rx_buf[1] = (char *) malloc(USART_DMA_MSIZE);
-    usart_tx_buf    = (char *) malloc(USART_DMA_MSIZE);
-    if ((usart_rx_buf[0] == NULL) || (usart_rx_buf[1] == NULL) || (usart_tx_buf == NULL)) {
+    usart_rx_buf = (char *) malloc(USART_DMA_MSIZE);
+    usart_tx_buf = (char *) malloc(USART_DMA_MSIZE);
+    if ((usart_rx_buf == NULL) || (usart_tx_buf == NULL)) {
         panic();
     }
     else {
         /* Clear buffers */
-        memset32(usart_rx_buf[0], 0, USART_DMA_MSIZE);
-        memset32(usart_rx_buf[1], 0, USART_DMA_MSIZE);
+        memset32(usart_rx_buf, 0, USART_DMA_MSIZE);
         memset32(usart_tx_buf, 0, USART_DMA_MSIZE);
-        *DMA2_S2M0AR = (uint32_t) usart_rx_buf[0];
-        *DMA2_S2M1AR = (uint32_t) usart_rx_buf[1];
+        *DMA2_S2M0AR = (uint32_t) usart_rx_buf;
         *DMA2_S7M0AR = (uint32_t) usart_tx_buf;
     }
 
@@ -87,8 +84,8 @@ void init_usart(void) {
     /* FIFO setup */
     *DMA2_S7FCR |= DMA_SxFCR_FTH_4 | DMA_SxFCR_DMDIS;
 
-    /* Data direct, memory increment, high priority, memory burst, double buffer */
-    *DMA2_S2CR |= DMA_SxCR_DIR_PM | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_DBM;
+    /* Data direct, memory increment, high priority, memory burst */
+    *DMA2_S2CR |= DMA_SxCR_DIR_PM | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_CIRC;
     *DMA2_S7CR |= DMA_SxCR_DIR_MP | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_MBURST_4;
 
     /* Enable DMAs */
@@ -98,11 +95,6 @@ void init_usart(void) {
 
     /* Set baud rate */
     *USART1_BRR = usart_baud(115200);
-
-    ///* Enable recieve interrupt */
-    //*USART1_CR1 |= USART_CR1_RXNEIE;
-    ///* Enable in NVIC.  USART1 is interrupt 37, so 37-32 is bit 5 in second ISER */
-    //*NVIC_ISER1 |= (1 << 5);
 
     /* Enable reciever and transmitter */
     *USART1_CR1 |= USART_CR1_RE;
@@ -133,19 +125,6 @@ uint16_t usart_baud(uint32_t baud) {
     }
 
     return (mantissa << 4) | int_fraction;
-}
-
-/* Handle USART1 Global Interrupt */
-void usart1_handler(void) {
-    /* Receive interrupt */
-    if (*USART1_SR & USART_SR_RXNE) {
-        putc(*USART1_DR);       /* Echo character */
-    }
-    else {
-        /* Something bad happened, disable interrupt to save the rest of system. */
-        *NVIC_ICER1 |= (1 << 5);
-        puts("\r\n----USART read error, dropping to write-only mode.----\r\n");
-    }
 }
 
 #define PS 256
@@ -220,4 +199,62 @@ void puts(char *s) {
     }
 
     release(&usart_semaphore);
+}
+
+void usart_echo(void) {
+    char buf[5];
+    uint16_t read = 0;
+    uint16_t dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
+    char *usart_buf = usart_rx_buf;
+
+    buf[4] = '\0';
+
+    /* Clear completion flag */
+    *DMA2_LIFCR |= DMA_LIFCR_CTCIF2;
+
+    while (1) {
+        dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
+        while ((read < dma_read) && !(*DMA2_LISR & DMA_LISR_TCIF2)) {
+            uint8_t i = 0;
+            uint8_t j = ((dma_read - read) > 4) ? 4 : (dma_read - read);
+       
+            for (i = 0; i < j; i++) {
+                if (usart_buf >= (usart_rx_buf + USART_DMA_MSIZE)) {
+                    buf[i] = '\0';
+                }
+                else {
+                    buf[i] = *usart_buf++;
+                }
+
+                read++;
+            }
+            buf[i] = '\0';
+
+            puts(buf);
+            dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
+        }
+
+        /* Buffer has wrapped around */
+        while (*DMA2_LISR & DMA_LISR_TCIF2) {
+            *DMA2_LIFCR |= DMA_LIFCR_CTCIF2;
+
+            /* Read to end of buffer */
+            while (read < USART_DMA_MSIZE) {
+                for (uint8_t i = 0; i < 4; i++) {
+                    if (usart_buf >= (usart_rx_buf + USART_DMA_MSIZE)) {
+                        buf[i] = '\0';
+                    }
+                    else {
+                        buf[i] = *usart_buf++;
+                    }
+
+                    read++;
+                }
+                puts(buf);
+            }
+
+            read = 0;
+            usart_buf = usart_rx_buf;
+        }
+    }
 }

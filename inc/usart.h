@@ -6,8 +6,9 @@ void usart1_handler(void) __attribute__((section(".kernel")));
 void printx(char *s, uint8_t *x, int n) __attribute__((section(".kernel")));
 void putc(char letter) __attribute__((section(".kernel")));
 void puts(char *s) __attribute__((section(".kernel")));
+void usart_echo(void) __attribute__((section(".kernel")));
 
 volatile uint8_t usart_semaphore;
 
-char *usart_rx_buf[2];
+char *usart_rx_buf;
 char *usart_tx_buf;
