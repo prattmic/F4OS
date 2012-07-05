@@ -28,7 +28,7 @@ int main(void) {
 
     puts("\r\n\r\n\r\nWelcome to...\r\n");
 
-    puts("                                                     \r\n"
+    puts("\r\n"
          "88888888888      ,d8      ,ad8888ba,     ad88888ba   \r\n"
          "88             ,d888     d8\"\'    `\"8b   d8\"     \"8b  \r\n"
          "88           ,d8\" 88    d8\'        `8b  Y8,          \r\n"
@@ -38,7 +38,7 @@ int main(void) {
          "88                88     Y8a.    .a8P   Y8a     a8P  \r\n"
          "88                88      `\"Y8888Y\"\'     \"Y88888P\"   \r\n"
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
-         "                                                     \r\n");
+         "\r\n");
 
     led_tasks();
 

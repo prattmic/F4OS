@@ -165,7 +165,7 @@ void puts(char *s) {
 
     while (*s) {
         char *buf = usart_tx_buf;
-        uint8_t count = 0;
+        uint16_t count = 0;
 
         while (*s && count < USART_DMA_MSIZE) {
             count += 1;

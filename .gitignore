@@ -6,5 +6,6 @@
 *.hex
 *.swp
 *.fuse*
+*.pyc
 tags
 core

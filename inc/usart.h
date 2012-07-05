@@ -1,4 +1,4 @@
-#define USART_DMA_MSIZE     (256-sizeof(uint32_t))      /* Since malloc headers take up some space, we want to request the max space we can fit in one block */
+#define USART_DMA_MSIZE     (512-sizeof(uint32_t))      /* Since malloc headers take up some space, we want to request the max space we can fit in one block */
 
 void init_usart(void) __attribute__((section(".kernel")));
 uint16_t usart_baud(uint32_t baud) __attribute__((section(".kernel")));
