@@ -22,7 +22,9 @@ extern const uint32_t _ekernel;
 
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
 #define SPI2_BASE                       (APB1PERIPH_BASE + 0x3800)                              /* SPI2 base address */
+#define SPI1_BASE                       (APB2PERIPH_BASE + 0x3000)                              /* SPI1 base address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                              /* USART1 Base Address */
+#define GPIOA_BASE                      (AHB1PERIPH_BASE + 0x0000)                              /* GPIO Port A base address */
 #define GPIOB_BASE                      (AHB1PERIPH_BASE + 0x0400)                              /* GPIO Port B base address */
 #define GPIOD_BASE                      (AHB1PERIPH_BASE + 0x0C00)                              /* GPIO Port D base address */
 #define RCC_BASE                        (AHB1PERIPH_BASE + 0x3800)                              /* Reset and Clock Control base address */
@@ -37,6 +39,14 @@ extern const uint32_t _ekernel;
 #define SCB_BASE                        (SCS_BASE + 0x0D00)                                     /* System Control Block Base Address */
 #define MPU_BASE                        (SCB_BASE + 0x0090)                                     /* MPU Block Base Address */
 #define FPU_BASE                        (SCB_BASE + 0x0230)                                     /* FPU Block Base Address */
+
+/* GPIO Port A (GPIOA) */
+#define GPIOA_MODER                     (volatile uint32_t *) (GPIOA_BASE + 0x00)               /* Port A mode register */
+#define GPIOA_OTYPER                    (volatile uint32_t *) (GPIOA_BASE + 0x04)               /* Port A output type register */
+#define GPIOA_OSPEEDR                   (volatile uint32_t *) (GPIOA_BASE + 0x08)               /* Port A output speed register */
+#define GPIOA_PUPDR                     (volatile uint32_t *) (GPIOA_BASE + 0x0C)               /* Port A pull up/down register */
+#define GPIOA_AFRL                      (volatile uint32_t *) (GPIOA_BASE + 0x20)               /* Port A alternate function low register */
+#define GPIOA_AFRH                      (volatile uint32_t *) (GPIOA_BASE + 0x24)               /* Port A alternate function high register */
 
 /* GPIO Port B (GPIOB) */
 #define GPIOB_MODER                     (volatile uint32_t *) (GPIOB_BASE + 0x00)               /* Port B mode register */
@@ -58,6 +68,17 @@ extern const uint32_t _ekernel;
 #define USART1_CR2                      (volatile uint32_t *) (USART1_BASE + 0x10)              /* USART1 control register 2 */
 #define USART1_CR3                      (volatile uint32_t *) (USART1_BASE + 0x14)              /* USART1 control register 3 */
 #define USART1_GTPR                     (volatile uint32_t *) (USART1_BASE + 0x18)              /* USART1 gaurd time and prescale register */
+
+/* SPI1 */
+#define SPI1_CR1                        (volatile uint32_t *) (SPI1_BASE + 0x00)                /* SPI1 control register 1 */
+#define SPI1_CR2                        (volatile uint32_t *) (SPI1_BASE + 0x04)                /* SPI1 control register 2 */
+#define SPI1_SR                         (volatile uint32_t *) (SPI1_BASE + 0x08)                /* SPI1 status register */
+#define SPI1_DR                         (volatile uint32_t *) (SPI1_BASE + 0x0c)                /* SPI1 data register */
+#define SPI1_CRCPR                      (volatile uint32_t *) (SPI1_BASE + 0x10)                /* SPI1 CRC polynomial register */
+#define SPI1_RXCRCR                     (volatile uint32_t *) (SPI1_BASE + 0x14)                /* SPI1 RX CRC register */
+#define SPI1_TXCRCR                     (volatile uint32_t *) (SPI1_BASE + 0x18)                /* SPI1 TX CRC register */
+#define SPI1_I2SCFGR                    (volatile uint32_t *) (SPI1_BASE + 0x1c)                /* SPI1 I2C configuration register */
+#define SPI1_I2SPR                      (volatile uint32_t *) (SPI1_BASE + 0x20)                /* SPI1 I2C prescaler register */
 
 /* SPI2 */
 #define SPI2_CR1                        (volatile uint32_t *) (SPI2_BASE + 0x00)                /* SPI2 control register 1 */
@@ -276,10 +297,20 @@ extern const uint32_t _ekernel;
 
 #define RCC_AHB1RSTR_DMA1RST            (uint32_t) (1 << 21)                                    /* DMA1 reset */
 #define RCC_AHB1RSTR_DMA2RST            (uint32_t) (1 << 22)                                    /* DMA2 reset */
+#define RCC_AHB1ENR_GPIOAEN             (uint32_t) (1 << 0)                                     /* GPIOA clock enable */
+#define RCC_AHB1ENR_GPIOBEN             (uint32_t) (1 << 1)                                     /* GPIOB clock enable */
+#define RCC_AHB1ENR_GPIOCEN             (uint32_t) (1 << 2)                                     /* GPIOC clock enable */
+#define RCC_AHB1ENR_GPIODEN             (uint32_t) (1 << 3)                                     /* GPIOD clock enable */
+#define RCC_AHB1ENR_GPIOEEN             (uint32_t) (1 << 4)                                     /* GPIOE clock enable */
+#define RCC_AHB1ENR_GPIOFEN             (uint32_t) (1 << 5)                                     /* GPIOF clock enable */
+#define RCC_AHB1ENR_GPIOGEN             (uint32_t) (1 << 6)                                     /* GPIOG clock enable */
+#define RCC_AHB1ENR_GPIOHEN             (uint32_t) (1 << 7)                                     /* GPIOH clock enable */
+#define RCC_AHB1ENR_GPIOIEN             (uint32_t) (1 << 8)                                     /* GPIOI clock enable */
 #define RCC_AHB1ENR_DMA1EN              (uint32_t) (1 << 21)                                    /* DMA1 clock enable */
 #define RCC_AHB1ENR_DMA2EN              (uint32_t) (1 << 22)                                    /* DMA2 clock enable */
 #define RCC_APB1ENR_SPI2EN              (uint32_t) (0x00004000)                                 /* SPI2 clock enable */
 #define RCC_APB1ENR_PWREN               (uint32_t) (0x10000000)                                 /* Power Interface Clock Enable */
+#define RCC_APB2ENR_SPI1EN              (uint32_t) (1 << 12)                                    /* SPI1 Enable */
 
 #define FLASH_ACR_ICEN                  (uint32_t) (0x00000200)                                 /* Instruction Cache Enable */
 #define FLASH_ACR_DCEN                  (uint32_t) (0x00000400)                                 /* Data Cache Enable */
@@ -288,6 +319,25 @@ extern const uint32_t _ekernel;
 /* GPIO */
 #define GPIO_MODER_ALT                  (uint32_t) (0x2)                                        /* Sets GPIO pin to alternative function mode */
 #define GPIO_AF_USART13                 (uint32_t) (0x7)                                        /* GPIO USART1-3 mode */
+#define GPIO_AF_SPI12                   (uint32_t) (0x5)                                        /* GPIO SPI1-2 mode */
+
+/* SPI */
+#define SPI_CR1_CPHA                    (uint32_t) (1 << 0)                                     /* SPI clock phase */
+#define SPI_CR1_CPOL                    (uint32_t) (1 << 1)                                     /* SPI clock polarity */
+#define SPI_CR1_MSTR                    (uint32_t) (1 << 2)                                     /* SPI master selection */
+#define SPI_CR1_BR_2                    (uint32_t) (0 << 3)                                     /* SPI baud rate = fPCLK/2 */
+#define SPI_CR1_BR_4                    (uint32_t) (1 << 3)                                     /* SPI baud rate = fPCLK/4 */
+#define SPI_CR1_BR_8                    (uint32_t) (2 << 3)                                     /* SPI baud rate = fPCLK/8 */
+#define SPI_CR1_BR_16                   (uint32_t) (3 << 3)                                     /* SPI baud rate = fPCLK/16 */
+#define SPI_CR1_BR_32                   (uint32_t) (4 << 3)                                     /* SPI baud rate = fPCLK/32 */
+#define SPI_CR1_BR_64                   (uint32_t) (5 << 3)                                     /* SPI baud rate = fPCLK/64 */
+#define SPI_CR1_BR_128                  (uint32_t) (6 << 3)                                     /* SPI baud rate = fPCLK/128 */
+#define SPI_CR1_BR_256                  (uint32_t) (7 << 3)                                     /* SPI baud rate = fPCLK/256 */
+#define SPI_CR1_SPE                     (uint32_t) (1 << 6)                                     /* SPI enable */
+#define SPI_CR1_LSBFIRST                (uint32_t) (1 << 7)                                     /* SPI LSB transmitted first */
+#define SPI_CR1_SSI                     (uint32_t) (1 << 8)                                     /* SPI internal slave select */
+#define SPI_CR1_SSM                     (uint32_t) (1 << 9)                                     /* SPI software slave management */
+#define SPI_CR1_DFF                     (uint32_t) (1 << 11)                                     /* SPI data frame format (0 = 8bit, 1 = 16bit) */
 
 /* USART */
 #define USART_SR_TC                     (uint32_t) (1 << 6)                                     /* USART Transmission Complete */

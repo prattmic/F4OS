@@ -11,6 +11,7 @@
 #include "buddy.h"
 #include "usermode.h"
 #include "usart.h"
+#include "spi.h"
 
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
@@ -25,6 +26,7 @@ int main(void) {
     //mpu_setup();
     init_heap();
     init_usart();
+    init_spi();
 
     puts("\r\n\r\n\r\nWelcome to...\r\n");
 
