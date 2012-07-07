@@ -5,6 +5,7 @@
 #include "systick.h"
 #include "usart.h"
 #include "buddy.h"
+#include "interrupt.h"
 #include "usermode.h"
 
 void unprivileged_test(void) {
@@ -31,6 +32,7 @@ void toggle_led_delay(void) {
 }
 
 void led_tasks(void) {
+    task_ctrl *kernel_action_task;
     task_ctrl *blue_led_task;
     task_ctrl *orange_led_task;
     task_ctrl *hello_print_task;
@@ -38,6 +40,23 @@ void led_tasks(void) {
 
     /* Enable blue and orange LEDs */
     *GPIOD_MODER |= (1 << (13 * 2)) | (1 << (15 * 2));
+
+    kernel_action_task = create_task(&kernel_task, 1, 0);
+    if (kernel_action_task != NULL) {
+        task_node *reg_task;
+
+        reg_task = register_task(kernel_action_task);
+        if (reg_task == NULL) {
+            free(kernel_action_task->stack_base);
+            kfree(kernel_action_task);
+            puts("Couldn't allocate kernel_action_task, panicing.\r\n");
+            panic();
+        }
+    }
+    else {
+        puts("Couldn't allocate kernel_action_task, panicing.\r\n");
+        panic();
+    }
 
     blue_led_task = create_task(&blue_led, 1, 0);
     if (blue_led_task != NULL) {

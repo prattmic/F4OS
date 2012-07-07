@@ -21,10 +21,12 @@ typedef struct k_task_struct {
 } task_ctrl;
 
 task_node *k_curr_task;
+extern task_node * volatile task_to_free;
 extern uint8_t task_switching;
 
 void idle_task(void);
 void end_task(void) __attribute__((section(".kernel"),naked));;
+void kernel_task(void) __attribute__((section(".kernel")));
 void start_task_switching(void) __attribute__((section(".kernel")));
 void switch_task(void) __attribute__((section(".kernel")));
 task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) __attribute__((section(".kernel")));

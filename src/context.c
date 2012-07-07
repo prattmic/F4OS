@@ -68,13 +68,14 @@ void svc_handler(uint32_t *svc_args) {
      * r0, r1, r2, r3, r12, r14, the return address and xPSR
      * First argument (r0) is svc_args[0] */
     svc_number = ((char *)svc_args[6])[-2];
-    return_address = svc_args[6];
 
     switch (svc_number) {
         case SVC_RAISE_PRIV: {
             /* Raise Privilege, but only if request came from the kernel */
             /* DEPRECATED: All code executed until _svc returns is privileged,
              * so raising privileges shouldn't ever be necessary. */
+            return_address = svc_args[6];
+
             if (return_address >= (uint32_t) &_skernel && return_address < (uint32_t) &_ekernel) {
                 raise_privilege();
             }
@@ -89,7 +90,20 @@ void svc_handler(uint32_t *svc_args) {
             break;
         }
         case SVC_END_TASK: {
-            task_node *task_to_free = k_curr_task;
+            task_node *node = task_to_free;
+
+            /* k_curr_task->next set to NULL after task switch */
+            if (node != NULL) {
+                while (node->next != NULL) {
+                    node = node->next;
+                }
+                node->next = k_curr_task;
+                node = node->next;
+            }
+            else {
+                task_to_free = k_curr_task;
+                node = task_to_free;
+            }
 
             __asm__("push {lr}");
             remove_task(k_curr_task);
@@ -98,7 +112,7 @@ void svc_handler(uint32_t *svc_args) {
             switch_task();
             __asm__("pop {lr}");
             __asm__("push {lr}");
-            free_task(task_to_free);
+            node->next = NULL;
             __asm__("pop {lr}");
             __asm__("push {lr}");
             enable_psp(k_curr_task->task->stack_top);

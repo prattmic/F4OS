@@ -4,6 +4,7 @@
 #include "context.h"
 #include "buddy.h"
 #include "interrupt.h"
+#include "usart.h"
 #include "task.h"
 
 task_ctrl k_idle_task;
@@ -12,6 +13,7 @@ task_node sys_idle_task;
 task_node_list task_list;
 task_node_list task_queue;
 
+task_node * volatile task_to_free = NULL;
 uint8_t task_switching = 0;
 
 void init_kernel(void) {
@@ -19,6 +21,22 @@ void init_kernel(void) {
     (sys_idle_task.task)->fptr =        &idle_task;
     (sys_idle_task.task)->stack_base =  IDLE_TASK_BASE;
     (sys_idle_task.task)->stack_top =   IDLE_TASK_BASE;
+}
+
+void kernel_task(void) {
+    /* Does cleanup that can't be done from outside a task (ie. in an interrupt) */
+
+    while (1) {
+        while (task_to_free != NULL) {
+            task_node *node = task_to_free;
+
+            task_to_free = task_to_free->next;
+
+            free_task(node);
+        }
+
+        _svc(SVC_YIELD);
+    }
 }
 
 void start_task_switching(void) {
