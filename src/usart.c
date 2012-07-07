@@ -158,11 +158,41 @@ void printf(char *fmt, ...) {
 
     va_start(ap, fmt);
 
-    uint8_t i = va_arg(ap, uint8_t);
-    uint32_t j = va_arg(ap, uint32_t);
+    while (*fmt) {
+        if (*fmt == '%') {
+            switch (*(++fmt)) {
+                case 'x': {
+                    /* Hex */
+                    uint32_t hex = va_arg(ap, uint32_t);
+                    char buf[9];
+                    buf[8] = '\0';
 
-    printx("\r\n0x%\r\n", &i, 1);
-    printx("\r\n0x%\r\n", (uint8_t*) &j, 4);
+                    uint8_t i = 0;
+                    for(int8_t j = 7; j >= 0; j--){
+                        buf[i++] = ((hex>>(4*j))&0xf)[
+                            "0123456789ABCDEF"
+                        ];
+                    }
+
+                    puts(buf);
+                    break;
+                }
+                case '%': {
+                    /* Just print a % */
+                    putc('%');
+                }
+                default: {
+                    putc('%');
+                    putc(*fmt);
+                }
+            }
+
+            fmt++;
+        }
+        else {
+            putc(*fmt++);
+        }
+    }
 
     va_end(ap);
 }
