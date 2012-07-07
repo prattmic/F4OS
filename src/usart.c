@@ -6,6 +6,7 @@
 #include "task.h"
 #include "mem.h"
 #include "buddy.h"
+#include "stdarg.h"
 #include "usart.h"
 
 void init_usart(void) {
@@ -150,6 +151,20 @@ void printx(char *s, uint8_t *x, int n){
         s++;
     }
     puts(buf);
+}
+
+void printf(char *fmt, ...) {
+    va_list ap;
+
+    va_start(ap, fmt);
+
+    uint8_t i = va_arg(ap, uint8_t);
+    uint32_t j = va_arg(ap, uint32_t);
+
+    printx("\r\n0x%\r\n", &i, 1);
+    printx("\r\n0x%\r\n", (uint8_t*) &j, 4);
+
+    va_end(ap);
 }
 
 void putc(char letter) {

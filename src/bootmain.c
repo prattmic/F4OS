@@ -28,6 +28,8 @@ int main(void) {
     init_usart();
     init_spi();
 
+    printf("Hello", 5, 0xDEADBEEF);
+
     puts("\r\n\r\n\r\nWelcome to...\r\n");
 
     puts("\r\n"
