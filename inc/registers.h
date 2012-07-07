@@ -27,6 +27,7 @@ extern const uint32_t _ekernel;
 #define GPIOA_BASE                      (AHB1PERIPH_BASE + 0x0000)                              /* GPIO Port A base address */
 #define GPIOB_BASE                      (AHB1PERIPH_BASE + 0x0400)                              /* GPIO Port B base address */
 #define GPIOD_BASE                      (AHB1PERIPH_BASE + 0x0C00)                              /* GPIO Port D base address */
+#define GPIOE_BASE                      (AHB1PERIPH_BASE + 0x1000)                              /* GPIO Port E base address */
 #define RCC_BASE                        (AHB1PERIPH_BASE + 0x3800)                              /* Reset and Clock Control base address */
 #define FLASH_R_BASE                    (AHB1PERIPH_BASE + 0x3C00)                              /* Flash registers base address */
 #define DMA1_BASE                       (AHB1PERIPH_BASE + 0x6000)                              /* DMA1 base address */
@@ -55,6 +56,15 @@ extern const uint32_t _ekernel;
 #define GPIOB_PUPDR                     (volatile uint32_t *) (GPIOB_BASE + 0x0C)               /* Port B pull up/down register */
 #define GPIOB_AFRL                      (volatile uint32_t *) (GPIOB_BASE + 0x20)               /* Port B alternate function low register */
 #define GPIOB_AFRH                      (volatile uint32_t *) (GPIOB_BASE + 0x24)               /* Port B alternate function high register */
+
+/* GPIO Port E (GPIOE) */
+#define GPIOE_MODER                     (volatile uint32_t *) (GPIOE_BASE + 0x00)               /* Port E mode register */
+#define GPIOE_OTYPER                    (volatile uint32_t *) (GPIOE_BASE + 0x04)               /* Port E output type register */
+#define GPIOE_OSPEEDR                   (volatile uint32_t *) (GPIOE_BASE + 0x08)               /* Port E output speed register */
+#define GPIOE_PUPDR                     (volatile uint32_t *) (GPIOE_BASE + 0x0C)               /* Port E pull up/down register */
+#define GPIOE_ODR                       (volatile uint32_t *) (GPIOE_BASE + 0x14)               /* Port E output data register */
+#define GPIOE_AFRL                      (volatile uint32_t *) (GPIOE_BASE + 0x20)               /* Port E alternate function low register */
+#define GPIOE_AFRH                      (volatile uint32_t *) (GPIOE_BASE + 0x24)               /* Port E alternate function high register */
 
 /* GPIO Port D (GPIOD) */
 #define GPIOD_MODER                     (volatile uint32_t *) (GPIOD_BASE + 0x00)               /* Port D mode register */
@@ -317,6 +327,7 @@ extern const uint32_t _ekernel;
 #define FLASH_ACR_LATENCY_5WS           (uint32_t) (0x00000005)                                 /* 5 Wait States Latency */
 
 /* GPIO */
+#define GPIO_MODER_OUT                  (uint32_t) (0x1)                                        /* Sets GPIO pin to output mode */
 #define GPIO_MODER_ALT                  (uint32_t) (0x2)                                        /* Sets GPIO pin to alternative function mode */
 #define GPIO_AF_USART13                 (uint32_t) (0x7)                                        /* GPIO USART1-3 mode */
 #define GPIO_AF_SPI12                   (uint32_t) (0x5)                                        /* GPIO SPI1-2 mode */

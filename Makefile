@@ -18,7 +18,7 @@ OBJCOPY=arm-none-eabi-objcopy
 CFLAGS  = -g3 -Wall --std=gnu99 -I./inc/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
-CFLAGS += -O2
+CFLAGS += -O0
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=

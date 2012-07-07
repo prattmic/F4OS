@@ -1,7 +1,7 @@
 import gdb
 
 class Print_Buddy(gdb.Command):
-    """Prints out an F4OS buddy is a pretty format"""
+    """Prints out an F4OS buddy in a pretty format"""
 
     def __init__(self):
         super(Print_Buddy, self).__init__("print-buddy", gdb.COMMAND_DATA, gdb.COMPLETE_SYMBOL)
