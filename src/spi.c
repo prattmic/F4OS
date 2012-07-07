@@ -54,3 +54,70 @@ void init_spi(void) {
     /* Set high */
     spi_cs_high();
 }
+
+uint8_t spi_write(uint8_t addr, uint8_t data) {
+    /* Data MUST be read after each TX */
+    volatile uint8_t read;
+
+    /* Clear overrun by reading old data */
+    if (*SPI1_SR & SPI_SR_OVR) {
+        read = *SPI1_DR;
+        read = *SPI1_SR;
+    }
+
+    spi_cs_low();
+
+    while (!(*SPI1_SR & SPI_SR_TXNE));
+    *SPI1_DR = addr;
+
+    while (!(*SPI1_SR & SPI_SR_RXNE));
+
+    read = *SPI1_DR;
+
+    while (!(*SPI1_SR & SPI_SR_TXNE));
+    *SPI1_DR = data;
+
+    while (!(*SPI1_SR & SPI_SR_RXNE));
+
+    spi_cs_high();
+
+    read = *SPI1_DR;
+
+    return read;
+}
+
+uint8_t spi_read(uint8_t addr) {
+    /* Data MUST be read after each TX */
+    volatile uint8_t read;
+
+    /* Clear overrun by reading old data */
+    if (*SPI1_SR & SPI_SR_OVR) {
+        read = *SPI1_DR;
+        read = *SPI1_SR;
+    }
+
+    spi_cs_low();
+
+    while (!(*SPI1_SR & SPI_SR_TXNE));
+
+    *SPI1_DR = (addr | SPI_READ);
+
+    while (!(*SPI1_SR & SPI_SR_RXNE));
+    read = *SPI1_DR;
+
+    while (!(*SPI1_SR & SPI_SR_TXNE));
+    *SPI1_DR = 0x00;
+
+    while (!(*SPI1_SR & SPI_SR_RXNE));
+
+    spi_cs_high();
+
+    read = *SPI1_DR;
+
+    return read;
+}
+
+void accel_setup() {
+    /* Run this setup, then spi_read() addresses, 0x29 and 0x2A are the X axis */
+    spi_write(0x20, 0x47);
+}

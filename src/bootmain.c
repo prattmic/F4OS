@@ -28,50 +28,6 @@ int main(void) {
     init_usart();
     init_spi();
 
-    puts("Hi\r\n");
-
-    uint16_t reg = 0x002D;
-    while (1) {
-        uint8_t test1;
-        uint8_t test2;
-
-        spi_cs_low();
-        while (!(*SPI1_SR & (1 << 1)));
-        //*SPI1_DR = 0x4780;
-        *SPI1_DR = 0x20;
-        while (!(*SPI1_SR & (1 << 0)));
-        //float i = 10;
-        //while (i--);
-        //__asm__("dsb");
-        test1 = (uint8_t) *SPI1_DR;
-
-
-        while (!(*SPI1_SR & (1 << 1)));
-        *SPI1_DR = 0x47;
-        while (!(*SPI1_SR & (1 << 0)));
-        test2 = (uint8_t) *SPI1_DR;
-        spi_cs_high();
-
-        spi_cs_low();
-        while (!(*SPI1_SR & (1 << 1)));
-        //*SPI1_DR = 0x4780;
-        *SPI1_DR = 0xA9;
-        while (!(*SPI1_SR & (1 << 0)));
-        //float i = 10;
-        //while (i--);
-        //__asm__("dsb");
-        test1 = (uint8_t) *SPI1_DR;
-
-
-        while (!(*SPI1_SR & (1 << 1)));
-        *SPI1_DR = 0x00;
-        while (!(*SPI1_SR & (1 << 0)));
-        test2 = (uint8_t) *SPI1_DR;
-        spi_cs_high();
-
-        printx("0x%\r\n", &test2, 1);
-    }
-
     puts("\r\n\r\n\r\nWelcome to...\r\n");
 
     puts("\r\n"

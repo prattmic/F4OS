@@ -348,7 +348,16 @@ extern const uint32_t _ekernel;
 #define SPI_CR1_LSBFIRST                (uint32_t) (1 << 7)                                     /* SPI LSB transmitted first */
 #define SPI_CR1_SSI                     (uint32_t) (1 << 8)                                     /* SPI internal slave select */
 #define SPI_CR1_SSM                     (uint32_t) (1 << 9)                                     /* SPI software slave management */
-#define SPI_CR1_DFF                     (uint32_t) (1 << 11)                                     /* SPI data frame format (0 = 8bit, 1 = 16bit) */
+#define SPI_CR1_DFF                     (uint32_t) (1 << 11)                                    /* SPI data frame format (0 = 8bit, 1 = 16bit) */
+#define SPI_SR_RXNE                     (uint32_t) (1 << 0)                                     /* SPI receive not empty */
+#define SPI_SR_TXNE                     (uint32_t) (1 << 1)                                     /* SPI transmit not empty */
+#define SPI_SR_CHSIDE                   (uint32_t) (1 << 2)                                     /* SPI channel side */
+#define SPI_SR_UDR                      (uint32_t) (1 << 3)                                     /* SPI underrun flag */
+#define SPI_SR_CRCERR                   (uint32_t) (1 << 4)                                     /* SPI CRC error flag */
+#define SPI_SR_MODF                     (uint32_t) (1 << 5)                                     /* SPI mode fault */
+#define SPI_SR_OVR                      (uint32_t) (1 << 6)                                     /* SPI overrun flag */
+#define SPI_SR_BSY                      (uint32_t) (1 << 7)                                     /* SPI busy flag */
+#define SPI_SR_TIRFE                    (uint32_t) (1 << 8)                                     /* SPI TI frame format error */
 
 /* USART */
 #define USART_SR_TC                     (uint32_t) (1 << 6)                                     /* USART Transmission Complete */
