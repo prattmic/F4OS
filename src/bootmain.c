@@ -13,9 +13,6 @@
 #include "usart.h"
 #include "spi.h"
 
-#include "string.h"
-#include "math.h"
-
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
 
