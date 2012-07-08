@@ -6,6 +6,7 @@
 #include "usart.h"
 #include "buddy.h"
 #include "interrupt.h"
+#include "spi.h"
 #include "usermode.h"
 
 void unprivileged_test(void) {

@@ -200,7 +200,7 @@ void printf(char *fmt, ...) {
                     float num = va_arg(ap, float);
                     char buf[20];
 
-                    ftoa(num, buf, 20);
+                    ftoa(num, 0.0001f, buf, 20);
 
                     puts(buf);
                     break;
