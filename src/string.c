@@ -35,10 +35,9 @@ void uitoa(uint32_t n, char buf[]) {
     strreverse(buf);
 }
 
-void ftoa(float num, char buf[], uint32_t n) {
+void ftoa(float num, float tolerance, char buf[], uint32_t n) {
     int m;
     int digit;
-    float tolerance = .0001f;
 
     if (isnan(num)) {
         buf[0%n] = 'n';
