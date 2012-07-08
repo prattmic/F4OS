@@ -7,6 +7,7 @@
 #include "mem.h"
 #include "buddy.h"
 #include "stdarg.h"
+#include "string.h"
 #include "usart.h"
 
 void init_usart(void) {
@@ -116,7 +117,7 @@ uint16_t usart_baud(uint32_t baud) {
     while (fraction > 1) {
         fraction--;
     }
-    if (fraction >= 0.5) {
+    if (fraction >= 0.5f) {
         int_fraction += 1;
     }
 
@@ -177,9 +178,49 @@ void printf(char *fmt, ...) {
                     puts(buf);
                     break;
                 }
+                case 'i': case 'd': {
+                    int num = va_arg(ap, int);
+                    char buf[9];    /* 7 digits in INT_MAX + '-' and '\0' */
+
+                    itoa(num, buf);
+
+                    puts(buf);
+                    break;
+                }
+                case 'u': {
+                    uint32_t num = va_arg(ap, uint32_t);
+                    char buf[9];    /* 7 digits in INT_MAX + '-' and '\0' */
+
+                    uitoa(num, buf);
+
+                    puts(buf);
+                    break;
+                }
+                case 'f': {
+                    float num = va_arg(ap, float);
+                    char buf[20];
+
+                    ftoa(num, buf, 20);
+
+                    puts(buf);
+                    break;
+                }
+                case 'c': {
+                    char letter = va_arg(ap, char);
+
+                    putc(letter);
+                    break;
+                }
+                case 's': {
+                    char *s = va_arg(ap, char*);
+
+                    puts(s);
+                    break;
+                }
                 case '%': {
                     /* Just print a % */
                     putc('%');
+                    break;
                 }
                 default: {
                     putc('%');

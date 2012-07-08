@@ -1,4 +1,4 @@
-SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c
+SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c string.c math.c
 ASM_SRCS = bootasm.S memasm.S
 
 LINK_SCRIPT = kernel.ld
@@ -18,7 +18,8 @@ OBJCOPY=arm-none-eabi-objcopy
 CFLAGS  = -g3 -Wall --std=gnu99 -I./inc/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
-CFLAGS += -O2
+CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
+CFLAGS += -O2 
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=
@@ -55,7 +56,7 @@ ctags:
 proj: 	$(PROJ_NAME).elf
 
 $(PROJ_NAME).elf: $(OBJS)
-	$(LD) $(LFLAGS) -T $(LINK_SCRIPT) $^ -o $@ 
+	$(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
 

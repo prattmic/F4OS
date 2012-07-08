@@ -13,6 +13,9 @@
 #include "usart.h"
 #include "spi.h"
 
+#include "string.h"
+#include "math.h"
+
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
 
@@ -41,8 +44,6 @@ int main(void) {
          "88                88      `\"Y8888Y\"\'     \"Y88888P\"   \r\n"
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
          "\r\n");
-
-    printf("Do you prefer 0x%x or 0x%x?\r\n", 0xDEADBEEF, 0xCAFEBABE);
 
     led_tasks();
 
