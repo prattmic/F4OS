@@ -69,7 +69,7 @@ ctags:
 generated_headers: builddefs.h
 
 builddefs.h:
-	./builddefs.sh
+	$(SHELL) ./builddefs.sh
 
 proj: 	$(PROJ_NAME).elf
 
