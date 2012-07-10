@@ -287,6 +287,45 @@ void puts(char *s) {
     release(&usart_semaphore);
 }
 
+char getc(void) {
+    static uint32_t read = 0;
+    uint16_t dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
+    uint8_t wrapped = *DMA2_LISR & DMA_LISR_TCIF2;
+    char *usart_buf = usart_rx_buf;
+
+    while (!wrapped && dma_read == read) {
+        /* Yield */
+        _svc(1);
+
+        dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
+        wrapped = *DMA2_LISR & DMA_LISR_TCIF2;
+    }
+
+    /* DMA has not wrapped around and is ahead of us */
+    if (!wrapped && dma_read >= read) {
+        read += 1;
+        return *(usart_buf + (read-1));
+    }
+    /* The DMA has not wrapped around, yet is somehow behind us, start over */
+    else if (!wrapped && dma_read < read) {
+        read = 1;
+        return *usart_buf;
+    }
+    /* The DMA has wrapped around, but hasn't caught up to us yet */
+    else if (wrapped && dma_read < read) {
+        read += 1;
+        return *(usart_buf + (read-1));
+    }
+    /* The DMA has wrapped around, and has already caught up to us, start over
+     * if (wrapped && dma_read >= read) */
+    else {
+        /* Clear completion flag */
+        *DMA2_LIFCR |= DMA_LIFCR_CTCIF2;
+        read = 1;
+        return *usart_buf;
+    }
+}
+
 void usart_echo(void) {
     char buf[17];
     uint16_t read = 0;

@@ -2,6 +2,24 @@
 #include "math.h"
 #include "string.h"
 
+int strncmp(char *s, char *p, uint32_t n) {
+    while (*s == *p && *s != '\0' && *p != '\0' && n) {
+        s++;
+        p++;
+        n--;
+    }
+
+    if (*s == *p) {
+        return 0;
+    }
+    else if (*s > *p) {
+        return 1;
+    }
+    else {
+        return -1;
+    }
+}
+
 void itoa(int n, char buf[]) {
     int i, sign;
 
