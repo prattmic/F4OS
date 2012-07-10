@@ -1,6 +1,7 @@
 *.o
 *.i
 *.s
+*.P
 *.elf
 *.bin
 *.hex
@@ -9,3 +10,4 @@
 *.pyc
 tags
 core
+inc/builddefs.h

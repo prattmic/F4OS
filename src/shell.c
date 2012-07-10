@@ -3,6 +3,7 @@
 #include "mem.h"
 #include "buddy.h"
 #include "usart.h"
+#include "builddefs.h"
 #include "shell.h"
 
 void shell(void) {
@@ -141,7 +142,7 @@ void parse_command(char *command, uint32_t *argc, char ***argv) {
 void uname(uint32_t argc, char **argv) {
     if (argc > 1) {
         if (!strncmp(argv[1], "-a", SHELL_ARG_BUF_MAX)) {
-            printf("F40S dev 2012-Jul-9 arm-cortex-m4f\r\n");
+            printf("F40S rev %d %s\r\n", BUILD_REV, BUILD_TIME);
         }
         else {
             printf("%s: unrecognized option '%s'\r\n", argv[0], argv[1]);
