@@ -16,7 +16,18 @@ void shell(void) {
 
     while (1) {
         while ((command[++n] = getc()) != '\n' && command[n] != '\r' && n < (SHELL_BUF_MAX-1)) {
-            putc(command[n]);
+            if (command[n] == '\b' || command[n] == 0x7F) {
+                if (n) {
+                    puts(BACKSPACE);
+                    n = n - 2;
+                }
+                else {
+                    n--;
+                }
+            }
+            else {
+                putc(command[n]);
+            }
         }
 
         if (command[n] == '\n' || command[n] == '\r') {
@@ -143,6 +154,9 @@ void uname(uint32_t argc, char **argv) {
     if (argc > 1) {
         if (!strncmp(argv[1], "-a", SHELL_ARG_BUF_MAX)) {
             printf("F40S rev %d %s\r\n", BUILD_REV, BUILD_TIME);
+        }
+        else if (!strncmp(argv[1], "-r", SHELL_ARG_BUF_MAX)) {
+            printf("rev %d\r\n", BUILD_REV);
         }
         else {
             printf("%s: unrecognized option '%s'\r\n", argv[0], argv[1]);
