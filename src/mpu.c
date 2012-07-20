@@ -1,5 +1,6 @@
 #include "types.h"
 #include "registers.h"
+#include "task.h"
 #include "mem.h"
 #include "mpu.h"
 

@@ -1,17 +1,16 @@
 #include "types.h"
 #include "registers.h"
-#include "mem.h"
 #include "context.h"
 #include "buddy.h"
 #include "interrupt.h"
 #include "usart.h"
 #include "task.h"
+#include "mem.h"
 
 task_ctrl k_idle_task;
 
 task_node sys_idle_task;
 task_node_list task_list;
-task_node_list task_queue;
 
 task_node * volatile task_to_free = NULL;
 uint8_t task_switching = 0;
@@ -45,35 +44,65 @@ void start_task_switching(void) {
     k_curr_task = task_list.head;
 
     //mpu_stack_set(task->stack_base);
-    enable_psp(task->stack_top);
 
     task_switching = 1;
     task->running = 1;
-    user_mode_branch(task->fptr);
+    
+    create_context(task, &end_task);
+
+    enable_psp(task->stack_top);
+    restore_full_context();
 }
 
 void switch_task(void) {
-    task_node *node = k_curr_task;
-
-    while (node == k_curr_task) {
-        if (node->next == NULL) {
-            if (node == task_list.head) {
-                break;
-            }
-            node = task_list.head;
-        }
-        else {
-            node = node->next;
-        }
-    }
-
+    /* Rate monotonic scheduling
+     * Always runs the highest priority task,
+     * which will be the head of the list, as
+     * it is kept sorted.  Round-robin through
+     * equal priority tasks. */
+    task_node *node = task_list.head;
     k_curr_task = node;
     if (k_curr_task == NULL) {
         /* Uh-oh, no tasks! */
         panic();
     }
 
-    //mpu_stack_set(node->task->stack_base);
+    /* Don't bother moving this if it is the only high priority task */
+    if (node->task->priority <= node->next->task->priority) {
+        /* Move to end of priority */
+        task_node *prev = node;
+        task_node *next = node->next;
+        while (next && node->task->priority == next->task->priority) {
+            prev = next;
+            next = next->next;
+        }
+
+        /* Found next priority level */
+        if (next) {
+            task_list.head = node->next;
+            node->next->prev = NULL;
+
+            prev->next = node;
+            node->prev = prev;
+
+            next->prev = node;
+            node->next = next;
+        } 
+        /* Reached end of list without priorty changing, place on end. */
+        else {
+            if (node->next) {
+                task_list.head = node->next;
+                node->next->prev = NULL;
+            }
+
+            node->next = NULL;
+            node->prev = task_list.tail;
+            task_list.tail->next = node;
+            task_list.tail = node;
+        }
+    }
+
+    /* mpu_stack_set(node->task->stack_base);   Sigh...maybe some day */
 
     if (node->task->running) {
         uint32_t *psp_addr = node->task->stack_top;
@@ -81,15 +110,15 @@ void switch_task(void) {
         return;
     }
     else {
-        enable_psp(node->task->stack_top);
         node->task->running = 1;
-        /*user_mode_branch(node->task->fptr);*/
-        create_context(node->task->fptr, &end_task, node->task->stack_top);
+
+        create_context(node->task, &end_task);
+        enable_psp(node->task->stack_top);
         return;
     }
 }
 
-task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_until_wake) {
+task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task_ctrl *task;
     uint32_t *memory;
 
@@ -108,34 +137,54 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t ticks_unti
     task->stack_top  = memory + STKSIZE;
     task->fptr       = fptr;
     task->priority   = priority;
-    task->ticks_until_wake = ticks_until_wake;
+    task->period     = period;
     task->running    = 0;
 
     return task;
 }
 
+/* Place task in task list based on priority */
 void append_task_to_klist(task_node *new_task) {
     /* Check if head is set */
     if (task_list.head == NULL) {
+        if (task_list.tail) {
+            /* WTF!?  Why is the tail set but not the head? */
+            panic();
+        }
+
         task_list.head = new_task;
-        new_task->prev = NULL;
-    }
-    if (task_list.tail == NULL) {
         task_list.tail = new_task;
+        new_task->prev = NULL;
+        new_task->next = NULL;
     }
     else {
-        new_task->prev = task_list.tail;
-        task_list.tail->next = new_task;
-        task_list.tail = new_task;
+        if (new_task->task->priority > task_list.head->task->priority) {
+            new_task->prev = NULL;
+            new_task->next = task_list.head;
+            task_list.head = new_task;
+            return;
+        }
+        else {
+            task_node *prev = task_list.head;
+            task_node *next = task_list.head->next;
+
+            while (next && next->task->priority >= new_task->task->priority) {
+                prev = next;
+                next = next->next;
+            }
+            
+            if (next) {
+                new_task->next = next;
+                next->prev = new_task;
+            }
+            else {
+                new_task->next = NULL;
+                task_list.tail = new_task;
+            }
+            new_task->prev = prev;
+            prev->next = new_task;
+        }
     }
-
-    new_task->next = NULL;
-}
-
-void append_task_to_queue(task_node *new_task) {
-    task_node* last_node = task_queue.tail;
-    new_task->next = NULL;
-    last_node->next = new_task;
 }
 
 void idle_task(void) {
@@ -224,14 +273,4 @@ task_node_list sort_by_priority(task_node_list list) {
         ret.tail = ret.tail->next;
     }
     return ret;
-}
-
-task_node *find_last_task_node(task_node* init_node){
-    task_node *curr_node = init_node;
-
-    while(curr_node->next != NULL){
-        curr_node = curr_node->next;
-    }
-
-    return curr_node;
 }

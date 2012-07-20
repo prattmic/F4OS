@@ -1,6 +1,7 @@
 #include "types.h"
 #include "registers.h"
 #include "semaphore.h"
+#include "task.h"
 #include "mem.h"
 #include "buddy.h"
 

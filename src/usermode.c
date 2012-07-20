@@ -37,7 +37,7 @@ void led_tasks(void) {
     task_ctrl *kernel_action_task;
     task_ctrl *blue_led_task;
     task_ctrl *orange_led_task;
-    task_ctrl *hello_print_task;
+    task_ctrl *loading_task;
     //task_ctrl *usart_echo_task;
     task_ctrl *shell_task;
 
@@ -91,15 +91,15 @@ void led_tasks(void) {
         puts("Couldn't allocate orange_led_task, skipping.\r\n");
     }
 
-    hello_print_task = create_task(&hello_print, 1, 0);
-    if (hello_print_task != NULL) {
+    loading_task = create_task(&loading, 2, 0);
+    if (loading_task != NULL) {
         task_node *reg_task;
 
-        reg_task = register_task(hello_print_task);
+        reg_task = register_task(loading_task);
         if (reg_task == NULL) {
-            free(hello_print_task->stack_base);
-            kfree(hello_print_task);
-            puts("Couldn't allocate hello_print_task, skipping.\r\n");
+            free(loading_task->stack_base);
+            kfree(loading_task);
+            puts("Couldn't allocate loading_task, skipping.\r\n");
         }
     }
     else {
@@ -172,12 +172,14 @@ void orange_led(void) {
     }
 }
 
-void hello_print(void) {
-    uint8_t num = 3;
-    while (num) {
-        uint32_t count = 9000000;
+void loading(void) {
+    puts("Loading");
 
-        //puts("Hello World.\r\n");
+    uint8_t num = 6;
+    while (num) {
+        uint32_t count = 5000000;
+
+        puts(".");
 
         while (--count) {
             float delay = 2.81;
@@ -186,5 +188,5 @@ void hello_print(void) {
 
         num--;
     }
-    //puts("Goodbye World!\r\n");
+    puts("\r\n");
 }

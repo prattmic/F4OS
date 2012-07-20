@@ -4,11 +4,11 @@
 #include "types.h"
 #include "registers.h"
 #include "interrupt.h"
-#include "mem.h"
 #include "buddy.h"
 #include "mpu.h"
 #include "usermode.h"
 #include "task.h"
+#include "mem.h"
 #include "context.h"
 
 void user_prefix(void) {

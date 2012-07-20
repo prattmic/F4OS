@@ -5,6 +5,7 @@
 #include "types.h"
 #include "registers.h"
 #include "interrupt.h"
+#include "task.h"
 #include "mem.h"
 #include "context.h"
 #include "systick.h"

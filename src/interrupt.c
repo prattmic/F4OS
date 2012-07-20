@@ -1,6 +1,7 @@
 #include "types.h"
 #include "registers.h"
 #include "usart.h"
+#include "task.h"
 #include "semaphore.h"
 #include "interrupt.h"
 
@@ -8,10 +9,12 @@ void hardfault_handler(void) {
     uint32_t status;
     uint8_t interpretation = 0;
 
-    status = *SCB_HFSR;
-
+    /* We're done here... */
+    task_switching = 0;
     /* Force release of usart semaphore */
     release(&usart_semaphore);
+
+    status = *SCB_HFSR;
 
     puts("\r\n-----------------Hard Fault-----------------\r\n");
     printx("The hard fault status register contains: 0x%\r\n", (uint8_t *) &status, 4);
@@ -42,6 +45,8 @@ void memmanage_handler(void) {
 
     status = (uint8_t) (*SCB_CFSR & 0xff);
 
+    /* We're done here... */
+    task_switching = 0;
     /* Force release of usart semaphore */
     release(&usart_semaphore);
 
@@ -93,6 +98,8 @@ void busfault_handler(void) {
 
     status = (uint8_t) ((*SCB_CFSR >> 8) & 0xff);
 
+    /* We're done here... */
+    task_switching = 0;
     /* Force release of usart semaphore */
     release(&usart_semaphore);
 
@@ -151,6 +158,8 @@ void usagefault_handler(void) {
 
     status = (uint16_t) (*SCB_CFSR >> 16);
 
+    /* We're done here... */
+    task_switching = 0;
     /* Force release of usart semaphore */
     release(&usart_semaphore);
 
