@@ -43,7 +43,7 @@ void pendsv_handler(void){
     uint32_t *psp_addr;
 
     /* Blink an LED, for the LOLs */
-    *LED_ODR ^= (1<<12);
+    //*LED_ODR ^= (1<<12);
 
     __asm__("push {lr}");
     psp_addr = save_context();
