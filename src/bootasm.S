@@ -52,7 +52,7 @@
 .word   hang                /* 25 ... */
 .word   hang                /* 26 ... */
 .word   hang                /* 27 ... */
-.word   hang                /* 28 ... */
+.word   tim2_handler        /* 28 TIM2 Global Interrupt */
 .word   hang                /* 29 ... */
 .word   hang                /* 30 ... */
 .word   hang                /* 31 ... */

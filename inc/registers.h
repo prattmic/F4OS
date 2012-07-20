@@ -20,6 +20,7 @@ extern const uint32_t _ekernel;
 #define APB2PERIPH_BASE                 (PERIPH_BASE + 0x00010000)
 #define AHB1PERIPH_BASE                 (PERIPH_BASE + 0x00020000)
 
+#define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
 #define SPI2_BASE                       (APB1PERIPH_BASE + 0x3800)                              /* SPI2 base address */
 #define SPI1_BASE                       (APB2PERIPH_BASE + 0x3000)                              /* SPI1 base address */
@@ -40,6 +41,62 @@ extern const uint32_t _ekernel;
 #define SCB_BASE                        (SCS_BASE + 0x0D00)                                     /* System Control Block Base Address */
 #define MPU_BASE                        (SCB_BASE + 0x0090)                                     /* MPU Block Base Address */
 #define FPU_BASE                        (SCB_BASE + 0x0230)                                     /* FPU Block Base Address */
+
+/* Timer 2 (TIM2) */
+#define TIM2_CR1                        (volatile uint32_t *) (TIM2_BASE + 0x00)                /* TIM2 control register 1 */
+#define TIM2_CR2                        (volatile uint32_t *) (TIM2_BASE + 0x04)                /* TIM2 control register 2 */
+#define TIM2_SMCR                       (volatile uint32_t *) (TIM2_BASE + 0x08)                /* TIM2 slave mode control register */
+#define TIM2_DIER                       (volatile uint32_t *) (TIM2_BASE + 0x0C)                /* TIM2 DMA/Interrupt enable register */
+#define TIM2_SR                         (volatile uint32_t *) (TIM2_BASE + 0x10)                /* TIM2 status register */
+#define TIM2_EGR                        (volatile uint32_t *) (TIM2_BASE + 0x14)                /* TIM2 event generation register */
+#define TIM2_CCMR1                      (volatile uint32_t *) (TIM2_BASE + 0x18)                /* TIM2 capture/compare mode register 1 */
+#define TIM2_CCMR2                      (volatile uint32_t *) (TIM2_BASE + 0x1C)                /* TIM2 capture/compare mode register 2 */
+#define TIM2_CCER                       (volatile uint32_t *) (TIM2_BASE + 0x20)                /* TIM2 capture/compare enable register */
+#define TIM2_CNT                        (volatile uint32_t *) (TIM2_BASE + 0x24)                /* TIM2 counter */
+#define TIM2_PSC                        (volatile uint32_t *) (TIM2_BASE + 0x28)                /* TIM2 prescaler */
+#define TIM2_ARR                        (volatile uint32_t *) (TIM2_BASE + 0x2C)                /* TIM2 auto-reload register */
+#define TIM2_CCR1                       (volatile uint32_t *) (TIM2_BASE + 0x34)                /* TIM2 capture/compare register 1 */
+#define TIM2_CCR2                       (volatile uint32_t *) (TIM2_BASE + 0x38)                /* TIM2 capture/compare register 2 */
+#define TIM2_CCR3                       (volatile uint32_t *) (TIM2_BASE + 0x3C)                /* TIM2 capture/compare register 3 */
+#define TIM2_CCR4                       (volatile uint32_t *) (TIM2_BASE + 0x40)                /* TIM2 capture/compare register 4 */
+#define TIM2_DCR                        (volatile uint32_t *) (TIM2_BASE + 0x48)                /* TIM2 DMA control register */
+#define TIM2_DMAR                       (volatile uint32_t *) (TIM2_BASE + 0x4C)                /* TIM2 DMA address for full transfer */
+#define TIM2_OR                         (volatile uint32_t *) (TIM2_BASE + 0x50)                /* TIM2 option register */
+
+/* Power Control (PWR) */
+#define PWR_CR                          (volatile uint32_t *) (PWR_BASE + 0x00)                 /* Power Control Register */
+#define PWR_CSR                         (volatile uint32_t *) (PWR_BASE + 0x04)                 /* Power Control/Status Register */
+
+/* SPI1 */
+#define SPI1_CR1                        (volatile uint32_t *) (SPI1_BASE + 0x00)                /* SPI1 control register 1 */
+#define SPI1_CR2                        (volatile uint32_t *) (SPI1_BASE + 0x04)                /* SPI1 control register 2 */
+#define SPI1_SR                         (volatile uint32_t *) (SPI1_BASE + 0x08)                /* SPI1 status register */
+#define SPI1_DR                         (volatile uint32_t *) (SPI1_BASE + 0x0c)                /* SPI1 data register */
+#define SPI1_CRCPR                      (volatile uint32_t *) (SPI1_BASE + 0x10)                /* SPI1 CRC polynomial register */
+#define SPI1_RXCRCR                     (volatile uint32_t *) (SPI1_BASE + 0x14)                /* SPI1 RX CRC register */
+#define SPI1_TXCRCR                     (volatile uint32_t *) (SPI1_BASE + 0x18)                /* SPI1 TX CRC register */
+#define SPI1_I2SCFGR                    (volatile uint32_t *) (SPI1_BASE + 0x1c)                /* SPI1 I2C configuration register */
+#define SPI1_I2SPR                      (volatile uint32_t *) (SPI1_BASE + 0x20)                /* SPI1 I2C prescaler register */
+
+/* SPI2 */
+#define SPI2_CR1                        (volatile uint32_t *) (SPI2_BASE + 0x00)                /* SPI2 control register 1 */
+#define SPI2_CR2                        (volatile uint32_t *) (SPI2_BASE + 0x04)                /* SPI2 control register 2 */
+#define SPI2_SR                         (volatile uint32_t *) (SPI2_BASE + 0x08)                /* SPI2 status register */
+#define SPI2_DR                         (volatile uint32_t *) (SPI2_BASE + 0x0c)                /* SPI2 data register */
+#define SPI2_CRCPR                      (volatile uint32_t *) (SPI2_BASE + 0x10)                /* SPI2 CRC polynomial register */
+#define SPI2_RXCRCR                     (volatile uint32_t *) (SPI2_BASE + 0x14)                /* SPI2 RX CRC register */
+#define SPI2_TXCRCR                     (volatile uint32_t *) (SPI2_BASE + 0x18)                /* SPI2 TX CRC register */
+#define SPI2_I2SCFGR                    (volatile uint32_t *) (SPI2_BASE + 0x1c)                /* SPI2 I2C configuration register */
+#define SPI2_I2SPR                      (volatile uint32_t *) (SPI2_BASE + 0x20)                /* SPI2 I2C prescaler register */
+
+/* USART 1 */
+#define USART1_SR                       (volatile uint32_t *) (USART1_BASE + 0x00)              /* USART1 status register */
+#define USART1_DR                       (volatile uint32_t *) (USART1_BASE + 0x04)              /* USART1 data register */
+#define USART1_BRR                      (volatile uint32_t *) (USART1_BASE + 0x08)              /* USART1 baud rate register */
+#define USART1_CR1                      (volatile uint32_t *) (USART1_BASE + 0x0C)              /* USART1 control register 1 */
+#define USART1_CR2                      (volatile uint32_t *) (USART1_BASE + 0x10)              /* USART1 control register 2 */
+#define USART1_CR3                      (volatile uint32_t *) (USART1_BASE + 0x14)              /* USART1 control register 3 */
+#define USART1_GTPR                     (volatile uint32_t *) (USART1_BASE + 0x18)              /* USART1 gaurd time and prescale register */
 
 /* GPIO Port A (GPIOA) */
 #define GPIOA_MODER                     (volatile uint32_t *) (GPIOA_BASE + 0x00)               /* Port A mode register */
@@ -69,41 +126,6 @@ extern const uint32_t _ekernel;
 /* GPIO Port D (GPIOD) */
 #define GPIOD_MODER                     (volatile uint32_t *) (GPIOD_BASE + 0x00)               /* Port D mode register */
 #define LED_ODR                         (volatile uint32_t *) (GPIOD_BASE + 0x14)               /* LED Output Data Register */
-
-/* USART 1 */
-#define USART1_SR                       (volatile uint32_t *) (USART1_BASE + 0x00)              /* USART1 status register */
-#define USART1_DR                       (volatile uint32_t *) (USART1_BASE + 0x04)              /* USART1 data register */
-#define USART1_BRR                      (volatile uint32_t *) (USART1_BASE + 0x08)              /* USART1 baud rate register */
-#define USART1_CR1                      (volatile uint32_t *) (USART1_BASE + 0x0C)              /* USART1 control register 1 */
-#define USART1_CR2                      (volatile uint32_t *) (USART1_BASE + 0x10)              /* USART1 control register 2 */
-#define USART1_CR3                      (volatile uint32_t *) (USART1_BASE + 0x14)              /* USART1 control register 3 */
-#define USART1_GTPR                     (volatile uint32_t *) (USART1_BASE + 0x18)              /* USART1 gaurd time and prescale register */
-
-/* SPI1 */
-#define SPI1_CR1                        (volatile uint32_t *) (SPI1_BASE + 0x00)                /* SPI1 control register 1 */
-#define SPI1_CR2                        (volatile uint32_t *) (SPI1_BASE + 0x04)                /* SPI1 control register 2 */
-#define SPI1_SR                         (volatile uint32_t *) (SPI1_BASE + 0x08)                /* SPI1 status register */
-#define SPI1_DR                         (volatile uint32_t *) (SPI1_BASE + 0x0c)                /* SPI1 data register */
-#define SPI1_CRCPR                      (volatile uint32_t *) (SPI1_BASE + 0x10)                /* SPI1 CRC polynomial register */
-#define SPI1_RXCRCR                     (volatile uint32_t *) (SPI1_BASE + 0x14)                /* SPI1 RX CRC register */
-#define SPI1_TXCRCR                     (volatile uint32_t *) (SPI1_BASE + 0x18)                /* SPI1 TX CRC register */
-#define SPI1_I2SCFGR                    (volatile uint32_t *) (SPI1_BASE + 0x1c)                /* SPI1 I2C configuration register */
-#define SPI1_I2SPR                      (volatile uint32_t *) (SPI1_BASE + 0x20)                /* SPI1 I2C prescaler register */
-
-/* SPI2 */
-#define SPI2_CR1                        (volatile uint32_t *) (SPI2_BASE + 0x00)                /* SPI2 control register 1 */
-#define SPI2_CR2                        (volatile uint32_t *) (SPI2_BASE + 0x04)                /* SPI2 control register 2 */
-#define SPI2_SR                         (volatile uint32_t *) (SPI2_BASE + 0x08)                /* SPI2 status register */
-#define SPI2_DR                         (volatile uint32_t *) (SPI2_BASE + 0x0c)                /* SPI2 data register */
-#define SPI2_CRCPR                      (volatile uint32_t *) (SPI2_BASE + 0x10)                /* SPI2 CRC polynomial register */
-#define SPI2_RXCRCR                     (volatile uint32_t *) (SPI2_BASE + 0x14)                /* SPI2 RX CRC register */
-#define SPI2_TXCRCR                     (volatile uint32_t *) (SPI2_BASE + 0x18)                /* SPI2 TX CRC register */
-#define SPI2_I2SCFGR                    (volatile uint32_t *) (SPI2_BASE + 0x1c)                /* SPI2 I2C configuration register */
-#define SPI2_I2SPR                      (volatile uint32_t *) (SPI2_BASE + 0x20)                /* SPI2 I2C prescaler register */
-
-/* Power Control (PWR) */
-#define PWR_CR                          (volatile uint32_t *) (PWR_BASE + 0x00)                 /* Power Control Register */
-#define PWR_CSR                         (volatile uint32_t *) (PWR_BASE + 0x04)                 /* Power Control/Status Register */
 
 /* Reset and Clock Control (RCC) */
 #define RCC_CR                          (volatile uint32_t *) (RCC_BASE + 0x00)                 /* Clock Control Register */
@@ -318,6 +340,7 @@ extern const uint32_t _ekernel;
 #define RCC_AHB1ENR_GPIOIEN             (uint32_t) (1 << 8)                                     /* GPIOI clock enable */
 #define RCC_AHB1ENR_DMA1EN              (uint32_t) (1 << 21)                                    /* DMA1 clock enable */
 #define RCC_AHB1ENR_DMA2EN              (uint32_t) (1 << 22)                                    /* DMA2 clock enable */
+#define RCC_APB1ENR_TIM2EN              (uint32_t) (0x00000001)                                 /* TIM2 clock enable */
 #define RCC_APB1ENR_SPI2EN              (uint32_t) (0x00004000)                                 /* SPI2 clock enable */
 #define RCC_APB1ENR_PWREN               (uint32_t) (0x10000000)                                 /* Power Interface Clock Enable */
 #define RCC_APB2ENR_SPI1EN              (uint32_t) (1 << 12)                                    /* SPI1 Enable */
@@ -326,11 +349,44 @@ extern const uint32_t _ekernel;
 #define FLASH_ACR_DCEN                  (uint32_t) (0x00000400)                                 /* Data Cache Enable */
 #define FLASH_ACR_LATENCY_5WS           (uint32_t) (0x00000005)                                 /* 5 Wait States Latency */
 
-/* GPIO */
-#define GPIO_MODER_OUT                  (uint32_t) (0x1)                                        /* Sets GPIO pin to output mode */
-#define GPIO_MODER_ALT                  (uint32_t) (0x2)                                        /* Sets GPIO pin to alternative function mode */
-#define GPIO_AF_USART13                 (uint32_t) (0x7)                                        /* GPIO USART1-3 mode */
-#define GPIO_AF_SPI12                   (uint32_t) (0x5)                                        /* GPIO SPI1-2 mode */
+/* TIM2 */
+#define TIM2_CR1_CEN                    (uint32_t) (1 << 0)                                     /* TIM2 counter enable */
+#define TIM2_CR1_UDIS                   (uint32_t) (1 << 1)                                     /* TIM2 update disable */
+#define TIM2_CR1_URS                    (uint32_t) (1 << 2)                                     /* TIM2 update request source */
+#define TIM2_CR1_OPM                    (uint32_t) (1 << 3)                                     /* TIM2 one-pulse mode */
+#define TIM2_CR1_DIR_DOWN               (uint32_t) (1 << 4)                                     /* TIM2 downcounter */
+#define TIM2_CR1_CMS_EDGE               (uint32_t) (0 << 5)                                     /* TIM2 center-aligned mode selection - counter up or down depending on DIR bit */
+#define TIM2_CR1_CMS_CM1                (uint32_t) (1 << 5)                                     /* TIM2 center-aligned mode selection - up and down, compare flags set down */
+#define TIM2_CR1_CMS_CM2                (uint32_t) (2 << 5)                                     /* TIM2 center-aligned mode selection - up and down, compare flags set up */
+#define TIM2_CR1_CMS_CM3                (uint32_t) (3 << 5)                                     /* TIM2 center-aligned mode selection - up and down, compare flags set up/down */
+#define TIM2_CR1_ARPE                   (uint32_t) (1 << 7)                                     /* TIM2 auto-reload preload enable */
+#define TIM2_CR1_CKD_1                  (uint32_t) (0 << 8)                                     /* TIM2 clock division 1 */
+#define TIM2_CR1_CKD_2                  (uint32_t) (1 << 8)                                     /* TIM2 clock division 2 */
+#define TIM2_CR1_CKD_4                  (uint32_t) (2 << 8)                                     /* TIM2 clock division 4 */
+
+#define TIM2_CR2_CCDS                   (uint32_t) (1 << 3)                                     /* TIM2 capture/compare DMA requests send when update event occurs */
+#define TIM2_CR2_MMS_RST                (uint32_t) (0 << 4)                                     /* TIM2 master mode - reset */
+#define TIM2_CR2_MMS_EN                 (uint32_t) (1 << 4)                                     /* TIM2 master mode - enable */
+#define TIM2_CR2_MMS_UP                 (uint32_t) (2 << 4)                                     /* TIM2 master mode - update */
+#define TIM2_CR2_MMS_CMP_PUL            (uint32_t) (3 << 4)                                     /* TIM2 master mode - compare pulse */
+#define TIM2_CR2_MMS_CMP_OC1            (uint32_t) (4 << 4)                                     /* TIM2 master mode - compare OC1 */
+#define TIM2_CR2_MMS_CMP_OC2            (uint32_t) (5 << 4)                                     /* TIM2 master mode - compare OC2 */
+#define TIM2_CR2_MMS_CMP_OC3            (uint32_t) (6 << 4)                                     /* TIM2 master mode - compare OC3 */
+#define TIM2_CR2_MMS_CMP_OC4            (uint32_t) (7 << 4)                                     /* TIM2 master mode - compare OC4 */
+#define TIM2_CR2_TI1_123                (uint32_t) (1 << 7)                                     /* TIM2 CH1, CH2, CH3 pins connected to TI1 */
+
+#define TIM2_DIER_UIE                   (uint32_t) (1 << 0)                                     /* TIM2 update interrupt enable */
+#define TIM2_DIER_CC1IE                 (uint32_t) (1 << 1)                                     /* TIM2 CC1 interrupt enable */
+#define TIM2_DIER_CC2IE                 (uint32_t) (1 << 2)                                     /* TIM2 CC2 interrupt enable */
+#define TIM2_DIER_CC3IE                 (uint32_t) (1 << 3)                                     /* TIM2 CC3 interrupt enable */
+#define TIM2_DIER_CC4IE                 (uint32_t) (1 << 4)                                     /* TIM2 CC4 interrupt enable */
+#define TIM2_DIER_TIE                   (uint32_t) (1 << 6)                                     /* TIM2 trigger interrupt enable */
+#define TIM2_DIER_UDE                   (uint32_t) (1 << 8)                                     /* TIM2 update DMA request enable */
+#define TIM2_DIER_CC1DE                 (uint32_t) (1 << 9)                                     /* TIM2 CC1 DMA request enable */
+#define TIM2_DIER_CC2DE                 (uint32_t) (1 << 10)                                    /* TIM2 CC2 DMA request enable */
+#define TIM2_DIER_CC3DE                 (uint32_t) (1 << 11)                                    /* TIM2 CC3 DMA request enable */
+#define TIM2_DIER_CC4DE                 (uint32_t) (1 << 12)                                    /* TIM2 CC4 DMA request enable */
+#define TIM2_DIER_TDE                   (uint32_t) (1 << 14)                                    /* TIM2 trigger DMA request enable */
 
 /* SPI */
 #define SPI_CR1_CPHA                    (uint32_t) (1 << 0)                                     /* SPI clock phase */
@@ -368,6 +424,12 @@ extern const uint32_t _ekernel;
 #define USART_CR1_RE                    (uint32_t) (1 << 2)                                     /* USART Receive Enable */
 #define USART_CR3_DMAR_EN               (uint32_t) (1 << 6)                                     /* USART DMA Receive Enable */
 #define USART_CR3_DMAT_EN               (uint32_t) (1 << 7)                                     /* USART DMA Transmit Enable */
+
+/* GPIO */
+#define GPIO_MODER_OUT                  (uint32_t) (0x1)                                        /* Sets GPIO pin to output mode */
+#define GPIO_MODER_ALT                  (uint32_t) (0x2)                                        /* Sets GPIO pin to alternative function mode */
+#define GPIO_AF_USART13                 (uint32_t) (0x7)                                        /* GPIO USART1-3 mode */
+#define GPIO_AF_SPI12                   (uint32_t) (0x5)                                        /* GPIO SPI1-2 mode */
 
 /* DMA */
 #define DMA_LISR_TCIF2                  (uint32_t) (1 << 21)                                    /* DMA stream 2 transfer complete flag */

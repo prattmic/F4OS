@@ -1,4 +1,4 @@
-SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c shell.c
+SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c shell.c tim.c
 SRCS += string.c math.c
 ASM_SRCS = bootasm.S memasm.S
 
