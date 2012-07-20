@@ -21,6 +21,8 @@ CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler 
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
 CFLAGS += -O2 
+
+CFLAGS += -D BUILD_TIME='"$(shell date)"' -D BUILD_REV=$(shell git shortlog | grep -E '^[ ]+\w+' | wc -l)
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=
@@ -34,7 +36,7 @@ OBJS += $(ASM_SRCS:.S=.o)
 
 ###################################################
 
-.PHONY: proj generated_headers
+.PHONY: proj
 
 all: proj
 
@@ -48,7 +50,7 @@ burn:
 ctags:
 	ctags -R .
 
-%.o : %.S | generated_headers
+%.o : %.S
 	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $*.d $*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
@@ -57,7 +59,7 @@ ctags:
 
 -include $(ASM_SRCS:.S=.P)
 
-%.o : %.c | generated_headers
+%.o : %.c
 	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $*.d $*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
@@ -65,11 +67,6 @@ ctags:
 		rm -f $*.d
 
 -include $(SRCS:.c=.P)
-
-generated_headers: builddefs.h
-
-builddefs.h:
-	$(SHELL) ./builddefs.sh
 
 proj: 	$(PROJ_NAME).elf
 
