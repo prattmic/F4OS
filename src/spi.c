@@ -1,5 +1,7 @@
 #include "types.h"
 #include "registers.h"
+#include "task.h"
+#include "semaphore.h"
 #include "usart.h"
 #include "spi.h"
 

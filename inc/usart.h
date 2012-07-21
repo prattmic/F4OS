@@ -10,7 +10,7 @@ void puts(char *s) __attribute__((section(".kernel")));
 char getc(void) __attribute__((section(".kernel")));
 void usart_echo(void) __attribute__((section(".kernel")));
 
-volatile uint8_t usart_semaphore;
+volatile struct semaphore usart_semaphore;
 
 char *usart_rx_buf;
 char *usart_tx_buf;

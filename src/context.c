@@ -4,10 +4,11 @@
 #include "types.h"
 #include "registers.h"
 #include "interrupt.h"
-#include "buddy.h"
 #include "mpu.h"
 #include "usermode.h"
 #include "task.h"
+#include "semaphore.h"
+#include "buddy.h"
 #include "mem.h"
 #include "context.h"
 

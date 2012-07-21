@@ -1,8 +1,8 @@
 #include "types.h"
 #include "registers.h"
-#include "semaphore.h"
 #include "task.h"
 #include "mem.h"
+#include "semaphore.h"
 #include "buddy.h"
 
 extern uint32_t _suserheap;
@@ -20,7 +20,7 @@ void init_heap(void) {
     /* User buddy */
     user_buddy.max_order = USER_MAX_ORDER;
     user_buddy.min_order = USER_MIN_ORDER;
-    user_buddy.semaphore = 0;
+    init_semaphore(&user_buddy.semaphore);
     user_buddy.list = user_buddy_list;
 
     init_buddy(&user_buddy, &_suserheap);
@@ -28,7 +28,7 @@ void init_heap(void) {
     /* Kernel buddy */
     kernel_buddy.max_order = KERNEL_MAX_ORDER;
     kernel_buddy.min_order = KERNEL_MIN_ORDER;
-    kernel_buddy.semaphore = 0;
+    init_semaphore(&kernel_buddy.semaphore);
     kernel_buddy.list = kernel_buddy_list;
 
     init_buddy(&kernel_buddy, &_skernelheap);

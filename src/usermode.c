@@ -4,6 +4,7 @@
 #include "mem.h"
 #include "systick.h"
 #include "usart.h"
+#include "semaphore.h"
 #include "buddy.h"
 #include "interrupt.h"
 #include "spi.h"

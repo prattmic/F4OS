@@ -1,9 +1,9 @@
 #include "types.h"
 #include "registers.h"
 #include "interrupt.h"
-#include "semaphore.h"
 #include "context.h"
 #include "task.h"
+#include "semaphore.h"
 #include "mem.h"
 #include "buddy.h"
 #include "stdarg.h"
@@ -103,7 +103,7 @@ void init_usart(void) {
     *USART1_CR1 |= USART_CR1_TE;
 
     /* Reset semaphore */
-    usart_semaphore = 0;
+    init_semaphore(&usart_semaphore);
 }
 
 /* Calculates the value for the USART_BRR */

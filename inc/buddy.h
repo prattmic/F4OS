@@ -14,7 +14,7 @@ struct heapnode {
 struct buddy {
     uint8_t max_order;
     uint8_t min_order;
-    uint8_t semaphore;
+    struct semaphore semaphore;
     struct heapnode **list;
 };
 

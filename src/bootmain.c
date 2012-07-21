@@ -9,6 +9,7 @@
 #include "mem.h"
 #include "context.h"
 #include "systick.h"
+#include "semaphore.h"
 #include "buddy.h"
 #include "usermode.h"
 #include "usart.h"

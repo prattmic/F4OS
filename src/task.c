@@ -1,10 +1,11 @@
 #include "types.h"
 #include "registers.h"
 #include "context.h"
-#include "buddy.h"
 #include "interrupt.h"
 #include "usart.h"
 #include "task.h"
+#include "semaphore.h"
+#include "buddy.h"
 #include "mem.h"
 
 task_ctrl k_idle_task;
