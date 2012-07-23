@@ -30,6 +30,7 @@ void kernel_task(void) __attribute__((section(".kernel")));
 void start_task_switching(void) __attribute__((section(".kernel"), optimize(1)));
 void switch_task(void) __attribute__((section(".kernel")));
 task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) __attribute__((section(".kernel")));
+void append_task(task_node *new_task) __attribute__((section(".kernel")));
 task_node *register_task(task_ctrl *task_ptr) __attribute__((section(".kernel")));
 void remove_task(task_node *tasknode) __attribute__((section(".kernel")));
 void free_task(task_node *tasknode) __attribute__((section(".kernel")));

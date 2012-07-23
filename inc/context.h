@@ -9,3 +9,4 @@ void svc_handler(uint32_t*) __attribute__((section(".kernel")));
 extern uint32_t *save_context(void) __attribute__((section(".kernel"), naked));
 extern uint32_t *restore_context() __attribute__((section(".kernel"), naked));
 extern uint32_t *restore_full_context() __attribute__((section(".kernel"), naked));
+void swap_task(task_node *node) __attribute__((section(".kernel"), optimize(0)));

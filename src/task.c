@@ -1,9 +1,9 @@
 #include "types.h"
 #include "registers.h"
-#include "context.h"
 #include "interrupt.h"
 #include "usart.h"
 #include "task.h"
+#include "context.h"
 #include "semaphore.h"
 #include "buddy.h"
 #include "mem.h"
@@ -145,7 +145,7 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
 }
 
 /* Place task in task list based on priority */
-void append_task_to_klist(task_node *new_task) {
+void append_task(task_node *new_task) {
     /* Check if head is set */
     if (task_list.head == NULL) {
         if (task_list.tail) {
@@ -208,7 +208,7 @@ task_node *register_task(task_ctrl *task_ptr) {
     }
 
     new_task->task = task_ptr;
-    append_task_to_klist(new_task);
+    append_task(new_task);
 
     return new_task;
 }

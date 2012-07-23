@@ -22,7 +22,7 @@ void memset32(void *p, int32_t value, uint32_t size) {
 }
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {
-    asm volatile("mov     r5, #0                                                        \n\
+    asm volatile("mov     r5, #0                                                              \n\
                   stmdb   %[stack]!, {r5}                                                     \n\
                   stmdb   %[stack]!, {r5}                                                     \n\
                   stmdb   %[stack]!, {r5}                                                     \n\
@@ -41,9 +41,9 @@ void create_context(task_ctrl* task, void (*lptr)(void)) {
                   stmdb   %[stack]!, {r5}                                                     \n\
                   stmdb   %[stack]!, {r5}                                                     \n\
                   stmdb   %[stack]!, {r5}                                                     \n\
-                  ldr.w   r5, =0x01000000 /* Thumb state bit must be set */             \n\
+                  ldr.w   r5, =0x01000000 /* Thumb state bit must be set */                   \n\
                   stmdb   %[stack]!, {r5}   /* xPSR */                                        \n\
-                  mov     r5, #0                                                        \n\
+                  mov     r5, #0                                                              \n\
                   stmdb   %[stack]!, {%[pc]}   /* PC */                                       \n\
                   stmdb   %[stack]!, {%[lr]}   /* LR */                                       \n\
                   stmdb   %[stack]!, {r5}   /* R12 */                                         \n\

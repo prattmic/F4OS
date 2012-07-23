@@ -79,6 +79,8 @@ _start:
 .global     panic
 .type       panic, %function
 panic:
+    mov     r0, #1
+    msr     primask, r0
     bl      raise_privilege
     bl      toggle_led_delay
     b       panic 

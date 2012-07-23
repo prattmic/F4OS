@@ -1,4 +1,4 @@
-/* Context switching fro F4OS!
+/* Context switching for F4OS!
  * Michael Pratt <michael@pratt.im> */
 
 #include "types.h"
@@ -127,4 +127,44 @@ void svc_handler(uint32_t *svc_args) {
         default:
             break;
     }
+}
+
+/* Makes node run immediately */
+void swap_task(task_node *node) {
+    register uint32_t *stack_top asm("r0");
+    
+    __asm__(/* If you aren't already on the psp, you are screwed, sorry */
+            "str     r0, [sp, #-100] \r\n"      /* Go ahead and store r0, so I can use it */
+
+            "mrs     r0, xpsr        \r\n"
+            "orr     r0, r0, #0x1000000      \r\n"
+            "str     r0, [sp, #-72]  \r\n"      /* Store xpsr quickly, don't want it to change */
+
+            /* 18 words left for fp registers, which I don't save yet */
+
+            "ldr     r0, =swap_complete  \r\n"
+            "str     r0, [sp, #-76]  \r\n"      /* Save PC as the end of this function */
+
+            "str     lr, [sp, #-80]  \r\n"
+            "str     r12, [sp, #-84] \r\n"
+            "str     r3, [sp, #-88]  \r\n"
+            "str     r2, [sp, #-92]  \r\n"
+            "str     r1, [sp, #-96]  \r\n"
+           
+            "sub     r0, sp, #100  \r\n"
+            "stmfd   r0!, {r4-r11}  \r\n"   /* Saves multiple registers and writes the final address back to Rn */
+
+            "msr     psp, r0  \r\n"
+            );
+
+    k_curr_task->task->stack_top = stack_top;
+
+    k_curr_task = node;
+
+    enable_psp(k_curr_task->task->stack_top);
+
+    __asm__("b  restore_full_context\r\n");  /* Won't return */
+
+    __asm__("swap_complete: \r\n"
+            "nop");
 }

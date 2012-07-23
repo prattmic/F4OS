@@ -5,3 +5,4 @@ void led_tasks(void);
 void blue_led(void) __attribute__((optimize(0)));
 void orange_led(void) __attribute__((optimize(0)));
 void loading(void) __attribute__((optimize(0)));
+void greedy(void) __attribute__((optimize(0)));

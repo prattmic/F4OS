@@ -11,6 +11,8 @@
 #include "shell.h"
 #include "usermode.h"
 
+struct semaphore faux_sem;
+
 void unprivileged_test(void) {
     int test = 0;
 
@@ -41,6 +43,7 @@ void led_tasks(void) {
     task_ctrl *loading_task;
     //task_ctrl *usart_echo_task;
     task_ctrl *shell_task;
+    task_ctrl *greedy_task;
 
     /* Enable blue and orange LEDs */
     *GPIOD_MODER |= (1 << (13 * 2)) | (1 << (15 * 2));
@@ -137,6 +140,21 @@ void led_tasks(void) {
         puts("Couldn't allocate shell_task, skipping.\r\n");
     }
 
+    greedy_task = create_task(&greedy, 1, 0);
+    if (greedy_task != NULL) {
+        task_node *reg_task;
+
+        reg_task = register_task(greedy_task);
+        if (reg_task == NULL) {
+            free(greedy_task->stack_base);
+            kfree(greedy_task);
+            puts("Couldn't allocate greedy_task, skipping.\r\n");
+        }
+    }
+    else {
+        puts("Couldn't allocate greedy_task, skipping.\r\n");
+    }
+
     systick_init();
     start_task_switching();
 }
@@ -158,6 +176,8 @@ void blue_led(void) {
 }
 
 void orange_led(void) {
+    uint8_t i = 1;
+
     while (1) {
         uint32_t count = 9000000;
 
@@ -170,11 +190,44 @@ void orange_led(void) {
             float delay = 2.81;
             delay *= 3.14f;
         }
+
+        if (i) {
+            k_curr_task->task->priority = 2;
+            remove_task(k_curr_task);
+            append_task(k_curr_task);
+            acquire(&faux_sem);
+            puts("Orange got the lock!\r\n");
+            release(&faux_sem);
+            k_curr_task->task->priority = 1;
+            remove_task(k_curr_task);
+            append_task(k_curr_task);
+            i = 0;
+        }
     }
 }
 
 void loading(void) {
     puts("Loading");
+
+    uint8_t num = 3;
+    while (num) {
+        uint32_t count = 5000000;
+
+        puts(".");
+
+        while (--count) {
+            float delay = 2.81;
+            delay *= 3.14f;
+        }
+
+        num--;
+    }
+    puts("\r\n");
+}
+
+void greedy(void) {
+    acquire(&faux_sem);
+    puts("Grabbed lock\r\n");
 
     uint8_t num = 6;
     while (num) {
@@ -189,5 +242,7 @@ void loading(void) {
 
         num--;
     }
-    puts("\r\n");
+
+    release(&faux_sem);
+    puts("Released lock\r\n");
 }
