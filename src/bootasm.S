@@ -79,8 +79,8 @@ _start:
 .global     panic
 .type       panic, %function
 panic:
-    mov     r0, #1
-    msr     primask, r0
+    /* Disable interrupts */
+    cpsid   i
     bl      raise_privilege
     bl      toggle_led_delay
     b       panic 
