@@ -144,6 +144,37 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     return task;
 }
 
+task_node *register_task(task_ctrl *task_ptr) {
+    task_node *new_task = kmalloc(sizeof(task_node));
+    if (new_task == NULL) {
+        return NULL;
+    }
+
+    new_task->task = task_ptr;
+    append_task(new_task);
+
+    return new_task;
+}
+
+void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
+    task_ctrl *task = create_task(fptr, priority, period);
+    if (task != NULL) {
+        task_node *reg_task;
+
+        reg_task = register_task(task);
+        if (reg_task == NULL) {
+            free(task->stack_base);
+            kfree(task);
+            printf("Could not allocate task with function pointer 0x%x; panicing.\r\n", fptr);
+            panic();
+        }
+    }
+    else {
+        printf("Could not allocate task with function pointer 0x%x; panicing.\r\n", fptr);
+        panic();
+    }
+}
+
 /* Place task in task list based on priority */
 void append_task(task_node *new_task) {
     /* Check if head is set */
@@ -199,18 +230,6 @@ void end_task(void) {
     _svc(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
     __asm__("pop {lr}\n"
             "bx lr\n");
-}
-
-task_node *register_task(task_ctrl *task_ptr) {
-    task_node *new_task = kmalloc(sizeof(task_node));
-    if (new_task == NULL) {
-        return NULL;
-    }
-
-    new_task->task = task_ptr;
-    append_task(new_task);
-
-    return new_task;
 }
 
 void remove_task(task_node *node) {
