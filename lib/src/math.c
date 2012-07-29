@@ -1,7 +1,8 @@
-/* Most of these functions are based on Newlib 
+/* This file was compiled from various components of the Newlib project
+ * Components released under various licenses and are copyright various authors.
+ *
+ * http://sourceware.org/cgi-bin/cvsweb.cgi/src/COPYING.NEWLIB?rev=1.31&content-type=text/x-cvsweb-markup&cvsroot=src
  * http://www.sourceware.org/newlib/   */
-
-/* CAUTION: Contents may cause eye bleeding */
 
 #include "types.h"
 #include "math.h"
