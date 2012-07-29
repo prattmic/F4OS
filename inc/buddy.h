@@ -18,6 +18,9 @@ struct buddy {
     struct heapnode **list;
 };
 
+extern struct buddy user_buddy;
+extern struct buddy kernel_buddy;
+
 void init_heap(void) __attribute__((section(".kernel")));
 void init_buddy(struct buddy *buddy, uint32_t *address) __attribute__((section(".kernel")));
 struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));

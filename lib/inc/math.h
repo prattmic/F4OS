@@ -1,3 +1,6 @@
+uint32_t pow(uint32_t base, uint32_t exp);
+
+
 float logarithm(float x, int ten);
 float frexpf (float d, int *exp);
 uint8_t numtestf(float x);

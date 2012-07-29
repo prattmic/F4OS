@@ -5,6 +5,7 @@
 #include "semaphore.h"
 #include "buddy.h"
 #include "usart.h"
+#include "top.h"
 #include "shell.h"
 
 void shell(void) {
@@ -55,6 +56,9 @@ void shell(void) {
         }
         else if (!strncmp(argv[0], "uname", SHELL_BUF_MAX+1)) {
             uname(argc, argv);
+        }
+        else if (!strncmp(argv[0], "top", SHELL_BUF_MAX+1)) {
+            top(argc, argv);
         }
         else {
             printf("%s: command not found\r\n", command);
