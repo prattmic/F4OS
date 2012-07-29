@@ -8,6 +8,19 @@
 #include "top.h"
 #include "shell.h"
 
+struct command {
+    char *name;
+    void (*fptr)(uint32_t, char **);
+};
+
+const struct command valid_commands[] = {{"uname",  &uname},
+                                         {"top",    &top}};
+#define NUM_COMMANDS    (sizeof(valid_commands)/sizeof(valid_commands[0]))
+
+static void free_argv(uint32_t argc, char ***argv);
+static void parse_command(char *command, uint32_t *argc, char ***argv);
+static void run_command(char *command, uint32_t argc, char **argv);
+
 void shell(void) {
     char *command = malloc(SHELL_BUF_MAX+1);
     int n = -1;
@@ -49,20 +62,7 @@ void shell(void) {
 
         parse_command(command, &argc, &argv);
 
-        if (!argc) {
-        }
-        else if (argc < 0) {
-            printf("%s: could not parse input\r\n", command);
-        }
-        else if (!strncmp(argv[0], "uname", SHELL_BUF_MAX+1)) {
-            uname(argc, argv);
-        }
-        else if (!strncmp(argv[0], "top", SHELL_BUF_MAX+1)) {
-            top(argc, argv);
-        }
-        else {
-            printf("%s: command not found\r\n", command);
-        }
+        run_command(command, argc, argv);
 
         free_argv(argc, &argv);
         printf("%s", SHELL_PROMPT);
@@ -153,6 +153,26 @@ void parse_command(char *command, uint32_t *argc, char ***argv) {
             command++;
         }
     }
+}
+
+void run_command(char *command, uint32_t argc, char **argv) {
+    if (!argc) {
+        return;
+    }
+
+    if (argc < 0) {
+        printf("%s: could not parse input\r\n", command);
+        return;
+    }
+
+    for (int i = 0; i < NUM_COMMANDS; i++) {
+        if (!strncmp(argv[0], valid_commands[i].name, SHELL_BUF_MAX+1)) {
+            valid_commands[i].fptr(argc, argv);
+            return;
+        }
+    }
+
+    printf("%s: command not found\r\n", argv[0]);
 }
 
 void uname(uint32_t argc, char **argv) {
