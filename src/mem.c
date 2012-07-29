@@ -12,7 +12,7 @@ void memset32(void *p, int32_t value, uint32_t size) {
 
     /* Disallowed unaligned addresses */
     if ( (uint32_t) p % 4 ) {
-        panic();
+        panic_print("Attempt to memset unaligned address.");
     }
 
     while ( (uint32_t*) p < end ) {

@@ -5,6 +5,19 @@
 #include "semaphore.h"
 #include "interrupt.h"
 
+/* Print a message and then panic */
+void panic_print(char *s) {
+    /* We're done here... */
+    task_switching = 0;
+    /* Force release of usart semaphore */
+    release(&usart_semaphore);
+
+    /* Print panic message */
+    printf("panic: %s\r\n", s);
+
+    panic();
+}
+
 void hardfault_handler(void) {
     uint32_t status;
     uint8_t interpretation = 0;

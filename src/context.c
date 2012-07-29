@@ -81,7 +81,7 @@ void svc_handler(uint32_t *svc_args) {
                 raise_privilege();
             }
             else {
-                panic();
+                panic_print("User code requested raised permissions.");
             }
             break;
         }

@@ -65,7 +65,7 @@ void switch_task(void) {
     k_curr_task = node;
     if (k_curr_task == NULL) {
         /* Uh-oh, no tasks! */
-        panic();
+        panic_print("No tasks to run.");
     }
 
     /* Don't bother moving this if it is the only high priority task */
@@ -166,12 +166,12 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
             free(task->stack_base);
             kfree(task);
             printf("Could not allocate task with function pointer 0x%x; panicing.\r\n", fptr);
-            panic();
+            panic_print("Could not allocate task.");
         }
     }
     else {
         printf("Could not allocate task with function pointer 0x%x; panicing.\r\n", fptr);
-        panic();
+        panic_print("Could not allocate task.");
     }
 }
 
@@ -181,7 +181,7 @@ void append_task(task_node *new_task) {
     if (task_list.head == NULL) {
         if (task_list.tail) {
             /* WTF!?  Why is the tail set but not the head? */
-            panic();
+            panic_print("Task list tail set, but not head.");
         }
 
         task_list.head = new_task;

@@ -48,7 +48,7 @@ void acquire(volatile struct semaphore *semaphore) {
     }
     else {
         /* How was the semaphore taken, yet no one holds it? */
-        panic();
+        panic_print("Semaphore not available, but held_by unset.");
     }
 
     /********************/
