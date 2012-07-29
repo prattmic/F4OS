@@ -43,10 +43,10 @@ void led_tasks(void) {
     new_task(&kernel_task, 1, 0);
     new_task(&blue_led, 1, 0);
     new_task(&orange_led, 1, 0);
-    new_task(&loading, 2, 0);
-    //new_task(&usart_echo, 1, 0);
     new_task(&shell, 1, 0);
-    new_task(&greedy, 1, 0);
+    //new_task(&loading, 2, 0);
+    //new_task(&usart_echo, 1, 0);
+    //new_task(&greedy, 1, 0);
 
     systick_init();
     start_task_switching();
@@ -69,7 +69,7 @@ void blue_led(void) {
 }
 
 void orange_led(void) {
-    uint8_t i = 1;
+    /* uint8_t i = 1; */
 
     while (1) {
         uint32_t count = 9000000;
@@ -84,7 +84,8 @@ void orange_led(void) {
             delay *= 3.14f;
         }
 
-        if (i) {
+        /* Testing priority inheritance with greedy() */
+        /* if (i) {
             k_curr_task->task->priority = 2;
             remove_task(k_curr_task);
             append_task(k_curr_task);
@@ -95,7 +96,7 @@ void orange_led(void) {
             remove_task(k_curr_task);
             append_task(k_curr_task);
             i = 0;
-        }
+        } */
     }
 }
 
