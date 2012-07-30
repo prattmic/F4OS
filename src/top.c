@@ -9,7 +9,7 @@
 static uint32_t free_memory(struct buddy *buddy);
 
 /* Display memory usage */
-void top(uint32_t argc, char **argv) {
+void top(int argc, char **argv) {
     printf("User buddy free memory: %d bytes\r\n", free_memory(&user_buddy));
     printf("Kernel buddy free memory: %d bytes\r\n", free_memory(&kernel_buddy));
 }

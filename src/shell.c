@@ -10,21 +10,21 @@
 
 struct command {
     char *name;
-    void (*fptr)(uint32_t, char **);
+    void (*fptr)(int, char **);
 };
 
 const struct command valid_commands[] = {{"uname",  &uname},
                                          {"top",    &top}};
 #define NUM_COMMANDS    (sizeof(valid_commands)/sizeof(valid_commands[0]))
 
-static void free_argv(uint32_t argc, char ***argv);
-static void parse_command(char *command, uint32_t *argc, char ***argv);
-static void run_command(char *command, uint32_t argc, char **argv);
+static void free_argv(int argc, char ***argv);
+static void parse_command(char *command, int *argc, char ***argv);
+static void run_command(char *command, int argc, char **argv);
 
 void shell(void) {
     char *command = malloc(SHELL_BUF_MAX+1);
     int n = -1;
-    uint32_t argc;
+    int argc;
     char **argv;
 
     printf("%s", SHELL_PROMPT);
@@ -61,10 +61,15 @@ void shell(void) {
         }
 
         parse_command(command, &argc, &argv);
+        if (argc < 0) {
+            /* Something bad happened, argv has already been freed */
+            printf("%s: could not parse input\r\n", command);
+        }
+        else {
+            run_command(command, argc, argv);
+            free_argv(argc, &argv);
+        }
 
-        run_command(command, argc, argv);
-
-        free_argv(argc, &argv);
         printf("%s", SHELL_PROMPT);
         n = -1;
     }
@@ -72,7 +77,7 @@ void shell(void) {
     free(command);
 }
 
-void free_argv(uint32_t argc, char ***argv) {
+void free_argv(int argc, char ***argv) {
     while (argc) {
         free((*argv)[argc-1]);
         argc--;
@@ -80,7 +85,7 @@ void free_argv(uint32_t argc, char ***argv) {
     free(*argv);
 }
 
-void parse_command(char *command, uint32_t *argc, char ***argv) {
+void parse_command(char *command, int *argc, char ***argv) {
     char *begin = command;
     uint32_t n = 0;
     *argc = 0;
@@ -128,7 +133,7 @@ void parse_command(char *command, uint32_t *argc, char ***argv) {
             printf("Memory error\r\n");
             (*argc)--;
             while (*argc) {
-                free(*argv[*argc-1]);
+                free((*argv)[*argc-1]);
                 (*argc)--;
             }
             free(*argv);
@@ -155,13 +160,8 @@ void parse_command(char *command, uint32_t *argc, char ***argv) {
     }
 }
 
-void run_command(char *command, uint32_t argc, char **argv) {
+void run_command(char *command, int argc, char **argv) {
     if (!argc) {
-        return;
-    }
-
-    if (argc < 0) {
-        printf("%s: could not parse input\r\n", command);
         return;
     }
 
@@ -175,7 +175,7 @@ void run_command(char *command, uint32_t argc, char **argv) {
     printf("%s: command not found\r\n", argv[0]);
 }
 
-void uname(uint32_t argc, char **argv) {
+void uname(int argc, char **argv) {
     if (argc > 1) {
         if (!strncmp(argv[1], "-a", SHELL_ARG_BUF_MAX)) {
             printf("F40S rev %d %s\r\n", BUILD_REV, BUILD_TIME);

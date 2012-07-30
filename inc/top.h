@@ -1,1 +1,1 @@
-void top(uint32_t argc, char **argv);
+void top(int argc, char **argv);
