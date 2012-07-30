@@ -10,4 +10,4 @@
 *.pyc
 tags
 core
-inc/builddefs.h
+lorem.py
