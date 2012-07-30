@@ -1,4 +1,5 @@
-SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c shell.c tim.c top.c
+SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c tim.c 
+SRCS += shell.c top.c uname.c
 SRCS += string.c math.c
 ASM_SRCS = bootasm.S memasm.S
 
@@ -16,7 +17,7 @@ CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g3 -Wall --std=gnu99 -I./inc/ -I./lib/inc/
+CFLAGS  = -g3 -Wall --std=gnu99 -I./inc/ -I./inc/shell/ -I./lib/inc/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
@@ -27,7 +28,7 @@ CFLAGS += -D BUILD_TIME='"$(shell date)"' -D BUILD_REV=$(shell git shortlog | gr
 
 LFLAGS=
 
-VPATH = src/ lib/src/
+VPATH = src/ src/shell/ lib/src/
 
 ###################################################
 
