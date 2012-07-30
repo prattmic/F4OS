@@ -69,7 +69,7 @@ void switch_task(void) {
     }
 
     /* As a workaround for lack of MPU support, check if the 
-     * stack of the task was are switching from has overflowed */
+     * stack of the task we are switching from has overflowed */
     if (node->task->stack_base > node->task->stack_top) {
         panic_print("Task has overflowed its stack.");
     }
@@ -95,7 +95,7 @@ void switch_task(void) {
             next->prev = node;
             node->next = next;
         } 
-        /* Reached end of list without priorty changing, place on end. */
+        /* Reached end of list without priority changing, place on end. */
         else {
             if (node->next) {
                 task_list.head = node->next;
@@ -171,12 +171,12 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         if (reg_task == NULL) {
             free(task->stack_base);
             kfree(task);
-            printf("Could not allocate task with function pointer 0x%x; panicing.\r\n", fptr);
+            printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
             panic_print("Could not allocate task.");
         }
     }
     else {
-        printf("Could not allocate task with function pointer 0x%x; panicing.\r\n", fptr);
+        printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
         panic_print("Could not allocate task.");
     }
 }

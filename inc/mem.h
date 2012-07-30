@@ -1,5 +1,5 @@
 /* mem.h: memory operations definitions.
- * Convers mem.S and mem.c */
+ * Covers mem.S and mem.c */
 
 /* mem.S */
 extern void raise_privilege(void);

@@ -7,7 +7,7 @@
 /* Enables the MPU and sets the default memory map. */
 /* MPU Base address must be aligned with the MPU region size */
 void mpu_setup(void) {
-    /* The defualt memory map sets everything as accessible only to privileged access
+    /* The default memory map sets everything as accessible only to privileged access
      * Any unprivileged accesses will need to be explicitly allowed through a region. */
     uint32_t kernel_size = mpu_size((uint32_t) (&_ekernel) - (uint32_t) (&_skernel));
 

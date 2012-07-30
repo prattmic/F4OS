@@ -94,7 +94,7 @@ save_context:
     msr     psp, r0
     bx      lr
 
-/* Restores part of the context from PSP, exeception handler does the rest. */
+/* Restores part of the context from PSP, exception handler does the rest. */
 .thumb_func
 .section    .kernel
 .global     restore_context
@@ -105,10 +105,10 @@ restore_context:
     msr     psp, r0
     bx      lr
 
-/* Saves full context to PSP, including what the exeception handler would normally do. */
+/* Saves full context to PSP, including what the exception handler would normally do. */
 /* For save_full_context, see context.c:swap_task() */
 
-/* Restores full context from PSP, including what the exeception handler would normally do. */
+/* Restores full context from PSP, including what the exception handler would normally do. */
 .thumb_func
 .section    .kernel
 .global     restore_full_context
