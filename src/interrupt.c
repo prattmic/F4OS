@@ -13,7 +13,7 @@ void panic_print(char *s) {
     release(&usart_semaphore);
 
     /* Print panic message */
-    printf("panic: %s\r\n", s);
+    printf("\r\npanic: %s\r\n", s);
 
     panic();
 }

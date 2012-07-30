@@ -68,6 +68,12 @@ void switch_task(void) {
         panic_print("No tasks to run.");
     }
 
+    /* As a workaround for lack of MPU support, check if the 
+     * stack of the task was are switching from has overflowed */
+    if (node->task->stack_base > node->task->stack_top) {
+        panic_print("Task has overflowed its stack.");
+    }
+
     /* Don't bother moving this if it is the only high priority task */
     if (node->task->priority <= node->next->task->priority) {
         /* Move to end of priority */
