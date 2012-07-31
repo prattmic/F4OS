@@ -183,6 +183,10 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
 
 /* Place task in task list based on priority */
 void append_task(task_node *new_task) {
+    /* Interrupts need to be disabled while modifying the task
+     * list, as an interrupt could find the list chopped in two */
+    __asm__("cpsid  i");
+
     /* Check if head is set */
     if (task_list.head == NULL) {
         if (task_list.tail) {
@@ -223,6 +227,8 @@ void append_task(task_node *new_task) {
             prev->next = new_task;
         }
     }
+
+    __asm__("cpsie  i");
 }
 
 void idle_task(void) {
