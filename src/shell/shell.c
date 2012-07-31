@@ -5,17 +5,21 @@
 #include "semaphore.h"
 #include "buddy.h"
 #include "usart.h"
+#include "shell.h"
+
+/* Shell commands */
+#include "blink.h"
 #include "top.h"
 #include "uname.h"
-#include "shell.h"
 
 struct command {
     char *name;
     void (*fptr)(int, char **);
 };
 
-const struct command valid_commands[] = {{"uname",  &uname},
-                                         {"top",    &top}};
+const struct command valid_commands[] = {{"blink",  &blink},
+                                         {"top",    &top},
+                                         {"uname",  &uname}};
 #define NUM_COMMANDS    (sizeof(valid_commands)/sizeof(valid_commands[0]))
 
 static void free_argv(int argc, char ***argv);

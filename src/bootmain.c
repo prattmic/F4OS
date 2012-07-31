@@ -46,7 +46,7 @@ int main(void) {
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
          "\r\n");
 
-    led_tasks();
+    start_tasks();
 
     dont_panic();
     return 0;
