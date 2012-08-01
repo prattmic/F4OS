@@ -6,6 +6,7 @@
 #include "context.h"
 #include "semaphore.h"
 #include "buddy.h"
+#include "resource.h"
 #include "mem.h"
 
 task_node * volatile task_to_free = NULL;
@@ -150,6 +151,7 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task->task_list_node    = NULL;
     task->periodic_node     = NULL;
 
+    resource_setup(task);
     return task;
 }
 

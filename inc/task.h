@@ -1,4 +1,6 @@
-#define IDLE_TASK_BASE (uint32_t *)0x200
+#define RESOURCE_TABLE_SIZE         16
+
+typedef uint8_t rd_t;
 
 typedef struct task_node_struct {
     struct task_node_struct *prev;
@@ -10,6 +12,11 @@ typedef struct task_node_list {
     task_node   *head;
     task_node   *tail;
 } task_node_list;
+
+typedef struct resource {
+    void        (*writer)(char*);
+    char        (*reader)(void);
+} resource;
    
 typedef struct task_struct {
     uint32_t    *stack_top;
@@ -21,6 +28,8 @@ typedef struct task_struct {
     uint8_t     running;
     task_node   *task_list_node;
     task_node   *periodic_node;
+    resource    *resources[RESOURCE_TABLE_SIZE];
+    rd_t        top_rd;
 } task_ctrl;
 
 task_node_list task_list;
