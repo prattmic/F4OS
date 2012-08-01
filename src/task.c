@@ -43,7 +43,7 @@ void kernel_task(void) {
 void start_task_switching(void) {
     task_ctrl *task = task_list.head->task;
 
-    k_curr_task = task_list.head;
+    curr_task = task_list.head;
 
     //mpu_stack_set(task->stack_base);
 
@@ -63,8 +63,8 @@ void switch_task(void) {
      * it is kept sorted.  Round-robin through
      * equal priority tasks. */
     task_node *node = task_list.head;
-    k_curr_task = node;
-    if (k_curr_task == NULL) {
+    curr_task = node;
+    if (curr_task == NULL) {
         /* Uh-oh, no tasks! */
         panic_print("No tasks to run.");
     }

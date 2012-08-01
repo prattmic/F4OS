@@ -1,26 +1,26 @@
 #define IDLE_TASK_BASE (uint32_t *)0x200
 
-typedef struct k_task_node_struct {
-    struct k_task_node_struct*  prev;
-    struct k_task_node_struct*  next;
-    struct k_task_struct*       task;
+typedef struct task_node_struct {
+    struct task_node_struct *prev;
+    struct task_node_struct *next;
+    struct task_struct      *task;
 } task_node;
 
-typedef struct k_task_node_list {
-    task_node*   head;
-    task_node*   tail;
+typedef struct task_node_list {
+    task_node   *head;
+    task_node   *tail;
 } task_node_list;
    
-typedef struct k_task_struct {
-    uint32_t *stack_top;
-    uint32_t *stack_base;
-    void(*fptr)(void);
-    uint32_t period;
-    uint8_t priority;
-    uint8_t running;
+typedef struct task_struct {
+    uint32_t    *stack_top;
+    uint32_t    *stack_base;
+    void        (*fptr)(void);
+    uint32_t    period;
+    uint8_t     priority;
+    uint8_t     running;
 } task_ctrl;
 
-task_node *k_curr_task;
+task_node *curr_task;
 extern task_node * volatile task_to_free;
 extern uint8_t task_switching;
 

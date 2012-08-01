@@ -78,15 +78,15 @@ void orange_led(void) {
 
         /* Testing priority inheritance with greedy() */
         /* if (i) {
-            k_curr_task->task->priority = 2;
-            remove_task(k_curr_task);
-            append_task(k_curr_task);
+            curr_task->task->priority = 2;
+            remove_task(curr_task);
+            append_task(curr_task);
             acquire(&faux_sem);
             puts("Orange got the lock!\r\n");
             release(&faux_sem);
-            k_curr_task->task->priority = 1;
-            remove_task(k_curr_task);
-            append_task(k_curr_task);
+            curr_task->task->priority = 1;
+            remove_task(curr_task);
+            append_task(curr_task);
             i = 0;
         } */
     }

@@ -37,7 +37,7 @@ void acquire(volatile struct semaphore *semaphore) {
             :"r1", "r2", "r3", "cc", "memory");
 
     if (semaphore->held_by != NULL) {
-        if (semaphore->held_by->task->priority <= k_curr_task->task->priority) {
+        if (semaphore->held_by->task->priority <= curr_task->task->priority) {
             swap_task(semaphore->held_by);
         }
         else {
@@ -55,7 +55,7 @@ void acquire(volatile struct semaphore *semaphore) {
 
     /********************/
     __asm__("success:");
-    semaphore->held_by = k_curr_task;
+    semaphore->held_by = curr_task;
     return;
 }
     

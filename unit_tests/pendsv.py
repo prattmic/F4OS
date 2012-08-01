@@ -20,7 +20,7 @@ def interrupted_task(big_stack=False):
 
     function = lookup_symbol(pc)
 
-    curr_task = gdb.parse_and_eval("k_curr_task")
+    curr_task = gdb.parse_and_eval("curr_task")
 
     task_name = lookup_symbol(curr_task["task"]["fptr"].cast(gdb.lookup_type("uint32_t")))
 
