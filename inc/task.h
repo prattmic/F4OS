@@ -1,10 +1,18 @@
 #define IDLE_TASK_BASE (uint32_t *)0x200
+#define RESOURCE_TABLE_SIZE         16
+
+typedef uint8_t rd_t;
 
 typedef struct k_task_node_struct {
     struct k_task_node_struct*  prev;
     struct k_task_node_struct*  next;
     struct k_task_struct*       task;
 } task_node;
+
+typedef struct resource {
+    void(*writer)(char*);
+    char(*reader)(void);
+} resource;
 
 typedef struct k_task_node_list {
     task_node*   head;
@@ -18,6 +26,8 @@ typedef struct k_task_struct {
     uint32_t period;
     uint8_t priority;
     uint8_t running;
+    resource* resources[RESOURCE_TABLE_SIZE];
+    rd_t top_rd;
 } task_ctrl;
 
 task_node *k_curr_task;

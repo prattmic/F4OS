@@ -6,6 +6,7 @@
 #include "context.h"
 #include "semaphore.h"
 #include "buddy.h"
+#include "resource.h"
 #include "mem.h"
 
 task_ctrl k_idle_task;
@@ -146,7 +147,7 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task->priority   = priority;
     task->period     = period;
     task->running    = 0;
-
+    resource_setup(task);
     return task;
 }
 

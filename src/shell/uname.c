@@ -5,6 +5,7 @@
 #include "usart.h"
 #include "shell.h"
 #include "uname.h"
+#include "resource.h"
 
 void uname(int argc, char **argv) {
     if (argc > 1) {
@@ -19,6 +20,6 @@ void uname(int argc, char **argv) {
         }
     }
     else {
-        printf("F4OS\r\n");
+        write(0, "F4OS\r\n");
     }
 }
