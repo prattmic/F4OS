@@ -7,6 +7,9 @@
 
 /* Print a message and then panic */
 void panic_print(char *s) {
+    /* Toggle red LED so there is some indication that something
+     * bad has happened if this handler hangs */
+    *LED_ODR ^= (1 << 14);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
@@ -22,6 +25,9 @@ void hardfault_handler(void) {
     uint32_t status;
     uint8_t interpretation = 0;
 
+    /* Toggle red LED so there is some indication that something
+     * bad has happened if this handler hangs */
+    *LED_ODR ^= (1 << 14);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
@@ -58,6 +64,9 @@ void memmanage_handler(void) {
 
     status = (uint8_t) (*SCB_CFSR & 0xff);
 
+    /* Toggle red LED so there is some indication that something
+     * bad has happened if this handler hangs */
+    *LED_ODR ^= (1 << 14);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
@@ -111,6 +120,9 @@ void busfault_handler(void) {
 
     status = (uint8_t) ((*SCB_CFSR >> 8) & 0xff);
 
+    /* Toggle red LED so there is some indication that something
+     * bad has happened if this handler hangs */
+    *LED_ODR ^= (1 << 14);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
@@ -171,6 +183,9 @@ void usagefault_handler(void) {
 
     status = (uint16_t) (*SCB_CFSR >> 16);
 
+    /* Toggle red LED so there is some indication that something
+     * bad has happened if this handler hangs */
+    *LED_ODR ^= (1 << 14);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
