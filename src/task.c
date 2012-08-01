@@ -129,7 +129,7 @@ void switch_task(void) {
 task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task_ctrl *task;
     uint32_t *memory;
-
+    static uint32_t pid_source = 1;
     task = (task_ctrl *) kmalloc(sizeof(task_ctrl));
     if (task == NULL) {
         return NULL;
@@ -147,6 +147,7 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task->priority   = priority;
     task->period     = period;
     task->running    = 0;
+    task->pid = pid_source++;
     resource_setup(task);
     return task;
 }

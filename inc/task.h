@@ -10,6 +10,7 @@ typedef struct k_task_node_struct {
 } task_node;
 
 typedef struct resource {
+    char *addr;
     void(*writer)(char*);
     char(*reader)(void);
 } resource;
@@ -26,7 +27,8 @@ typedef struct k_task_struct {
     uint32_t period;
     uint8_t priority;
     uint8_t running;
-    resource* resources[RESOURCE_TABLE_SIZE];
+    uint32_t pid;
+    resource *resources[RESOURCE_TABLE_SIZE];
     rd_t top_rd;
 } task_ctrl;
 
