@@ -8,21 +8,8 @@
 #include "buddy.h"
 #include "mem.h"
 
-task_ctrl k_idle_task;
-
-task_node sys_idle_task;
-task_node_list task_list;
-task_node_list periodic_task_list;
-
 task_node * volatile task_to_free = NULL;
 uint8_t task_switching = 0;
-
-void init_kernel(void) {
-    sys_idle_task.next = NULL;
-    (sys_idle_task.task)->fptr =        &idle_task;
-    (sys_idle_task.task)->stack_base =  IDLE_TASK_BASE;
-    (sys_idle_task.task)->stack_top =   IDLE_TASK_BASE;
-}
 
 void kernel_task(void) {
     /* Does cleanup that can't be done from outside a task (ie. in an interrupt) */
@@ -50,7 +37,12 @@ void start_task_switching(void) {
     task_switching = 1;
     task->running = 1;
     
-    create_context(task, &end_task);
+    if (task->period) {
+        create_context(task, &end_periodic_task);
+    }
+    else {
+        create_context(task, &end_task);
+    }
 
     enable_psp(task->stack_top);
     restore_full_context();
@@ -120,7 +112,12 @@ void switch_task(void) {
     else {
         node->task->running = 1;
 
-        create_context(node->task, &end_task);
+        if (node->task->period) {
+            create_context(node->task, &end_periodic_task);
+        }
+        else {
+            create_context(node->task, &end_task);
+        }
         enable_psp(node->task->stack_top);
         return;
     }
@@ -141,24 +138,29 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         return NULL;
     }
 
-    task->stack_base = memory;
-    task->stack_top  = memory + STKSIZE;
-    task->fptr       = fptr;
-    task->priority   = priority;
-    task->period     = period;
-    task->running    = 0;
+    task->stack_base        = memory;
+    task->stack_top         = memory + STKSIZE;
+    task->fptr              = fptr;
+    task->priority          = priority;
+    task->running           = 0;
+
+    task->period            = period;
+    task->ticks_until_wake  = period;
+
+    task->task_list_node    = NULL;
+    task->periodic_node     = NULL;
 
     return task;
 }
 
-task_node *register_task(task_ctrl *task_ptr) {
+task_node *register_task(task_node_list *list, task_ctrl *task_ptr) {
     task_node *new_task = kmalloc(sizeof(task_node));
     if (new_task == NULL) {
         return NULL;
     }
 
     new_task->task = task_ptr;
-    append_task(new_task);
+    append_task(list, new_task);
 
     return new_task;
 }
@@ -168,12 +170,29 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     if (task != NULL) {
         task_node *reg_task;
 
-        reg_task = register_task(task);
+        reg_task = register_task(&task_list, task);
         if (reg_task == NULL) {
             free(task->stack_base);
             kfree(task);
             printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
             panic_print("Could not allocate task.");
+        }
+        else {
+            task->task_list_node = reg_task;
+        }
+
+        if (period) {
+            task_node *per_node = register_task(&periodic_task_list, task);
+            if (per_node == NULL) {
+                free(task->stack_base);
+                kfree(task);
+                kfree(reg_task);
+                printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
+                panic_print("Could not allocate task.");
+            }
+            else {
+                task->periodic_node = per_node;
+            }
         }
     }
     else {
@@ -232,20 +251,7 @@ void append_task(task_node_list *list, task_node *task) {
     __asm__("cpsie  i");
 }
 
-void idle_task(void) {
-    while(1){
-        __asm__("nop");
-    }
-}
-
-void end_task(void) {
-    __asm__("push {lr}");
-    _svc(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
-    __asm__("pop {lr}\n"
-            "bx lr\n");
-}
-
-void remove_task(task_node *node) {
+void remove_task(task_node_list *list, task_node *node) {
     /* Remove from end/middle/beginning of list */
     if (node->next == NULL && node->prev) {
         node->prev->next = NULL;
@@ -257,12 +263,18 @@ void remove_task(task_node *node) {
         node->next->prev = NULL;
     }
 
-    /* Remove from head/tail of task_list */
-    if (task_list.head == node) {
-        task_list.head = node->next;
+    /* Remove from head/tail of list->*/
+    if (list->head == node) {
+        list->head = node->next;
     }
-    if (task_list.tail == node) {
-        task_list.tail = node->prev;
+    if (list->tail == node) {
+        list->tail = node->prev;
+    }
+}
+
+void idle_task(void) {
+    while(1){
+        __asm__("nop");
     }
 }
 
@@ -273,37 +285,14 @@ void free_task(task_node *node) {
     kfree(node);
 }
 
-task_node_list sort_by_priority(task_node_list list) {
-    task_node_list ret = {NULL, NULL};
-    task_node *temp_head = list.head;
-    task_node *ptr = list.head;
-    task_node *preptr = list.head;
-    task_node *pre_min_node = list.head;
-    int8_t min = ptr->task->priority;
+void end_task(void) {
+    __asm__("mrs    %[ghetto], msp"
+            :[ghetto] "=r" (ghetto_sp_save)::);
+    _svc(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
+}
 
-    while(ptr->next != NULL){
-        if(min >= ptr->task->priority){
-            min = ptr->task->priority;
-            pre_min_node = preptr;
-        }
-        preptr = ptr;
-        ptr = ptr->next;
-        //derp
-    }
-
-    ret.head = pre_min_node->next;
-    ret.tail = ret.head;
-    while(temp_head->next != NULL){
-        preptr = ptr;
-        ptr = ptr->next;
-        while(ptr->next != NULL){
-            if(min >= ptr->task->priority){
-                min = ptr->task->priority;
-                pre_min_node = preptr;
-            }
-        }
-        ret.tail->next = pre_min_node->next;
-        ret.tail = ret.tail->next;
-    }
-    return ret;
+void end_periodic_task(void) {
+    __asm__("mrs    %[ghetto], msp"
+            :[ghetto] "=r" (ghetto_sp_save)::);
+    _svc(SVC_END_PERIODIC_TASK);    /* Shouldn't return (to here, at least) */
 }

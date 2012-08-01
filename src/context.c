@@ -91,6 +91,7 @@ void svc_handler(uint32_t *svc_args) {
             break;
         }
         case SVC_END_TASK: {
+            __asm__("mov r10, sp");
             task_node *node = task_to_free;
 
             /* curr_task->next set to NULL after task switch */
@@ -107,7 +108,7 @@ void svc_handler(uint32_t *svc_args) {
             }
 
             __asm__("push {lr}");
-            remove_task(curr_task);
+            remove_task(&task_list, curr_task);
             __asm__("pop {lr}");
             __asm__("push {lr}");
             switch_task();
@@ -119,12 +120,28 @@ void svc_handler(uint32_t *svc_args) {
             enable_psp(curr_task->task->stack_top);
             __asm__("pop {lr}");
 
-            __asm__("push {lr}\r\n"
-                    "b  restore_context\r\n");  /* Won't return */
-            __asm__("pop {lr}");
+            __asm__("mov sp, %[ghetto]\r\n"
+                    "b  restore_context\r\n"    /* Won't return */
+                    ::[ghetto] "r" (ghetto_sp_save):);
             break;
         }
-        case SVC_PERIODIC_TASK: {
+        case SVC_END_PERIODIC_TASK: {
+            __asm__("push {lr}");
+            remove_task(&task_list, curr_task);
+            __asm__("pop {lr}");
+            curr_task->task->running = 0;
+            /* Reset stack */
+            curr_task->task->stack_top = curr_task->task->stack_base + STKSIZE;
+            __asm__("push {lr}");
+            switch_task();
+            __asm__("pop {lr}");
+            __asm__("push {lr}");
+            enable_psp(curr_task->task->stack_top);
+            __asm__("pop {lr}");
+
+            __asm__("mov sp, %[ghetto]\r\n"
+                    "b  restore_context\r\n"    /* Won't return */
+                    ::[ghetto] "r" (ghetto_sp_save):);
         }
         default:
             break;

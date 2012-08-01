@@ -25,5 +25,21 @@ void init_timer(void) {
 
 void tim2_handler(void) {
     *TIM2_SR = 0;
-    *LED_ODR ^= (1<<12);
+    //*LED_ODR ^= (1<<12);
+
+    task_node *node = periodic_task_list.head;
+
+    while (node) {
+        if (node->task->ticks_until_wake == 0) {
+            if (!node->task->running) {
+                append_task(&task_list, node->task->task_list_node);
+            }
+            node->task->ticks_until_wake = node->task->period;
+        }
+        else {
+            node->task->ticks_until_wake--;
+        }
+
+        node = node->next;
+    }
 }
