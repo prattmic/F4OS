@@ -124,6 +124,8 @@ void svc_handler(uint32_t *svc_args) {
             __asm__("pop {lr}");
             break;
         }
+        case SVC_PERIODIC_TASK: {
+        }
         default:
             break;
     }

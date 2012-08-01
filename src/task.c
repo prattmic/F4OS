@@ -12,6 +12,7 @@ task_ctrl k_idle_task;
 
 task_node sys_idle_task;
 task_node_list task_list;
+task_node_list periodic_task_list;
 
 task_node * volatile task_to_free = NULL;
 uint8_t task_switching = 0;
@@ -182,49 +183,49 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
 }
 
 /* Place task in task list based on priority */
-void append_task(task_node *new_task) {
+void append_task(task_node_list *list, task_node *task) {
     /* Interrupts need to be disabled while modifying the task
      * list, as an interrupt could find the list chopped in two */
     __asm__("cpsid  i");
 
     /* Check if head is set */
-    if (task_list.head == NULL) {
-        if (task_list.tail) {
+    if (list->head == NULL) {
+        if (list->tail) {
             /* WTF!?  Why is the tail set but not the head? */
             panic_print("Task list tail set, but not head.");
         }
 
-        task_list.head = new_task;
-        task_list.tail = new_task;
-        new_task->prev = NULL;
-        new_task->next = NULL;
+        list->head = task;
+        list->tail = task;
+        task->prev = NULL;
+        task->next = NULL;
     }
     else {
-        if (new_task->task->priority > task_list.head->task->priority) {
-            new_task->prev = NULL;
-            new_task->next = task_list.head;
-            task_list.head = new_task;
+        if (task->task->priority > list->head->task->priority) {
+            task->prev = NULL;
+            task->next = list->head;
+            list->head = task;
             return;
         }
         else {
-            task_node *prev = task_list.head;
-            task_node *next = task_list.head->next;
+            task_node *prev = list->head;
+            task_node *next = list->head->next;
 
-            while (next && next->task->priority >= new_task->task->priority) {
+            while (next && next->task->priority >= task->task->priority) {
                 prev = next;
                 next = next->next;
             }
             
             if (next) {
-                new_task->next = next;
-                next->prev = new_task;
+                task->next = next;
+                next->prev = task;
             }
             else {
-                new_task->next = NULL;
-                task_list.tail = new_task;
+                task->next = NULL;
+                list->tail = task;
             }
-            new_task->prev = prev;
-            prev->next = new_task;
+            task->prev = prev;
+            prev->next = task;
         }
     }
 
