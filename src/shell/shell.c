@@ -18,6 +18,7 @@ struct command {
 };
 
 const struct command valid_commands[] = {{"blink",  &blink},
+                                         {"help",   &help},
                                          {"top",    &top},
                                          {"uname",  &uname}};
 #define NUM_COMMANDS    (sizeof(valid_commands)/sizeof(valid_commands[0]))
@@ -178,4 +179,12 @@ void run_command(char *command, int argc, char **argv) {
     }
 
     printf("%s: command not found\r\n", argv[0]);
+}
+
+void help(int argc, char **argv) {
+    puts("Available commands:\r\n");
+
+    for (uint32_t i = 0; i < NUM_COMMANDS; i++) {
+        printf("%s\r\n", valid_commands[i].name);
+    }
 }
