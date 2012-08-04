@@ -4,6 +4,7 @@
 
 #include "types.h"
 #include "registers.h"
+#include "stdio.h"
 #include "interrupt.h"
 #include "task.h"
 #include "mem.h"

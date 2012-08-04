@@ -1,8 +1,9 @@
 #include "types.h"
 #include "registers.h"
-#include "usart.h"
+#include "stdio.h"
 #include "task.h"
 #include "semaphore.h"
+#include "usart.h"
 #include "interrupt.h"
 
 /* Print a message and then panic */

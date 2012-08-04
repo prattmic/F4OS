@@ -4,7 +4,7 @@
 #include "mem.h"
 #include "semaphore.h"
 #include "buddy.h"
-#include "usart.h"
+#include "stdio.h"
 #include "shell.h"
 
 /* Shell commands */

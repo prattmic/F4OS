@@ -7,6 +7,7 @@
 #include "semaphore.h"
 #include "buddy.h"
 #include "resource.h"
+#include "stdio.h"
 #include "mem.h"
 
 task_node * volatile task_to_free = NULL;

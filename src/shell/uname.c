@@ -2,7 +2,7 @@
 #include "string.h"
 #include "task.h"
 #include "semaphore.h"
-#include "usart.h"
+#include "stdio.h"
 #include "shell.h"
 #include "uname.h"
 #include "resource.h"
@@ -20,6 +20,6 @@ void uname(int argc, char **argv) {
         }
     }
     else {
-        write(0, "F4OS\r\n");
+        puts("F4OS\r\n");
     }
 }

@@ -3,7 +3,7 @@
 #include "string.h"
 #include "task.h"
 #include "semaphore.h"
-#include "usart.h"
+#include "stdio.h"
 #include "blink.h"
 
 uint8_t enabled_blue = 0;
