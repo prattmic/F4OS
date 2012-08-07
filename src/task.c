@@ -227,6 +227,8 @@ void append_task(task_node_list *list, task_node *task) {
             task->prev = NULL;
             task->next = list->head;
             list->head = task;
+
+            __asm__("cpsie  i");
             return;
         }
         else {
