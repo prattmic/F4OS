@@ -23,7 +23,7 @@ void blink(int argc, char **argv) {
             }
             else {
                 printf("Enabling blue LED...");
-                new_task(&blue_led, 1, 500);
+                new_task(&blue_led, 5, 500);
                 enabled_blue = 1;
                 printf("Done.\r\n");
             }
@@ -34,7 +34,7 @@ void blink(int argc, char **argv) {
             }
             else {
                 printf("Enabling orange LED...");
-                new_task(&orange_led, 1, 2000);
+                new_task(&orange_led, 5, 2000);
                 enabled_orange = 1;
                 printf("Done.\r\n");
             }
@@ -45,7 +45,7 @@ void blink(int argc, char **argv) {
             }
             else {
                 printf("Enabling green LED...");
-                new_task(&green_led, 1, 1000);
+                new_task(&green_led, 5, 1000);
                 enabled_green = 1;
                 printf("Done.\r\n");
             }
