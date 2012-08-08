@@ -49,7 +49,7 @@ void pendsv_handler(void){
     __asm__("push {lr}");
     psp_addr = save_context();
     __asm__("pop {lr}");
-    k_curr_task->task->stack_top = psp_addr;
+    curr_task->task->stack_top = psp_addr;
 
     __asm__("push {lr}");
     switch_task();
@@ -91,23 +91,24 @@ void svc_handler(uint32_t *svc_args) {
             break;
         }
         case SVC_END_TASK: {
+            __asm__("mov r10, sp");
             task_node *node = task_to_free;
 
-            /* k_curr_task->next set to NULL after task switch */
+            /* curr_task->next set to NULL after task switch */
             if (node != NULL) {
                 while (node->next != NULL) {
                     node = node->next;
                 }
-                node->next = k_curr_task;
+                node->next = curr_task;
                 node = node->next;
             }
             else {
-                task_to_free = k_curr_task;
+                task_to_free = curr_task;
                 node = task_to_free;
             }
 
             __asm__("push {lr}");
-            remove_task(k_curr_task);
+            remove_task(&task_list, curr_task);
             __asm__("pop {lr}");
             __asm__("push {lr}");
             switch_task();
@@ -116,13 +117,31 @@ void svc_handler(uint32_t *svc_args) {
             node->next = NULL;
             __asm__("pop {lr}");
             __asm__("push {lr}");
-            enable_psp(k_curr_task->task->stack_top);
+            enable_psp(curr_task->task->stack_top);
             __asm__("pop {lr}");
 
-            __asm__("push {lr}\r\n"
-                    "b  restore_context\r\n");  /* Won't return */
-            __asm__("pop {lr}");
+            __asm__("mov sp, %[ghetto]\r\n"
+                    "b  restore_context\r\n"    /* Won't return */
+                    ::[ghetto] "r" (ghetto_sp_save):);
             break;
+        }
+        case SVC_END_PERIODIC_TASK: {
+            __asm__("push {lr}");
+            remove_task(&task_list, curr_task);
+            __asm__("pop {lr}");
+            curr_task->task->running = 0;
+            /* Reset stack */
+            curr_task->task->stack_top = curr_task->task->stack_base + STKSIZE;
+            __asm__("push {lr}");
+            switch_task();
+            __asm__("pop {lr}");
+            __asm__("push {lr}");
+            enable_psp(curr_task->task->stack_top);
+            __asm__("pop {lr}");
+
+            __asm__("mov sp, %[ghetto]\r\n"
+                    "b  restore_context\r\n"    /* Won't return */
+                    ::[ghetto] "r" (ghetto_sp_save):);
         }
         default:
             break;
@@ -157,11 +176,11 @@ void swap_task(task_node *node) {
             "msr     psp, r0  \r\n"
             );
 
-    k_curr_task->task->stack_top = stack_top;
+    curr_task->task->stack_top = stack_top;
 
-    k_curr_task = node;
+    curr_task = node;
 
-    enable_psp(k_curr_task->task->stack_top);
+    enable_psp(curr_task->task->stack_top);
 
     __asm__("b  restore_full_context\r\n");  /* Won't return */
 

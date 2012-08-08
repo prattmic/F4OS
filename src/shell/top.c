@@ -4,6 +4,7 @@
 #include "task.h"
 #include "semaphore.h"
 #include "buddy.h"
+#include "stdio.h"
 #include "top.h"
 
 static uint32_t free_memory(struct buddy *buddy);

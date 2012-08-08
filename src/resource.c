@@ -7,9 +7,12 @@
 #include "semaphore.h"
 #include "buddy.h"
 #include "resource.h"
+#include "stdio.h"
 #include "mem.h"
 
 pipe_list k_pipes = {NULL, NULL};
+resource default_resources[RESOURCE_TABLE_SIZE] = {{&usart_puts, &usart_getc}
+                                                  };
 
 void add_resource(task_ctrl* tcs, resource* r) {
     tcs->resources[tcs->top_rd] = r;
@@ -20,14 +23,23 @@ void add_resource(task_ctrl* tcs, resource* r) {
 void resource_setup(task_ctrl* tcs) {
     tcs->top_rd = 0;
     resource* new_r = kmalloc(sizeof(resource));
-    new_r->addr = NULL;
     new_r->writer = &puts;
     new_r->reader = &getc;
+    new_r->addr = NULL;
     add_resource(tcs, new_r);
 }
 
 void write(rd_t rd, char* s) {
-    k_curr_task->task->resources[rd]->writer(s);
+    if (rd >= RESOURCE_TABLE_SIZE) {
+        panic_print("Resource descriptor too large");
+    }
+
+    if (task_switching) {
+        curr_task->task->resources[rd]->writer(s);
+    }
+    else {
+        default_resources[rd].writer(s);
+    }
 }
 
 pipe create_pipe(uint32_t reader_pid, uint32_t writer_pid) {
@@ -58,3 +70,15 @@ void add_pipe_to_list(pipe_node* p) {
     }
 }
 
+char read(rd_t rd) {
+    if (rd >= RESOURCE_TABLE_SIZE) {
+        panic_print("Resource descriptor too large");
+    }
+
+    if (task_switching) {
+        return curr_task->task->resources[rd]->reader();
+    }
+    else {
+        return default_resources[rd].reader();
+    }
+}

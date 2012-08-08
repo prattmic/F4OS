@@ -3,11 +3,12 @@
 #include "string.h"
 #include "task.h"
 #include "semaphore.h"
-#include "usart.h"
+#include "stdio.h"
 #include "blink.h"
 
 uint8_t enabled_blue = 0;
 uint8_t enabled_orange = 0;
+uint8_t enabled_green = 0;
 
 void blink(int argc, char **argv) {
     if (argc < 2) {
@@ -22,7 +23,7 @@ void blink(int argc, char **argv) {
             }
             else {
                 printf("Enabling blue LED...");
-                new_task(&blue_led, 1, 0);
+                new_task(&blue_led, 5, 500);
                 enabled_blue = 1;
                 printf("Done.\r\n");
             }
@@ -33,8 +34,19 @@ void blink(int argc, char **argv) {
             }
             else {
                 printf("Enabling orange LED...");
-                new_task(&orange_led, 1, 0);
+                new_task(&orange_led, 5, 2000);
                 enabled_orange = 1;
+                printf("Done.\r\n");
+            }
+        }
+        else if (!strncmp(argv[i], "green", 16)) {
+            if (enabled_green) {
+                printf("Green LED already enabled.\r\n");
+            }
+            else {
+                printf("Enabling green LED...");
+                new_task(&green_led, 5, 1000);
+                enabled_green = 1;
                 printf("Done.\r\n");
             }
         }
@@ -45,49 +57,16 @@ void blink(int argc, char **argv) {
 }
 
 void blue_led(void) {
-    while (1) {
-        uint32_t count = 9000000;
-
-        //puts("Toggling blue LED.\r\n");
-
-        /* Toggle LED */
-        *LED_ODR ^= (1 << 15);
-
-        while (--count) {
-            float delay = 2.81;
-            delay *= 3.14f;
-        }
-    }
+    /* Toggle LED */
+    *LED_ODR ^= (1 << 15);
 }
 
 void orange_led(void) {
-    /* uint8_t i = 1; */
+    /* Toggle LED */
+    *LED_ODR ^= (1 << 13);
 
-    while (1) {
-        uint32_t count = 9000000;
+}
 
-        //puts("Toggling orange LED.\r\n");
-
-        /* Toggle LED */
-        *LED_ODR ^= (1 << 13);
-
-        while (--count) {
-            float delay = 2.81;
-            delay *= 3.14f;
-        }
-
-        /* Testing priority inheritance with greedy() */
-        /* if (i) {
-            k_curr_task->task->priority = 2;
-            remove_task(k_curr_task);
-            append_task(k_curr_task);
-            acquire(&faux_sem);
-            puts("Orange got the lock!\r\n");
-            release(&faux_sem);
-            k_curr_task->task->priority = 1;
-            remove_task(k_curr_task);
-            append_task(k_curr_task);
-            i = 0;
-        } */
-    }
+void green_led(void) {
+    *LED_ODR ^= (1 << 12);
 }

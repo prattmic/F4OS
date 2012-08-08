@@ -2,7 +2,7 @@
 #include "registers.h"
 #include "task.h"
 #include "semaphore.h"
-#include "usart.h"
+#include "stdio.h"
 #include "spi.h"
 
 void init_spi(void) {

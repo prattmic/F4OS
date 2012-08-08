@@ -22,6 +22,15 @@ void spin_acquire(volatile struct semaphore *semaphore) {
 }
 
 void acquire(volatile struct semaphore *semaphore) {
+    /* If in a fault, allow immediate use of semaphore */
+    if (FAULTMASK()) {
+        semaphore->lock = 1;
+        /* This will cause a bus fault if someone tries to switch to it,
+         * but in a fault state there should be no task switching */
+        semaphore->held_by = (task_node *) 0xdefeca7e;
+        return;
+    }
+
     __asm__("try:");
     __asm__("\
             mov         r2, #1              \r\n\
@@ -37,7 +46,7 @@ void acquire(volatile struct semaphore *semaphore) {
             :"r1", "r2", "r3", "cc", "memory");
 
     if (semaphore->held_by != NULL) {
-        if (semaphore->held_by->task->priority <= k_curr_task->task->priority) {
+        if (semaphore->held_by->task->priority <= curr_task->task->priority) {
             swap_task(semaphore->held_by);
         }
         else {
@@ -55,7 +64,7 @@ void acquire(volatile struct semaphore *semaphore) {
 
     /********************/
     __asm__("success:");
-    semaphore->held_by = k_curr_task;
+    semaphore->held_by = curr_task;
     return;
 }
     

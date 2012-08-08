@@ -1,6 +1,6 @@
 SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c tim.c resource.c 
 SRCS += shell.c blink.c top.c uname.c
-SRCS += string.c math.c
+SRCS += string.c math.c stdio.c
 ASM_SRCS = bootasm.S memasm.S
 
 LINK_SCRIPT = kernel.ld
@@ -23,7 +23,7 @@ CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
 CFLAGS += -O2 
 
-CFLAGS += -D BUILD_TIME='"$(shell date)"' -D BUILD_REV=$(shell git shortlog | grep -E '^[ ]+\w+' | wc -l)
+CFLAGS += -D BUILD_TIME='"$(shell date)"' -D BUILD_REV=$(shell git rev-list HEAD | wc -l)
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=

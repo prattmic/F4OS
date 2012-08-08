@@ -3,6 +3,17 @@
 extern const uint32_t _skernel;
 extern const uint32_t _ekernel;
 
+inline uint8_t FAULTMASK(void) __attribute__((always_inline));
+inline uint8_t FAULTMASK(void) {
+    uint8_t val;
+
+    asm("mrs    %[val], faultmask"
+        :[val] "=r" (val)
+        ::);
+
+    return val;
+}
+
 /* Make a SVC call */
 #define _svc(x)                         asm volatile ("svc  %0  \n" :: "i" (x))
 
