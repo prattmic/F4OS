@@ -11,3 +11,6 @@
 tags
 core
 lorem.py
+.cproject
+.project
+.settings
