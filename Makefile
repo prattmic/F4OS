@@ -44,9 +44,20 @@ all: proj
 
 again: clean all
 
-# Flash the STM32F4
-burn:
+# Flash the STM32F4 using on-board ST-LinkV1/V2
+burn-stlink:
 	st-flash write $(PROJ_NAME).bin 0x8000000
+
+# Flash the STM32F4 using ARM-USB-OCD
+burn-arm-usb-ocd:
+	openocd -s $(OPENOCD_SHARE)/scripts \
+            -f interface/arm-usb-ocd.cfg \
+            -f target/stm32f4x.cfg \
+            -c "init" \
+            -c "reset halt" \
+            -c "flash write_image erase $(PROJ_NAME).bin 0x08000000" \
+            -c "reset" \
+            -c "shutdown"
 
 # Create tags
 ctags:
@@ -76,6 +87,7 @@ $(PROJ_NAME).elf: $(OBJS)
 	$(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
 	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
+	$(SIZE) $(PROJ_NAME).elf
 
 clean:
 	-rm -f *.o *.i *.s *.P

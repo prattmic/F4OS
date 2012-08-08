@@ -47,16 +47,15 @@ void pendsv_handler(void){
     //*LED_ODR ^= (1<<12);
 
     __asm__("push {lr}");
+
     psp_addr = save_context();
-    __asm__("pop {lr}");
+
     curr_task->task->stack_top = psp_addr;
 
-    __asm__("push {lr}");
     switch_task();
-    __asm__("pop {lr}");
-    
-    __asm__("push {lr}");
+
     restore_context();
+
     __asm__("pop {lr} \n"
             "bx lr\n");
 }
@@ -108,16 +107,15 @@ void svc_handler(uint32_t *svc_args) {
             }
 
             __asm__("push {lr}");
+
             remove_task(&task_list, curr_task);
-            __asm__("pop {lr}");
-            __asm__("push {lr}");
+
             switch_task();
-            __asm__("pop {lr}");
-            __asm__("push {lr}");
+
             node->next = NULL;
-            __asm__("pop {lr}");
-            __asm__("push {lr}");
+
             enable_psp(curr_task->task->stack_top);
+
             __asm__("pop {lr}");
 
             __asm__("mov sp, %[ghetto]\r\n"
@@ -127,16 +125,18 @@ void svc_handler(uint32_t *svc_args) {
         }
         case SVC_END_PERIODIC_TASK: {
             __asm__("push {lr}");
+
             remove_task(&task_list, curr_task);
-            __asm__("pop {lr}");
+
             curr_task->task->running = 0;
+
             /* Reset stack */
             curr_task->task->stack_top = curr_task->task->stack_base + STKSIZE;
-            __asm__("push {lr}");
+
             switch_task();
-            __asm__("pop {lr}");
-            __asm__("push {lr}");
+
             enable_psp(curr_task->task->stack_top);
+
             __asm__("pop {lr}");
 
             __asm__("mov sp, %[ghetto]\r\n"
