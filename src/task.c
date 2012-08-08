@@ -208,7 +208,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
 void append_task(task_node_list *list, task_node *task) {
     /* Interrupts need to be disabled while modifying the task
      * list, as an interrupt could find the list chopped in two */
-    __asm__("cpsid  i");
+    __asm__("cpsid  i \n\t");
 
     /* Check if head is set */
     if (list->head == NULL) {
@@ -251,7 +251,7 @@ void append_task(task_node_list *list, task_node *task) {
         }
     }
 
-    __asm__("cpsie  i");
+    __asm__("cpsie  i \n\t");
 }
 
 void remove_task(task_node_list *list, task_node *node) {
@@ -277,7 +277,7 @@ void remove_task(task_node_list *list, task_node *node) {
 
 void idle_task(void) {
     while(1){
-        __asm__("nop");
+        __asm__("nop \n\t");
     }
 }
 
@@ -289,13 +289,13 @@ void free_task(task_node *node) {
 }
 
 void end_task(void) {
-    __asm__("mrs    %[ghetto], msp"
+    __asm__("mrs    %[ghetto], msp \n\t"
             :[ghetto] "=r" (ghetto_sp_save)::);
     _svc(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
 }
 
 void end_periodic_task(void) {
-    __asm__("mrs    %[ghetto], msp"
+    __asm__("mrs    %[ghetto], msp \n\t"
             :[ghetto] "=r" (ghetto_sp_save)::);
     _svc(SVC_END_PERIODIC_TASK);    /* Shouldn't return (to here, at least) */
 }

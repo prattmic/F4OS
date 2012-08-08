@@ -24,5 +24,5 @@ void systick_handler(void) {
     /* Call PendSV to do switching */
     *SCB_ICSR |= SCB_ICSR_PENDSVSET;
 
-    __asm__("bx lr");
+    __asm__("bx lr \n\t");
 }

@@ -43,10 +43,8 @@ void user_prefix(void) {
 void pendsv_handler(void){
     uint32_t *psp_addr;
 
-    /* Blink an LED, for the LOLs */
-    //*LED_ODR ^= (1<<12);
-
-    __asm__("push {lr}");
+    __asm__("push {lr} \n\t");
+    __asm__("cpsid i \n\t");
 
     psp_addr = save_context();
 
@@ -56,8 +54,9 @@ void pendsv_handler(void){
 
     restore_context();
 
-    __asm__("pop {lr} \n"
-            "bx lr\n");
+    __asm__("cpsie i \n\t");
+    __asm__("pop {lr} \n\t");
+    __asm__("bx lr \n\t");
 }
 
 void svc_handler(uint32_t *svc_args) {
@@ -90,7 +89,7 @@ void svc_handler(uint32_t *svc_args) {
             break;
         }
         case SVC_END_TASK: {
-            __asm__("mov r10, sp");
+            __asm__("mov r10, sp \n\t");
             task_node *node = task_to_free;
 
             /* curr_task->next set to NULL after task switch */
@@ -106,7 +105,7 @@ void svc_handler(uint32_t *svc_args) {
                 node = task_to_free;
             }
 
-            __asm__("push {lr}");
+            __asm__("push {lr} \n\t");
 
             remove_task(&task_list, curr_task);
 
@@ -116,15 +115,15 @@ void svc_handler(uint32_t *svc_args) {
 
             enable_psp(curr_task->task->stack_top);
 
-            __asm__("pop {lr}");
+            __asm__("pop {lr} \n\t");
 
-            __asm__("mov sp, %[ghetto]\r\n"
-                    "b  restore_context\r\n"    /* Won't return */
+            __asm__("mov sp, %[ghetto] \n\t"
+                    "b  restore_context \n\t"    /* Won't return */
                     ::[ghetto] "r" (ghetto_sp_save):);
             break;
         }
         case SVC_END_PERIODIC_TASK: {
-            __asm__("push {lr}");
+            __asm__("push {lr} \n\t");
 
             remove_task(&task_list, curr_task);
 
@@ -137,10 +136,10 @@ void svc_handler(uint32_t *svc_args) {
 
             enable_psp(curr_task->task->stack_top);
 
-            __asm__("pop {lr}");
+            __asm__("pop {lr} \n\t");
 
-            __asm__("mov sp, %[ghetto]\r\n"
-                    "b  restore_context\r\n"    /* Won't return */
+            __asm__("mov sp, %[ghetto] \n\t"
+                    "b  restore_context \n\t"    /* Won't return */
                     ::[ghetto] "r" (ghetto_sp_save):);
         }
         default:
@@ -153,27 +152,27 @@ void swap_task(task_node *node) {
     register uint32_t *stack_top asm("r0");
     
     __asm__(/* If you aren't already on the psp, you are screwed, sorry */
-            "str     r0, [sp, #-100] \r\n"      /* Go ahead and store r0, so I can use it */
+            "str     r0, [sp, #-100] \n\t"      /* Go ahead and store r0, so I can use it */
 
-            "mrs     r0, xpsr        \r\n"
-            "orr     r0, r0, #0x1000000      \r\n"
-            "str     r0, [sp, #-72]  \r\n"      /* Store xpsr quickly, don't want it to change */
+            "mrs     r0, xpsr \n\t"
+            "orr     r0, r0, #0x1000000 \n\t"
+            "str     r0, [sp, #-72] \n\t"      /* Store xpsr quickly, don't want it to change */
 
             /* 18 words left for fp registers, which I don't save yet */
 
-            "ldr     r0, =swap_complete  \r\n"
-            "str     r0, [sp, #-76]  \r\n"      /* Save PC as the end of this function */
+            "ldr     r0, =swap_complete \n\t"
+            "str     r0, [sp, #-76] \n\t"      /* Save PC as the end of this function */
 
-            "str     lr, [sp, #-80]  \r\n"
-            "str     r12, [sp, #-84] \r\n"
-            "str     r3, [sp, #-88]  \r\n"
-            "str     r2, [sp, #-92]  \r\n"
-            "str     r1, [sp, #-96]  \r\n"
+            "str     lr, [sp, #-80] \n\t"
+            "str     r12, [sp, #-84] \n\t"
+            "str     r3, [sp, #-88] \n\t"
+            "str     r2, [sp, #-92] \n\t"
+            "str     r1, [sp, #-96] \n\t"
            
-            "sub     r0, sp, #100  \r\n"
-            "stmfd   r0!, {r4-r11}  \r\n"   /* Saves multiple registers and writes the final address back to Rn */
+            "sub     r0, sp, #100 \n\t"
+            "stmfd   r0!, {r4-r11} \n\t"   /* Saves multiple registers and writes the final address back to Rn */
 
-            "msr     psp, r0  \r\n"
+            "msr     psp, r0 \n\t"
             );
 
     curr_task->task->stack_top = stack_top;
@@ -182,8 +181,8 @@ void swap_task(task_node *node) {
 
     enable_psp(curr_task->task->stack_top);
 
-    __asm__("b  restore_full_context\r\n");  /* Won't return */
+    __asm__("b  restore_full_context \n\t");  /* Won't return */
 
-    __asm__("swap_complete: \r\n"
-            "nop");
+    __asm__("swap_complete: \n\t"
+            "nop \n\t");
 }
