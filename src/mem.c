@@ -21,6 +21,12 @@ void memset32(void *p, int32_t value, uint32_t size) {
     }
 }
 
+void memcpy(void *dst, void *src, int n) {
+    while(n--) {
+        *(uint8_t *)dst++ = *(uint8_t *)src++;
+    }
+}
+
 void create_context(task_ctrl* task, void (*lptr)(void)) {
     asm volatile("mov     r5, #0                                                              \n\
                   stmdb   %[stack]!, {r5}                                                     \n\
