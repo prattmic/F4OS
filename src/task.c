@@ -48,6 +48,7 @@ void start_task_switching(void) {
 
     enable_psp(task->stack_top);
     restore_full_context();
+    __asm__("nop");
 }
 
 void switch_task(void) {
