@@ -10,8 +10,7 @@
 #include "stdio.h"
 #include "mem.h"
 
-pipe_list k_pipes = {NULL, NULL};
-resource default_resources[RESOURCE_TABLE_SIZE] = {{&usart_puts, &usart_getc}
+resource default_resources[RESOURCE_TABLE_SIZE] = {{NULL, &usart_puts, &usart_getc}
                                                   };
 
 void add_resource(task_ctrl* tcs, resource* r) {
@@ -23,9 +22,9 @@ void add_resource(task_ctrl* tcs, resource* r) {
 void resource_setup(task_ctrl* tcs) {
     tcs->top_rd = 0;
     resource* new_r = kmalloc(sizeof(resource));
-    new_r->writer = &puts;
-    new_r->reader = &getc;
-    new_r->addr = NULL;
+    new_r->writer = &usart_puts;
+    new_r->reader = &usart_getc;
+    new_r->env = NULL;
     add_resource(tcs, new_r);
 }
 
@@ -33,40 +32,11 @@ void write(rd_t rd, char* s) {
     if (rd >= RESOURCE_TABLE_SIZE) {
         panic_print("Resource descriptor too large");
     }
-
     if (task_switching) {
-        curr_task->task->resources[rd]->writer(s);
+        curr_task->task->resources[rd]->writer(s, curr_task->task->resources[rd]->env);
     }
     else {
-        default_resources[rd].writer(s);
-    }
-}
-
-pipe create_pipe(uint32_t reader_pid, uint32_t writer_pid) {
-    pipe* new_pipe = kmalloc(sizeof(pipe));
-    if(new_pipe == NULL)
-        printf("Pipe allocation failed.");
-    new_pipe->reader_pid = reader_pid;
-    new_pipe->writer_pid = writer_pid;
-    pipe_node* new_node = kmalloc(sizeof(pipe));
-    if(new_node == NULL)
-        printf("Pipe node allocation failed.");
-    new_node->curr = new_pipe;
-    add_pipe_to_list(new_node);
-}
-
-void add_pipe_to_list(pipe_node* p) {
-    if(k_pipes.head == NULL) {
-        k_pipes.head = p;
-        k_pipes.tail = p;
-        p->next = NULL;
-        p->prev = NULL;
-    }
-    else {
-        p->next = k_pipes.head;
-        k_pipes.head = p;
-        p->next->prev = p;
-        p->prev = NULL;
+        default_resources[rd].writer(s, default_resources[rd].env);
     }
 }
 
@@ -76,9 +46,11 @@ char read(rd_t rd) {
     }
 
     if (task_switching) {
-        return curr_task->task->resources[rd]->reader();
+        return curr_task->task->resources[rd]->reader(curr_task->task->resources[rd]->env);
     }
     else {
-        return default_resources[rd].reader();
+        return default_resources[rd].reader(default_resources[rd].env);
     }
 }
+
+

@@ -32,7 +32,6 @@ int main(void) {
     init_usart();
     //init_spi();
     init_timer();
-
     puts("\r\n\r\n\r\nWelcome to...\r\n");
 
     puts("\r\n"
@@ -48,7 +47,6 @@ int main(void) {
          "\r\n");
 
     start_tasks();
-
     dont_panic();
     return 0;
 }

@@ -14,9 +14,9 @@ typedef struct task_node_list {
 } task_node_list;
 
 typedef struct resource {
-    char *addr;
-    void        (*writer)(char*);
-    char        (*reader)(void);
+    void        *env;
+    void        (*writer)(char*, void*);
+    char        (*reader)(void*);
 } resource;
    
 typedef struct task_struct {

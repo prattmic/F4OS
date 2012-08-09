@@ -129,7 +129,7 @@ uint16_t usart_baud(uint32_t baud) {
     return (mantissa << 4) | int_fraction;
 }
 
-void usart_puts(char *s) {
+void usart_puts(char *s, void *env) {
     acquire(&usart_semaphore);
 
     while (*s) {
@@ -170,7 +170,7 @@ void usart_puts(char *s) {
     release(&usart_semaphore);
 }
 
-char usart_getc(void) {
+char usart_getc(void *env) {
     static uint32_t read = 0;
     uint16_t dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
     uint8_t wrapped = *DMA2_LISR & DMA_LISR_TCIF2;

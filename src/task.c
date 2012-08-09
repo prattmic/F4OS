@@ -6,9 +6,9 @@
 #include "context.h"
 #include "semaphore.h"
 #include "buddy.h"
-#include "resource.h"
 #include "stdio.h"
 #include "mem.h"
+#include "resource.h"
 
 task_node * volatile task_to_free = NULL;
 uint8_t task_switching = 0;
