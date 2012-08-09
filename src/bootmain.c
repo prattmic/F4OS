@@ -20,8 +20,6 @@
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
 
-static void dont_panic(void) __attribute__((section(".kernel")));
-
 int main(void) __attribute__((section(".kernel")));
 
 int main(void) {
@@ -49,14 +47,8 @@ int main(void) {
 
     start_tasks();
 
-    dont_panic();
+    panic_print("Task switching ended.");
     return 0;
-}
-
-/* Temporary function to prevent main from returning */
-void dont_panic(void) {
-    while (1) {
-    }
 }
 
 #define HSE_STARTUP_TIMEOUT     (uint16_t) (0x0500)         /* Time out for HSE start up */
