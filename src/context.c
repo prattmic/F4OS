@@ -41,22 +41,17 @@ void user_prefix(void) {
 
 /* systick_handler calls pendsv to service task switching */
 void pendsv_handler(void){
-    register uint32_t lr_save asm("r9");
-    __asm__("mov %[lr_save], lr"
-            :[lr_save] "=r" (lr_save)
-            ::"memory");
-
     uint32_t *psp_addr;
 
+    __asm__("push {lr}");
     psp_addr = save_context();
 
     curr_task->task->stack_top = psp_addr;
 
     switch_task();
     
-    __asm__("mov lr, %[lr_save]\n"
-            "b   restore_context\n"     /* Won't return */
-            ::[lr_save] "r" (lr_save));
+    __asm__("pop {lr}\n"
+            "b   restore_context\n");     /* Won't return */
 }
 
 void svc_handler(uint32_t *svc_args) {
