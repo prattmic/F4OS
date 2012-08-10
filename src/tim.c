@@ -25,7 +25,6 @@ void init_timer(void) {
 
 void tim2_handler(void) {
     *TIM2_SR = 0;
-    //*LED_ODR ^= (1<<12);
 
     task_node *node = periodic_task_list.head;
 
