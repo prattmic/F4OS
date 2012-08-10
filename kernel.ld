@@ -78,10 +78,11 @@ SECTIONS {
         . = ALIGN(4);
         _sbss = .;         /* define a global symbol at bss start */
         *(.bss*)
+        *(COMMON)
 
         . = ALIGN(4);
+        _ebss = .;         /* define a global symbol at bss end */
     } > CCMRAM
-    _ebss = .;         /* define a global symbol at bss end */
 }
 
 PROVIDE(end = .);
