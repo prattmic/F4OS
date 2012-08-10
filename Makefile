@@ -22,7 +22,10 @@ CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler 
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
 
-CFLAGS += -D BUILD_TIME='"$(shell date)"' -D BUILD_REV=$(shell git rev-list HEAD | wc -l)
+DATE := "$(shell date -u)"
+REV := $(shell git rev-list HEAD | wc -l)
+CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_REV=$(REV)
+
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=
