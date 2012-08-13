@@ -42,7 +42,7 @@ extern task_node * volatile task_to_free;
 extern uint8_t task_switching;
 
 void kernel_task(void) __attribute__((section(".kernel")));
-void start_task_switching(void) __attribute__((section(".kernel"), optimize(1)));
+void start_task_switching(void) __attribute__((section(".kernel")));
 void switch_task(void) __attribute__((section(".kernel")));
 task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) __attribute__((section(".kernel")));
 task_node *register_task(task_node_list *list, task_ctrl *task_ptr) __attribute__((section(".kernel")));

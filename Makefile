@@ -21,9 +21,11 @@ CFLAGS  = -g3 -Wall --std=gnu99 -I./inc/ -I./inc/shell/ -I./lib/inc/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
-CFLAGS += -O2 
 
-CFLAGS += -D BUILD_TIME='"$(shell date)"' -D BUILD_REV=$(shell git rev-list HEAD | wc -l)
+DATE := "$(shell date -u)"
+REV := $(shell git rev-list HEAD | wc -l)
+CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_REV=$(REV)
+
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=
@@ -37,9 +39,13 @@ OBJS += $(ASM_SRCS:.S=.o)
 
 ###################################################
 
-.PHONY: proj
+.PHONY: proj unoptimized
 
+all: CFLAGS += -O2
 all: proj
+
+unoptimized: CFLAGS += -O0
+unoptimized: proj
 
 again: clean all
 
