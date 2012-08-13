@@ -15,7 +15,7 @@ typedef struct task_node_list {
 
 typedef struct resource {
     void        *env;
-    void        (*writer)(char*, void*);
+    void        (*writer)(char, void*);
     char        (*reader)(void*);
 } resource;
    

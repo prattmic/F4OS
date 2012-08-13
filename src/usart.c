@@ -129,6 +129,50 @@ uint16_t usart_baud(uint32_t baud) {
     return (mantissa << 4) | int_fraction;
 }
 
+/* ghettohax - brought to you by mgyenik*/
+void usart_putc(char c, void *env) {
+    acquire(&usart_semaphore);
+    char str[2];
+    str[0] = c;
+    str[1] = 0x00;
+    char *s = str;
+    while (*s) {
+        char *buf = usart_tx_buf;
+        uint16_t count = 0;
+
+        while (*s && (count < USART_DMA_MSIZE)) {
+            count += 1;
+            *buf++ = *s++;
+        }
+
+        /* Wait for DMA to be ready */
+        while (*DMA2_S7CR & DMA_SxCR_EN) {
+            if (task_switching) {
+                _svc(SVC_YIELD);
+            }
+        }
+
+        /* Number of bytes to write */
+        *DMA2_S7NDTR = (uint16_t) count;
+        /* Enable DMA */
+        *DMA2_S7CR |= DMA_SxCR_EN;
+
+        /* Wait for transfer to complete */
+        while (!(*DMA2_HISR & DMA_HISR_TCIF7)) {
+            if (task_switching) {
+                _svc(SVC_YIELD);
+            }
+        }
+
+        /* Clear transfer complete flag */
+        *DMA2_HIFCR |= DMA_HIFCR_CTCIF7;
+
+        /* Clear buffer */
+        memset32(usart_tx_buf, 0, (count % 4) ? (count/4 + 1) : (count/4));
+    }
+
+    release(&usart_semaphore);
+}
 void usart_puts(char *s, void *env) {
     acquire(&usart_semaphore);
 

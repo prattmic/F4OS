@@ -33,7 +33,7 @@ int main(void) {
     //init_spi();
     init_timer();
     puts("\r\n\r\n\r\nWelcome to...\r\n");
-
+    puts("LOLOOLOL");
     puts("\r\n"
          "88888888888      ,d8      ,ad8888ba,     ad88888ba   \r\n"
          "88             ,d888     d8\"\'    `\"8b   d8\"     \"8b  \r\n"

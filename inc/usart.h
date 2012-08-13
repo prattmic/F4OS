@@ -3,6 +3,7 @@
 void init_usart(void) __attribute__((section(".kernel")));
 uint16_t usart_baud(uint32_t baud) __attribute__((section(".kernel")));
 void usart1_handler(void) __attribute__((section(".kernel")));
+void usart_putc(char c, void *env) __attribute__((section(".kernel")));
 void usart_puts(char *s, void *env) __attribute__((section(".kernel")));
 char usart_getc(void *env) __attribute__((section(".kernel")));
 void usart_echo(void) __attribute__((section(".kernel")));
