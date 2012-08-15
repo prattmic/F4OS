@@ -10,7 +10,7 @@
 #include "stdio.h"
 #include "mem.h"
 
-resource default_resources[RESOURCE_TABLE_SIZE] = {{NULL, &usart_putc, &usart_getc}
+resource default_resources[RESOURCE_TABLE_SIZE] = {{.env = NULL, .writer = &usart_putc, .reader = &usart_getc}
                                                   };
 
 void add_resource(task_ctrl* tcs, resource* r) {
@@ -26,6 +26,7 @@ void resource_setup(task_ctrl* tcs) {
     new_r->writer = &usart_putc;
     new_r->reader = &usart_getc;
     new_r->env = NULL;
+    new_r->sem = &usart_semaphore;
     add_resource(tcs, new_r);
 }
 
@@ -34,14 +35,18 @@ void write(rd_t rd, char* d, int n) {
         panic_print("Resource descriptor too large");
     }
     if (task_switching) {
+        acquire(curr_task->task->resources[rd]->sem);
         for(int i = 0; i < n; i++) {
             curr_task->task->resources[rd]->writer(d[i], curr_task->task->resources[rd]->env);
         }
+        release(curr_task->task->resources[rd]->sem);
     }
     else {
+        acquire(default_resources[rd].sem);
         for(int i = 0; i < n; i++) {
             default_resources[rd].writer(d[i], default_resources[rd].env);
         }
+        release(default_resources[rd].sem);
     }
 }
 
@@ -50,14 +55,18 @@ void swrite(rd_t rd, char* s) {
         panic_print("Resource descriptor too large");
     }
     if (task_switching) {
-        while(*s++) {
+        acquire(curr_task->task->resources[rd]->sem);
+        while(*s) {
             curr_task->task->resources[rd]->writer(*s++, curr_task->task->resources[rd]->env);
         }
+        release(curr_task->task->resources[rd]->sem);
     }
     else {
-        while(*s++) {
+        acquire(default_resources[rd].sem);
+        while(*s) {
             default_resources[rd].writer(*s++, default_resources[rd].env);
         }
+        release(default_resources[rd].sem);
     }
 }
 
@@ -84,6 +93,9 @@ rd_t open_shared_mem(void) {
     new_r->env = mem;
     new_r->writer = &shared_mem_write;
     new_r->reader = &shared_mem_read;
+    new_r->sem = kmalloc(sizeof(semaphore));
+    /* Just to be sure it's 0 */
+    release(new_r->sem);
     add_resource(curr_task->task, new_r);
     return curr_task->task->top_rd - 1;
 }

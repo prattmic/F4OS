@@ -131,7 +131,6 @@ uint16_t usart_baud(uint32_t baud) {
 
 /* ghettohax - brought to you by mgyenik*/
 void usart_putc(char c, void *env) {
-    acquire(&usart_semaphore);
     char str[2];
     str[0] = c;
     str[1] = 0x00;
@@ -170,9 +169,8 @@ void usart_putc(char c, void *env) {
         /* Clear buffer */
         memset32(usart_tx_buf, 0, (count % 4) ? (count/4 + 1) : (count/4));
     }
-
-    release(&usart_semaphore);
 }
+
 void usart_puts(char *s, void *env) {
     acquire(&usart_semaphore);
 

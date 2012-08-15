@@ -1,7 +1,6 @@
 #define SM_SIZE   512
 
 typedef struct shared_mem {
-    semaphore   sem;
     char        data[SM_SIZE];
     int         read_ctr;
     int         write_ctr;

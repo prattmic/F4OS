@@ -13,7 +13,16 @@ typedef struct task_node_list {
     task_node   *tail;
 } task_node_list;
 
+
+struct semaphore {
+        uint8_t     lock;
+        task_node   *held_by;
+};
+
+typedef struct semaphore semaphore;
+
 typedef struct resource {
+    semaphore   *sem;
     void        *env;
     void        (*writer)(char, void*);
     char        (*reader)(void*);
