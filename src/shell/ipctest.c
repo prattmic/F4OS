@@ -1,13 +1,5 @@
-#include "types.h"
-#include "registers.h"
-#include "string.h"
-#include "task.h"
-#include "semaphore.h"
-#include "stdio.h"
-#include "blink.h"
-#include "ipctest.h"
-#include "resource.h"
-#include "mem.h"
+#include "shell_header.h"
+#include "shared_mem.h"
 
 resource *test_mem = NULL;
 

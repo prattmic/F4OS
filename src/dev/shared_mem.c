@@ -1,0 +1,35 @@
+#include "dev_header.h"
+#include "shared_mem.h"
+
+rd_t open_shared_mem(void) {
+    shared_mem *mem = kmalloc(sizeof(shared_mem));
+    resource *new_r = kmalloc(sizeof(resource));
+    mem->read_ctr = 0;
+    mem->write_ctr = 0;
+    new_r->env = mem;
+    new_r->writer = &shared_mem_write;
+    new_r->reader = &shared_mem_read;
+    new_r->sem = kmalloc(sizeof(semaphore));
+    /* Just to be sure it's 0 */
+    release(new_r->sem);
+    add_resource(curr_task->task, new_r);
+    return curr_task->task->top_rd - 1;
+}
+
+char shared_mem_read(void *env) {
+    shared_mem *mem = (shared_mem *)env;
+    if(mem->read_ctr > 512) {
+        mem->read_ctr = 1;
+        return mem->data[0];
+    }
+    else return mem->data[mem->read_ctr++];
+}
+
+void shared_mem_write(char c, void *env) {
+    shared_mem *mem = (shared_mem *)env;
+    if(mem->write_ctr > 512) {
+        mem->write_ctr = 1;
+        mem->data[0] = c;
+    }
+    else mem->data[mem->write_ctr++] = c;
+}
