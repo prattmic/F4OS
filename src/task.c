@@ -148,12 +148,7 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         kfree(task);
         return NULL;
     }
-    task->stack_base = memory;
-    task->stack_top  = memory + STKSIZE;
-    task->fptr       = fptr;
-    task->priority   = priority;
-    task->period     = period;
-    task->running    = 0;
+
     task->stack_base        = memory;
     task->stack_top         = memory + STKSIZE;
     task->fptr              = fptr;
@@ -165,7 +160,7 @@ task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
 
     task->task_list_node    = NULL;
     task->periodic_node     = NULL;
-    task->pid = pid_source++;
+    task->pid               = pid_source++;
 
     resource_setup(task);
     return task;
