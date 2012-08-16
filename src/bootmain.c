@@ -28,7 +28,7 @@ int main(void) {
     //mpu_setup();
     init_heap();
     init_usart();
-    //init_spi();
+    init_spi();
     init_timer();
     puts("\r\n\r\n\r\nWelcome to...\r\n");
     puts("\r\n"
