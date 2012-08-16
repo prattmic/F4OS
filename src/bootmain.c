@@ -44,9 +44,6 @@ int main(void) {
          "\r\n");
 
     start_tasks();
-    while(1) {
-        __asm__("nop");
-    }
     panic_print("Task switching ended.");
     return 0;
 }

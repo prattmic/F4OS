@@ -16,11 +16,10 @@ resource default_resources[RESOURCE_TABLE_SIZE] = {{.env = NULL, .writer = &usar
 void add_resource(task_ctrl* tcs, resource* r) {
     tcs->resources[tcs->top_rd] = r;
     if(tcs->resources[tcs->top_rd++] == NULL)
-        printf("Resource add failed, resource is null");
+        printf("Resource add failed, resource is null\n");
 }
 
 void resource_setup(task_ctrl* tcs) {
-    printf("Attempting to set up resources.");
     tcs->top_rd = 0;
     resource* new_r = kmalloc(sizeof(resource));
     new_r->writer = &usart_putc;
@@ -42,11 +41,9 @@ void write(rd_t rd, char* d, int n) {
         release(curr_task->task->resources[rd]->sem);
     }
     else {
-        acquire(default_resources[rd].sem);
         for(int i = 0; i < n; i++) {
             default_resources[rd].writer(d[i], default_resources[rd].env);
         }
-        release(default_resources[rd].sem);
     }
 }
 
@@ -62,11 +59,9 @@ void swrite(rd_t rd, char* s) {
         release(curr_task->task->resources[rd]->sem);
     }
     else {
-        acquire(default_resources[rd].sem);
         while(*s) {
             default_resources[rd].writer(*s++, default_resources[rd].env);
         }
-        release(default_resources[rd].sem);
     }
 }
 
@@ -75,9 +70,11 @@ void read(rd_t rd, char *buf, int n) {
         panic_print("Resource descriptor too large");
     }
     if (task_switching) {
+        acquire(curr_task->task->resources[rd]->sem);
         for(int i = 0; i < n; i++) {
             buf[i] = curr_task->task->resources[rd]->reader(curr_task->task->resources[rd]->env);
         }
+        release(curr_task->task->resources[rd]->sem);
     }
     else {
         for(int i = 0; i < n; i++) {
