@@ -1,14 +1,5 @@
-#include "types.h"
-#include "registers.h"
-#include "string.h"
-#include "task.h"
-#include "semaphore.h"
-#include "stdio.h"
-#include "blink.h"
-#include "accel.h"
-#include "resource.h"
-#include "mem.h"
-#include "buddy.h"
+#include "shell_header.h"
+#include "discovery_accel.h"
 
 typedef struct accel_data {
     short x;

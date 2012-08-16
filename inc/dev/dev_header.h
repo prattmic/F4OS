@@ -1,0 +1,12 @@
+#include "types.h"
+#include "registers.h"
+#include "interrupt.h"
+#include "usart.h"
+#include "task.h"
+#include "context.h"
+#include "semaphore.h"
+#include "buddy.h"
+#include "resource.h"
+#include "stdio.h"
+#include "mem.h"
+
