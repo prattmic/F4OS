@@ -22,7 +22,7 @@ struct semaphore {
 typedef struct semaphore semaphore;
 
 typedef struct resource {
-    semaphore   *sem;
+    volatile semaphore   *sem;
     void        *env;
     void        (*writer)(char, void*);
     char        (*reader)(void*);
