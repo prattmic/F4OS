@@ -22,4 +22,5 @@ char shared_mem_read(void *env) __attribute__((section(".kernel")));
 void shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
 char discovery_accel_read(void *env) __attribute__((section(".kernel")));
 void discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
+rd_t open_discovery_accel(void) __attribute__((section(".kernel")));
 

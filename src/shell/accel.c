@@ -8,6 +8,7 @@
 #include "accel.h"
 #include "resource.h"
 #include "mem.h"
+#include "buddy.h"
 
 typedef struct accel_data {
     short x;
