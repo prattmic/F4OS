@@ -120,13 +120,13 @@ uint8_t spi_read(uint8_t addr) {
     return read;
 }
 
-void accel_setup() {
+void discovery_accel_setup() {
     /* Run this setup, then spi_read() addresses, 0x29 and 0x2A are the X axis */
     spi_write(0x20, 0x47);
 }
 
 void accel_loop() {
-    accel_setup();
+    discovery_accel_setup();
 
     while (1) {
         uint32_t x = (spi_read(0x28) << 8) | spi_read(0x29);

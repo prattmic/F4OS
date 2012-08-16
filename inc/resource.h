@@ -6,6 +6,10 @@ typedef struct shared_mem {
     int         write_ctr;
 } shared_mem;
 
+typedef struct discovery_accel {
+    uint8_t read_ctr;
+} discovery_accel;
+
 extern resource default_resources[RESOURCE_TABLE_SIZE];
 
 void add_resource(task_ctrl* tcs, resource* r) __attribute__((section(".kernel")));
@@ -16,3 +20,6 @@ void read(rd_t rd, char *buf, int n) __attribute__((section(".kernel")));
 rd_t open_shared_mem(void) __attribute__((section(".kernel")));
 char shared_mem_read(void *env) __attribute__((section(".kernel")));
 void shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
+char discovery_accel_read(void *env) __attribute__((section(".kernel")));
+void discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
+
