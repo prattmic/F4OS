@@ -18,6 +18,8 @@ void accel(int argc, char **argv) {
     printf("q to quit, any other key to get data.\r\n");
     while(1) {
         if(getc() == 'q') {
+            free(data);
+            close(accelrd);
             return;
         }
         else {

@@ -9,6 +9,7 @@ rd_t open_shared_mem(void) {
     new_r->env = mem;
     new_r->writer = &shared_mem_write;
     new_r->reader = &shared_mem_read;
+    new_r->closer = &shared_mem_close;
     new_r->sem = kmalloc(sizeof(semaphore));
     /* Just to be sure it's 0 */
     release(new_r->sem);
@@ -32,4 +33,8 @@ void shared_mem_write(char c, void *env) {
         mem->data[0] = c;
     }
     else mem->data[mem->write_ctr++] = c;
+}
+
+void shared_mem_close(void *env) {
+    kfree(env);
 }

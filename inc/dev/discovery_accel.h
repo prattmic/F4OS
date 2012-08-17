@@ -7,3 +7,4 @@ typedef struct discovery_accel {
 char discovery_accel_read(void *env) __attribute__((section(".kernel")));
 void discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
 rd_t open_discovery_accel(void) __attribute__((section(".kernel")));
+void discovery_accel_close(void *env) __attribute__((section(".kernel")));
