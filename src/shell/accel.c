@@ -1,4 +1,5 @@
 #include "shell_header.h"
+#include "spi.h"
 #include "discovery_accel.h"
 
 typedef struct accel_data {

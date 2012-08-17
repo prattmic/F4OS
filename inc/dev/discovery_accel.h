@@ -1,5 +1,6 @@
 
 typedef struct discovery_accel {
+        spi_dev *spi_port;
         uint8_t read_ctr;
 } discovery_accel;
 

@@ -1,11 +1,26 @@
-#include "types.h"
-#include "registers.h"
-#include "task.h"
-#include "semaphore.h"
-#include "stdio.h"
+#include "dev_header.h"
 #include "spi.h"
 
-void init_spi(void) {
+spi_dev spi1 = {
+    .curr_addr = 0,
+    .addr_ctr = 0,
+    .read = &spinoread,
+    .write = &spinowrite
+};
+
+uint8_t spinowrite(uint8_t addr, uint8_t data) {
+    panic_print("Attempted write on uninitialized spi device.\r\n");
+    /* Execution will never reach here */
+    return -1;
+}
+
+uint8_t spinoread(uint8_t addr) {
+    panic_print("Attempted read on uninitialized spi device.\r\n");
+    /* Execution will never reach here */
+    return -1;
+}
+
+void init_spi1(void) {
     *RCC_APB2ENR |= RCC_APB2ENR_SPI1EN;     /* Enable SPI1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOAEN;    /* Enable GPIOA Clock */
 
@@ -55,10 +70,14 @@ void init_spi(void) {
     *GPIOE_OSPEEDR |= (2 << (3 * 2));
 
     /* Set high */
-    spi_cs_high();
+    spi1_cs_high();
+
+    /* Set up abstract device for later use in device drivers */
+    spi1.write = &spi1_write;
+    spi1.read = &spi1_read;
 }
 
-uint8_t spi_write(uint8_t addr, uint8_t data) {
+uint8_t spi1_write(uint8_t addr, uint8_t data) {
     /* Data MUST be read after each TX */
     volatile uint8_t read;
 
@@ -68,7 +87,7 @@ uint8_t spi_write(uint8_t addr, uint8_t data) {
         read = *SPI1_SR;
     }
 
-    spi_cs_low();
+    spi1_cs_low();
 
     while (!(*SPI1_SR & SPI_SR_TXNE));
     *SPI1_DR = addr;
@@ -82,14 +101,14 @@ uint8_t spi_write(uint8_t addr, uint8_t data) {
 
     while (!(*SPI1_SR & SPI_SR_RXNE));
 
-    spi_cs_high();
+    spi1_cs_high();
 
     read = *SPI1_DR;
 
     return read;
 }
 
-uint8_t spi_read(uint8_t addr) {
+uint8_t spi1_read(uint8_t addr) {
     /* Data MUST be read after each TX */
     volatile uint8_t read;
 
@@ -99,7 +118,7 @@ uint8_t spi_read(uint8_t addr) {
         read = *SPI1_SR;
     }
 
-    spi_cs_low();
+    spi1_cs_low();
 
     while (!(*SPI1_SR & SPI_SR_TXNE));
 
@@ -113,7 +132,7 @@ uint8_t spi_read(uint8_t addr) {
 
     while (!(*SPI1_SR & SPI_SR_RXNE));
 
-    spi_cs_high();
+    spi1_cs_high();
 
     read = *SPI1_DR;
 
@@ -122,9 +141,10 @@ uint8_t spi_read(uint8_t addr) {
 
 void discovery_accel_setup() {
     /* Run this setup, then spi_read() addresses, 0x29 and 0x2A are the X axis */
-    spi_write(0x20, 0x47);
+    spi1_write(0x20, 0x47);
 }
 
+/* Old, we have abstract IO now! *
 void accel_loop() {
     discovery_accel_setup();
 
@@ -136,3 +156,4 @@ void accel_loop() {
         printf("X: %i   Y: %i   Z: %i\r\n", x, y, z);
     }
 }
+* -------------------------------- */
