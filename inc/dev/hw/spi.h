@@ -16,7 +16,7 @@ uint8_t spi1_write(uint8_t addr, uint8_t data) __attribute__((section(".kernel")
 uint8_t spi1_read(uint8_t addr) __attribute__((section(".kernel")));
 void discovery_accel_setup() __attribute__((section(".kernel")));
 
-inline void spi1_cs_high(void) __attribute((always_inline));
+inline void spi1_cs_high(void) __attribute__((always_inline));
 inline void spi1_cs_low(void) __attribute__((always_inline));
 
 inline void spi1_cs_high(void) {
