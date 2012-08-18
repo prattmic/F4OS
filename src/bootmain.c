@@ -46,15 +46,6 @@ int main(void) {
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
          "\r\n");
 
-    uint8_t data = 0;
-    i2c1_write(0x3C, 0x00);
-    i2c1_stop();
-    data = i2c1_read(0x3D);
-    i2c1_stop();
-    if (data) {
-        printf("I2C Read on 0x%x: 0x%x\r\n", 0x3B, data);
-    }
-
     start_tasks();
     panic_print("Task switching ended.");
     return 0;

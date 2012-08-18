@@ -5,6 +5,15 @@
 //    .read = &i2cnoread,
 //    .write = *i2cnowrite
 //};
+//
+
+/* This has to be a function because GCC's optimizations suck 
+ * GCC's optimizations break read and write when using this line
+ * on their own or with an inline function, despite the fact that
+ * GCC inlines this function anyway. */
+void i2c1_stop(void) {
+    *I2C1_CR1 |= I2C_CR1_STOP;
+}
 
 void init_i2c1(void) {
     *RCC_APB1ENR |= RCC_APB1ENR_I2C1EN;     /* Enable I2C1 Clock */
@@ -45,35 +54,30 @@ void init_i2c1(void) {
     //i2c1.write = &i2c1write;
 }
 
-void i2c1_write(uint8_t addr, uint8_t data) {
+int i2c1_write(uint8_t addr, uint8_t *data, uint32_t num) {
     *I2C1_CR1 |= I2C_CR1_START;
 
     while (!(*I2C1_SR1 & I2C_SR1_SB));
 
-    *I2C1_DR = addr;
+    *I2C1_DR = addr << 1;
 
-    uint32_t count = 10000;
     while (!(*I2C1_SR1 & I2C_SR1_ADDR)) {
-        if (!count) {
-            printf("Couldn't write from address: 0x%x\r\n", addr);
-            return;
+        if (*I2C1_SR1 & I2C_SR1_AF) {
+            return -1;
         }
-        else if (*I2C1_SR1 & I2C_SR1_AF) {
-            printf("Acknowledge failure: 0x%x\r\n", addr);
-            return;
-        }
-        count--;
     }
-
-    printf("Acknowledge received: 0x%x\r\n", addr);
 
     while (!(*I2C1_SR2 & I2C_SR2_MSL)); 
 
-    *I2C1_DR = data;
+    while (num--) {
+        *I2C1_DR = *data++;
 
-    while (!(*I2C1_SR1 & I2C_SR1_TXE));
+        while (!(*I2C1_SR1 & I2C_SR1_TXE));
+    }
 
-    printf("Written to address: 0x%x\r\n", addr);
+    i2c1_stop();
+
+    return 0;
 }
 
 uint8_t i2c1_read(uint8_t addr) {
@@ -85,29 +89,20 @@ uint8_t i2c1_read(uint8_t addr) {
 
     while (!(*I2C1_SR1 & I2C_SR1_SB));
 
-    *I2C1_DR = addr;
+    *I2C1_DR = (addr << 1) | 1;
 
-    printf("addr = 0x%x ", addr);
-
-    uint32_t count = 10000;
     while (!(*I2C1_SR1 & I2C_SR1_ADDR)) {
-        if (!count) {
-            printf("Couldn't read from address: 0x%x\r\n", addr);
+        if (*I2C1_SR1 & I2C_SR1_AF) {
             return 0;
         }
-        else if (*I2C1_SR1 & I2C_SR1_AF) {
-            printf("Acknowledge failure: 0x%x\r\n", addr);
-            return 0;
-        }
-        count--;
     }
 
-    printf("Acknowledge received: 0x%x\r\n", addr);
-    
     while (!(*I2C1_SR2 & I2C_SR2_MSL)); 
     while (!(*I2C1_SR1 & I2C_SR1_RXNE));
 
     data = *I2C1_DR;
 
     return data;
+
+    i2c1_stop();
 }
