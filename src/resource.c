@@ -65,6 +65,23 @@ void swrite(rd_t rd, char* s) {
     }
 }
 
+void close(rd_t rd) {
+    if (rd >= RESOURCE_TABLE_SIZE) {
+        panic_print("Resource descriptor too large");
+    }
+    if (task_switching) {
+        acquire(curr_task->task->resources[rd]->sem);
+        curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]->env);
+        kfree((void *)curr_task->task->resources[rd]->sem);
+        kfree(curr_task->task->resources[rd]);
+    }
+    else {
+        default_resources[rd].closer(default_resources[rd].env);
+        free(&default_resources[rd]);
+    }
+}
+
+
 void read(rd_t rd, char *buf, int n) {
     if (rd >= RESOURCE_TABLE_SIZE) {
         panic_print("Resource descriptor too large");

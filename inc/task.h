@@ -26,6 +26,7 @@ typedef struct resource {
     void        *env;
     void        (*writer)(char, void*);
     char        (*reader)(void*);
+    void        (*closer)(void*);
 } resource;
    
 typedef struct task_struct {

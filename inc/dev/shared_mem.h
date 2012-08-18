@@ -7,5 +7,6 @@ typedef struct shared_mem {
 } shared_mem; 
 
 rd_t open_shared_mem(void) __attribute__((section(".kernel")));
+void shared_mem_close(void *env) __attribute__((section(".kernel")));
 char shared_mem_read(void *env) __attribute__((section(".kernel")));
 void shared_mem_write(char c, void *env) __attribute__((section(".kernel")));

@@ -4,17 +4,16 @@
 
 extern spi_dev spi1;
 
-rd_t open_discovery_accel(void) {
+rd_t open_px4_mpu6000(void) {
+    discovery_accel_setup();
     discovery_accel *accel = kmalloc(sizeof(discovery_accel));
     resource *new_r = kmalloc(sizeof(resource));
     /* We expect that spi1 was init'd in bootmain.c */
     accel->spi_port = &spi1;
-    accel->spi_port->write(0x20, 0x47);
     accel->read_ctr = 0;
     new_r->env = accel;
     new_r->writer = &discovery_accel_write;
     new_r->reader = &discovery_accel_read;
-    new_r->closer = &discovery_accel_close;
     new_r->sem = kmalloc(sizeof(semaphore));
     /* Just to be sure it's 0 */
     release(new_r->sem);
@@ -22,17 +21,14 @@ rd_t open_discovery_accel(void) {
     return curr_task->task->top_rd - 1;
 }
 
-char discovery_accel_read(void *env) {
+char px4_mpu6000_read(void *env) {
     discovery_accel *accel = (discovery_accel *)env;
     if(accel->read_ctr > 5)
         accel->read_ctr = 0;
     return (char)accel->spi_port->read(0x28 + accel->read_ctr++);
 }
 
-void discovery_accel_write(char d, void *env) {
+void px4_mpu6000_write(char d, void *env) {
     /* No real meaning to this yet */
 }
 
-void discovery_accel_close(void *env) {
-    kfree(env);
-}

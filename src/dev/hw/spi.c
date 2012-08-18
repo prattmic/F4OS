@@ -139,11 +139,6 @@ uint8_t spi1_read(uint8_t addr) {
     return read;
 }
 
-void discovery_accel_setup() {
-    /* Run this setup, then spi_read() addresses, 0x29 and 0x2A are the X axis */
-    spi1_write(0x20, 0x47);
-}
-
 /* Old, we have abstract IO now! *
 void accel_loop() {
     discovery_accel_setup();
