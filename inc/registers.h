@@ -34,6 +34,7 @@ inline uint8_t FAULTMASK(void) {
 #define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
 #define SPI2_BASE                       (APB1PERIPH_BASE + 0x3800)                              /* SPI2 base address */
+#define I2C1_BASE                       (APB1PERIPH_BASE + 0x5400)                              /* I2C1 base address */
 #define SPI1_BASE                       (APB2PERIPH_BASE + 0x3000)                              /* SPI1 base address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                              /* USART1 Base Address */
 #define GPIOA_BASE                      (AHB1PERIPH_BASE + 0x0000)                              /* GPIO Port A base address */
@@ -100,6 +101,17 @@ inline uint8_t FAULTMASK(void) {
 #define SPI2_I2SCFGR                    (volatile uint32_t *) (SPI2_BASE + 0x1c)                /* SPI2 I2C configuration register */
 #define SPI2_I2SPR                      (volatile uint32_t *) (SPI2_BASE + 0x20)                /* SPI2 I2C prescaler register */
 
+/* I2C1 */
+#define I2C1_CR1                        (volatile uint32_t *) (I2C1_BASE + 0x00)                /* I2C1 control register 1 */
+#define I2C1_CR2                        (volatile uint32_t *) (I2C1_BASE + 0x04)                /* I2C1 control register 2 */
+#define I2C1_OAR1                       (volatile uint32_t *) (I2C1_BASE + 0x08)                /* I2C1 own address register 1 */
+#define I2C1_OAR2                       (volatile uint32_t *) (I2C1_BASE + 0x0C)                /* I2C1 own address register 2 */
+#define I2C1_DR                         (volatile uint32_t *) (I2C1_BASE + 0x10)                /* I2C1 data register */
+#define I2C1_SR1                        (volatile uint32_t *) (I2C1_BASE + 0x14)                /* I2C1 status register 1 */
+#define I2C1_SR2                        (volatile uint32_t *) (I2C1_BASE + 0x18)                /* I2C1 status register 2 */
+#define I2C1_CCR                        (volatile uint32_t *) (I2C1_BASE + 0x1C)                /* I2C1 clock control register */
+#define I2C1_TRISE                      (volatile uint32_t *) (I2C1_BASE + 0x20)                /* I2C1 TRISE register */
+
 /* USART 1 */
 #define USART1_SR                       (volatile uint32_t *) (USART1_BASE + 0x00)              /* USART1 status register */
 #define USART1_DR                       (volatile uint32_t *) (USART1_BASE + 0x04)              /* USART1 data register */
@@ -125,6 +137,10 @@ inline uint8_t FAULTMASK(void) {
 #define GPIOB_AFRL                      (volatile uint32_t *) (GPIOB_BASE + 0x20)               /* Port B alternate function low register */
 #define GPIOB_AFRH                      (volatile uint32_t *) (GPIOB_BASE + 0x24)               /* Port B alternate function high register */
 
+/* GPIO Port D (GPIOD) */
+#define GPIOD_MODER                     (volatile uint32_t *) (GPIOD_BASE + 0x00)               /* Port D mode register */
+#define LED_ODR                         (volatile uint32_t *) (GPIOD_BASE + 0x14)               /* LED Output Data Register */
+
 /* GPIO Port E (GPIOE) */
 #define GPIOE_MODER                     (volatile uint32_t *) (GPIOE_BASE + 0x00)               /* Port E mode register */
 #define GPIOE_OTYPER                    (volatile uint32_t *) (GPIOE_BASE + 0x04)               /* Port E output type register */
@@ -133,10 +149,6 @@ inline uint8_t FAULTMASK(void) {
 #define GPIOE_ODR                       (volatile uint32_t *) (GPIOE_BASE + 0x14)               /* Port E output data register */
 #define GPIOE_AFRL                      (volatile uint32_t *) (GPIOE_BASE + 0x20)               /* Port E alternate function low register */
 #define GPIOE_AFRH                      (volatile uint32_t *) (GPIOE_BASE + 0x24)               /* Port E alternate function high register */
-
-/* GPIO Port D (GPIOD) */
-#define GPIOD_MODER                     (volatile uint32_t *) (GPIOD_BASE + 0x00)               /* Port D mode register */
-#define LED_ODR                         (volatile uint32_t *) (GPIOD_BASE + 0x14)               /* LED Output Data Register */
 
 /* Reset and Clock Control (RCC) */
 #define RCC_CR                          (volatile uint32_t *) (RCC_BASE + 0x00)                 /* Clock Control Register */
@@ -351,8 +363,9 @@ inline uint8_t FAULTMASK(void) {
 #define RCC_AHB1ENR_GPIOIEN             (uint32_t) (1 << 8)                                     /* GPIOI clock enable */
 #define RCC_AHB1ENR_DMA1EN              (uint32_t) (1 << 21)                                    /* DMA1 clock enable */
 #define RCC_AHB1ENR_DMA2EN              (uint32_t) (1 << 22)                                    /* DMA2 clock enable */
-#define RCC_APB1ENR_TIM2EN              (uint32_t) (0x00000001)                                 /* TIM2 clock enable */
-#define RCC_APB1ENR_SPI2EN              (uint32_t) (0x00004000)                                 /* SPI2 clock enable */
+#define RCC_APB1ENR_TIM2EN              (uint32_t) (1 << 0)                                     /* TIM2 clock enable */
+#define RCC_APB1ENR_SPI2EN              (uint32_t) (1 << 14)                                    /* SPI2 clock enable */
+#define RCC_APB1ENR_I2C1EN              (uint32_t) (1 << 21)                                    /* SPI2 clock enable */
 #define RCC_APB1ENR_PWREN               (uint32_t) (0x10000000)                                 /* Power Interface Clock Enable */
 #define RCC_APB2ENR_SPI1EN              (uint32_t) (1 << 12)                                    /* SPI1 Enable */
 
@@ -426,6 +439,64 @@ inline uint8_t FAULTMASK(void) {
 #define SPI_SR_BSY                      (uint32_t) (1 << 7)                                     /* SPI busy flag */
 #define SPI_SR_TIRFE                    (uint32_t) (1 << 8)                                     /* SPI TI frame format error */
 
+/* I2C */
+#define I2C_CR1_PE                      (uint32_t) (1 << 0)                                     /* I2C peripheral enable */
+#define I2C_CR1_SMBUS                   (uint32_t) (1 << 1)                                     /* I2C SMBus mode */
+#define I2C_CR1_SMBTYPE                 (uint32_t) (1 << 3)                                     /* I2C SMBus type (0=Device, 1=Host) */
+#define I2C_CR1_ENARP                   (uint32_t) (1 << 4)                                     /* I2C enable ARP */
+#define I2C_CR1_ENPEC                   (uint32_t) (1 << 5)                                     /* I2C enable PEC */
+#define I2C_CR1_ENGC                    (uint32_t) (1 << 6)                                     /* I2C enable general call */
+#define I2C_CR1_NOSTRETCH               (uint32_t) (1 << 7)                                     /* I2C clock stretching disable */
+#define I2C_CR1_START                   (uint32_t) (1 << 8)                                     /* I2C START generation */
+#define I2C_CR1_STOP                    (uint32_t) (1 << 9)                                     /* I2C STOP generation */
+#define I2C_CR1_ACK                     (uint32_t) (1 << 10)                                    /* I2C ACK enable */
+#define I2C_CR1_POS                     (uint32_t) (1 << 11)                                    /* I2C ACK/PEC position */
+#define I2C_CR1_PEC                     (uint32_t) (1 << 12)                                    /* I2C packet error checking */
+#define I2C_CR1_ALERT                   (uint32_t) (1 << 13)                                    /* I2C SMBus alert */
+#define I2C_CR1_SWRST                   (uint32_t) (1 << 15)                                    /* I2C software reset */
+
+#define I2C_CR2_FREQ(n)                 (uint32_t) (n << 0)                                     /* I2C clock frequency */
+#define I2C_CR2_ITERREN                 (uint32_t) (1 << 8)                                     /* I2C error interrupt enable */
+#define I2C_CR2_ITEVTEN                 (uint32_t) (1 << 9)                                     /* I2C event interrupt enable */
+#define I2C_CR2_ITBUFEN                 (uint32_t) (1 << 10)                                    /* I2C buffer interrupt enable */
+#define I2C_CR2_DMAEN                   (uint32_t) (1 << 11)                                    /* I2C DMA requests enable */
+#define I2C_CR2_LAST                    (uint32_t) (1 << 12)                                    /* I2C DMA last transfer */
+
+#define I2C_OAR1_ADD10(n)               (uint32_t) (n << 0)                                     /* I2C interface address (10-bit) */
+#define I2C_OAR1_ADD7(n)                (uint32_t) (n << 1)                                     /* I2C interface address (7-bit) */
+#define I2C_OAR1_ADDMODE                (uint32_t) (1 << 15)                                    /* I2C interface address mode (1=10-bit) */
+
+#define I2C_OAR2_ENDUAL                 (uint32_t) (1 << 0)                                     /* I2C dual address mode enable */
+#define I2C_OAR2_ADD2(n)                (uint32_t) (n << 1)                                     /* I2C interface address 2 (7-bit) */
+
+#define I2C_SR1_SB                      (uint32_t) (1 << 0)                                     /* I2C start bit generated */
+#define I2C_SR1_ADDR                    (uint32_t) (1 << 1)                                     /* I2C address sent/matched */
+#define I2C_SR1_BTF                     (uint32_t) (1 << 2)                                     /* I2C byte transfer finished */
+#define I2C_SR1_ADD10                   (uint32_t) (1 << 3)                                     /* I2C 10-bit header sent */
+#define I2C_SR1_STOPF                   (uint32_t) (1 << 4)                                     /* I2C stop detection */
+#define I2C_SR1_RXNE                    (uint32_t) (1 << 6)                                     /* I2C DR not empty */
+#define I2C_SR1_TXE                     (uint32_t) (1 << 7)                                     /* I2C DR empty */
+#define I2C_SR1_BERR                    (uint32_t) (1 << 8)                                     /* I2C bus error */
+#define I2C_SR1_ARLO                    (uint32_t) (1 << 9)                                     /* I2C attribution lost */
+#define I2C_SR1_AF                      (uint32_t) (1 << 10)                                    /* I2C acknowledge failure */
+#define I2C_SR1_OVR                     (uint32_t) (1 << 11)                                    /* I2C overrun/underrun */
+#define I2C_SR1_PECERR                  (uint32_t) (1 << 12)                                    /* I2C PEC error in reception */
+#define I2C_SR1_TIMEOUT                 (uint32_t) (1 << 14)                                    /* I2C timeout or tlow error */
+#define I2C_SR1_SMBALERT                (uint32_t) (1 << 15)                                    /* I2C SMBus alert */
+
+#define I2C_SR2_MSL                     (uint32_t) (1 << 0)                                     /* I2C master/slave */
+#define I2C_SR2_BUSY                    (uint32_t) (1 << 1)                                     /* I2C bus busy */
+#define I2C_SR2_TRA                     (uint32_t) (1 << 2)                                     /* I2C transmitter/receiver */
+#define I2C_SR2_GENCALL                 (uint32_t) (1 << 4)                                     /* I2C general call address */
+#define I2C_SR2_SMBDEFAULT              (uint32_t) (1 << 5)                                     /* I2C SMBus device default address */
+#define I2C_SR2_SMBHOST                 (uint32_t) (1 << 6)                                     /* I2C SMBus host header */
+#define I2C_SR2_DUALF                   (uint32_t) (1 << 7)                                     /* I2C dual flag */
+#define I2C_SR2_PEC(r)                  (uint32_t) (r >> 8)                                     /* I2C packet error checking register */
+
+#define I2C_CCR_CCR(n)                  (uint32_t) (n & 0x0FFF)                                 /* I2C clock control register */
+#define I2C_CCR_DUTY                    (uint32_t) (1 << 14)                                    /* I2C fast mode duty cycle */
+#define I2C_CCR_FS                      (uint32_t) (1 << 15)                                    /* I2C master mode selection */
+
 /* USART */
 #define USART_SR_TC                     (uint32_t) (1 << 6)                                     /* USART Transmission Complete */
 #define USART_SR_RXNE                   (uint32_t) (1 << 5)                                     /* USART Read data register not empty */
@@ -440,6 +511,7 @@ inline uint8_t FAULTMASK(void) {
 #define GPIO_MODER_OUT                  (uint32_t) (0x1)                                        /* Sets GPIO pin to output mode */
 #define GPIO_MODER_ALT                  (uint32_t) (0x2)                                        /* Sets GPIO pin to alternative function mode */
 #define GPIO_AF_USART13                 (uint32_t) (0x7)                                        /* GPIO USART1-3 mode */
+#define GPIO_AF_I2C                     (uint32_t) (0x4)                                        /* GPIO I2C mode */
 #define GPIO_AF_SPI12                   (uint32_t) (0x5)                                        /* GPIO SPI1-2 mode */
 
 /* DMA */

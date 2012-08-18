@@ -14,6 +14,7 @@
 #include "usart.h"
 #include "spi.h"
 #include "tim.h"
+#include "i2c.h"
 #include "mem.h"
 #include "buddy.h"
 
@@ -30,6 +31,8 @@ int main(void) {
     init_usart();
     init_spi1();
     init_timer();
+    init_i2c1();
+
     puts("\r\n\r\n\r\nWelcome to...\r\n");
     puts("\r\n"
          "88888888888      ,d8      ,ad8888ba,     ad88888ba   \r\n"
