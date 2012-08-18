@@ -363,8 +363,9 @@ inline uint8_t FAULTMASK(void) {
 #define RCC_AHB1ENR_GPIOIEN             (uint32_t) (1 << 8)                                     /* GPIOI clock enable */
 #define RCC_AHB1ENR_DMA1EN              (uint32_t) (1 << 21)                                    /* DMA1 clock enable */
 #define RCC_AHB1ENR_DMA2EN              (uint32_t) (1 << 22)                                    /* DMA2 clock enable */
-#define RCC_APB1ENR_TIM2EN              (uint32_t) (0x00000001)                                 /* TIM2 clock enable */
-#define RCC_APB1ENR_SPI2EN              (uint32_t) (0x00004000)                                 /* SPI2 clock enable */
+#define RCC_APB1ENR_TIM2EN              (uint32_t) (1 << 0)                                     /* TIM2 clock enable */
+#define RCC_APB1ENR_SPI2EN              (uint32_t) (1 << 14)                                    /* SPI2 clock enable */
+#define RCC_APB1ENR_I2C1EN              (uint32_t) (1 << 21)                                    /* SPI2 clock enable */
 #define RCC_APB1ENR_PWREN               (uint32_t) (0x10000000)                                 /* Power Interface Clock Enable */
 #define RCC_APB2ENR_SPI1EN              (uint32_t) (1 << 12)                                    /* SPI1 Enable */
 
@@ -510,6 +511,7 @@ inline uint8_t FAULTMASK(void) {
 #define GPIO_MODER_OUT                  (uint32_t) (0x1)                                        /* Sets GPIO pin to output mode */
 #define GPIO_MODER_ALT                  (uint32_t) (0x2)                                        /* Sets GPIO pin to alternative function mode */
 #define GPIO_AF_USART13                 (uint32_t) (0x7)                                        /* GPIO USART1-3 mode */
+#define GPIO_AF_I2C                     (uint32_t) (0x4)                                        /* GPIO I2C mode */
 #define GPIO_AF_SPI12                   (uint32_t) (0x5)                                        /* GPIO SPI1-2 mode */
 
 /* DMA */

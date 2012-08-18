@@ -1,4 +1,4 @@
-SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c tim.c resource.c 
+SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c tim.c resource.c i2c.c
 SRCS += shell.c blink.c top.c uname.c ipctest.c accel.c
 SRCS += discovery_accel.c shared_mem.c
 SRCS += string.c math.c stdio.c

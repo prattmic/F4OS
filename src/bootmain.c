@@ -14,6 +14,7 @@
 #include "usart.h"
 #include "spi.h"
 #include "tim.h"
+#include "i2c.h"
 #include "mem.h"
 #include "buddy.h"
 
@@ -30,6 +31,8 @@ int main(void) {
     init_usart();
     init_spi1();
     init_timer();
+    init_i2c1();
+
     puts("\r\n\r\n\r\nWelcome to...\r\n");
     puts("\r\n"
          "88888888888      ,d8      ,ad8888ba,     ad88888ba   \r\n"
@@ -42,6 +45,15 @@ int main(void) {
          "88                88      `\"Y8888Y\"\'     \"Y88888P\"   \r\n"
          "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
          "\r\n");
+
+    uint8_t data = 0;
+    i2c1_write(0x3C, 0x00);
+    i2c1_stop();
+    data = i2c1_read(0x3D);
+    i2c1_stop();
+    if (data) {
+        printf("I2C Read on 0x%x: 0x%x\r\n", 0x3B, data);
+    }
 
     start_tasks();
     panic_print("Task switching ended.");
