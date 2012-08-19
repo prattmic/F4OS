@@ -6,6 +6,12 @@
 #include "mem.h"
 #include "semaphore.h"
 
+void init_semaphore(volatile struct semaphore *semaphore) {
+    semaphore->lock = 0;
+    semaphore->held_by = NULL;
+    semaphore->waiting = NULL;
+}
+
 /* --- Basically the same as the locking example in ARM docs --- */
 void spin_acquire(volatile struct semaphore *semaphore) {
     __asm__("\
@@ -31,6 +37,13 @@ void acquire(volatile struct semaphore *semaphore) {
         return;
     }
 
+    /* This a stupid hack to make GCC put curr_task
+     * in a register before the branches below, which
+     * screw with the optimizer */
+    if (task_switching && !curr_task) {
+        panic_print("Task switching, but no curr_task.");
+    }
+
     __asm__("try:");
     __asm__("\
             mov         r2, #1              \r\n\
@@ -46,6 +59,17 @@ void acquire(volatile struct semaphore *semaphore) {
             :"r1", "r2", "r3", "cc", "memory");
 
     if (semaphore->held_by != NULL) {
+        /* Add to waitlist if higher priority */
+        if (semaphore->waiting) {
+            if (semaphore->waiting->task->priority < curr_task->task->priority) {
+                semaphore->waiting = curr_task;
+            }
+        }
+        else {
+            semaphore->waiting = curr_task;
+        }
+
+        /* Swap or yield */
         if (semaphore->held_by->task->priority <= curr_task->task->priority) {
             swap_task(semaphore->held_by);
         }
@@ -58,12 +82,12 @@ void acquire(volatile struct semaphore *semaphore) {
     else {
         /* How was the semaphore taken, yet no one holds it? */
         /* Maybe we were interrupted and now it is available?  Try again */
-        /* panic_print("Semaphore not available, but held_by unset.");*/
+        panic_print("Semaphore not available, but held_by unset.");
         __asm__("b try");
     }
 
     /********************/
-    __asm__("success:");
+    __asm__("success:":::"memory");
     semaphore->held_by = curr_task;
     return;
 }
@@ -71,9 +95,10 @@ void acquire(volatile struct semaphore *semaphore) {
 void release(volatile struct semaphore *semaphore) {
     semaphore->lock = 0;
     semaphore->held_by = NULL;
-}
 
-void init_semaphore(volatile struct semaphore *semaphore) {
-    semaphore->lock = 0;
-    semaphore->held_by = NULL;
+    if (task_switching && semaphore->waiting && semaphore->waiting->task->priority >= curr_task->task->priority) {
+        task_node *task = semaphore->waiting;
+        semaphore->waiting = NULL;
+        swap_task(task);
+    }
 }

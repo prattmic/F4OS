@@ -17,6 +17,7 @@ typedef struct task_node_list {
 struct semaphore {
         uint8_t     lock;
         task_node   *held_by;
+        task_node   *waiting;
 };
 
 typedef struct semaphore semaphore;
@@ -47,7 +48,7 @@ typedef struct task_struct {
 task_node_list task_list;
 task_node_list periodic_task_list;
 
-task_node *curr_task;
+task_node * volatile curr_task;
 extern task_node * volatile task_to_free;
 extern uint8_t task_switching;
 
