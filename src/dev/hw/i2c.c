@@ -1,6 +1,9 @@
 #include "dev_header.h"
 #include "i2c.h"
 
+
+#define I2C1_SDA    9
+#define I2C1_SCL    8
 //struct i2c_dev i2c1 = {
 //    .read = &i2cnoread,
 //    .write = *i2cnowrite
@@ -23,22 +26,22 @@ void init_i2c1(void) {
      * See stm32f4_ref.pdf pg 141 and stm32f407.pdf pg 51 */
 
     /* Sets PB8 and PB9 to alternative function mode */
-    *GPIOB_MODER &= ~((3 << (8 * 2)) | (3 << (9 * 2)));
-    *GPIOB_MODER |= (GPIO_MODER_ALT << (8 * 2)) | (GPIO_MODER_ALT << (9 * 2));
+    *GPIOB_MODER &= ~((3 << (I2C1_SCL * 2)) | (3 << (I2C1_SDA * 2)));
+    *GPIOB_MODER |= (GPIO_MODER_ALT << (I2C1_SCL * 2)) | (GPIO_MODER_ALT << (I2C1_SDA * 2));
 
     /* Sets PB8 and PB9 to I2C mode */
-    *GPIOB_AFRH  &= ~((0xF << ((8-8) * 4)) | (0xF << ((9-8) * 4)));
-    *GPIOB_AFRH  |= (GPIO_AF_I2C << ((8-8) * 4)) | (GPIO_AF_I2C << ((9-8) * 4));
+    *GPIOB_AFRH  &= ~((0xF << ((I2C1_SCL-8) * 4)) | (0xF << ((I2C1_SDA-8) * 4)));
+    *GPIOB_AFRH  |= (GPIO_AF_I2C << ((I2C1_SCL-8) * 4)) | (GPIO_AF_I2C << ((I2C1_SDA-8) * 4));
 
     /* Sets pin output to open drain */
-    *GPIOB_OTYPER |= (1 << 8) | (1 << 9);
+    *GPIOB_OTYPER |= (1 << I2C1_SCL) | (1 << I2C1_SDA);
 
     /* No pull-up, no pull-down */
-    *GPIOB_PUPDR  &= ~((3 << (8 * 2)) | (3 << (9 * 2)));
+    *GPIOB_PUPDR  &= ~((3 << (I2C1_SCL * 2)) | (3 << (I2C1_SDA * 2)));
 
     /* Speed to 50Mhz */
-    *GPIOB_OSPEEDR &= ~((3 << (8 * 2)) | (3 << (9 * 2)));
-    *GPIOB_OSPEEDR |= (2 << (8 * 2)) | (2 << (9 * 2));
+    *GPIOB_OSPEEDR &= ~((3 << (I2C1_SCL * 2)) | (3 << (I2C1_SDA * 2)));
+    *GPIOB_OSPEEDR |= (2 << (I2C1_SCL * 2)) | (2 << (I2C1_SDA * 2));
 
     /* Configure peripheral */
     *I2C1_CR2 |= I2C_CR2_FREQ(42);
