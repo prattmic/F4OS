@@ -15,12 +15,18 @@ resource default_resources[RESOURCE_TABLE_SIZE] = {{.env = NULL, .writer = &usar
 
 void add_resource(task_ctrl* tcs, resource* r) {
     tcs->resources[tcs->top_rd] = r;
-    if(tcs->resources[tcs->top_rd++] == NULL)
+    if(tcs->resources[tcs->top_rd++] == NULL) {
         printf("Resource add failed, resource is null\n");
+    }
 }
 
 void resource_setup(task_ctrl* tcs) {
+    for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
+        tcs->resources[i] = NULL;
+    }
+
     tcs->top_rd = 0;
+
     resource* new_r = kmalloc(sizeof(resource));
     new_r->writer = &usart_putc;
     new_r->reader = &usart_getc;
@@ -74,10 +80,11 @@ void close(rd_t rd) {
         curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]->env);
         kfree((void *)curr_task->task->resources[rd]->sem);
         kfree(curr_task->task->resources[rd]);
+        curr_task->task->resources[rd] = NULL;
     }
     else {
         default_resources[rd].closer(default_resources[rd].env);
-        free(&default_resources[rd]);
+        kfree(&default_resources[rd]);
     }
 }
 

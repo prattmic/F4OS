@@ -192,6 +192,9 @@ void buddy_merge(struct heapnode *node, struct buddy *buddy) {
             }
         }
 
+        /* Set parent node as the less of the two buddies */
+        node = node < buddy_curr_node ? node : buddy_curr_node;
+
         node->order += 1;
         node->next = buddy->list[node->order];
         buddy->list[node->order] = node;

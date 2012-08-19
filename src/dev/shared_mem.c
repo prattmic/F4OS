@@ -2,7 +2,7 @@
 #include "shared_mem.h"
 
 rd_t open_shared_mem(void) {
-    shared_mem *mem = kmalloc(sizeof(shared_mem));
+    shared_mem *mem = malloc(sizeof(shared_mem));
     resource *new_r = kmalloc(sizeof(resource));
 
     mem->read_ctr = 0;
@@ -39,5 +39,5 @@ void shared_mem_write(char c, void *env) {
 }
 
 void shared_mem_close(void *env) {
-    kfree(env);
+    free(env);
 }
