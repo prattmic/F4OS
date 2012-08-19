@@ -218,9 +218,10 @@ char usart_getc(void *env) {
     uint8_t wrapped = *DMA2_LISR & DMA_LISR_TCIF2;
     char *usart_buf = usart_rx_buf;
 
+    /* Waiting... */
     while (!wrapped && dma_read == read) {
         /* Yield */
-        _svc(1);
+        _svc(SVC_YIELD);
 
         dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
         wrapped = *DMA2_LISR & DMA_LISR_TCIF2;

@@ -138,17 +138,3 @@ uint8_t spi1_read(uint8_t addr) {
 
     return read;
 }
-
-/* Old, we have abstract IO now! *
-void accel_loop() {
-    discovery_accel_setup();
-
-    while (1) {
-        uint32_t x = (spi_read(0x28) << 8) | spi_read(0x29);
-        uint32_t y = (spi_read(0x2A) << 8) | spi_read(0x2B);
-        uint32_t z = (spi_read(0x2C) << 8) | spi_read(0x2D);
-
-        printf("X: %i   Y: %i   Z: %i\r\n", x, y, z);
-    }
-}
-* -------------------------------- */

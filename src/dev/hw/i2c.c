@@ -57,7 +57,12 @@ void init_i2c1(void) {
 int i2c1_write(uint8_t addr, uint8_t *data, uint32_t num) {
     *I2C1_CR1 |= I2C_CR1_START;
 
-    while (!(*I2C1_SR1 & I2C_SR1_SB));
+    int count = 10000;
+    while (!(*I2C1_SR1 & I2C_SR1_SB)) {
+        if (!count--) {
+            return -1;
+        }
+    }
 
     *I2C1_DR = addr << 1;
 
@@ -84,10 +89,13 @@ uint8_t i2c1_read(uint8_t addr) {
     uint8_t data;
 
     *I2C1_CR1 |= I2C_CR1_START;
-    /* No ACK */
-    //*I2C1_CR1 &= ~(I2C_CR1_ACK);
 
-    while (!(*I2C1_SR1 & I2C_SR1_SB));
+    int count = 10000;
+    while (!(*I2C1_SR1 & I2C_SR1_SB)) {
+        if (!count--) {
+            return 0;
+        }
+    }
 
     *I2C1_DR = (addr << 1) | 1;
 

@@ -9,11 +9,17 @@ void ghetto_gyro(int argc, char **argv) {
     /* Turn stuff on */
     packet[0] = 0x15;
     packet[1] = 0x07;
-    i2c1_write(0x68, packet, 2);
+    if (i2c1_write(0x68, packet, 2)) {
+        printf("Error writing I2C.\r\n");
+        return;
+    }
 
     packet[0] = 0x16;
     packet[1] = 0x18;
-    i2c1_write(0x68, packet, 2);
+    if (i2c1_write(0x68, packet, 2)) {
+        printf("Error writing I2C.\r\n");
+        return;
+    }
 
     printf("Press any key for data and q to quit\r\n");
 

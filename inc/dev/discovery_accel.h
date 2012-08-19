@@ -1,4 +1,3 @@
-
 typedef struct discovery_accel {
         spi_dev *spi_port;
         uint8_t read_ctr;
@@ -8,3 +7,5 @@ char discovery_accel_read(void *env) __attribute__((section(".kernel")));
 void discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
 rd_t open_discovery_accel(void) __attribute__((section(".kernel")));
 void discovery_accel_close(void *env) __attribute__((section(".kernel")));
+
+#define DISCOVERY_ACCEL_SENSITIVITY     (0.018)
