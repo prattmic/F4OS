@@ -3,9 +3,12 @@
 #include "discovery_accel.h"
 
 typedef struct accel_data {
-    short x;
-    short y;
-    short z;
+    int8_t this;
+    int8_t x;
+    int8_t stuff;
+    int8_t y;
+    int8_t sucks;
+    int8_t z;
 } accel_data;
 
 void accel(int argc, char **argv) {
@@ -15,7 +18,7 @@ void accel(int argc, char **argv) {
     }
     rd_t accelrd = open_discovery_accel();
     accel_data *data = malloc(sizeof(accel_data));
-    printf("q to quit, any other key to get data.\r\n");
+    printf("q to quit, any other key to get data.\r\nunits in g's\r\n");
     while(1) {
         if(getc() == 'q') {
             free(data);
@@ -24,7 +27,10 @@ void accel(int argc, char **argv) {
         }
         else {
             read(accelrd, (char *)data, 6);
-            printf("X: %d Y: %d Z: %d\r\n", data->x, data->y, data->z);
+            printf("X: %f Y: %f Z: %f\r\n", data->x*DISCOVERY_ACCEL_SENSITIVITY, data->y*DISCOVERY_ACCEL_SENSITIVITY, data->z*DISCOVERY_ACCEL_SENSITIVITY);
         }
     }
+
+    free(data);
+    close(accelrd);
 }

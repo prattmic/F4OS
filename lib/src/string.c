@@ -90,6 +90,11 @@ void ftoa(float num, float tolerance, char buf[], uint32_t n) {
 
     m = logarithm(num, 1);
 
+    if (m < 0) {
+        *(buf++) = '0';
+        *(buf++) = '.';
+    }
+
     while ((num > 0 + tolerance || m >= 0) && n > 0) {
         float weight = powf(10.0f, m);
         digit = floorf(num / weight);
