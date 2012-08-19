@@ -4,15 +4,19 @@
 rd_t open_shared_mem(void) {
     shared_mem *mem = kmalloc(sizeof(shared_mem));
     resource *new_r = kmalloc(sizeof(resource));
+
     mem->read_ctr = 0;
     mem->write_ctr = 0;
+
     new_r->env = mem;
     new_r->writer = &shared_mem_write;
     new_r->reader = &shared_mem_read;
     new_r->closer = &shared_mem_close;
     new_r->sem = kmalloc(sizeof(semaphore));
     init_semaphore(new_r->sem);
+
     add_resource(curr_task->task, new_r);
+
     return curr_task->task->top_rd - 1;
 }
 

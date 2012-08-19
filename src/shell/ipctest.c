@@ -23,7 +23,11 @@ void memreader(void) {
     }
     add_resource(curr_task->task, test_mem);
     rd_t memrd = curr_task->task->top_rd - 1;
+
     read(memrd, buf, 10);
     buf[10] = 0x00;
+
     puts(buf);
+
+    close(memrd);
 }
