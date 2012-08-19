@@ -1,5 +1,20 @@
 uint32_t pow(uint32_t base, uint32_t exp);
 
+inline float fabsf(float num) __attribute__((always_inline));
+inline float fabsf(float num) {
+    __asm__("vabs.f32   %[num], %[num]  \r\n"
+            :[num] "+w" (num)::"cc");
+
+    return num;
+}
+
+inline float sqrtf(float num) __attribute__((always_inline));
+inline float sqrtf(float num) {
+    __asm__("vsqrt.f32   %[num], %[num]  \r\n"
+            :[num] "+w" (num)::"cc");
+
+    return num;
+}
 
 float logarithm(float x, int ten);
 float frexpf (float d, int *exp);
@@ -8,7 +23,6 @@ float floorf(float x);
 float modff(float x, float *iptr);
 float powf(float x, float y);
 float ldexpf(float d, int e);
-float fabsf(float x);
 float expf(float x);
 
 #define FLOAT_INF           0x7f800000

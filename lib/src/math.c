@@ -329,22 +329,6 @@ float ldexpf(float d, int e) {
       return (d);
 }
 
-float fabsf(float x) {
-    switch (numtestf(x)) {
-        case INF:
-            return x;
-            break;
-        case NAN:
-            return x;
-            break;
-        case 0:
-            return 0.0f;
-            break;
-        default:
-            return (x < 0.0f ? -x : x);
-    }
-}
-
 static const float INV_LN2 = 1.442695040;
 static const float LN2 = 0.693147180;
 static const float p[] = { 0.249999999950, 0.00416028863 };
