@@ -82,7 +82,7 @@ void acquire(volatile struct semaphore *semaphore) {
     else {
         /* How was the semaphore taken, yet no one holds it? */
         /* Maybe we were interrupted and now it is available?  Try again */
-        panic_print("Semaphore not available, but held_by unset.");
+        //panic_print("Semaphore not available, but held_by unset.");
         __asm__("b try");
     }
 
