@@ -78,7 +78,6 @@ void close(rd_t rd) {
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);
         curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]->env);
-        kfree((void *)curr_task->task->resources[rd]->sem);
         kfree(curr_task->task->resources[rd]);
         curr_task->task->resources[rd] = NULL;
     }
