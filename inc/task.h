@@ -1,3 +1,6 @@
+#ifndef TASK_H_INCLUDED
+#define TASK_H_INCLUDED
+
 #define RESOURCE_TABLE_SIZE         16
 
 typedef uint8_t rd_t;
@@ -63,3 +66,5 @@ void remove_task(task_node_list *list, task_node *tasknode) __attribute__((secti
 void free_task(task_node *tasknode) __attribute__((section(".kernel")));
 void end_task(void) __attribute__((section(".kernel"),naked));;
 void end_periodic_task(void) __attribute__((section(".kernel"),naked));;
+
+#endif

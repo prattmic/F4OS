@@ -21,6 +21,16 @@ void memset32(void *p, int32_t value, uint32_t size) {
     }
 }
 
+/* Set size bytes to value from p */
+void memset(void *p, int32_t value, uint32_t size) {
+    uint32_t *end = (uint32_t *) ((uint32_t) p + size);
+
+    while ( (uint32_t*) p < end ) {
+        *((uint32_t*)p) = value;
+        p++;
+    }
+}
+
 void memcpy(void *dst, void *src, int n) {
     while(n--) {
         *(uint8_t *)dst++ = *(uint8_t *)src++;

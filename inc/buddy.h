@@ -1,3 +1,6 @@
+#ifndef BUDDY_H_INCLUDED
+#define BUDDY_H_INCLUDED
+
 #define USER_MAX_ORDER   17
 #define USER_MIN_ORDER   4
 
@@ -31,3 +34,5 @@ void *kmalloc(uint32_t size) __attribute__((section(".kernel")));
 void buddy_merge(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
 void free(void *address) __attribute__((section(".kernel")));
 void kfree(void *address) __attribute__((section(".kernel")));
+
+#endif

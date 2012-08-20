@@ -1,6 +1,9 @@
 /* mem.h: memory operations definitions.
  * Covers mem.S and mem.c */
 
+#ifndef MEM_H_INCLUDED
+#define MEM_H_INCLUDED
+
 /* mem.S */
 extern void raise_privilege(void);
 extern void user_mode(void);
@@ -13,8 +16,12 @@ extern void disable_psp();
 #define STKSIZE                 128                      /* This is in words */
 
 void memset32(void *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
+void memset(void *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
+void memcpy(void *dst, void *src, int n) __attribute__((section(".kernel")));
 void create_context(task_ctrl *task, void (*lptr)(void)) __attribute__((section(".kernel")));
 
 struct memlist {
     struct memlist *next;
 };
+
+#endif

@@ -1,5 +1,8 @@
 /* STM32F4 Registers and Memory Locations */
 
+#ifndef REGISTERS_H_INCLUDED
+#define REGISTERS_H_INCLUDED
+
 extern const uint32_t _skernel;
 extern const uint32_t _ekernel;
 
@@ -621,3 +624,5 @@ inline uint8_t FAULTMASK(void) {
 /* Floating Point Unit (FPU)
  * ST PM0214 (Cortex M4 Programming Manual) pg. 236 */
 #define FPU_CCR_ASPEN                   (uint32_t) (1 << 31)                                    /* FPU Automatic State Preservation */
+
+#endif
