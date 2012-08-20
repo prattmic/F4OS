@@ -109,7 +109,7 @@ uint8_t i2c1_read(uint8_t addr) {
     int count = 10000;
     while (!(*I2C1_SR1 & I2C_SR1_SB)) {
         if (!count--) {
-            return 0;
+            return 69;
         }
     }
 
@@ -117,7 +117,7 @@ uint8_t i2c1_read(uint8_t addr) {
 
     while (!(*I2C1_SR1 & I2C_SR1_ADDR)) {
         if (*I2C1_SR1 & I2C_SR1_AF) {
-            return 0;
+            return 69;
         }
     }
 

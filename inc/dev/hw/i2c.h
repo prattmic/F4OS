@@ -1,8 +1,4 @@
 typedef struct i2c_dev {
-    uint8_t read_ctr;
-    uint8_t write_ctr;
-    uint8_t read_addr;
-    uint8_t write_addr;
     uint8_t (*read)(uint8_t);
     uint8_t (*write)(uint8_t, uint8_t*, uint32_t);
 } i2c_dev;
