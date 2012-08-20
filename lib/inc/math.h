@@ -10,6 +10,7 @@ float powf(float x, float y);
 float ldexpf(float d, int e);
 float fabsf(float x);
 float expf(float x);
+float atan2(float y, float x);
 
 #define FLOAT_INF           0x7f800000
 #define FLOAT_NAN           0xffd00000
@@ -28,6 +29,8 @@ float expf(float x);
 #define BIGX                7.09782712893383973096e+02f
 #define SMALLX              -7.45133219101941108420e+02f
 #define ROOTEPS             1.7263349182589107e-4f
+#define RAD_TO_DEG          180/FLOAT_PI
+#define DEG_TO_RAD          FLOAT_PI/180
 
 typedef union {
     float f;
