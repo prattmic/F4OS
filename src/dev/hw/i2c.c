@@ -4,11 +4,24 @@
 
 #define I2C1_SDA    9
 #define I2C1_SCL    8
-//struct i2c_dev i2c1 = {
-//    .read = &i2cnoread,
-//    .write = *i2cnowrite
-//};
-//
+
+struct i2c_dev i2c1 = {
+    .read = &i2cnoread,
+    .write = &i2cnowrite
+};
+
+
+uint8_t i2cnowrite(uint8_t addr, uint8_t *data, uint32_t num) {
+        panic_print("Attempted write on uninitialized i2c device.\r\n");
+        /* Execution will never reach here */
+        return -1;
+}
+
+uint8_t i2cnoread(uint8_t addr) {
+        panic_print("Attempted read on uninitialized i2c device.\r\n");
+        /* Execution will never reach here */
+        return -1;
+}
 
 /* This has to be a function because GCC's optimizations suck 
  * GCC's optimizations break read and write when using this line
@@ -53,11 +66,11 @@ void init_i2c1(void) {
     /* Enable */
     *I2C1_CR1 |= I2C_CR1_PE;
 
-    //i2c1.read = &i2c1read;
-    //i2c1.write = &i2c1write;
+    i2c1.read = &i2c1_read;
+    i2c1.write = &i2c1_write;
 }
 
-int i2c1_write(uint8_t addr, uint8_t *data, uint32_t num) {
+uint8_t i2c1_write(uint8_t addr, uint8_t *data, uint32_t num) {
     *I2C1_CR1 |= I2C_CR1_START;
 
     int count = 10000;
