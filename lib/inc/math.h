@@ -1,3 +1,6 @@
+#ifndef MATH_H_INCLUDED
+#define MATH_H_INCLUDED
+
 uint32_t pow(uint32_t base, uint32_t exp);
 
 inline float fabsf(float num) __attribute__((always_inline));
@@ -82,3 +85,5 @@ inline float uint_to_float(uint32_t x) {
     c.i = x;
     return c.f;
 }
+
+#endif
