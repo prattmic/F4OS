@@ -15,7 +15,7 @@ rd_t open_discovery_accel(void) {
     new_r->writer = &discovery_accel_write;
     new_r->reader = &discovery_accel_read;
     new_r->closer = &discovery_accel_close;
-    new_r->sem = kmalloc(sizeof(semaphore));
+    new_r->sem = &spi1_semaphore;
     init_semaphore(new_r->sem);
     add_resource(curr_task->task, new_r);
     return curr_task->task->top_rd - 1;
