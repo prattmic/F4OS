@@ -2,21 +2,34 @@
 #include "math.h"
 #include "string.h"
 
-int strncmp(char *s, char *p, uint32_t n) {
-    while (*s == *p && *s != '\0' && *p != '\0' && n) {
-        s++;
-        p++;
-        n--;
+/* Set size bytes to value from p */
+void memset32(void *p, int32_t value, uint32_t size) {
+    uint32_t *end = (uint32_t *) ((uint32_t) p + size);
+
+    /* Disallowed unaligned addresses */
+    if ( (uint32_t) p % 4 ) {
+        panic_print("Attempt to memset unaligned address.");
     }
 
-    if (*s == *p) {
-        return 0;
+    while ( (uint32_t*) p < end ) {
+        *((uint32_t*)p) = value;
+        p++;
     }
-    else if (*s > *p) {
-        return 1;
+}
+
+/* Set size bytes to value from p */
+void memset(void *p, int32_t value, uint32_t size) {
+    uint32_t *end = (uint32_t *) ((uint32_t) p + size);
+
+    while ( (uint32_t*) p < end ) {
+        *((uint32_t*)p) = value;
+        p++;
     }
-    else {
-        return -1;
+}
+
+void memcpy(void *dst, void *src, int n) {
+    while(n--) {
+        *(uint8_t *)dst++ = *(uint8_t *)src++;
     }
 }
 
@@ -120,5 +133,23 @@ void strreverse(char *s) {
         char temp = *begin;
         *begin++ = *s;
         *s-- = temp;
+    }
+}
+
+int strncmp(char *s, char *p, uint32_t n) {
+    while (*s == *p && *s != '\0' && *p != '\0' && n) {
+        s++;
+        p++;
+        n--;
+    }
+
+    if (*s == *p) {
+        return 0;
+    }
+    else if (*s > *p) {
+        return 1;
+    }
+    else {
+        return -1;
     }
 }

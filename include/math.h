@@ -32,9 +32,6 @@ float atan2(float y, float x);
 #define FLOAT_INF           0x7f800000
 #define FLOAT_NAN           0xffd00000
 
-#define FLT_MAX_EXP         128     /* Not confirmed */
-#define FLT_MIN_EXP         -125    /* Not confirmed */
-
 #define FLOAT_PI            3.14159265358979323846f
 #define FLOAT_SQRT_HALF     0.70710678118654752440f
 #define FLOAT_PI_OVER_TWO   1.57079632679489661923132f

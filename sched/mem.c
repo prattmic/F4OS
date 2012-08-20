@@ -6,37 +6,6 @@
 #include "task.h"
 #include "mem.h"
 
-/* Set size bytes to value from p */
-void memset32(void *p, int32_t value, uint32_t size) {
-    uint32_t *end = (uint32_t *) ((uint32_t) p + size);
-
-    /* Disallowed unaligned addresses */
-    if ( (uint32_t) p % 4 ) {
-        panic_print("Attempt to memset unaligned address.");
-    }
-
-    while ( (uint32_t*) p < end ) {
-        *((uint32_t*)p) = value;
-        p++;
-    }
-}
-
-/* Set size bytes to value from p */
-void memset(void *p, int32_t value, uint32_t size) {
-    uint32_t *end = (uint32_t *) ((uint32_t) p + size);
-
-    while ( (uint32_t*) p < end ) {
-        *((uint32_t*)p) = value;
-        p++;
-    }
-}
-
-void memcpy(void *dst, void *src, int n) {
-    while(n--) {
-        *(uint8_t *)dst++ = *(uint8_t *)src++;
-    }
-}
-
 void create_context(task_ctrl* task, void (*lptr)(void)) {
     asm volatile("mov     r5, #0                                                              \n\
                   stmdb   %[stack]!, {r5}                                                     \n\

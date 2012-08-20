@@ -12,12 +12,8 @@ extern void enable_psp(uint32_t *);
 extern void disable_psp();
 
 /* mem.c */
-#define NULL                    (void *) 0x00000000
 #define STKSIZE                 128                      /* This is in words */
 
-void memset32(void *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
-void memset(void *p, int32_t value, uint32_t size) __attribute__((section(".kernel")));
-void memcpy(void *dst, void *src, int n) __attribute__((section(".kernel")));
 void create_context(task_ctrl *task, void (*lptr)(void)) __attribute__((section(".kernel")));
 
 struct memlist {
