@@ -1,5 +1,17 @@
-#include "dev_header.h"
-#include "spi.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <dev/registers.h>
+#include <kernel/semaphore.h>
+#include <kernel/fault.h>
+
+#include <dev/hw/spi.h>
+
+#define SPI_READ    (uint8_t) (1 << 7)
+
+uint8_t spinowrite(uint8_t addr, uint8_t data) __attribute__((section(".kernel")));
+uint8_t spinoread(uint8_t addr) __attribute__((section(".kernel")));
+uint8_t spi1_write(uint8_t addr, uint8_t data) __attribute__((section(".kernel")));
+uint8_t spi1_read(uint8_t addr) __attribute__((section(".kernel")));
 
 spi_dev spi1 = {
     .curr_addr = 0,
@@ -8,10 +20,21 @@ spi_dev spi1 = {
     .write = &spinowrite
 };
 
-semaphore spi1_semaphore = {
+struct semaphore spi1_semaphore = {
     .lock = 0,
     .held_by = NULL
 };
+
+inline void spi1_cs_high(void) __attribute__((always_inline));
+inline void spi1_cs_low(void) __attribute__((always_inline));
+
+inline void spi1_cs_high(void) {
+    *GPIOE_ODR |= (1 << 3);
+}
+
+inline void spi1_cs_low(void) {
+    *GPIOE_ODR &= ~(1 << 3);
+}
 
 uint8_t spinowrite(uint8_t addr, uint8_t data) {
     panic_print("Attempted write on uninitialized spi device.\r\n");

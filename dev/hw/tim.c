@@ -1,11 +1,7 @@
-#include "types.h"
-#include "registers.h"
-#include "task.h"
-#include "semaphore.h"
-#include "usart.h"
-#include "tim.h"
+#include <dev/registers.h>
+#include <dev/hw/tim.h>
 
-void init_timer(void) {
+void init_tim2(void) {
     /* Enable TIM2 clock */
     *RCC_APB1ENR |= RCC_APB1ENR_TIM2EN;
 
@@ -21,24 +17,4 @@ void init_timer(void) {
     /* Enable timer */
     *TIM2_CR1 |= TIM2_CR1_CEN;
     *TIM2_EGR = 1;
-}
-
-void tim2_handler(void) {
-    *TIM2_SR = 0;
-
-    task_node *node = periodic_task_list.head;
-
-    while (node) {
-        if (node->task->ticks_until_wake == 0) {
-            if (!node->task->running) {
-                append_task(&task_list, node->task->task_list_node);
-            }
-            node->task->ticks_until_wake = node->task->period;
-        }
-        else {
-            node->task->ticks_until_wake--;
-        }
-
-        node = node->next;
-    }
 }

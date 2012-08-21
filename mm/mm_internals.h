@@ -1,6 +1,8 @@
 #ifndef MM_INTERNALS_INCLUDED
 #define MM_INTERNALS_INCLUDED
 
+#include <kernel/semaphore.h>
+
 #define USER_MAX_ORDER   17
 #define USER_MIN_ORDER   4
 
@@ -21,10 +23,10 @@ struct buddy {
     struct heapnode **list;
 };
 
-struct buddy user_buddy;
-struct heapnode *user_buddy_list[USER_MAX_ORDER+1];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
+extern struct buddy user_buddy;
+extern struct heapnode *user_buddy_list[];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
 
-struct buddy kernel_buddy;
-struct heapnode *kernel_buddy_list[KERNEL_MAX_ORDER+1];
+extern struct buddy kernel_buddy;
+extern struct heapnode *kernel_buddy_list[];
 
 #endif

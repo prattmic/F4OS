@@ -3,6 +3,9 @@
  *
  * Michael Pratt <michael@pratt.im> */
 
+#ifndef STARG_H_INCLUDED
+#define STARG_H_INCLUDED
+
 typedef void* va_list;
 
 #define va_start(v, l)  \
@@ -14,3 +17,5 @@ typedef void* va_list;
 
 #define va_end(v)       \
     v = NULL
+
+#endif

@@ -1,17 +1,16 @@
-#include "types.h"
-#include "registers.h"
-#include "interrupt.h"
-#include "usart.h"
-#include "task.h"
-#include "context.h"
-#include "semaphore.h"
-#include "buddy.h"
-#include "resource.h"
-#include "stdio.h"
-#include "mem.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <mm/mm.h>
+#include <kernel/sched.h>
+#include <kernel/semaphore.h>
+#include <kernel/fault.h>
+#include <dev/hw/usart.h>
 
-resource default_resources[RESOURCE_TABLE_SIZE] = {{.env = NULL, .writer = &usart_putc, .reader = &usart_getc}
-                                                  };
+#include <dev/resource.h>
+
+resource default_resources[RESOURCE_TABLE_SIZE] = {{.env = NULL, .writer = &usart_putc, .reader = &usart_getc}};
 
 void add_resource(task_ctrl* tcs, resource* r) {
     tcs->resources[tcs->top_rd] = r;

@@ -1,11 +1,8 @@
-#include "types.h"
-#include "task.h"
-#include "mem.h"
-#include "string.h"
-#include "stdarg.h"
-#include "stdio.h"
-#include "semaphore.h"
-#include "resource.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 void puts(char *s) {
     swrite(0, s);

@@ -1,16 +1,26 @@
-#include "types.h"
-#include "registers.h"
-#include "interrupt.h"
-#include "task.h"
-#include "context.h"
-#include "semaphore.h"
-#include "mem.h"
-#include "buddy.h"
-#include "stdarg.h"
-#include "stdio.h"
-#include "usart.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <dev/registers.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <kernel/sched.h>
+#include <kernel/semaphore.h>
+#include <kernel/fault.h>
 
-void init_usart(void) {
+#include <dev/hw/usart.h>
+
+#define USART_DMA_MSIZE     (512-sizeof(uint32_t))      /* Since malloc headers take up some space, we want to request the max space we can fit in one block */
+
+struct semaphore usart_semaphore;
+
+void usart_echo(void) __attribute__((section(".kernel")));
+static uint16_t usart_baud(uint32_t baud) __attribute__((section(".kernel")));
+
+char *usart_rx_buf;
+char *usart_tx_buf;
+
+void init_usart1(void) {
     *RCC_APB2ENR |= (1 << 4);   /* Enable USART1 Clock */
     *RCC_AHB1ENR |= (1 << 1);   /* Enable GPIOB Clock */
 

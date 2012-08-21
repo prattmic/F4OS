@@ -1,6 +1,8 @@
-#include "types.h"
-#include "math.h"
-#include "string.h"
+#include <stdint.h>
+#include <math.h>
+#include <string.h>
+
+#include <kernel/fault.h>
 
 /* Set size bytes to value from p */
 void memset32(void *p, int32_t value, uint32_t size) {

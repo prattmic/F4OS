@@ -1,11 +1,8 @@
-#include "types.h"
-#include "string.h"
-#include "task.h"
-#include "semaphore.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <string.h>
+
 #include "shell.h"
 #include "uname.h"
-#include "resource.h"
 
 void uname(int argc, char **argv) {
     if (argc > 1) {

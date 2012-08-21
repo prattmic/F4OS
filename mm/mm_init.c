@@ -1,9 +1,18 @@
+#include <stddef.h>
+#include <stdint.h>
+
 #include "mm_internals.h"
 
 extern uint32_t _suserheap;
 extern uint32_t _euserheap;
 extern uint32_t _skernelheap;
 extern uint32_t _ekernelheap;
+
+struct buddy user_buddy;
+struct heapnode *user_buddy_list[USER_MAX_ORDER+1];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
+
+struct buddy kernel_buddy;
+struct heapnode *kernel_buddy_list[KERNEL_MAX_ORDER+1];
 
 static void init_buddy(struct buddy *buddy, uint32_t *address) __attribute__((section(".kernel")));
 

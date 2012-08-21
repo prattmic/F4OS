@@ -1,14 +1,60 @@
-SRCS = bootmain.c mem.c mpu.c buddy.c usart.c interrupt.c usermode.c systick.c context.c task.c semaphore.c spi.c tim.c resource.c i2c.c
-SRCS += shell.c blink.c top.c uname.c ipctest.c accel.c ghetto_gyro.c
-SRCS += discovery_accel.c shared_mem.c 9dof_gyro.c
-SRCS += string.c math.c stdio.c
-ASM_SRCS = bootasm.S memasm.S
+LINK_SCRIPT = boot/link.ld
 
-LINK_SCRIPT = kernel.ld
+# boot/
+VPATH = boot/
+CFLAGS = -Iboot/
+SRCS = boot_main.c
+ASM_SRCS = boot_asm.S
+
+# dev/
+VPATH += dev/
+CFLAGS = -Idev/
+SRCS += resource.c shared_mem.c
+
+# dev/hw
+VPATH += dev/hw/
+CFLAGS = -Idev/hw/
+SRCS += i2c.c spi.c systick.c tim.c usart.c
+
+# dev/periph/
+VPATH += dev/periph/
+CFLAGS = -Idev/periph/
+SRCS += 9dof_gyro.c discovery_accel.c
+
+# kernel/
+VPATH += kernel/
+CFLAGS = -Ikernel/
+SRCS += fault.c semaphore.c
+
+# kernel/sched/
+VPATH += kernel/sched/
+CFLAGS = -Ikernel/sched/
+SRCS += kernel_task.c sched_end.c sched_interrupts.c sched_new.c sched_start.c sched_swap.c sched_switch.c
+ASM_SRCS += sched_asm.S
+
+# lib/
+VPATH += lib/
+CFLAGS = -Ilib/
+SRCS += stdio.c string.c
+
+# lib/math/
+VPATH += lib/math/
+CFLAGS = -Ilib/math/
+SRCS += math_newlib.c math_other.c math_pow.c math_trig.c
+
+# mm/
+VPATH += mm/
+CFLAGS = -Imm/
+SRCS += mm_free.c mm_init.c mm_malloc.c mm_space.c
+
+# usr/shell/
+VPATH += usr/shell/
+CFLAGS = -Iusr/shell/
+SRCS += shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 
-PROJ_NAME=os
+PROJ_NAME=f4os
 
 # that's it, no need to change anything below this line!
 
@@ -18,7 +64,7 @@ CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS  = -g3 -Wall --std=gnu99 -I./inc/ -I./inc/shell/ -I./lib/inc/ -I./inc/dev/hw/ -I./inc/dev/
+CFLAGS += -g3 -Wall --std=gnu99 -isystem include/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
@@ -30,8 +76,6 @@ CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_REV=$(REV)
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=
-
-VPATH = src/ src/shell/ lib/src/ src/dev/ src/dev/hw/
 
 ###################################################
 

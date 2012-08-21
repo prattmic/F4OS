@@ -1,5 +1,22 @@
-#include "dev_header.h"
-#include "shared_mem.h"
+#include <stdlib.h>
+#include <mm/mm.h>
+#include <kernel/semaphore.h>
+#include <kernel/sched.h>
+#include <dev/resource.h>
+
+#include <dev/shared_mem.h>
+
+#define SM_SIZE   512
+
+typedef struct shared_mem { 
+        char        data[SM_SIZE]; 
+        int         read_ctr; 
+        int         write_ctr; 
+} shared_mem; 
+
+void shared_mem_close(void *env) __attribute__((section(".kernel")));
+char shared_mem_read(void *env) __attribute__((section(".kernel")));
+void shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
 
 rd_t open_shared_mem(void) {
     shared_mem *mem = kmalloc(sizeof(shared_mem));

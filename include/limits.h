@@ -1,3 +1,6 @@
+#ifndef LIMITS_H_INCLUDED
+#define LIMITS_H_INCLUDED
+
 #define MB_LEN_MAX    1
 
 #define CHAR_BIT 8
@@ -34,3 +37,5 @@
 
 /* Maximum value an `unsigned long int' can hold.  (Minimum is 0).  */
 #define ULONG_MAX (LONG_MAX * 2UL + 1)
+
+#endif

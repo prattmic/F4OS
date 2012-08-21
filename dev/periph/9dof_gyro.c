@@ -1,7 +1,16 @@
-#include "dev_header.h"
-#include "i2c.h"
-#include "9dof_gyro.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <mm/mm.h>
+#include <kernel/semaphore.h>
+#include <kernel/sched.h>
+#include <dev/resource.h>
 
+#include <dev/hw/i2c.h>
+#include <dev/periph/9dof_gyro.h>
+
+char sfe9dof_gyro_read(void *env) __attribute__((section(".kernel"))); 
+void sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel"))); 
+void sfe9dof_gyro_close(void *env) __attribute__((section(".kernel"))); 
 
 rd_t open_sfe9dof_gyro(void) {
     sfe9dof_gyro *gyro = kmalloc(sizeof(sfe9dof_gyro)); 

@@ -1,10 +1,14 @@
-#include "types.h"
-#include "registers.h"
-#include "string.h"
-#include "task.h"
-#include "semaphore.h"
-#include "stdio.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+#include <dev/registers.h>
+#include <kernel/sched.h>
+
 #include "blink.h"
+
+void blue_led(void);
+void orange_led(void);
+void green_led(void);
 
 uint8_t enabled_blue = 0;
 uint8_t enabled_orange = 0;

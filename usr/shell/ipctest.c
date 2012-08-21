@@ -1,5 +1,12 @@
-#include "shell_header.h"
-#include "shared_mem.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <kernel/sched.h>
+#include <dev/resource.h>
+#include <dev/shared_mem.h>
+
+#include "ipctest.h"
+
+void memreader(void);
 
 resource *test_mem = NULL;
 

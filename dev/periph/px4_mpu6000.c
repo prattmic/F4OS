@@ -1,5 +1,13 @@
-#include "dev_header.h"
-#include "spi.h"
+#include <stdlib.h>
+#include <mm/mm.h>
+#include <kernel/semaphore.h>
+#include <dev/resource.h>
+
+#include <dev/hw/spi.h>
+
+/* ~~~~~~~~~~~~~~~~~~
+ * This file clearly is not done and should not depend
+ * on discovery_accel.  It will not be built until complete */
 #include "discovery_accel.h"
 
 extern spi_dev spi1;

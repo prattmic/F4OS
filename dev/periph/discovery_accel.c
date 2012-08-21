@@ -1,8 +1,22 @@
-#include "dev_header.h"
-#include "spi.h"
-#include "discovery_accel.h"
+#include <stdlib.h>
+#include <mm/mm.h>
+#include <kernel/semaphore.h>
+#include <kernel/sched.h>
+#include <dev/resource.h>
+
+#include <dev/hw/spi.h>
+#include <dev/periph/discovery_accel.h>
+
+typedef struct discovery_accel {
+        spi_dev *spi_port;
+        uint8_t read_ctr;
+} discovery_accel;
 
 extern spi_dev spi1;
+
+char discovery_accel_read(void *env) __attribute__((section(".kernel")));
+void discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
+void discovery_accel_close(void *env) __attribute__((section(".kernel")));
 
 rd_t open_discovery_accel(void) {
     discovery_accel *accel = kmalloc(sizeof(discovery_accel));

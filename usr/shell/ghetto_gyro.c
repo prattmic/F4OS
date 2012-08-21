@@ -1,6 +1,9 @@
-#include "shell_header.h"
-#include "i2c.h"
-#include "9dof_gyro.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <dev/hw/i2c.h>
+#include <dev/periph/9dof_gyro.h>
+
 #include "ghetto_gyro.h"
 
 typedef struct gyro_data {

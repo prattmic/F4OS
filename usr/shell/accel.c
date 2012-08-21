@@ -1,7 +1,10 @@
-#include "shell_header.h"
-#include "spi.h"
-#include "discovery_accel.h"
-#include "math.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <dev/hw/spi.h>
+#include <dev/periph/discovery_accel.h>
+#include <math.h>
+
+#include "accel.h"
 
 float accel_lp_gain = .2;
 

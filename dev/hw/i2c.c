@@ -1,9 +1,18 @@
-#include "dev_header.h"
-#include "i2c.h"
+#include <stdint.h>
+#include <dev/registers.h>
+#include <dev/resource.h>
+#include <kernel/fault.h>
 
+#include <dev/hw/i2c.h>
 
 #define I2C1_SDA    9
 #define I2C1_SCL    8
+
+uint8_t i2c1_write(uint8_t addr, uint8_t *data, uint32_t num) __attribute__((section(".kernel")));
+uint8_t i2c1_read(uint8_t addr) __attribute__((section(".kernel")));
+uint8_t i2cnowrite(uint8_t addr, uint8_t *data, uint32_t num) __attribute__((section(".kernel")));
+uint8_t i2cnoread(uint8_t addr) __attribute__((section(".kernel")));
+void i2c1_stop(void) __attribute__((section(".kernel")));
 
 struct i2c_dev i2c1 = {
     .read = &i2cnoread,

@@ -1,4 +1,7 @@
+#include <stddef.h>
 #include <stdlib.h>
+#include <kernel/semaphore.h>
+
 #include <mm/mm.h>
 #include "mm_internals.h"
 
