@@ -55,6 +55,7 @@ SRCS += shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 
 PROJ_NAME=f4os
+PREFIX = ./out
 
 # that's it, no need to change anything below this line!
 
@@ -87,48 +88,48 @@ OBJS += $(ASM_SRCS:.S=.o)
 .PHONY: proj unoptimized
 
 all: CFLAGS += -O2
-all: proj
+all: $(PREFIX) proj
 
 unoptimized: CFLAGS += -O0
-unoptimized: proj
+unoptimized: $(PREFIX) proj
 
 again: clean all
 
 # Flash the STM32F4
 burn:
-	st-flash write $(PROJ_NAME).bin 0x8000000
+	st-flash write $(PREFIX)/$(PROJ_NAME).bin 0x8000000
 
 # Create tags
 ctags:
 	ctags -R .
 
 %.o : %.S
-	$(CC) -MD -c $(CFLAGS) $< -o $@ 
-	@cp $*.d $*.P; \
+	$(CC) -MD -c $(CFLAGS) $< -o $(PREFIX)/$@ 
+	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-			-e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
-		rm -f $*.d
+			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
+		rm -f $(PREFIX)/$*.d
 
 -include $(ASM_SRCS:.S=.P)
 
 %.o : %.c
-	$(CC) -MD -c $(CFLAGS) $< -o $@ 
-	@cp $*.d $*.P; \
+	$(CC) -MD -c $(CFLAGS) $< -o $(PREFIX)/$@ 
+	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-			-e '/^$$/ d' -e 's/$$/ :/' < $*.d >> $*.P; \
-		rm -f $*.d
+			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
+		rm -f $(PREFIX)/$*.d
 
 -include $(SRCS:.c=.P)
 
 proj: 	$(PROJ_NAME).elf
 
+$(PREFIX):
+	mkdir -p $(PREFIX)
+
 $(PROJ_NAME).elf: $(OBJS) 
-	$(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
-	$(OBJCOPY) -O ihex $(PROJ_NAME).elf $(PROJ_NAME).hex
-	$(OBJCOPY) -O binary $(PROJ_NAME).elf $(PROJ_NAME).bin
+	$(LD) $(addprefix $(PREFIX)/,$^) -o $(PREFIX)/$@ $(LFLAGS) -T $(LINK_SCRIPT)
+	$(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
+	$(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
 
 clean:
-	-rm -f *.o *.i *.s *.P
-	-rm -f $(PROJ_NAME).elf
-	-rm -f $(PROJ_NAME).hex
-	-rm -f $(PROJ_NAME).bin
+	-rm -rf $(PREFIX)
