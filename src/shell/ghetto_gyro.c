@@ -1,63 +1,26 @@
 #include "shell_header.h"
 #include "i2c.h"
+#include "9dof_gyro.h"
 #include "ghetto_gyro.h"
 
-/* Remove/replace this with better IO */
+typedef struct gyro_data {
+    short x;
+    short y;
+    short z;
+} gyro_data;
+
+/* Basically the same as accelerometer reading. Woohoo abstraction */
 void ghetto_gyro(int argc, char **argv) {
-    uint8_t packet[2];
-
-    /* Turn stuff on */
-    packet[0] = 0x15;
-    packet[1] = 0x07;
-    if (i2c1_write(0x68, packet, 2)) {
-        printf("Error writing I2C.\r\n");
-        return;
+    if(argc != 1) {
+        printf("Usage: %s\r\n", argv[0]);
     }
-
-    packet[0] = 0x16;
-    packet[1] = 0x18;
-    if (i2c1_write(0x68, packet, 2)) {
-        printf("Error writing I2C.\r\n");
-        return;
-    }
-
+    gyro_data *data = malloc(sizeof(gyro_data));
+    rd_t gyro_rd = open_sfe9dof_gyro();
     printf("Press any key for data and q to quit\r\n");
-
     while (getc() != 'q') {
-        int16_t x = 0;
-        int16_t y = 0;
-        int16_t z = 0;
-
-        packet[0] = 0x1D;
-        if (!i2c1_write(0x68, packet, 1)) {
-            x |= i2c1_read(0x68) << 8;
-        }
-
-        packet[0] = 0x1E;
-        if (!i2c1_write(0x68, packet, 1)) {
-            x |= i2c1_read(0x68);
-        }
-
-        packet[0] = 0x1F;
-        if (!i2c1_write(0x68, packet, 1)) {
-            y |= i2c1_read(0x68) << 8;
-        }
-
-        packet[0] = 0x20;
-        if (!i2c1_write(0x68, packet, 1)) {
-            y |= i2c1_read(0x68);
-        }
-
-        packet[0] = 0x21;
-        if (!i2c1_write(0x68, packet, 1)) {
-            z |= i2c1_read(0x68) << 8;
-        }
-
-        packet[0] = 0x22;
-        if (!i2c1_write(0x68, packet, 1)) {
-            z |= i2c1_read(0x68);
-        }
-
-        printf("X: %d   Y: %d   Z:%d\r\n", z,y,z);
+        read(gyro_rd, (char *)data, 6);
+        printf("X: %d   Y: %d   Z:%d\r\n", data->x, data->y, data->z);
     }
+    free(data);
+    close(gyro_rd);
 }

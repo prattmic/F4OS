@@ -8,6 +8,11 @@ spi_dev spi1 = {
     .write = &spinowrite
 };
 
+semaphore spi1_semaphore = {
+    .lock = 0,
+    .held_by = NULL
+};
+
 uint8_t spinowrite(uint8_t addr, uint8_t data) {
     panic_print("Attempted write on uninitialized spi device.\r\n");
     /* Execution will never reach here */
