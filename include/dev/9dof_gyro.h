@@ -1,11 +1,14 @@
-typedef struct discovery_accel {
-        spi_dev *spi_port;
-        uint8_t read_ctr;
-} discovery_accel;
+typedef struct sfe9dof_gyro {
+        i2c_dev *i2c_port;
+        uint8_t device_addr;
+        uint8_t tmp_addr;
+        uint8_t addr_ctr;
+} sfe9dof_gyro;
 
-char discovery_accel_read(void *env) __attribute__((section(".kernel")));
-void discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
-rd_t open_discovery_accel(void) __attribute__((section(".kernel")));
-void discovery_accel_close(void *env) __attribute__((section(".kernel")));
+extern semaphore i2c1_semaphore;
+extern i2c_dev i2c1;
 
-#define DISCOVERY_ACCEL_SENSITIVITY     (0.018)
+rd_t open_sfe9dof_gyro(void) __attribute__((section(".kernel"))); 
+char sfe9dof_gyro_read(void *env) __attribute__((section(".kernel"))); 
+void sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel"))); 
+void sfe9dof_gyro_close(void *env) __attribute__((section(".kernel"))); 

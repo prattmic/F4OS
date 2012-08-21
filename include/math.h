@@ -28,6 +28,7 @@ float powf(float x, float y);
 float ldexpf(float d, int e);
 float expf(float x);
 float atan2(float y, float x);
+float lowpass(float acc, float new, float gain);
 
 #define FLOAT_INF           0x7f800000
 #define FLOAT_NAN           0xffd00000

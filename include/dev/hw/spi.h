@@ -1,5 +1,7 @@
 #define SPI_READ    (uint8_t) (1 << 7)
 
+extern semaphore spi1_semaphore;
+
 typedef struct spi_dev {
     uint8_t curr_addr;
     uint8_t addr_ctr;
