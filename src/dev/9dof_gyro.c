@@ -39,7 +39,7 @@ char sfe9dof_gyro_read(void *env) {
     }
     gyro->tmp_addr = 0x1D;
     tmp[0] = gyro->tmp_addr + gyro->addr_ctr;
-    tmp[1] = gyro->i2c_port->write(gyro->device_addr, &tmp, 1);
+    tmp[1] = gyro->i2c_port->write(gyro->device_addr, tmp, 1);
     return (char)gyro->i2c_port->read(gyro->device_addr);
 }
 
