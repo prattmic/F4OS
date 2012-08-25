@@ -31,8 +31,8 @@ void acquire(volatile struct semaphore *semaphore) {
     /* Local labels are numbers like 0 or 1. A branch to 1b goes "back" to last
      * 1, and 1f goes "forward" to the next 1. These are necessary because the
      * optimizer will inline this code at random, and labels will be redefined */
+    __asm__("0:");
     __asm__("\
-        0:                                  \r\n\
             mov         r2, #1              \r\n\
             ldrexb      r3, [%[addr]]       \r\n\
             cmp         r3, #0              \r\n\

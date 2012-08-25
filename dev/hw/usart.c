@@ -231,7 +231,9 @@ char usart_getc(void *env) {
     /* Waiting... */
     while (!wrapped && dma_read == read) {
         /* Yield */
+        release(&usart_semaphore);
         _svc(SVC_YIELD);
+        acquire(&usart_semaphore);
 
         dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
         wrapped = *DMA2_LISR & DMA_LISR_TCIF2;
