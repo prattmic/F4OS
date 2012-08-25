@@ -1,16 +1,25 @@
 # End users specify objects here
 
 # usr/shell/
-VPATH = usr/shell/
-CFLAGS = -Iusr/shell/
-SRCS = shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c
-
-# usr/
-VPATH += usr/
-SRCS += main.c
+USR_VPATH = usr/shell/
+USR_CFLAGS = -Iusr/shell/
+USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c
 
 ##########################
 LINK_SCRIPT = boot/link.ld
+
+UNIT_TESTS ?= 0
+
+ifeq ($(UNIT_TESTS),1)
+# usr/unit_tests/
+VPATH = usr/unit_tests/
+CFLAGS = 
+SRCS = main.c
+else
+VPATH = $(USR_VPATH)
+CFLAGS = $(USR_CFLAGS)
+SRCS = $(USR_SRCS)
+endif
 
 # boot/
 VPATH += boot/
@@ -90,6 +99,9 @@ all: $(PREFIX) proj
 
 unoptimized: CFLAGS += -O0
 unoptimized: $(PREFIX) proj
+
+unit-tests:
+	UNIT_TESTS=1 $(MAKE) -e
 
 again: clean all
 
