@@ -80,8 +80,8 @@ LFLAGS=
 
 ###################################################
 
-OBJS = $(SRCS:.c=.o)
-OBJS += $(ASM_SRCS:.S=.o)
+OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
+OBJS += $(addprefix $(PREFIX)/, $(ASM_SRCS:.S=.o))
 
 ###################################################
 
@@ -103,31 +103,31 @@ burn:
 ctags:
 	ctags -R .
 
-%.o : %.S
-	$(CC) -MD -c $(CFLAGS) $< -o $(PREFIX)/$@ 
+$(PREFIX)/%.o : %.S
+	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
 		rm -f $(PREFIX)/$*.d
 
--include $(ASM_SRCS:.S=.P)
+-include $(addprefix $(PREFIX)/, $(ASM_SRCS:.S=.P))
 
-%.o : %.c
-	$(CC) -MD -c $(CFLAGS) $< -o $(PREFIX)/$@ 
+$(PREFIX)/%.o : %.c
+	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
 		rm -f $(PREFIX)/$*.d
 
--include $(SRCS:.c=.P)
+-include $(addprefix $(PREFIX)/, $(SRCS:.c=.P))
 
-proj: 	$(PROJ_NAME).elf
+proj: 	$(PREFIX)/$(PROJ_NAME).elf
 
 $(PREFIX):
 	mkdir -p $(PREFIX)
 
-$(PROJ_NAME).elf: $(OBJS) 
-	$(LD) $(addprefix $(PREFIX)/,$^) -o $(PREFIX)/$@ $(LFLAGS) -T $(LINK_SCRIPT)
+$(PREFIX)/$(PROJ_NAME).elf: $(OBJS) 
+	$(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
 	$(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
 
