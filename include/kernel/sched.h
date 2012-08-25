@@ -53,4 +53,7 @@ void swap_task(task_node *node) __attribute__((section(".kernel"), optimize(0)))
 
 void raise_privilege(void) __attribute__((section(".kernel")));
 
+/* End-users set up boot tasks here */
+void main(void);
+
 #endif
