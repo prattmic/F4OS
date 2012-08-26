@@ -10,7 +10,7 @@
 
 char sfe9dof_gyro_read(void *env) __attribute__((section(".kernel"))); 
 void sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel"))); 
-void sfe9dof_gyro_close(void *env) __attribute__((section(".kernel"))); 
+void sfe9dof_gyro_close(resource *env) __attribute__((section(".kernel"))); 
 
 rd_t open_sfe9dof_gyro(void) {
     sfe9dof_gyro *gyro = kmalloc(sizeof(sfe9dof_gyro)); 
@@ -56,6 +56,7 @@ void sfe9dof_gyro_write(char d, void *env) {
     /* No real meaning to this yet */
 }
 
-void sfe9dof_gyro_close(void *env) {
-    kfree(env);
+void sfe9dof_gyro_close(resource *res) {
+    kfree(res->env);
+    kfree((void *) res->sem);
 }

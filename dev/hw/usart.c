@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <dev/resource.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
@@ -262,6 +263,10 @@ char usart_getc(void *env) {
         read = 1;
         return *usart_buf;
     }
+}
+
+void usart_close(resource *resource) {
+    panic_print("USART is a fundamental resource, it may not be closed.");
 }
 
 void usart_echo(void) {
