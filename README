@@ -1,3 +1,22 @@
-A small, real time OS for the ARM Cortex-M4F STM32F4 chip.
+A small, real time OS for the ARM Cortex-M4F STM32F4.
+
+Developed on STM32F4DISCOVERY, but should be portable to other 
+STM32F4 boards with very little modification.  In fact, with minor
+changes (such as disabling the FPU and changing pinouts), it should
+be portable to STM32F0 and STM32F1 chips.
+
+Building requires arm-none-eabi-toolchain.  For hardfloat support, see
+https://github.com/prattmic/arm-cortex-m4-hardfloat-toolchain or
+https://launchpad.net/gcc-arm-embedded.
+
+For flashing and debugging, texane's stlink is recommended:
+https://github.com/texane/stlink
+
+With stlink in your path, "make burn" will flash your device.
+
+By default, the shell program in usr/shell/ is built and run at
+boot.  The main() function in main.c is called by the scheduler
+before task switching begins and should be used to create tasks
+that run at boot.
 
 Michael Pratt
