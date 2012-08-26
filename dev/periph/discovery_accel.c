@@ -21,16 +21,18 @@ void discovery_accel_close(resource *env) __attribute__((section(".kernel")));
 rd_t open_discovery_accel(void) {
     discovery_accel *accel = kmalloc(sizeof(discovery_accel));
     resource *new_r = kmalloc(sizeof(resource));
+
     /* We expect that spi1 was init'd in bootmain.c */
     accel->spi_port = &spi1;
     accel->spi_port->write(0x20, 0x47);
     accel->read_ctr = 0;
+
     new_r->env = accel;
     new_r->writer = &discovery_accel_write;
     new_r->reader = &discovery_accel_read;
     new_r->closer = &discovery_accel_close;
     new_r->sem = &spi1_semaphore;
-    init_semaphore(new_r->sem);
+
     add_resource(curr_task->task, new_r);
     return curr_task->task->top_rd - 1;
 }
@@ -48,4 +50,6 @@ void discovery_accel_write(char d, void *env) {
 
 void discovery_accel_close(resource *res) {
     kfree(res->env);
+    /* Since this is a global semaphore, we need to release it */
+    release(res->sem);
 }

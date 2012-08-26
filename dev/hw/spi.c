@@ -22,7 +22,8 @@ spi_dev spi1 = {
 
 struct semaphore spi1_semaphore = {
     .lock = 0,
-    .held_by = NULL
+    .held_by = NULL,
+    .waiting = NULL
 };
 
 inline void spi1_cs_high(void) __attribute__((always_inline));
@@ -99,6 +100,8 @@ void init_spi1(void) {
 
     /* Set high */
     spi1_cs_high();
+
+    init_semaphore(&spi1_semaphore);
 
     /* Set up abstract device for later use in device drivers */
     spi1.write = &spi1_write;
