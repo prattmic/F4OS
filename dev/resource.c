@@ -76,7 +76,9 @@ void close(rd_t rd) {
         panic_print("Resource descriptor too large");
     }
     if (task_switching) {
-        acquire(curr_task->task->resources[rd]->sem);
+        if (rd == curr_task->task->top_rd - 1) {
+            curr_task->task->top_rd--;
+        }
         curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]);
         kfree(curr_task->task->resources[rd]);
         curr_task->task->resources[rd] = NULL;
@@ -86,7 +88,6 @@ void close(rd_t rd) {
         kfree(&default_resources[rd]);
     }
 }
-
 
 void read(rd_t rd, char *buf, int n) {
     if (rd >= RESOURCE_TABLE_SIZE) {

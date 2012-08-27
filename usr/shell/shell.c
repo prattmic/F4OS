@@ -13,6 +13,7 @@
 #include "ipctest.h"
 #include "accel.h"
 #include "ghetto_gyro.h"
+#include "lowpass.h"
 
 struct command {
     char *name;
@@ -25,7 +26,8 @@ const struct command valid_commands[] = {{"blink",  &blink},
                                          {"uname",  &uname},
                                          {"ipctest", &ipctest},
                                          {"accel_test", &accel},
-                                         {"ghetto_gyro", &ghetto_gyro}
+                                         {"ghetto_gyro", &ghetto_gyro},
+                                         {"lowpass", &lowpass_test}
 };
 #define NUM_COMMANDS    (sizeof(valid_commands)/sizeof(valid_commands[0]))
 
