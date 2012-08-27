@@ -44,9 +44,11 @@ void lowpass_test(int argc, char **argv) {
 
 void ghetto_lp(void) {
     static float theta = 0;
-    rd_t accelrd = open_discovery_accel();
+    static rd_t accelrd = -1;
+    if(accelrd == -1) {
+        accelrd = open_discovery_accel();
+    } 
     read(accelrd, (char *)data, 6);
     theta = lowpass(theta, atan2(G(data->z), G(data->y)), ACC_LP_GAIN);
     printf("Filtered roll: %f\r\n", theta);
-    close(accelrd);
 }
