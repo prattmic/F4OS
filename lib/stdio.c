@@ -2,20 +2,34 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdarg.h>
+#include <dev/resource.h>
+
 #include <stdio.h>
+
+void fputs(rd_t rd, char *s) {
+    swrite(rd, s);
+}
 
 void puts(char *s) {
     swrite(0, s);
 }
 
-char getc(void) {
-    char ret;
-    read(0, &ret, 1);
-    return ret;
+void fputc(rd_t rd, char letter) {
+    write(rd, &letter, 1);
 }
 
 void putc(char letter) {
     write(0, &letter, 1);
+}
+
+char fgetc(rd_t rd) {
+    char ret;
+    read(rd, &ret, 1);
+    return ret;
+}
+
+char getc(void) {
+    return fgetc(0);
 }
 
 #define PS 256
@@ -43,7 +57,7 @@ void printx(char *s, uint8_t *x, int n) {
     puts(buf);
 }
 
-void printf(char *fmt, ...) {
+void fprintf(rd_t rd, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
 
@@ -63,7 +77,7 @@ void printf(char *fmt, ...) {
                         ];
                     }
 
-                    puts(buf);
+                    fputs(rd, buf);
                     break;
                 }
                 case 'i': case 'd': {
@@ -72,7 +86,7 @@ void printf(char *fmt, ...) {
 
                     itoa(num, buf);
 
-                    puts(buf);
+                    fputs(rd, buf);
                     break;
                 }
                 case 'u': {
@@ -81,7 +95,7 @@ void printf(char *fmt, ...) {
 
                     uitoa(num, buf);
 
-                    puts(buf);
+                    fputs(rd, buf);
                     break;
                 }
                 case 'f': {
@@ -90,36 +104,36 @@ void printf(char *fmt, ...) {
 
                     ftoa(num, 0.0001f, buf, 20);
 
-                    puts(buf);
+                    fputs(rd, buf);
                     break;
                 }
                 case 'c': {
                     char letter = va_arg(ap, char);
 
-                    putc(letter);
+                    fputc(rd, letter);
                     break;
                 }
                 case 's': {
                     char *s = va_arg(ap, char*);
 
-                    puts(s);
+                    fputs(rd, s);
                     break;
                 }
                 case '%': {
                     /* Just print a % */
-                    putc('%');
+                    fputc(rd, '%');
                     break;
                 }
                 default: {
-                    putc('%');
-                    putc(*fmt);
+                    fputc(rd, '%');
+                    fputc(rd, *fmt);
                 }
             }
 
             fmt++;
         }
         else {
-            putc(*fmt++);
+            fputc(rd, *fmt++);
         }
     }
 

@@ -1,56 +1,63 @@
+# End users specify objects here
+
+# usr/shell/
+USR_VPATH = usr/shell/
+USR_CFLAGS = -Iusr/shell/
+USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c
+
+##########################
 LINK_SCRIPT = boot/link.ld
 
+UNIT_TESTS ?= 0
+
+ifeq ($(UNIT_TESTS),1)
+# usr/unit_tests/
+VPATH = usr/unit_tests/
+CFLAGS = 
+SRCS = main.c
+else
+VPATH = $(USR_VPATH)
+CFLAGS = $(USR_CFLAGS)
+SRCS = $(USR_SRCS)
+endif
+
 # boot/
-VPATH = boot/
-CFLAGS = -Iboot/
-SRCS = boot_main.c
-ASM_SRCS = boot_asm.S
+VPATH += boot/
+SRCS += boot_main.c
+ASM_SRCS += boot_asm.S
 
 # dev/
 VPATH += dev/
-CFLAGS = -Idev/
 SRCS += resource.c shared_mem.c
 
 # dev/hw
 VPATH += dev/hw/
-CFLAGS = -Idev/hw/
 SRCS += i2c.c spi.c systick.c tim.c usart.c
 
 # dev/periph/
 VPATH += dev/periph/
-CFLAGS = -Idev/periph/
 SRCS += 9dof_gyro.c discovery_accel.c
 
 # kernel/
 VPATH += kernel/
-CFLAGS = -Ikernel/
 SRCS += fault.c semaphore.c
 
 # kernel/sched/
 VPATH += kernel/sched/
-CFLAGS = -Ikernel/sched/
 SRCS += kernel_task.c sched_end.c sched_interrupts.c sched_new.c sched_start.c sched_swap.c sched_switch.c
 ASM_SRCS += sched_asm.S
 
 # lib/
 VPATH += lib/
-CFLAGS = -Ilib/
 SRCS += stdio.c string.c
 
 # lib/math/
 VPATH += lib/math/
-CFLAGS = -Ilib/math/
 SRCS += math_newlib.c math_other.c math_pow.c math_trig.c
 
 # mm/
 VPATH += mm/
-CFLAGS = -Imm/
 SRCS += mm_free.c mm_init.c mm_malloc.c mm_space.c
-
-# usr/shell/
-VPATH += usr/shell/
-CFLAGS = -Iusr/shell/
-SRCS += shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c
 
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 
@@ -80,8 +87,8 @@ LFLAGS=
 
 ###################################################
 
-OBJS = $(SRCS:.c=.o)
-OBJS += $(ASM_SRCS:.S=.o)
+OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
+OBJS += $(addprefix $(PREFIX)/, $(ASM_SRCS:.S=.o))
 
 ###################################################
 
@@ -93,6 +100,9 @@ all: $(PREFIX) proj
 unoptimized: CFLAGS += -O0
 unoptimized: $(PREFIX) proj
 
+unit-tests:
+	UNIT_TESTS=1 $(MAKE) -e
+
 again: clean all
 
 # Flash the STM32F4
@@ -103,31 +113,31 @@ burn:
 ctags:
 	ctags -R .
 
-%.o : %.S
-	$(CC) -MD -c $(CFLAGS) $< -o $(PREFIX)/$@ 
+$(PREFIX)/%.o : %.S
+	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
 		rm -f $(PREFIX)/$*.d
 
--include $(ASM_SRCS:.S=.P)
+-include $(addprefix $(PREFIX)/, $(ASM_SRCS:.S=.P))
 
-%.o : %.c
-	$(CC) -MD -c $(CFLAGS) $< -o $(PREFIX)/$@ 
+$(PREFIX)/%.o : %.c
+	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
 		rm -f $(PREFIX)/$*.d
 
--include $(SRCS:.c=.P)
+-include $(addprefix $(PREFIX)/, $(SRCS:.c=.P))
 
-proj: 	$(PROJ_NAME).elf
+proj: 	$(PREFIX)/$(PROJ_NAME).elf
 
 $(PREFIX):
 	mkdir -p $(PREFIX)
 
-$(PROJ_NAME).elf: $(OBJS) 
-	$(LD) $(addprefix $(PREFIX)/,$^) -o $(PREFIX)/$@ $(LFLAGS) -T $(LINK_SCRIPT)
+$(PREFIX)/$(PROJ_NAME).elf: $(OBJS) 
+	$(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
 	$(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
 

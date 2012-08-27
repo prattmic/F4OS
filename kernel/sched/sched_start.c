@@ -4,8 +4,6 @@
 #include <kernel/sched.h>
 #include "sched_internals.h"
 
-#include "shell.h"
-
 uint8_t task_switching = 0;
 
 static void start_task_switching(void) __attribute__((section(".kernel")));
@@ -16,7 +14,9 @@ void start_sched(void) {
 
     /* Set up initial tasks */
     new_task(&kernel_task, 1, 0);
-    new_task(&shell, 1, 0);
+
+    /* Setup boot tasks specified by end user. */
+    main();
 
     init_systick();
     start_task_switching();

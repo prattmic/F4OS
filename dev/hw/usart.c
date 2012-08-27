@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <dev/resource.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
@@ -231,7 +232,9 @@ char usart_getc(void *env) {
     /* Waiting... */
     while (!wrapped && dma_read == read) {
         /* Yield */
+        release(&usart_semaphore);
         _svc(SVC_YIELD);
+        acquire(&usart_semaphore);
 
         dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
         wrapped = *DMA2_LISR & DMA_LISR_TCIF2;
@@ -260,6 +263,10 @@ char usart_getc(void *env) {
         read = 1;
         return *usart_buf;
     }
+}
+
+void usart_close(resource *resource) {
+    panic_print("USART is a fundamental resource, it may not be closed.");
 }
 
 void usart_echo(void) {

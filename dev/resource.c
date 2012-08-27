@@ -29,6 +29,7 @@ void resource_setup(task_ctrl* tcs) {
     resource* new_r = kmalloc(sizeof(resource));
     new_r->writer = &usart_putc;
     new_r->reader = &usart_getc;
+    new_r->closer = &usart_close;
     new_r->env = NULL;
     new_r->sem = &usart_semaphore;
     add_resource(tcs, new_r);
@@ -76,7 +77,7 @@ void close(rd_t rd) {
     }
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);
-        curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]->env);
+        curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]);
         kfree(curr_task->task->resources[rd]);
         curr_task->task->resources[rd] = NULL;
     }

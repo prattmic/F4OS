@@ -14,9 +14,9 @@ typedef struct shared_mem {
         int         write_ctr; 
 } shared_mem; 
 
-void shared_mem_close(void *env) __attribute__((section(".kernel")));
 char shared_mem_read(void *env) __attribute__((section(".kernel")));
 void shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
+void shared_mem_close(resource *env) __attribute__((section(".kernel")));
 
 rd_t open_shared_mem(void) {
     shared_mem *mem = kmalloc(sizeof(shared_mem));
@@ -29,7 +29,7 @@ rd_t open_shared_mem(void) {
     new_r->writer = &shared_mem_write;
     new_r->reader = &shared_mem_read;
     new_r->closer = &shared_mem_close;
-    new_r->sem = kmalloc(sizeof(semaphore));
+    new_r->sem    = kmalloc(sizeof(semaphore));
     init_semaphore(new_r->sem);
 
     add_resource(curr_task->task, new_r);
@@ -55,6 +55,7 @@ void shared_mem_write(char c, void *env) {
     else mem->data[mem->write_ctr++] = c;
 }
 
-void shared_mem_close(void *env) {
-    kfree(env);
+void shared_mem_close(resource *resource) {
+    kfree(resource->env);
+    kfree((void*) resource->sem);
 }

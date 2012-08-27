@@ -98,6 +98,12 @@ restore_full_context:
     add     r0, r0, #100    /* Skip FP registers, leave space for three registers */
 
     ldr     r1, [r0, #-76]  /* load in old pc value */
+
+    mov     r2, #0x8100000
+    cmp     r1, r2
+    bgt     panic
+    ldr     r2, [r0, #8]
+
     orr     r1, r1, #1      /* bit[0] must be set to 1 for thumb mode */
     str     r1, [r0, #4]    /* Stack PC */
 

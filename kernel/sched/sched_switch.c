@@ -29,8 +29,8 @@ void switch_task(void) {
         panic_print("Task has overflowed its stack.");
     }
 
-    /* Don't bother moving this if it is the only high priority task */
-    if (node->task->priority <= node->next->task->priority) {
+    /* Don't bother moving this if it is the only (high priority) task */
+    if (node->next && node->task->priority <= node->next->task->priority) {
         /* Move to end of priority */
         task_node *prev = node;
         task_node *next = node->next;

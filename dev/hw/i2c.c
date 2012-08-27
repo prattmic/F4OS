@@ -1,6 +1,8 @@
 #include <stdint.h>
+#include <stddef.h>
 #include <dev/registers.h>
 #include <dev/resource.h>
+#include <kernel/semaphore.h>
 #include <kernel/fault.h>
 
 #include <dev/hw/i2c.h>
@@ -19,6 +21,11 @@ struct i2c_dev i2c1 = {
     .write = &i2cnowrite
 };
 
+struct semaphore i2c1_semaphore = {
+    .lock = 0,
+    .held_by = NULL,
+    .waiting = NULL
+};
 
 uint8_t i2cnowrite(uint8_t addr, uint8_t *data, uint32_t num) {
         panic_print("Attempted write on uninitialized i2c device.\r\n");
@@ -74,6 +81,8 @@ void init_i2c1(void) {
 
     /* Enable */
     *I2C1_CR1 |= I2C_CR1_PE;
+
+    init_semaphore(&i2c1_semaphore);
 
     i2c1.read = &i2c1_read;
     i2c1.write = &i2c1_write;

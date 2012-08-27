@@ -10,10 +10,15 @@ void close(rd_t rd) __attribute__((section(".kernel")));
 void read(rd_t rd, char *buf, int n) __attribute__((section(".kernel")));
 void swrite(rd_t rd, char *s) __attribute__((section(".kernel")));
 
+void fputs(rd_t rd, char *s);
+void fputc(rd_t rd, char letter);
+char fgetc(rd_t rd);
+void fprintf(rd_t rd, char *fmt, ...);
+
 void puts(char *s);
-char getc(void);
 void putc(char letter);
+char getc(void);
 void printx(char *s, uint8_t *x, int n);
-void printf(char *fmt, ...);
+#define printf(args...) fprintf(0, args)
 
 #endif

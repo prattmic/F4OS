@@ -10,7 +10,7 @@
 
 char sfe9dof_gyro_read(void *env) __attribute__((section(".kernel"))); 
 void sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel"))); 
-void sfe9dof_gyro_close(void *env) __attribute__((section(".kernel"))); 
+void sfe9dof_gyro_close(resource *env) __attribute__((section(".kernel"))); 
 
 rd_t open_sfe9dof_gyro(void) {
     sfe9dof_gyro *gyro = kmalloc(sizeof(sfe9dof_gyro)); 
@@ -22,6 +22,7 @@ rd_t open_sfe9dof_gyro(void) {
     /* Address on I2C bus of gyro. */
     gyro->device_addr = 0x68;
     gyro->tmp_addr = 0x1D;
+
     /* Fire it up, fire it up/ When we finally turn it over, make a b-line towards the boat, or... */
     uint8_t packet[2];
     packet[0] = 0x15;
@@ -30,12 +31,13 @@ rd_t open_sfe9dof_gyro(void) {
     packet[0] = 0x16;
     packet[1] = 0x18;
     gyro->i2c_port->write(gyro->device_addr, packet, 2);
+
     new_r->env = gyro;
     new_r->writer = &sfe9dof_gyro_write;
     new_r->reader = &sfe9dof_gyro_read;
     new_r->closer = &sfe9dof_gyro_close;
-    new_r->sem = kmalloc(sizeof(semaphore));
-    init_semaphore(new_r->sem);
+    new_r->sem = &i2c1_semaphore;
+
     add_resource(curr_task->task, new_r);
     return curr_task->task->top_rd - 1;
 }
@@ -56,6 +58,8 @@ void sfe9dof_gyro_write(char d, void *env) {
     /* No real meaning to this yet */
 }
 
-void sfe9dof_gyro_close(void *env) {
-    kfree(env);
+void sfe9dof_gyro_close(resource *res) {
+    kfree(res->env);
+    /* Since this is a global semaphore, we need to release it */
+    release(res->sem);
 }
