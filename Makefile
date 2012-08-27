@@ -3,7 +3,7 @@
 # usr/shell/
 USR_VPATH = usr/shell/
 USR_CFLAGS = -Iusr/shell/
-USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c
+USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c
 
 ##########################
 LINK_SCRIPT = boot/link.ld
