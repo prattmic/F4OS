@@ -70,6 +70,7 @@ void append_task(task_node_list *list, task_node *task) {
         if (task->task->priority > list->head->task->priority) {
             task->prev = NULL;
             task->next = list->head;
+            task->next->prev = task;
             list->head = task;
 
             __asm__("cpsie  i");
