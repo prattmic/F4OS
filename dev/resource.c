@@ -79,7 +79,6 @@ void close(rd_t rd) {
         if (rd == curr_task->task->top_rd - 1) {
             curr_task->task->top_rd--;
         }
-        acquire(curr_task->task->resources[rd]->sem);
         curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]);
         kfree(curr_task->task->resources[rd]);
         curr_task->task->resources[rd] = NULL;
