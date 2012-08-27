@@ -50,6 +50,4 @@ void discovery_accel_write(char d, void *env) {
 
 void discovery_accel_close(resource *res) {
     kfree(res->env);
-    /* Since this is a global semaphore, we need to release it */
-    release(res->sem);
 }

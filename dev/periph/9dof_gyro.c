@@ -60,6 +60,4 @@ void sfe9dof_gyro_write(char d, void *env) {
 
 void sfe9dof_gyro_close(resource *res) {
     kfree(res->env);
-    /* Since this is a global semaphore, we need to release it */
-    release(res->sem);
 }
