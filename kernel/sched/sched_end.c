@@ -27,8 +27,6 @@ void remove_task(task_node_list *list, task_node *node) {
 }
 
 void free_task(task_node *node) {
-    /* Free default resource made by resource_setup first */
-    kfree(node->task->resources[0]);
     free(node->task->stack_base);
     kfree(node->task);
     kfree(node);
