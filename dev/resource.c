@@ -10,7 +10,20 @@
 
 #include <dev/resource.h>
 
-resource default_resources[RESOURCE_TABLE_SIZE] = {{.env = NULL, .writer = &usart_putc, .reader = &usart_getc}};
+resource default_resources[RESOURCE_TABLE_SIZE] = {{.writer = &usart_putc,
+                                                    .reader = &usart_getc,
+                                                    .closer = &usart_close,
+                                                    .env    = NULL,
+                                                    .sem    = &usart_semaphore},
+                                                   {NULL}};
+
+static inline uint8_t resource_null(resource *r) {
+    if (r->writer == NULL && r->reader == NULL && r->closer == NULL && r->env == NULL && r->sem == NULL) {
+        return 1;
+    }
+
+    return 0;
+}
 
 void add_resource(task_ctrl* tcs, resource* r) {
     tcs->resources[tcs->top_rd] = r;
@@ -19,20 +32,30 @@ void add_resource(task_ctrl* tcs, resource* r) {
     }
 }
 
-void resource_setup(task_ctrl* tcs) {
-    for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
-        tcs->resources[i] = NULL;
+void resource_setup(task_ctrl* task) {
+    /* Copy resources */
+    if (task_switching) {
+        for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
+            task->resources[i] = curr_task->task->resources[i];
+        }
+
+        task->top_rd = curr_task->task->top_rd;
     }
+    else {
+        int top_rd = 0;
 
-    tcs->top_rd = 0;
+        for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
+            if (!resource_null(&default_resources[i])) {
+                task->resources[i] = &default_resources[i];
+                top_rd++;
+            }
+            else {
+                task->resources[i] = NULL;
+            }
+        }
 
-    resource* new_r = kmalloc(sizeof(resource));
-    new_r->writer = &usart_putc;
-    new_r->reader = &usart_getc;
-    new_r->closer = &usart_close;
-    new_r->env = NULL;
-    new_r->sem = &usart_semaphore;
-    add_resource(tcs, new_r);
+        task->top_rd = top_rd;
+    }
 }
 
 void write(rd_t rd, char* d, int n) {
