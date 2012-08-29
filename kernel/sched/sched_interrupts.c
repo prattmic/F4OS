@@ -125,7 +125,7 @@ void svc_handler(uint32_t *svc_args) {
 
             curr_task->task->running = 0;
             /* Reset stack */
-            curr_task->task->stack_top = curr_task->task->stack_base + STKSIZE;
+            curr_task->task->stack_top = curr_task->task->stack_base;
 
             switch_task();
             
