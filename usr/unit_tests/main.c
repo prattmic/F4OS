@@ -26,9 +26,7 @@ struct semaphore deadlock_sem = {
 void deadlock(void);
 void attempt_acquire(void);
 
-resource *test_mem = NULL;
 int ipc_success = 0;
-
 
 void main(void) {
     new_task(&unit_tests, 1, 0);
@@ -47,16 +45,11 @@ void unit_tests(void) {
 void ipctest() {
     rd_t memrd = open_shared_mem();
     swrite(memrd, "IPC Test passed.\r\n");
-    test_mem = curr_task->task->resources[memrd];
     new_task(&memreader, 5, 0);
 }
 
 void memreader(void) {
     char buf[20];
-    if(test_mem == NULL) {
-        return;
-    }
-    add_resource(curr_task->task, test_mem);
     rd_t memrd = curr_task->task->top_rd - 1;
 
     read(memrd, buf, 18);
