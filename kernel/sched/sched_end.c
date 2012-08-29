@@ -27,7 +27,7 @@ void remove_task(task_node_list *list, task_node *node) {
 }
 
 void free_task(task_node *node) {
-    free(node->task->stack_base);
+    free(node->task->stack_limit);
     kfree(node->task);
     kfree(node);
 }

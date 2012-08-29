@@ -30,6 +30,7 @@ struct resource;
 typedef struct resource resource;
 
 typedef struct task_ctrl {
+    uint32_t    *stack_limit;
     uint32_t    *stack_top;
     uint32_t    *stack_base;
     void        (*fptr)(void);

@@ -19,7 +19,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
 
         reg_task = register_task(&task_list, task);
         if (reg_task == NULL) {
-            free(task->stack_base);
+            free(task->stack_limit);
             kfree(task);
             printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
             panic_print("Could not allocate task.");
@@ -31,7 +31,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         if (period) {
             task_node *per_node = register_task(&periodic_task_list, task);
             if (per_node == NULL) {
-                free(task->stack_base);
+                free(task->stack_limit);
                 kfree(task);
                 kfree(reg_task);
                 printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
@@ -140,7 +140,7 @@ void create_context(task_ctrl* task, void (*lptr)(void)) {
                   stmdb   %[stack]!, {r5}   /* R5 */                                          \n\
                   stmdb   %[stack]!, {r5}   /* R4 */"
                   :[stack] "+r" (task->stack_top) /* Output */
-                  :[pc] "r" (task->fptr), [lr] "r" (lptr), [frame] "r" (task->stack_base)   /* Input */
+                  :[pc] "r" (task->fptr), [lr] "r" (lptr), [frame] "r" (task->stack_limit)   /* Input */
                   :"r5"   /* Clobber */);
 
 }
@@ -160,7 +160,8 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
         return NULL;
     }
 
-    task->stack_base        = memory;
+    task->stack_limit       = memory;
+    task->stack_base        = memory + STKSIZE;
     task->stack_top         = memory + STKSIZE;
     task->fptr              = fptr;
     task->priority          = priority;

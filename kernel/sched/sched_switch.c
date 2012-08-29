@@ -24,7 +24,7 @@ void switch_task(void) {
 
     /* As a workaround for lack of MPU support, check if the 
      * stack of the task we are switching from has overflowed */
-    if (node->task->stack_base > node->task->stack_top) {
+    if (node->task->stack_limit > node->task->stack_top) {
         __asm__("cpsie  i");
         panic_print("Task has overflowed its stack.");
     }
