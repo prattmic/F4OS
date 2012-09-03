@@ -40,6 +40,10 @@ void tim2_handler(void) {
 void pendsv_handler(void){
     uint32_t *psp_addr;
 
+    if (!task_switching) {
+        panic_print("Hit pendsv when not task switching");
+    }
+
     __asm__("push {lr}");
     psp_addr = save_context();
 
@@ -107,6 +111,10 @@ void svc_handler(uint32_t *svc_args) {
 
             node->next = NULL;
 
+            if (curr_task == NULL) {
+                panic_print("curr_task == NULL");
+            }
+
             enable_psp(curr_task->task->stack_top);
 
             __asm__("mov sp, %[ghetto]\n"
@@ -128,6 +136,10 @@ void svc_handler(uint32_t *svc_args) {
             curr_task->task->stack_top = curr_task->task->stack_base;
 
             switch_task();
+
+            if (curr_task == NULL) {
+                panic_print("curr_task == NULL");
+            }
             
             enable_psp(curr_task->task->stack_top);
 

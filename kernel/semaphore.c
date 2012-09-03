@@ -12,6 +12,20 @@ void init_semaphore(volatile struct semaphore *semaphore) {
     semaphore->waiting = NULL;
 }
 
+void spin_acquire(volatile struct semaphore *semaphore) {
+    __asm__("\
+            mov         r2, #1\r\n              \
+        spin:                                   \
+            ldrexb      r3, [%[addr]]\r\n       \
+            cmp         r3, #0\r\n              \
+            ITT         EQ\r\n                  \
+            strexbeq    r1, r2, [%[addr]]\r\n   \
+            cmpeq       r1, #0\r\n              \
+            bne         spin\r\n"
+            ::[addr] "l"(semaphore)
+            :"r1", "r2", "r3", "cc", "memory");
+}
+
 void acquire(volatile struct semaphore *semaphore) {
     /* If in a fault, allow immediate use of semaphore */
     if (FAULTMASK()) {
@@ -70,6 +84,11 @@ void acquire(volatile struct semaphore *semaphore) {
         /* How was the semaphore taken, yet no one holds it? */
         /* Maybe we were interrupted and now it is available?  Try again */
         //panic_print("Semaphore not available, but held_by unset.");
+        if (semaphore->lock != 1 && semaphore->lock != 0) {
+            panic_print("Lock not 0 or 1.");
+        }
+        __asm__("svc    %[yield]"
+                 ::[yield] "I"(SVC_YIELD):);
         __asm__("b 0b");
     }
 

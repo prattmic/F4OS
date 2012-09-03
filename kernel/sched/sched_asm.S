@@ -92,7 +92,7 @@ restore_full_context:
     ldr     r2, [r0, #8]
     ldr     r3, [r0, #12]
     ldr     r12, [r0, #16]
-    ldr     lr, [r0, #20]
+    /*ldr     lr, [r0, #20]*/
 
     /*vldm    r0, {s16-s31} */   /* Restore FPU registers */ /* Currently space is reserved for these, but they aren't saved */
     add     r0, r0, #100    /* Skip FP registers, leave space for three registers */
@@ -101,8 +101,10 @@ restore_full_context:
 
     mov     r2, #0x8100000
     cmp     r1, r2
-    bgt     panic
+    bgt     panic           /* Panic if PC is > 0x8100000 */
     ldr     r2, [r0, #8]
+
+    ldr     lr, [r0, #-80]
 
     orr     r1, r1, #1      /* bit[0] must be set to 1 for thumb mode */
     str     r1, [r0, #4]    /* Stack PC */

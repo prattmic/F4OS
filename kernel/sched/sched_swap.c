@@ -1,4 +1,7 @@
+#include <stddef.h>
 #include <stdint.h>
+
+#include <kernel/fault.h>
 
 #include <kernel/sched.h>
 #include "sched_internals.h"
@@ -6,6 +9,13 @@
 /* Makes node run immediately */
 void swap_task(task_node *node) {
     register uint32_t *stack_top asm("r1");
+
+    if (node == NULL) {
+        panic_print("node == NULL");
+    }
+    else if ((void *) node < (void *) 0x10000000 || (void *) node > (void *) 0x10010000) {
+        panic_print("Bad node address");
+    }
 
     __asm__(/* If you aren't already on the psp, you are screwed, sorry */
             "str     r1, [sp, #-96] \r\n"      /* Go ahead and store r0, so I can use it */
@@ -33,9 +43,21 @@ void swap_task(task_node *node) {
 
     curr_task->task->stack_top = stack_top;
 
+    __asm__("ldr    r1, [sp, #0x38]");
+
+    if ((void *) stack_top < (void *) 0x8000000 || (void *) stack_top > (void *) 0x8100000) {
+        panic_print("Bad stacked PC on save");
+    }
+
     curr_task = node;
 
     enable_psp(curr_task->task->stack_top);
+
+    __asm__("ldr    r1, [sp, #0x38]");
+
+    if ((void *) stack_top < (void *) 0x8000000 || (void *) stack_top > (void *) 0x8100000) {
+        panic_print("Bad stacked PC on restore");
+    }
 
     __asm__("b  restore_full_context\r\n");  /* Won't return */
 

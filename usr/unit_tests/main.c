@@ -45,7 +45,7 @@ void unit_tests(void) {
 void ipctest() {
     rd_t memrd = open_shared_mem();
     swrite(memrd, "IPC Test passed.\r\n");
-    new_task(&memreader, 5, 0);
+    new_task(&memreader, 3, 0);
 }
 
 void memreader(void) {
