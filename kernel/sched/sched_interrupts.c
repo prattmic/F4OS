@@ -81,11 +81,6 @@ void svc_handler(uint32_t *svc_args) {
             break;
         }
         case SVC_END_TASK: {
-            register uint32_t lr_save asm("r9");
-            __asm__("mov %[lr_save], lr"
-                    :[lr_save] "=r" (lr_save)
-                    ::"memory");
-
             task_node *node = task_to_free;
 
             /* curr_task->next set to NULL after task switch */
@@ -108,19 +103,9 @@ void svc_handler(uint32_t *svc_args) {
             node->next = NULL;
 
             enable_psp(curr_task->task->stack_top);
-
-            __asm__("mov sp, %[ghetto]\n"
-                    "mov lr, %[lr_save]\n"
-                    "b  restore_context\n"    /* Won't return */
-                    ::[ghetto] "r" (ghetto_sp_save), [lr_save] "r" (lr_save):);
             break;
         }
         case SVC_END_PERIODIC_TASK: {
-            register uint32_t lr_save asm("r9");
-            __asm__("mov %[lr_save], lr"
-                    :[lr_save] "=r" (lr_save)
-                    ::"memory");
-
             remove_task(&task_list, curr_task);
 
             curr_task->task->running = 0;
@@ -130,11 +115,7 @@ void svc_handler(uint32_t *svc_args) {
             switch_task();
             
             enable_psp(curr_task->task->stack_top);
-
-            __asm__("mov sp, %[ghetto]\n"
-                    "mov lr, %[lr_save]\n"
-                    "b  restore_context\n"    /* Won't return */
-                    ::[ghetto] "r" (ghetto_sp_save), [lr_save] "r" (lr_save):);
+            break;
         }
         default:
             break;

@@ -33,13 +33,9 @@ void free_task(task_node *node) {
 }
 
 void end_task(void) {
-    __asm__("mrs    %[ghetto], msp"
-            :[ghetto] "=r" (ghetto_sp_save)::);
     _svc(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
 }
 
 void end_periodic_task(void) {
-    __asm__("mrs    %[ghetto], msp"
-            :[ghetto] "=r" (ghetto_sp_save)::);
     _svc(SVC_END_PERIODIC_TASK);    /* Shouldn't return (to here, at least) */
 }

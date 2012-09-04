@@ -6,9 +6,6 @@
 task_node_list task_list;
 task_node_list periodic_task_list;
 
-/* Saves the msp from before an SVC, so we don't leak memory when svc_handler doesn't return */
-uint32_t *ghetto_sp_save;
-
 extern task_node * volatile task_to_free;
 
 void append_task(task_node_list *list, task_node *task) __attribute__((section(".kernel")));

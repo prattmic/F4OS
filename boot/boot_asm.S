@@ -127,5 +127,11 @@ loop_zero_bss:
 .type       _svc, %function
 _svc:
     mrs     r0, psp
-    b       svc_handler
+    push    {lr}
+    push    {r0}
+    bl      save_context
+    pop     {r0}
+    bl      svc_handler
+    bl      restore_context
+    pop     {lr}
     bx      lr
