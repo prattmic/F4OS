@@ -6,8 +6,8 @@
 #include "sched_internals.h"
 
 void systick_handler(void) __attribute__((section(".kernel"), naked));
+void pendsv_handler(void) __attribute__((section(".kernel")));
 void tim2_handler(void) __attribute__((section(".kernel")));
-void pendsv_handler(void) __attribute__((section(".kernel"), naked));
 void svc_handler(uint32_t*) __attribute__((section(".kernel")));
 
 void systick_handler(void) {
@@ -15,6 +15,12 @@ void systick_handler(void) {
     *SCB_ICSR |= SCB_ICSR_PENDSVSET;
 
     __asm__("bx lr");
+}
+
+void pendsv_handler(void){
+    curr_task->task->stack_top = PSP();
+
+    switch_task();
 }
 
 void tim2_handler(void) {
@@ -37,23 +43,8 @@ void tim2_handler(void) {
     }
 }
 
-void pendsv_handler(void){
-    uint32_t *psp_addr;
-
-    __asm__("push {lr}");
-    psp_addr = save_context();
-
-    curr_task->task->stack_top = psp_addr;
-
-    switch_task();
-    
-    __asm__("pop {lr}\n"
-            "b   restore_context\n");     /* Won't return */
-}
-
 void svc_handler(uint32_t *svc_args) {
     uint32_t svc_number;
-    uint32_t return_address;
 
     /* Stack contains:
      * r0, r1, r2, r3, r12, r14, the return address and xPSR
@@ -61,23 +52,10 @@ void svc_handler(uint32_t *svc_args) {
     svc_number = ((char *)svc_args[6])[-2];
 
     switch (svc_number) {
-        case SVC_RAISE_PRIV: {
-            /* Raise Privilege, but only if request came from the kernel */
-            /* DEPRECATED: All code executed until _svc returns is privileged,
-             * so raising privileges shouldn't ever be necessary. */
-            return_address = svc_args[6];
-
-            if (return_address >= (uint32_t) &_skernel && return_address < (uint32_t) &_ekernel) {
-                raise_privilege();
-            }
-            else {
-                panic_print("User code requested raised permissions.");
-            }
-            break;
-        }
         case SVC_YIELD: {
-            /* Set PendSV to yield a task */
-            *SCB_ICSR |= SCB_ICSR_PENDSVSET;
+            curr_task->task->stack_top = PSP();
+
+            switch_task();
             break;
         }
         case SVC_END_TASK: {
@@ -101,8 +79,6 @@ void svc_handler(uint32_t *svc_args) {
             switch_task();
 
             node->next = NULL;
-
-            enable_psp(curr_task->task->stack_top);
             break;
         }
         case SVC_END_PERIODIC_TASK: {
@@ -113,8 +89,6 @@ void svc_handler(uint32_t *svc_args) {
             curr_task->task->stack_top = curr_task->task->stack_base;
 
             switch_task();
-            
-            enable_psp(curr_task->task->stack_top);
             break;
         }
         default:

@@ -19,6 +19,17 @@ inline uint8_t FAULTMASK(void) {
     return val;
 }
 
+inline uint32_t *PSP(void) __attribute__((always_inline));
+inline uint32_t *PSP(void) {
+    uint32_t *val;
+
+    asm("mrs    %[val], psp"
+        :[val] "=r" (val)
+        ::);
+
+    return val;
+}
+
 /* Memory Map */
 #define MEMORY_BASE                     (uint32_t) (0x00000000)                                 /* Base of memory map */
 #define FLASH_BASE                      (uint32_t) (0x08000000)                                 /* Flash Memory Base Address */

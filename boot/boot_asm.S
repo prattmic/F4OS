@@ -21,7 +21,7 @@
 .word   _svc                /* 11 SVCall */
 .word   hang                /* 12 Debug Monitor */
 .word   hang                /* 13 RESERVED */
-.word   pendsv_handler      /* 14 PendSV */
+.word   _pendsv             /* 14 PendSV */
 .word   systick_handler     /* 15 SysTick */
 /* NVIC */
 .word   hang                /* 0 ... */
@@ -132,6 +132,15 @@ _svc:
     bl      save_context
     pop     {r0}
     bl      svc_handler
+    bl      restore_context
+    pop     {lr}
+    bx      lr
+
+.thumb_func
+_pendsv:
+    push    {lr}
+    bl      save_context
+    bl      pendsv_handler
     bl      restore_context
     pop     {lr}
     bx      lr
