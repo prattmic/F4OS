@@ -69,19 +69,14 @@ void switch_task(void) {
     /* mpu_stack_set(node->task->stack_base);   Sigh...maybe some day */
 
     if (node->task->running) {
-        uint32_t *psp_addr = node->task->stack_top;
-        enable_psp(psp_addr);
+        enable_psp(node->task->stack_top);
         return;
     }
     else {
         node->task->running = 1;
 
-        if (node->task->period) {
-            create_context(node->task, &end_periodic_task);
-        }
-        else {
-            create_context(node->task, &end_task);
-        }
+        create_context(node->task, &end_task);
+
         enable_psp(node->task->stack_top);
         return;
     }

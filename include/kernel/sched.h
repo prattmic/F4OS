@@ -20,7 +20,6 @@ inline int SVC(uint32_t call) {
 /* SVC case names */
 #define     SVC_YIELD               0x1
 #define     SVC_END_TASK            0x2
-#define     SVC_END_PERIODIC_TASK   0x3
    
 typedef struct task_node {
     struct task_node        *prev;

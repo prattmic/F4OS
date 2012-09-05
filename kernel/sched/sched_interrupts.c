@@ -48,7 +48,7 @@ void svc_handler(uint32_t *registers) {
 
     /* Stack contains:
      * r0, r1, r2, r3, r12, r14, the return address and xPSR
-     * First argument (r0) is registers[0] */
+     * First argument and return value (r0) is registers[0] */
     svc_number = ((char *)registers[6])[-2];
 
     switch (svc_number) {
@@ -59,36 +59,7 @@ void svc_handler(uint32_t *registers) {
             break;
         }
         case SVC_END_TASK: {
-            task_node *node = task_to_free;
-
-            /* curr_task->next set to NULL after task switch */
-            if (node != NULL) {
-                while (node->next != NULL) {
-                    node = node->next;
-                }
-                node->next = curr_task;
-                node = node->next;
-            }
-            else {
-                task_to_free = curr_task;
-                node = task_to_free;
-            }
-
-            remove_task(&task_list, curr_task);
-
-            switch_task();
-
-            node->next = NULL;
-            break;
-        }
-        case SVC_END_PERIODIC_TASK: {
-            remove_task(&task_list, curr_task);
-
-            curr_task->task->running = 0;
-            /* Reset stack */
-            curr_task->task->stack_top = curr_task->task->stack_base;
-
-            switch_task();
+            svc_end_task();
             break;
         }
         default:

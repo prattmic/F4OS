@@ -15,8 +15,8 @@ void switch_task(void) __attribute__((section(".kernel")));
 
 void remove_task(task_node_list *list, task_node *tasknode) __attribute__((section(".kernel")));
 void free_task(task_node *tasknode) __attribute__((section(".kernel")));
-void end_task(void) __attribute__((section(".kernel"),naked));;
-void end_periodic_task(void) __attribute__((section(".kernel"),naked));;
+void end_task(void) __attribute__((section(".kernel"),naked));
+void svc_end_task(void) __attribute__((section(".kernel")));
 
 void kernel_task(void) __attribute__((section(".kernel")));
 
