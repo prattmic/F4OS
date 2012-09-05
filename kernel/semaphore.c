@@ -61,8 +61,7 @@ void acquire(volatile struct semaphore *semaphore) {
             swap_task(semaphore->held_by);
         }
         else {
-            __asm__("svc    %[yield]"
-                     ::[yield] "I"(SVC_YIELD):);
+            SVC(SVC_YIELD);
         }
         __asm__("b 0b");
     }

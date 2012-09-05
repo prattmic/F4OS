@@ -43,13 +43,13 @@ void tim2_handler(void) {
     }
 }
 
-void svc_handler(uint32_t *svc_args) {
+void svc_handler(uint32_t *registers) {
     uint32_t svc_number;
 
     /* Stack contains:
      * r0, r1, r2, r3, r12, r14, the return address and xPSR
-     * First argument (r0) is svc_args[0] */
-    svc_number = ((char *)svc_args[6])[-2];
+     * First argument (r0) is registers[0] */
+    svc_number = ((char *)registers[6])[-2];
 
     switch (svc_number) {
         case SVC_YIELD: {

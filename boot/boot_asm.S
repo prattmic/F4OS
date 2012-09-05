@@ -18,7 +18,7 @@
 .word   hang                /* 8 RESERVED */
 .word   hang                /* 9 RESERVED*/
 .word   hang                /* 10 RESERVED */
-.word   _svc                /* 11 SVCall */
+.word   _svc_asm            /* 11 SVCall */
 .word   hang                /* 12 Debug Monitor */
 .word   hang                /* 13 RESERVED */
 .word   _pendsv             /* 14 PendSV */
@@ -123,9 +123,9 @@ loop_zero_bss:
     b       _start
 
 .thumb_func
-.global     _svc
-.type       _svc, %function
-_svc:
+.global     _svc_asm
+.type       _svc_asm, %function
+_svc_asm:
     mrs     r0, psp
     push    {lr}
     push    {r0}

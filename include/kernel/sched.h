@@ -7,12 +7,19 @@
 typedef uint8_t rd_t;
 
 /* Make a SVC call */
-#define _svc(x)                         asm volatile ("svc  %0  \n" :: "i" (x))
+#define _SVC(x)                     asm volatile ("svc  %0  \n" :: "i" (x))
+inline int SVC(uint32_t call) __attribute__((always_inline));
+inline int SVC(uint32_t call) {
+    register int ret asm("r0");
+
+    _SVC(call);
+
+    return ret;
+}
 
 /* SVC case names */
-#define     SVC_RAISE_PRIV      0x0
-#define     SVC_YIELD           0x1
-#define     SVC_END_TASK        0x2
+#define     SVC_YIELD               0x1
+#define     SVC_END_TASK            0x2
 #define     SVC_END_PERIODIC_TASK   0x3
    
 typedef struct task_node {

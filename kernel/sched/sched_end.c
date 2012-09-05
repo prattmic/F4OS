@@ -33,9 +33,9 @@ void free_task(task_node *node) {
 }
 
 void end_task(void) {
-    _svc(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
+    SVC(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
 }
 
 void end_periodic_task(void) {
-    _svc(SVC_END_PERIODIC_TASK);    /* Shouldn't return (to here, at least) */
+    SVC(SVC_END_PERIODIC_TASK);    /* Shouldn't return (to here, at least) */
 }
