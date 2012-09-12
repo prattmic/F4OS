@@ -7,13 +7,39 @@
 typedef uint8_t rd_t;
 
 /* Make a SVC call */
-#define _svc(x)                         asm volatile ("svc  %0  \n" :: "i" (x))
+
+/* I'm so sorry, the optimizer made me do it, I swear!
+ * Actually, the compiler refused to inline my always_inline
+ * function at -O0, so I had to switch to a macro */
+/* We need to make sure that we get the return value
+ * without screwing up r0, since GCC doesn't understand that
+ * SVC has a return value */
+#define SVC(call)  ({ \
+    uint32_t ret = 0;   \
+    asm volatile ("svc  %[code]  \n"    \
+                  "mov  %[ret], r0  \n" \
+                  :[ret] "+r" (ret)     \
+                  :[code] "I" (call)    \
+                  :"r0");               \
+    ret;    \
+})
+
+#define SVC_ARG(call, arg)  ({ \
+    uint32_t ret = 0;   \
+    asm volatile ("mov  r0, %[ar]  \n"  \
+                  "svc  %[code]  \n"    \
+                  "mov  %[ret], r0  \n" \
+                  :[ret] "+r" (ret)     \
+                  :[code] "I" (call), [ar] "r" (arg)     \
+                  :"r0");               \
+    ret;    \
+})
 
 /* SVC case names */
-#define     SVC_RAISE_PRIV      0x0
-#define     SVC_YIELD           0x1
-#define     SVC_END_TASK        0x2
-#define     SVC_END_PERIODIC_TASK   0x3
+#define     SVC_YIELD               0x1
+#define     SVC_END_TASK            0x2
+#define     SVC_ACQUIRE             0x3
+#define     SVC_RELEASE             0x4
    
 typedef struct task_node {
     struct task_node        *prev;

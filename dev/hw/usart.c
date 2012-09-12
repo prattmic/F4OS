@@ -158,7 +158,7 @@ void usart_putc(char c, void *env) {
         /* Wait for DMA to be ready */
         while (*DMA2_S7CR & DMA_SxCR_EN) {
             if (task_switching) {
-                _svc(SVC_YIELD);
+                SVC(SVC_YIELD);
             }
         }
 
@@ -170,7 +170,7 @@ void usart_putc(char c, void *env) {
         /* Wait for transfer to complete */
         while (!(*DMA2_HISR & DMA_HISR_TCIF7)) {
             if (task_switching) {
-                _svc(SVC_YIELD);
+                SVC(SVC_YIELD);
             }
         }
 
@@ -197,7 +197,7 @@ void usart_puts(char *s, void *env) {
         /* Wait for DMA to be ready */
         while (*DMA2_S7CR & DMA_SxCR_EN) {
             if (task_switching) {
-                _svc(SVC_YIELD);
+                SVC(SVC_YIELD);
             }
         }
 
@@ -209,7 +209,7 @@ void usart_puts(char *s, void *env) {
         /* Wait for transfer to complete */
         while (!(*DMA2_HISR & DMA_HISR_TCIF7)) {
             if (task_switching) {
-                _svc(SVC_YIELD);
+                SVC(SVC_YIELD);
             }
         }
 
@@ -233,7 +233,7 @@ char usart_getc(void *env) {
     while (!wrapped && dma_read == read) {
         /* Yield */
         release(&usart_semaphore);
-        _svc(SVC_YIELD);
+        SVC(SVC_YIELD);
         acquire(&usart_semaphore);
 
         dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
