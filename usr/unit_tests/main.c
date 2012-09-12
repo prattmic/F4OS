@@ -17,13 +17,13 @@ static void unit_tests(void);
 static void ipctest(void);
 static void memreader(void);
 
-struct semaphore deadlock_sem = {
+struct semaphore abandoned_sem = {
     .lock = 0,
     .held_by = NULL,
     .waiting = NULL
 };
 
-void deadlock(void);
+void abandon(void);
 void attempt_acquire(void);
 
 int ipc_success = 0;
@@ -38,8 +38,8 @@ void unit_tests(void) {
     //printf("IPC Test...");
     //ipctest();
 
-    printf("Deadlock test (this should hang but never crash)...");
-    deadlock();
+    printf("Abandoned semaphore test...");
+    abandon();
 }
 
 void ipctest() {
@@ -60,21 +60,13 @@ void memreader(void) {
     close(memrd);
 }
 
-void deadlock(void) {
-    //acquire(&deadlock_sem);
-    //new_task(&attempt_acquire, 1, 0);
-
-    /* Infinite loop to prevent abandoned semaphore;
-     * those will be fixed later. */
-    uint32_t count = 0;
-    while (1) {
-        new_task(&ipctest, 4, 0);
-        printf("Loop %d\r\n", count++);
-    }
+void abandon(void) {
+    acquire(&abandoned_sem);
+    new_task(&attempt_acquire, 1, 0);
 }
 
 void attempt_acquire(void) {
-    acquire(&deadlock_sem);
-    printf("Deadlock test passed.\r\n");
-    release(&deadlock_sem);
+    acquire(&abandoned_sem);
+    printf("Abandoned semaphore test passed.\r\n");
+    release(&abandoned_sem);
 }
