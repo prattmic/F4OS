@@ -33,13 +33,39 @@ void free_task(task_node *node) {
 }
 
 void end_task(void) {
-    __asm__("mrs    %[ghetto], msp"
-            :[ghetto] "=r" (ghetto_sp_save)::);
-    _svc(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
+    SVC(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
 }
 
-void end_periodic_task(void) {
-    __asm__("mrs    %[ghetto], msp"
-            :[ghetto] "=r" (ghetto_sp_save)::);
-    _svc(SVC_END_PERIODIC_TASK);    /* Shouldn't return (to here, at least) */
+/* Called by svc_handler */
+void svc_end_task(void) {
+    remove_task(&task_list, curr_task);
+
+    curr_task->prev = NULL;
+    curr_task->next = NULL;
+
+    /* Periodic */
+    if (curr_task->task->period) {
+        curr_task->task->running = 0;
+
+        /* Reset stack */
+        curr_task->task->stack_top = curr_task->task->stack_base;
+    }
+    else {
+        task_node *node = task_to_free;
+
+        /* curr_task->next set to NULL after task switch */
+        if (node != NULL) {
+            while (node->next != NULL) {
+                node = node->next;
+            }
+            node->next = curr_task;
+            node = node->next;
+        }
+        else {
+            task_to_free = curr_task;
+            node = task_to_free;
+        }
+    }
+
+    switch_task(NULL);
 }

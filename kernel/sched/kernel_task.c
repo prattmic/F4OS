@@ -17,6 +17,6 @@ void kernel_task(void) {
             free_task(node);
         }
 
-        _svc(SVC_YIELD);
+        SVC(SVC_YIELD);
     }
 }

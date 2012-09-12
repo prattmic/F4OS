@@ -32,12 +32,7 @@ static void start_task_switching(void) {
     task_switching = 1;
     task->running = 1;
     
-    if (task->period) {
-        create_context(task, &end_periodic_task);
-    }
-    else {
-        create_context(task, &end_task);
-    }
+    create_context(task, &end_task);
 
     enable_psp(task->stack_top);
     restore_full_context();
