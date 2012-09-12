@@ -23,10 +23,18 @@ void start_sched(void) {
 }
 
 static void start_task_switching(void) {
-    task_switching = 1;
+    task_ctrl *task = task_list.head->task;
 
-    switch_task();
+    curr_task = task_list.head;
+
+    //mpu_stack_set(task->stack_base);
+
+    task_switching = 1;
+    task->running = 1;
     
+    create_context(task, &end_task);
+
+    enable_psp(task->stack_top);
     restore_full_context();
     __asm__("nop");
 }

@@ -40,6 +40,9 @@ void end_task(void) {
 void svc_end_task(void) {
     remove_task(&task_list, curr_task);
 
+    curr_task->prev = NULL;
+    curr_task->next = NULL;
+
     /* Periodic */
     if (curr_task->task->period) {
         curr_task->task->running = 0;
@@ -64,5 +67,5 @@ void svc_end_task(void) {
         }
     }
 
-    switch_task();
+    switch_task(NULL);
 }

@@ -1,9 +1,12 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <dev/registers.h>
+#include <kernel/semaphore.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include "sched_internals.h"
+
+extern int get_lock(volatile struct semaphore *semaphore);
 
 void systick_handler(void) __attribute__((section(".kernel"), naked));
 void pendsv_handler(void) __attribute__((section(".kernel")));
@@ -20,7 +23,7 @@ void systick_handler(void) {
 void pendsv_handler(void){
     curr_task->task->stack_top = PSP();
 
-    switch_task();
+    switch_task(NULL);
 }
 
 void tim2_handler(void) {
@@ -43,6 +46,47 @@ void tim2_handler(void) {
     }
 }
 
+void svc_yield(void) {
+    curr_task->task->stack_top = PSP();
+    switch_task(NULL);
+}
+
+void svc_acquire(uint32_t *registers) {
+    struct semaphore *semaphore = (struct semaphore *) registers[0];
+
+    if (get_lock(semaphore)) {
+        /* Success */
+        registers[0] = 1;
+    }
+    else {
+        /* Failure */
+        registers[0] = 0;
+
+        if (semaphore->held_by->task->priority <= curr_task->task->priority) {
+            curr_task->task->stack_top = PSP();
+            switch_task(semaphore->held_by);
+        }
+        else {
+            svc_yield();
+        }
+    }
+}
+
+void svc_release(uint32_t *registers) {
+    struct semaphore *semaphore = (struct semaphore *) registers[0];
+
+    semaphore->lock = 0;
+    semaphore->held_by = NULL;
+
+    if (semaphore->waiting && semaphore->waiting->task->priority >= curr_task->task->priority) {
+        task_node *task = semaphore->waiting;
+        semaphore->waiting = NULL;
+
+        curr_task->task->stack_top = PSP();
+        switch_task(task);
+    }
+}
+
 void svc_handler(uint32_t *registers) {
     uint32_t svc_number;
 
@@ -52,17 +96,20 @@ void svc_handler(uint32_t *registers) {
     svc_number = ((char *)registers[6])[-2];
 
     switch (svc_number) {
-        case SVC_YIELD: {
-            curr_task->task->stack_top = PSP();
-
-            switch_task();
+        case SVC_YIELD: 
+            svc_yield();
             break;
-        }
-        case SVC_END_TASK: {
+        case SVC_END_TASK:
             svc_end_task();
             break;
-        }
+        case SVC_ACQUIRE:
+            svc_acquire(registers);
+            break;
+        case SVC_RELEASE:
+            svc_release(registers);
+            break;
         default:
+            panic_print("Unknown SVC");
             break;
     }
 }
