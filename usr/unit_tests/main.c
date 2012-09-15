@@ -37,7 +37,7 @@ void unit_tests(void) {
 
     //printf("IPC Test...");
     //ipctest();
-
+    
     printf("Abandoned semaphore test...");
     abandon();
 }
@@ -58,6 +58,14 @@ void memreader(void) {
     puts(buf);
 
     close(memrd);
+}
+
+void infinite_ipc(void) {
+    int count = 1;
+    while (1) {
+        new_task(&ipctest, 4, 0);
+        printf("Loop: %d\r\n", ++count);
+    }
 }
 
 void abandon(void) {
