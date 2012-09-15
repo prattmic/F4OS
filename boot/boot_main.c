@@ -25,7 +25,6 @@ int os_start(void) {
     init_usart1();
     init_spi1();
     init_i2c1();
-    init_tim2();
 
     puts("\r\n\r\n\r\nWelcome to...\r\n");
     puts("\r\n"

@@ -89,3 +89,22 @@ void switch_task(task_node *node) {
         return;
     }
 }
+
+/* Updates ticks in all periodic tasks */
+void rtos_tick(void) {
+    task_node *node = periodic_task_list.head;
+
+    while (node) {
+        if (node->task->ticks_until_wake == 0) {
+            if (!node->task->running) {
+                append_task(&task_list, node->task->task_list_node);
+            }
+            node->task->ticks_until_wake = node->task->period;
+        }
+        else {
+            node->task->ticks_until_wake--;
+        }
+
+        node = node->next;
+    }
+}

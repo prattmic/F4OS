@@ -12,6 +12,7 @@ void append_task(task_node_list *list, task_node *task) __attribute__((section("
 void create_context(task_ctrl *task, void (*lptr)(void)) __attribute__((section(".kernel")));
 
 void switch_task(task_node *node) __attribute__((section(".kernel")));
+void rtos_tick(void) __attribute__((section(".kernel")));
 
 void remove_task(task_node_list *list, task_node *tasknode) __attribute__((section(".kernel")));
 void free_task(task_node *tasknode) __attribute__((section(".kernel")));

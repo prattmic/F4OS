@@ -3,7 +3,8 @@
 #include <dev/hw/systick.h>
 
 void init_systick(void) {
-    *SYSTICK_RELOAD = 0x40000;
+    /* 250us  at 168Mhz */
+    *SYSTICK_RELOAD = 42000;
     *SYSTICK_VAL = 0;
     *SYSTICK_CTL = 0x00000007;
 
