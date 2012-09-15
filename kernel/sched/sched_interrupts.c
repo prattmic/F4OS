@@ -8,42 +8,23 @@
 
 extern int get_lock(volatile struct semaphore *semaphore);
 
-void systick_handler(void) __attribute__((section(".kernel"), naked));
+void systick_handler(void) __attribute__((section(".kernel")));
 void pendsv_handler(void) __attribute__((section(".kernel")));
 void tim2_handler(void) __attribute__((section(".kernel")));
 void svc_handler(uint32_t*) __attribute__((section(".kernel")));
 
 void systick_handler(void) {
+    /* Update periodic tasks */
+    rtos_tick();
+
     /* Call PendSV to do switching */
     *SCB_ICSR |= SCB_ICSR_PENDSVSET;
-
-    __asm__("bx lr");
 }
 
 void pendsv_handler(void){
     curr_task->task->stack_top = PSP();
 
     switch_task(NULL);
-}
-
-void tim2_handler(void) {
-    *TIM2_SR = 0;
-
-    task_node *node = periodic_task_list.head;
-
-    while (node) {
-        if (node->task->ticks_until_wake == 0) {
-            if (!node->task->running) {
-                append_task(&task_list, node->task->task_list_node);
-            }
-            node->task->ticks_until_wake = node->task->period;
-        }
-        else {
-            node->task->ticks_until_wake--;
-        }
-
-        node = node->next;
-    }
 }
 
 void svc_yield(void) {
