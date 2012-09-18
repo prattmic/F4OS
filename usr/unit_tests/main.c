@@ -35,11 +35,11 @@ void main(void) {
 void unit_tests(void) {
     //printf("Print Test...Test passed.\r\n");
 
-    //printf("IPC Test...");
-    //ipctest();
-    
     printf("Abandoned semaphore test...");
     abandon();
+
+    printf("IPC Test...");
+    infinite_ipc();
 }
 
 void ipctest() {
