@@ -16,6 +16,7 @@
 static void unit_tests(void);
 static void ipctest(void);
 static void memreader(void);
+void infinite_ipc(void);
 
 struct semaphore abandoned_sem = {
     .lock = 0,
