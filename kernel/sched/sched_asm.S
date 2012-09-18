@@ -73,7 +73,7 @@ restore_context:
     bx      lr
 
 /* Saves full context to PSP, including what the exception handler would normally do. */
-/* For save_full_context, see context.c:swap_task() */
+/* For save_full_context, see old revisions */
 
 /* Restores full context from PSP, including what the exception handler would normally do. */
 .thumb_func
