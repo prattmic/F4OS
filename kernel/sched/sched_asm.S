@@ -101,7 +101,7 @@ restore_full_context:
 
     mov     r2, #0x8100000
     cmp     r1, r2
-    bgt     panic
+    bgt     panic           /* Panic if PC is > 0x8100000 */
     ldr     r2, [r0, #8]
 
     orr     r1, r1, #1      /* bit[0] must be set to 1 for thumb mode */

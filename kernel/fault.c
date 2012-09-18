@@ -15,6 +15,7 @@ void usagefault_handler(void);
 
 /* Print a message and then panic */
 void panic_print(char *s) {
+    __asm__("cpsid  i");
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
     *LED_ODR ^= (1 << 14);
