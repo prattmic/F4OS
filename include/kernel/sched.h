@@ -76,7 +76,6 @@ extern uint8_t task_switching;
 
 void start_sched(void);
 void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) __attribute__((section(".kernel")));
-void swap_task(task_node *node) __attribute__((section(".kernel"), optimize(0)));
 
 void raise_privilege(void) __attribute__((section(".kernel")));
 

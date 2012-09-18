@@ -44,7 +44,7 @@ SRCS += fault.c semaphore.c
 
 # kernel/sched/
 VPATH += kernel/sched/
-SRCS += kernel_task.c sched_end.c sched_interrupts.c sched_new.c sched_start.c sched_swap.c sched_switch.c
+SRCS += kernel_task.c sched_end.c sched_interrupts.c sched_new.c sched_start.c sched_switch.c
 ASM_SRCS += sched_asm.S
 
 # lib/
