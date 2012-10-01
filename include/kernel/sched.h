@@ -64,6 +64,7 @@ typedef struct task_ctrl {
     uint32_t    ticks_until_wake;
     uint8_t     priority;
     uint8_t     running;
+    uint8_t     abort;
     uint32_t    pid;
     task_node   *task_list_node;
     task_node   *periodic_node;

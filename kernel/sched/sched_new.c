@@ -166,6 +166,7 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
     task->fptr              = fptr;
     task->priority          = priority;
     task->running           = 0;
+    task->abort             = 0;
 
     task->period            = period;
     task->ticks_until_wake  = period;
