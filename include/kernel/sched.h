@@ -5,6 +5,13 @@
 
 #define RESOURCE_TABLE_SIZE         16
 typedef uint8_t rd_t;
+struct resource;
+typedef struct resource resource;
+
+#define HELD_SEMAPHORES_MAX         6
+struct semaphore;
+typedef struct semaphore semaphore;
+
 
 /* Make a SVC call */
 
@@ -52,9 +59,6 @@ typedef struct task_node_list {
     task_node   *tail;
 } task_node_list;
 
-struct resource;
-typedef struct resource resource;
-
 typedef struct task_ctrl {
     uint32_t    *stack_limit;
     uint32_t    *stack_top;
@@ -70,6 +74,7 @@ typedef struct task_ctrl {
     task_node   *periodic_node;
     resource    *resources[RESOURCE_TABLE_SIZE];
     rd_t        top_rd;
+    semaphore   *held_semaphores[HELD_SEMAPHORES_MAX];
 } task_ctrl;
 
 task_node * volatile curr_task;

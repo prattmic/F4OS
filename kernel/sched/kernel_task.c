@@ -14,6 +14,13 @@ void kernel_task(void) {
 
             task_to_free = task_to_free->next;
 
+            /* Free abandoned semaphores */
+            for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
+                if (node->task->held_semaphores[i]) {
+                    release(node->task->held_semaphores[i]);
+                }
+            }
+
             free_task(node);
         }
 
