@@ -34,7 +34,7 @@ void main(void) {
 }
 
 void unit_tests(void) {
-    //printf("Print Test...Test passed.\r\n");
+    printf("Print Test...Test passed.\r\n");
 
     printf("Abandoned semaphore test...");
     abandon();
