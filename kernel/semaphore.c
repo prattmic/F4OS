@@ -8,6 +8,7 @@
 
 static void held_semaphores_insert(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
 void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
+static void deadlock_check(struct task_node *task) __attribute__((section(".kernel")));
 
 void init_semaphore(volatile struct semaphore *semaphore) {
     semaphore->lock = 0;
@@ -61,6 +62,8 @@ int get_lock(volatile struct semaphore *semaphore) {
         if (semaphore->held_by != NULL) {
             /* Add to waitlist if higher priority */
             if (semaphore->waiting) {
+                deadlock_check(semaphore->waiting);
+
                 if (semaphore->waiting->task->priority < curr_task->task->priority) {
                     semaphore->waiting = curr_task;
                 }
@@ -108,4 +111,17 @@ void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore 
         }
     }
     /* Not found, but this may be fine, as kernel_task frees semaphores on behalf of the deceased */
+}
+
+/* Warning! Here lies O(n^2)! */
+static void deadlock_check(struct task_node *task) {
+    for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
+        if (task->task->held_semaphores[i] != NULL) {
+            for (int j = 0; j < HELD_SEMAPHORES_MAX; i++) {
+                if (task->task->held_semaphores[i] == curr_task->task->held_semaphores[j]) {
+                    panic_print("Deadlock!");
+                }
+            }
+        }
+    }
 }
