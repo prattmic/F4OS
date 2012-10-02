@@ -25,7 +25,7 @@ const struct command valid_commands[] = {{"blink",  &blink},
                                          {"top",    &top},
                                          {"uname",  &uname},
                                          {"ipctest", &ipctest},
-                                         {"accel_test", &accel},
+                                         {"accel", &accel},
                                          {"ghetto_gyro", &ghetto_gyro},
                                          {"lowpass", &lowpass_test}
 };

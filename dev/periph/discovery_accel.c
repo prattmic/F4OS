@@ -39,9 +39,9 @@ rd_t open_discovery_accel(void) {
 
 char discovery_accel_read(void *env) {
     discovery_accel *accel = (discovery_accel *)env;
-    if(accel->read_ctr > 5)
+    if(accel->read_ctr > 2)
         accel->read_ctr = 0;
-    return (char)accel->spi_port->read(0x28 + accel->read_ctr++);
+    return (char)accel->spi_port->read(0x29 + 2*accel->read_ctr++);
 }
 
 void discovery_accel_write(char d, void *env) {

@@ -27,9 +27,18 @@ void remove_task(task_node_list *list, task_node *node) {
 }
 
 void free_task(task_node *node) {
+    if (node->task->periodic_node) {
+        kfree(node->task->periodic_node);
+    }
     free(node->task->stack_limit);
     kfree(node->task);
     kfree(node);
+}
+
+/* Abort a periodic task */
+void abort(void) {
+    curr_task->task->abort = 1;
+    SVC(SVC_END_TASK);    /* Shouldn't return (to here, at least) */
 }
 
 void end_task(void) {
@@ -43,8 +52,8 @@ void svc_end_task(void) {
     curr_task->prev = NULL;
     curr_task->next = NULL;
 
-    /* Periodic */
-    if (curr_task->task->period) {
+    /* Periodic (but only if not aborted) */
+    if (!curr_task->task->abort && curr_task->task->period) {
         curr_task->task->running = 0;
 
         /* Reset stack */
