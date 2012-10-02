@@ -1,5 +1,6 @@
 #include <stddef.h>
 
+#include <kernel/semaphore.h>
 #include <kernel/sched.h>
 #include "sched_internals.h"
 

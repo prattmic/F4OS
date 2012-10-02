@@ -6,8 +6,13 @@
 #ifndef STARG_H_INCLUDED
 #define STARG_H_INCLUDED
 
-typedef void* va_list;
+typedef __builtin_va_list va_list;
 
+#define va_start(v,l)   __builtin_va_start(v,l)
+#define va_arg(v,l)     __builtin_va_arg(v,l)
+#define va_end(v)       __builtin_va_end(v)
+
+/*j
 #define va_start(v, l)  \
     v = (va_list) ((uint32_t) &l + (sizeof(l)<4 ? 4 : sizeof(l)))
 
@@ -17,5 +22,6 @@ typedef void* va_list;
 
 #define va_end(v)       \
     v = NULL
+    */
 
 #endif

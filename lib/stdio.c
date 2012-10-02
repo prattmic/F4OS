@@ -60,7 +60,11 @@ void printx(char *s, uint8_t *x, int n) {
 void fprintf(rd_t rd, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
+    vfprintf(rd, fmt, ap);
+    va_end(ap);
+}
 
+void vfprintf(rd_t rd, char *fmt, va_list ap) {
     while (*fmt) {
         if (*fmt == '%') {
             switch (*(++fmt)) {
@@ -99,7 +103,7 @@ void fprintf(rd_t rd, char *fmt, ...) {
                     break;
                 }
                 case 'f': {
-                    float num = va_arg(ap, float);
+                    float num = (float) va_arg(ap, double);
                     char buf[20];
 
                     ftoa(num, 0.0001f, buf, 20);
@@ -108,7 +112,7 @@ void fprintf(rd_t rd, char *fmt, ...) {
                     break;
                 }
                 case 'c': {
-                    char letter = va_arg(ap, char);
+                    char letter = (char) va_arg(ap, uint32_t);
 
                     fputc(rd, letter);
                     break;
@@ -136,6 +140,4 @@ void fprintf(rd_t rd, char *fmt, ...) {
             fputc(rd, *fmt++);
         }
     }
-
-    va_end(ap);
 }

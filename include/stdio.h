@@ -2,6 +2,7 @@
 #define STDIO_H_INCLUDED
 
 #include <stdint.h>
+#include <stdarg.h>
 
 typedef uint8_t rd_t;
 
@@ -14,6 +15,7 @@ void fputs(rd_t rd, char *s);
 void fputc(rd_t rd, char letter);
 char fgetc(rd_t rd);
 void fprintf(rd_t rd, char *fmt, ...);
+void vfprintf(rd_t rd, char *fmt, va_list ap);
 
 void puts(char *s);
 void putc(char letter);
