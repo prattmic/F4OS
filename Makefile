@@ -28,7 +28,7 @@ ASM_SRCS += boot_asm.S
 
 # dev/
 VPATH += dev/
-SRCS += resource.c shared_mem.c
+SRCS += resource.c shared_mem.c buf_stream.c
 
 # dev/hw
 VPATH += dev/hw/

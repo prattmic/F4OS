@@ -11,6 +11,8 @@ void close(rd_t rd) __attribute__((section(".kernel")));
 void read(rd_t rd, char *buf, int n) __attribute__((section(".kernel")));
 void swrite(rd_t rd, char *s) __attribute__((section(".kernel")));
 
+void sprintf(char *buf, char *fmt, ...);
+
 void fputs(rd_t rd, char *s);
 void fputc(rd_t rd, char letter);
 char fgetc(rd_t rd);

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <dev/resource.h>
+#include <dev/buf_stream.h>
 
 #include <stdio.h>
 
@@ -30,6 +31,17 @@ char fgetc(rd_t rd) {
 
 char getc(void) {
     return fgetc(0);
+}
+
+void sprintf(char *buf, char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+
+    rd_t stream = open_buf_stream(buf);
+    vfprintf(stream, fmt, ap);
+    close(stream);
+
+    va_end(ap);
 }
 
 #define PS 256
