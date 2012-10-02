@@ -11,14 +11,23 @@
 #include <dev/resource.h>
 #include <dev/shared_mem.h>
 #include <kernel/sched.h>
+#include <kernel/semaphore.h>
 
 static void unit_tests(void);
 static void ipctest(void);
 static void memreader(void);
+void infinite_ipc(void);
 
-resource *test_mem = NULL;
+struct semaphore abandoned_sem = {
+    .lock = 0,
+    .held_by = NULL,
+    .waiting = NULL
+};
+
+void abandon(void);
+void attempt_acquire(void);
+
 int ipc_success = 0;
-
 
 void main(void) {
     new_task(&unit_tests, 1, 0);
@@ -27,29 +36,46 @@ void main(void) {
 void unit_tests(void) {
     printf("Print Test...Test passed.\r\n");
 
+    printf("Abandoned semaphore test...");
+    abandon();
+
     printf("IPC Test...");
-    ipctest();
+    infinite_ipc();
 }
 
 void ipctest() {
     rd_t memrd = open_shared_mem();
-    swrite(memrd, "Test passed.\r\n");
-    test_mem = curr_task->task->resources[memrd];
-    new_task(&memreader, 5, 0);
+    swrite(memrd, "IPC Test passed.\r\n");
+    new_task(&memreader, 3, 0);
 }
 
 void memreader(void) {
-    char buf[16];
-    if(test_mem == NULL) {
-        return;
-    }
-    add_resource(curr_task->task, test_mem);
+    char buf[20];
     rd_t memrd = curr_task->task->top_rd - 1;
 
-    read(memrd, buf, 15);
-    buf[15] = 0x00;
+    read(memrd, buf, 18);
+    buf[19] = 0x00;
 
     puts(buf);
 
     close(memrd);
+}
+
+void infinite_ipc(void) {
+    int count = 1;
+    while (1) {
+        new_task(&ipctest, 4, 0);
+        printf("Loop: %d\r\n", ++count);
+    }
+}
+
+void abandon(void) {
+    acquire(&abandoned_sem);
+    new_task(&attempt_acquire, 1, 0);
+}
+
+void attempt_acquire(void) {
+    acquire(&abandoned_sem);
+    printf("Abandoned semaphore test passed.\r\n");
+    release(&abandoned_sem);
 }
