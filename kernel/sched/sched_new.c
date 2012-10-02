@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <mm/mm.h>
 #include <dev/resource.h>
 #include <kernel/fault.h>
@@ -176,6 +177,8 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
     task->pid               = pid_source++;
 
     resource_setup(task);
+    memset(task->held_semaphores, 0, sizeof(task->held_semaphores));
+
     return task;
 }
 

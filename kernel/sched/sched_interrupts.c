@@ -7,6 +7,7 @@
 #include "sched_internals.h"
 
 extern int get_lock(volatile struct semaphore *semaphore);
+extern void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore);
 
 void systick_handler(void) __attribute__((section(".kernel")));
 void pendsv_handler(void) __attribute__((section(".kernel")));
@@ -58,6 +59,7 @@ void svc_release(uint32_t *registers) {
 
     semaphore->lock = 0;
     semaphore->held_by = NULL;
+    held_semaphores_remove(curr_task->task->held_semaphores, semaphore);
 
     if (semaphore->waiting && semaphore->waiting->task->priority >= curr_task->task->priority) {
         task_node *task = semaphore->waiting;

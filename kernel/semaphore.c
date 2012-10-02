@@ -6,6 +6,9 @@
 
 #include <kernel/semaphore.h>
 
+static void held_semaphores_insert(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
+void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
+
 void init_semaphore(volatile struct semaphore *semaphore) {
     semaphore->lock = 0;
     semaphore->held_by = NULL;
@@ -51,6 +54,7 @@ int8_t try_lock(volatile uint8_t *l) {
 int get_lock(volatile struct semaphore *semaphore) {
     if (try_lock(&semaphore->lock)) {
         semaphore->held_by = curr_task;
+        held_semaphores_insert(curr_task->task->held_semaphores, semaphore);
         return 1;
     }
     else {
@@ -83,4 +87,25 @@ void release(volatile struct semaphore *semaphore) {
     }
 
     SVC_ARG(SVC_RELEASE, (void *) semaphore);
+}
+
+static void held_semaphores_insert(struct semaphore *list[], volatile struct semaphore *semaphore) {
+    for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
+        if (list[i] == NULL) {
+            list[i] = (struct semaphore *) semaphore;
+            return;
+        }
+    }
+
+    panic_print("Too many semaphores already held.");
+}
+
+void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore) {
+    for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
+        if (list[i] == semaphore) {
+            list[i] = NULL;
+            return;
+        }
+    }
+    /* Not found, but this may be fine, as kernel_task frees semaphores on behalf of the deceased */
 }
