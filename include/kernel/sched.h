@@ -75,6 +75,7 @@ typedef struct task_ctrl {
     resource    *resources[RESOURCE_TABLE_SIZE];
     rd_t        top_rd;
     semaphore   *held_semaphores[HELD_SEMAPHORES_MAX];
+    semaphore   *waiting;
 } task_ctrl;
 
 task_node * volatile curr_task;

@@ -178,6 +178,7 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
 
     resource_setup(task);
     memset(task->held_semaphores, 0, sizeof(task->held_semaphores));
+    task->waiting           = NULL;
 
     return task;
 }
