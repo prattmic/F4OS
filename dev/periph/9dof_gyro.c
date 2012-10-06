@@ -43,14 +43,14 @@ rd_t open_sfe9dof_gyro(void) {
 }
 
 char sfe9dof_gyro_read(void *env) {
-    uint8_t tmp[2];
+    uint8_t tmp;
     sfe9dof_gyro *gyro = (sfe9dof_gyro *)env;
     if(gyro->addr_ctr > 5) {
         gyro->addr_ctr = 0;
     }
     gyro->tmp_addr = 0x1D;
-    tmp[0] = gyro->tmp_addr + gyro->addr_ctr;
-    tmp[1] = gyro->i2c_port->write(gyro->device_addr, tmp, 1);
+    tmp = gyro->tmp_addr + gyro->addr_ctr++;
+    gyro->i2c_port->write(gyro->device_addr, &tmp, 1);
     return (char)gyro->i2c_port->read(gyro->device_addr);
 }
 
