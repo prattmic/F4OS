@@ -1,9 +1,9 @@
-#include "types.h"
-#include "registers.h"
-#include "interrupt.h"
-#include "stdio.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <dev/registers.h>
+#include <kernel/fault.h>
 
-#include "usbdev.h"
+#include <dev/hw/usbdev.h>
 
 static inline void usbdev_clocks_init(void);
 

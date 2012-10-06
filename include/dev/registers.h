@@ -43,6 +43,7 @@ inline uint32_t *PSP(void) {
 #define APB1PERIPH_BASE                 (PERIPH_BASE)
 #define APB2PERIPH_BASE                 (PERIPH_BASE + 0x00010000)
 #define AHB1PERIPH_BASE                 (PERIPH_BASE + 0x00020000)
+#define AHB2PERIPH_BASE                 (PERIPH_BASE + 0x10000000)
 
 #define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
@@ -58,6 +59,7 @@ inline uint32_t *PSP(void) {
 #define FLASH_R_BASE                    (AHB1PERIPH_BASE + 0x3C00)                              /* Flash registers base address */
 #define DMA1_BASE                       (AHB1PERIPH_BASE + 0x6000)                              /* DMA1 base address */
 #define DMA2_BASE                       (AHB1PERIPH_BASE + 0x6400)                              /* DMA2 base address */
+#define USB_FS_BASE                     (AHB2PERIPH_BASE + 0x0000)                              /* USB OTG FS base address */
 
 /* System Control Map */
 #define SCS_BASE                        (uint32_t) (0xE000E000)                                 /* System Control Space Base Address */
@@ -170,6 +172,7 @@ inline uint32_t *PSP(void) {
 #define RCC_CIR                         (volatile uint32_t *) (RCC_BASE + 0x0C)                 /* Clock Interrupt Register */
 #define RCC_AHB1RSTR                    (volatile uint32_t *) (RCC_BASE + 0x10)                 /* AHB1 reset Register */
 #define RCC_AHB1ENR                     (volatile uint32_t *) (RCC_BASE + 0x30)                 /* AHB1 Enable Register */
+#define RCC_AHB2ENR                     (volatile uint32_t *) (RCC_BASE + 0x34)                 /* AHB2 Enable Register */
 #define RCC_APB1ENR                     (volatile uint32_t *) (RCC_BASE + 0x40)                 /* APB1 Peripheral Clock Enable Register */
 #define RCC_APB2ENR                     (volatile uint32_t *) (RCC_BASE + 0x44)                 /* APB2 Peripheral Clock Enable Register */
 
@@ -310,6 +313,7 @@ inline uint32_t *PSP(void) {
 #define NVIC_ISER0                      (volatile uint32_t *) (NVIC_BASE + 0x000)               /* Interrupt set-enable register 0 */
 #define NVIC_ISER1                      (volatile uint32_t *) (NVIC_BASE + 0x004)               /* Interrupt set-enable register 1 */
 #define NVIC_ISER2                      (volatile uint32_t *) (NVIC_BASE + 0x008)               /* Interrupt set-enable register 2 */
+#define NVIC_ISER3                      (volatile uint32_t *) (NVIC_BASE + 0x00C)               /* Interrupt set-enable register 3 */
 #define NVIC_ICER0                      (volatile uint32_t *) (NVIC_BASE + 0x080)               /* Interrupt clear-enable register 0 */
 #define NVIC_ICER1                      (volatile uint32_t *) (NVIC_BASE + 0x084)               /* Interrupt clear-enable register 1 */
 #define NVIC_ICER2                      (volatile uint32_t *) (NVIC_BASE + 0x088)               /* Interrupt clear-enable register 2 */
@@ -451,6 +455,7 @@ inline uint32_t *PSP(void) {
 #define RCC_AHB1ENR_GPIOIEN             (uint32_t) (1 << 8)                                     /* GPIOI clock enable */
 #define RCC_AHB1ENR_DMA1EN              (uint32_t) (1 << 21)                                    /* DMA1 clock enable */
 #define RCC_AHB1ENR_DMA2EN              (uint32_t) (1 << 22)                                    /* DMA2 clock enable */
+#define RCC_AHB2ENR_OTGFSEN             (uint32_t) (1 << 7)                                     /* USB OTG FS clock enable */
 #define RCC_APB1ENR_TIM2EN              (uint32_t) (1 << 0)                                     /* TIM2 clock enable */
 #define RCC_APB1ENR_SPI2EN              (uint32_t) (1 << 14)                                    /* SPI2 clock enable */
 #define RCC_APB1ENR_I2C1EN              (uint32_t) (1 << 21)                                    /* SPI2 clock enable */
@@ -601,6 +606,7 @@ inline uint32_t *PSP(void) {
 #define GPIO_AF_USART13                 (uint32_t) (0x7)                                        /* GPIO USART1-3 mode */
 #define GPIO_AF_I2C                     (uint32_t) (0x4)                                        /* GPIO I2C mode */
 #define GPIO_AF_SPI12                   (uint32_t) (0x5)                                        /* GPIO SPI1-2 mode */
+#define GPIO_AF_OTG                     (uint32_t) (0xA)                                        /* GPIO USB OTG mode */
 
 /* DMA */
 #define DMA_LISR_TCIF2                  (uint32_t) (1 << 21)                                    /* DMA stream 2 transfer complete flag */

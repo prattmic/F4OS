@@ -32,7 +32,7 @@ SRCS += resource.c shared_mem.c buf_stream.c
 
 # dev/hw
 VPATH += dev/hw/
-SRCS += i2c.c spi.c systick.c tim.c usart.c
+SRCS += i2c.c spi.c systick.c tim.c usart.c usbdev.c
 
 # dev/periph/
 VPATH += dev/periph/
