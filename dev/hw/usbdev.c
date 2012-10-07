@@ -119,13 +119,13 @@ int usbdev_tx(uint32_t *packet, int size) {
     *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
 
     while (size > 0) {
-        printf("\r\nSending word: 0x%x ", *packet);
+        printk("\r\nSending word: 0x%x ", *packet);
         *USB_FS_DFIFO_EP0 = *packet;
         packet++;
         size -= 4;
     }
 
-    printf("Done writing");
+    printk("Done writing");
 
     while (!(*USB_FS_DIEPINT0 & USB_FS_DIEPINTx_XFRC));
 
@@ -139,20 +139,20 @@ void usbdev_handler(void) {
     uint32_t interrupts = *USB_FS_GINTSTS;
     uint8_t handled = 0;
 
-    //printf("\r\nInterrupt = 0x%x\r\n", interrupts);
+    //printk("\r\nInterrupt = 0x%x\r\n", interrupts);
     //*LED_ODR ^= (1 << 12);
     
     /* USB Reset */
     if (interrupts & USB_FS_GINTSTS_USBRST) {
         handled = 1;
-        printf("USB reset\r\n");
+        printk("USB reset\r\n");
         usbdev_handle_usbrst();
     }
     interrupts &= ~USB_FS_GINTSTS_USBRST;
 
     if (interrupts & USB_FS_GINTSTS_SRQINT) {
         handled = 1;
-        printf("New session detected\r\n");
+        printk("New session detected\r\n");
         usbdev_handle_srqint();
     }
     interrupts &= ~USB_FS_GINTSTS_SRQINT;
@@ -160,7 +160,7 @@ void usbdev_handler(void) {
     /* Enumeration done */
     if (interrupts & USB_FS_GINTSTS_ENUMDNE) {
         handled = 1;
-        printf("Enumeration done\r\n");
+        printk("Enumeration done\r\n");
         usbdev_handle_enumdne();
     }
     interrupts &= ~USB_FS_GINTSTS_ENUMDNE;
@@ -168,34 +168,34 @@ void usbdev_handler(void) {
     /* Start of frame token received */
     if (interrupts & USB_FS_GINTSTS_SOF) {
         handled = 1;
-        //printf("Start of frame token received.\r\n");
+        //printk("Start of frame token received.\r\n");
         usbdev_handle_sof();
     }
     interrupts &= ~USB_FS_GINTSTS_SOF;
 
     if (interrupts & USB_FS_GINTSTS_RXFLVL) {
         handled = 1;
-        printf("Received packet: ");
+        printk("Received packet: ");
         usbdev_handle_rxflvl();
     }
     interrupts &= ~USB_FS_GINTSTS_RXFLVL;
 
     if (interrupts & USB_FS_GINTSTS_IEPINT) {
         handled = 1;
-        printf("IN endpoint interrupt\r\n");
+        printk("IN endpoint interrupt\r\n");
     }
     interrupts &= ~USB_FS_GINTSTS_IEPINT;
 
     if (interrupts & USB_FS_GINTSTS_OEPINT) {
         handled = 1;
-        printf("OUT endpoint interrupt\r\n");
+        printk("OUT endpoint interrupt\r\n");
     }
     interrupts &= ~USB_FS_GINTSTS_OEPINT;
 
     //*USB_FS_GINTSTS = USB_FS_GINTSTS_EOPF;
 
     //if (!handled) {
-    //    printf("Unhandled interrupt: 0x%x ", interrupts);
+    //    printk("Unhandled interrupt: 0x%x ", interrupts);
     //}
 }
 
@@ -235,27 +235,27 @@ static inline void usbdev_handle_rxflvl(void) {
 
     switch (packet_status) {
         case USB_FS_GRXSTS_PKTSTS_NAK:
-            puts("Global NAK: ");
+            printk("Global NAK: ");
             break;
         case USB_FS_GRXSTS_PKTSTS_ORX:
-            puts("OUT received: ");
+            printk("OUT received: ");
             usbdev_handle_out_packet_received(receive_status);
             break;
         case USB_FS_GRXSTS_PKTSTS_OCP:
-            puts("OUT complete ");
+            printk("OUT complete ");
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPCP:
-            puts("SETUP complete ");
+            printk("SETUP complete ");
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPRX:
-            puts("SETUP received: ");
+            printk("SETUP received: ");
             usbdev_handle_setup_packet_received(receive_status);
             break;
         default:
-            printf("Unknown packet, receive status: 0x%x ", receive_status);
+            printk("Unknown packet, receive status: 0x%x ", receive_status);
     }
 
-    puts("\r\n");
+    printk("\r\n");
 }
 
 static inline void usbdev_handle_out_packet_received(uint32_t status) {
@@ -270,7 +270,7 @@ static inline void usbdev_handle_out_packet_received(uint32_t status) {
     usbdev_rx(buf, word_count);
 
     for (int i = 0; i < word_count; i++) {
-        printf("0x%x ", buf[i]);
+        printk("0x%x ", buf[i]);
     }
 }
 
@@ -286,7 +286,7 @@ static inline void usbdev_handle_setup_packet_received(uint32_t status) {
     usbdev_rx(buf, word_count);
 
     for (int i = 0; i < word_count; i++) {
-        printf("0x%x ", buf[i]);
+        printk("0x%x ", buf[i]);
     }
 
     parse_setup_packet(buf, word_count);
@@ -302,25 +302,25 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
 
     switch (setup->request) {
     case USB_SETUP_REQUEST_GET_DESCRIPTOR:
-        printf("GET_DESCRIPTOR ");
+        printk("GET_DESCRIPTOR ");
         switch (setup->value >> 8) {
         case USB_SETUP_DESCRIPTOR_DEVICE:
-            printf("DEVICE ");
+            printk("DEVICE ");
             usbdev_tx((uint32_t *) &usb_device_descriptor, sizeof(struct usb_device_descriptor));
             break;
         case USB_SETUP_DESCRIPTOR_CONFIG:
-            printf("CONFIGURATION ");
+            printk("CONFIGURATION ");
             break;
         default:
-            printf("OTHER DESCRIPTOR %d ", setup->value >> 8);
+            printk("OTHER DESCRIPTOR %d ", setup->value >> 8);
         }
         break;
     case USB_SETUP_REQUEST_SET_ADDRESS:
-        printf("SET_ADDRESS %d ", setup->value);
+        printk("SET_ADDRESS %d ", setup->value);
         *USB_FS_DCFG |= USB_FS_DCFG_DAD(setup->value);
         usbdev_send_status_packet();
         break;
     default:
-        printf("OTHER_REQUEST ");
+        printk("OTHER_REQUEST ");
     }
 }
