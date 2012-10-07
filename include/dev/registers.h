@@ -19,6 +19,17 @@ inline uint8_t FAULTMASK(void) {
     return val;
 }
 
+inline uint8_t IPSR(void) __attribute__((always_inline));
+inline uint8_t IPSR(void) {
+    uint8_t val;
+
+    asm("mrs    %[val], ipsr"
+        :[val] "=r" (val)
+        ::);
+
+    return val;
+}
+
 inline uint32_t *PSP(void) __attribute__((always_inline));
 inline uint32_t *PSP(void) {
     uint32_t *val;

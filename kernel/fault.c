@@ -1,9 +1,11 @@
 #include <stdint.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <dev/registers.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 
+#include <dev/resource.h>
 #include <dev/hw/usart.h>
 
 #include <kernel/fault.h>
@@ -12,6 +14,21 @@ void hardfault_handler(void);
 void memmanage_handler(void);
 void busfault_handler(void);
 void usagefault_handler(void);
+
+static void printk_puts(rd_t r, char *s) {
+    usart_puts(s, NULL);
+}
+
+static void printk_putc(rd_t r, char c) {
+    usart_putc(c, NULL);
+}
+
+void printk(char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(0, fmt, ap, &printk_puts, &printk_putc);
+    va_end(ap);
+}
 
 /* Print a message and then panic */
 void panic_print(char *s) {
