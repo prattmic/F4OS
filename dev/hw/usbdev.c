@@ -7,11 +7,14 @@
 
 static inline void usbdev_clocks_init(void);
 
+static inline void usbdev_enable_receive(void);
+
 static inline void usbdev_handle_usbrst(void);
 static inline void usbdev_handle_srqint(void);
 static inline void usbdev_handle_enumdne(void);
 static inline void usbdev_handle_sof(void);
 static inline void usbdev_handle_rxflvl(void);
+static inline void usbdev_handle_oepint(void);
 
 static inline void usbdev_send_status_packet(void);
 
@@ -95,13 +98,17 @@ void init_usbdev(void) {
     *USB_FS_GOTGINT = 0xFFFFFFFF;
 
     /* Unmask mode mismatch, OTG, USB reset, enum done, early susp, USB susp, and SOF interrupts */
-    *USB_FS_GINTMSK |= USB_FS_GINTMSK_MMISM | USB_FS_GINTMSK_OTGINT | USB_FS_GINTMSK_USBRSTM | USB_FS_GINTMSK_ENUMDNEM | USB_FS_GINTMSK_ESUSPM | USB_FS_GINTMSK_USBUSPM | USB_FS_GINTMSK_SOFM | USB_FS_GINTMSK_RXFLVLM | USB_FS_GINTMSK_IEPINT | USB_FS_GINTMSK_OEPINT;
+    *USB_FS_GINTMSK |= USB_FS_GINTMSK_USBRSTM | USB_FS_GINTMSK_ENUMDNEM | USB_FS_GINTMSK_ESUSPM | USB_FS_GINTMSK_USBSUSPM | USB_FS_GINTMSK_SOFM;
 
     /* Set device to full speed (USB 1.1) */
     *USB_FS_DCFG |= USB_FS_DCFG_DSPD_FS | USB_FS_DCFG_NZLSOHSK;
 
     /* Enable VBUS B sensing */
     *USB_FS_GCCFG |= USB_FS_GCCFG_VBUSBSEN | USB_FS_GCCFG_PWRDWN;
+}
+
+static inline void usbdev_enable_receive(void) {
+    *USB_FS_DOEPCTL0 |= USB_FS_DOEPCTL0_CNAK;
 }
 
 void usbdev_rx(uint32_t *buf, int words) {
@@ -119,17 +126,21 @@ int usbdev_tx(uint32_t *packet, int size) {
     *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
 
     while (size > 0) {
+        while (!*USB_FS_DTXFSTS0);
+
         printk("\r\nSending word: 0x%x ", *packet);
         *USB_FS_DFIFO_EP0 = *packet;
         packet++;
         size -= 4;
     }
 
-    printk("Done writing");
+    printk("Done writing ");
 
     while (!(*USB_FS_DIEPINT0 & USB_FS_DIEPINTx_XFRC));
 
-    *USB_FS_DIEPINT0 &= ~USB_FS_DIEPINTx_XFRC;
+    *USB_FS_DIEPINT0 = USB_FS_DIEPINTx_XFRC;
+
+    printk("Transfer complete");
 
     return 0;
 }
@@ -138,6 +149,9 @@ int usbdev_tx(uint32_t *packet, int size) {
 void usbdev_handler(void) {
     uint32_t interrupts = *USB_FS_GINTSTS;
     uint8_t handled = 0;
+    
+    // Clear interrupts
+    *USB_FS_GINTSTS = 0xFFFFFFFF;
 
     //printk("\r\nInterrupt = 0x%x\r\n", interrupts);
     //*LED_ODR ^= (1 << 12);
@@ -145,14 +159,14 @@ void usbdev_handler(void) {
     /* USB Reset */
     if (interrupts & USB_FS_GINTSTS_USBRST) {
         handled = 1;
-        printk("USB reset\r\n");
+        printk("USB: Reset\r\n");
         usbdev_handle_usbrst();
     }
     interrupts &= ~USB_FS_GINTSTS_USBRST;
 
     if (interrupts & USB_FS_GINTSTS_SRQINT) {
         handled = 1;
-        printk("New session detected\r\n");
+        printk("USB: New session detected\r\n");
         usbdev_handle_srqint();
     }
     interrupts &= ~USB_FS_GINTSTS_SRQINT;
@@ -160,7 +174,7 @@ void usbdev_handler(void) {
     /* Enumeration done */
     if (interrupts & USB_FS_GINTSTS_ENUMDNE) {
         handled = 1;
-        printk("Enumeration done\r\n");
+        printk("USB: Enumeration done\r\n");
         usbdev_handle_enumdne();
     }
     interrupts &= ~USB_FS_GINTSTS_ENUMDNE;
@@ -175,33 +189,89 @@ void usbdev_handler(void) {
 
     if (interrupts & USB_FS_GINTSTS_RXFLVL) {
         handled = 1;
-        printk("Received packet: ");
+        printk("USB: Received packet: ");
         usbdev_handle_rxflvl();
+        usbdev_enable_receive();
     }
     interrupts &= ~USB_FS_GINTSTS_RXFLVL;
 
     if (interrupts & USB_FS_GINTSTS_IEPINT) {
         handled = 1;
-        printk("IN endpoint interrupt\r\n");
+        printk("USB: IN endpoint interrupt\r\n");
     }
     interrupts &= ~USB_FS_GINTSTS_IEPINT;
 
     if (interrupts & USB_FS_GINTSTS_OEPINT) {
         handled = 1;
-        printk("OUT endpoint interrupt\r\n");
+        printk("USB: OUT endpoint interrupt. ");
+        usbdev_handle_oepint();
     }
     interrupts &= ~USB_FS_GINTSTS_OEPINT;
 
-    //*USB_FS_GINTSTS = USB_FS_GINTSTS_EOPF;
+    if (interrupts & USB_FS_GINTSTS_EOPF) {
+        handled = 1;
+        //printk("End of periodic frame\r\n");
+    }
+    interrupts &= ~USB_FS_GINTSTS_EOPF;
 
-    //if (!handled) {
-    //    printk("Unhandled interrupt: 0x%x ", interrupts);
-    //}
+    if (interrupts & USB_FS_GINTSTS_ESUSP) {
+        handled = 1;
+        printk("USB: Early suspend.\r\n");
+    }
+    interrupts &= ~USB_FS_GINTSTS_ESUSP;
+
+    if (interrupts & USB_FS_GINTSTS_USBSUSP) {
+        handled = 1;
+        printk("USB: USB suspend.\r\n");
+    }
+    interrupts &= ~USB_FS_GINTSTS_USBSUSP;
+
+    if (interrupts & USB_FS_GINTSTS_OTGINT) {
+        handled = 1;
+        printk("USB: OTG Interrupt: 0x%x.\r\n", *USB_FS_GOTGINT);
+        *USB_FS_GOTGINT = 0xFFFFFFFF;
+    }
+    interrupts &= ~USB_FS_GINTSTS_OTGINT;
+
+    if (!handled) {
+        printk("USB: Unhandled interrupt: 0x%x \r\n", interrupts);
+    }
 }
 
+#define RX_FIFO_SIZE    128
+#define TX0_FIFO_SIZE   64
+#define TX1_FIFO_SIZE   128
+#define TX2_FIFO_SIZE   0
+#define TX3_FIFO_SIZE   0
+
 static inline void usbdev_handle_usbrst(void) {
-    // Do nothing, clear interrupt
+    // Clear interrupt
     *USB_FS_GINTSTS = USB_FS_GINTSTS_USBRST;
+
+    /* NAK bits */
+    *USB_FS_DOEPCTL0 |= USB_FS_DOEPCTL0_SNAK;
+    *USB_FS_DOEPCTL1 |= USB_FS_DOEPCTLx_SNAK;
+    *USB_FS_DOEPCTL2 |= USB_FS_DOEPCTLx_SNAK;
+    *USB_FS_DOEPCTL3 |= USB_FS_DOEPCTLx_SNAK;
+
+    /* Unmask interrupts */
+    *USB_FS_DAINTMSK |= USB_FS_DAINT_IEPM(0) | USB_FS_DAINT_OEPM(0);
+    *USB_FS_DOEPMSK |= USB_FS_DOEPMSK_STUPM | USB_FS_DOEPMSK_XFRCM;
+
+    /* Back-to-back SETUP packets */
+    *USB_FS_DOEPTSIZ0 |= USB_FS_DOEPTSIZ0_STUPCNT(3);
+
+    /* Set RX FIFO size */
+    *USB_FS_GRXFSIZ = RX_FIFO_SIZE;
+
+    /* EP0 TX Size */
+    *USB_FS_DIEPTXF0 = USB_FS_DIEPTXF0_TX0FSA(RX_FIFO_SIZE) | USB_FS_DIEPTXF0_TX0FD(TX0_FIFO_SIZE);
+    /* EP1 TX Size */
+    *USB_FS_DIEPTXF1 = USB_FS_DIEPTXF_INEPTXSA((RX_FIFO_SIZE+TX0_FIFO_SIZE)) | USB_FS_DIEPTXF_INEPTXFD(TX1_FIFO_SIZE);
+    /* EP2 TX Size */
+    *USB_FS_DIEPTXF2 = USB_FS_DIEPTXF_INEPTXSA((RX_FIFO_SIZE+TX0_FIFO_SIZE+TX1_FIFO_SIZE)) | USB_FS_DIEPTXF_INEPTXFD(TX2_FIFO_SIZE);
+    /* EP3 TX Size */
+    *USB_FS_DIEPTXF3 = USB_FS_DIEPTXF_INEPTXSA((RX_FIFO_SIZE+TX0_FIFO_SIZE+TX1_FIFO_SIZE+TX2_FIFO_SIZE)) | USB_FS_DIEPTXF_INEPTXFD(TX3_FIFO_SIZE);
 }
 
 static inline void usbdev_handle_srqint(void) {
@@ -246,6 +316,8 @@ static inline void usbdev_handle_rxflvl(void) {
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPCP:
             printk("SETUP complete ");
+            uint32_t buffer;
+            usbdev_rx(&buffer, sizeof(buffer)/4);
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPRX:
             printk("SETUP received: ");
@@ -274,6 +346,8 @@ static inline void usbdev_handle_out_packet_received(uint32_t status) {
     }
 }
 
+uint32_t setup_packet[2];
+
 static inline void usbdev_handle_setup_packet_received(uint32_t status) {
     uint32_t word_count = USB_FS_GRXSTS_BCNT(status)/4;
 
@@ -281,20 +355,25 @@ static inline void usbdev_handle_setup_packet_received(uint32_t status) {
         return;
     }
 
-    uint32_t buf[word_count];
+    //uint32_t buf[word_count];
 
-    usbdev_rx(buf, word_count);
+    //usbdev_rx(buf, word_count);
+    usbdev_rx(setup_packet, 2);
 
     for (int i = 0; i < word_count; i++) {
-        printk("0x%x ", buf[i]);
+        //printk("0x%x ", buf[i]);
+        printk("0x%x ", setup_packet[i]);
     }
 
-    parse_setup_packet(buf, word_count);
+    //parse_setup_packet(buf, word_count);
 }
 
 static inline void usbdev_send_status_packet(void) {
     *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(1) | USB_FS_DIEPTSIZ0_XFRSIZ(0);
     *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
+
+    *USB_FS_DOEPTSIZ0 = USB_FS_DOEPTSIZ0_STUPCNT(3) | USB_FS_DOEPTSIZ0_PKTCNT(1) | USB_FS_DOEPTSIZ0_XFRSIZ(8*3);
+    //*USB_FS_DOEPCTL0 |= USB_FS_DOEPCTL0_CNAK | USB_FS_DOEPCTL0_EPENA;
 }
 
 static void parse_setup_packet(uint32_t *packet, uint32_t len) {
@@ -320,7 +399,62 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
         *USB_FS_DCFG |= USB_FS_DCFG_DAD(setup->value);
         usbdev_send_status_packet();
         break;
+    case USB_SETUP_REQUEST_GET_STATUS:
+        printk("GET_STATUS ");
+        if (setup->recipient == USB_SETUP_REQUEST_TYPE_RECIPIENT_DEVICE) {
+            printk("DEVICE ");
+            uint32_t buf = 0x11; /* Self powered and remote wakeup */
+            usbdev_tx(&buf, sizeof(buf));
+        }
+        else {
+            printk("OTHER ");
+        }
+        break;
     default:
         printk("OTHER_REQUEST ");
     }
+}
+
+static inline void usbdev_handle_oepint(void) {
+    if (*USB_FS_DAINT & (1 << 16)) {
+        printk("On endpoint 0. ");
+    }
+    else {
+        printk("Not on endpoint 0.\r\n");
+        return;
+    }
+
+    uint32_t interrupts = *USB_FS_DOEPINT0;
+
+    if (interrupts & USB_FS_DOEPINTx_XFRC) {
+        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_XFRC;
+        printk("Transfer complete. ");
+    }
+
+    if (interrupts & USB_FS_DOEPINTx_EPDISD) {
+        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_EPDISD;
+        printk("Endpoint disabled. ");
+    }
+
+    if (interrupts & USB_FS_DOEPINTx_STUP) {
+        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_STUP;
+        printk("SETUP phase done. ");
+        parse_setup_packet(setup_packet, 2);
+        //usbdev_handle_rxflvl();
+    }
+
+    if (interrupts & USB_FS_DOEPINTx_OTEPDIS) {
+        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_OTEPDIS;
+        printk("OUT token received when endpoint disabled. ");
+    }
+
+    if (interrupts & USB_FS_DOEPINTx_B2BSTUP) {
+        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_B2BSTUP;
+        printk("Back-to-back SETUP packets received.");
+    }
+
+    printk("\r\n");
+
+    /* Clear interrupt */
+    *USB_FS_GINTSTS = USB_FS_GINTSTS_OEPINT;
 }

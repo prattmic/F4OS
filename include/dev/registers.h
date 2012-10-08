@@ -719,7 +719,7 @@ inline uint32_t *PSP(void) {
 #define USB_FS_GINTSTS_GINAKEFF         (uint32_t) (1 << 6)                                     /* USB global IN non-periodic NAK effective */
 #define USB_FS_GINTSTS_GONAKEFF         (uint32_t) (1 << 7)                                     /* USB global OUT NAK effective */
 #define USB_FS_GINTSTS_ESUSP            (uint32_t) (1 << 10)                                    /* USB early suspend */
-#define USB_FS_GINTSTS_USBUSP           (uint32_t) (1 << 11)                                    /* USB suspend */
+#define USB_FS_GINTSTS_USBSUSP          (uint32_t) (1 << 11)                                    /* USB suspend */
 #define USB_FS_GINTSTS_USBRST           (uint32_t) (1 << 12)                                    /* USB reset */
 #define USB_FS_GINTSTS_ENUMDNE          (uint32_t) (1 << 13)                                    /* USB enumeration done */
 #define USB_FS_GINTSTS_ISOODRP          (uint32_t) (1 << 14)                                    /* USB isochronous OUT packet dropped interrupt */
@@ -745,7 +745,7 @@ inline uint32_t *PSP(void) {
 #define USB_FS_GINTMSK_GINAKEFFM        (uint32_t) (1 << 6)                                     /* USB global IN non-periodic NAK effective mask */
 #define USB_FS_GINTMSK_GONAKEFFM        (uint32_t) (1 << 7)                                     /* USB global OUT NAK effective mask */
 #define USB_FS_GINTMSK_ESUSPM           (uint32_t) (1 << 10)                                    /* USB early suspend mask */
-#define USB_FS_GINTMSK_USBUSPM          (uint32_t) (1 << 11)                                    /* USB suspend mask */
+#define USB_FS_GINTMSK_USBSUSPM         (uint32_t) (1 << 11)                                    /* USB suspend mask */
 #define USB_FS_GINTMSK_USBRSTM          (uint32_t) (1 << 12)                                    /* USB reset mask */
 #define USB_FS_GINTMSK_ENUMDNEM         (uint32_t) (1 << 13)                                    /* USB enumeration done mask */
 #define USB_FS_GINTMSK_ISOODRPM         (uint32_t) (1 << 14)                                    /* USB isochronous OUT packet dropped interrupt mask */
@@ -775,8 +775,8 @@ inline uint32_t *PSP(void) {
 #define USB_FS_GRXSTS_PKTSTS_STUPCP     (uint8_t)  (4)                                          /* USB RX FIFO packet status = SETUP transaction completed */
 #define USB_FS_GRXSTS_PKTSTS_STUPRX     (uint8_t)  (6)                                          /* USB RX FIFO packet status = SETUP data packet received */
 
-#define USB_FS_DIEPTXF0_TX0FSA          (uint32_t) (1 << 0)                                     /* USB endpoint 0 transmit RAM start address */
-#define USB_FS_DIEPTXF0_TX0FD           (uint32_t) (1 << 16)                                    /* USB endpoint 0 TX FIFO depth */
+#define USB_FS_DIEPTXF0_TX0FSA(n)       (uint32_t) (n << 0)                                     /* USB endpoint 0 transmit RAM start address */
+#define USB_FS_DIEPTXF0_TX0FD(n)        (uint32_t) (n << 16)                                    /* USB endpoint 0 TX FIFO depth */
 
 #define USB_FS_GCCFG_PWRDWN             (uint32_t) (1 << 16)                                    /* USB power down */
 #define USB_FS_GCCFG_VBUSASEN           (uint32_t) (1 << 18)                                    /* USB VBUS "A" sensing enable */
@@ -784,8 +784,8 @@ inline uint32_t *PSP(void) {
 #define USB_FS_GCCFG_SOFOUTEN           (uint32_t) (1 << 20)                                    /* USB SOF output enable */
 #define USB_FS_GCCFG_NOVBUSSSENS        (uint32_t) (1 << 21)                                    /* USB VBUS sensing disable */
 
-#define USB_FS_DIEPTXF_INEPTXSA         (uint32_t) (1 << 0)                                     /* USB IN endpoint FIFOx transmit RAM start address */
-#define USB_FS_DIEPTXF_INEPTXFD         (uint32_t) (1 << 16)                                    /* USB IN endpoint TX FIFOx depth */
+#define USB_FS_DIEPTXF_INEPTXSA(n)      (uint32_t) (n << 0)                                     /* USB IN endpoint FIFOx transmit RAM start address */
+#define USB_FS_DIEPTXF_INEPTXFD(n)      (uint32_t) (n << 16)                                    /* USB IN endpoint TX FIFOx depth */
 
 /* Device-mode Registers */
 #define USB_FS_DCFG_DSPD_FS             (uint32_t) (1 << 1 | 1 << 0)                            /* USB device speed: full speed (USB 1.1) */
@@ -929,16 +929,12 @@ inline uint32_t *PSP(void) {
 #define USB_FS_DIEPTSIZx_MCNT_3         (uint32_t) (3 << 29)                                    /* USB device endpoint x IN multi count 1 */
 
 #define USB_FS_DOEPTSIZ0_XFRSIZ(n)      (uint32_t) (n << 0)                                     /* USB device endpoint 0 OUT transfer size (7 bits) */
-#define USB_FS_DOEPTSIZ0_PKTCNT         (uint32_t) (1 << 19)                                    /* USB device endpoint 0 OUT packet count */
-#define USB_FS_DOEPTSIZ0_STUPCNT_1      (uint32_t) (1 << 29)                                    /* USB device endpoint 0 OUT 1 back-to-back SETUP packets allowed */
-#define USB_FS_DOEPTSIZ0_STUPCNT_2      (uint32_t) (2 << 29)                                    /* USB device endpoint 0 OUT 2 back-to-back SETUP packets allowed */
-#define USB_FS_DOEPTSIZ0_STUPCNT_3      (uint32_t) (3 << 29)                                    /* USB device endpoint 0 OUT 3 back-to-back SETUP packets allowed */
+#define USB_FS_DOEPTSIZ0_PKTCNT(n)      (uint32_t) (n << 19)                                    /* USB device endpoint 0 OUT packet count */
+#define USB_FS_DOEPTSIZ0_STUPCNT(n)     (uint32_t) (n << 29)                                    /* USB device endpoint 0 OUT back-to-back SETUP packets allowed */
 
 #define USB_FS_DOEPTSIZx_XFRSIZ(n)      (uint32_t) (n << 0)                                     /* USB device endpoint x OUT transfer size (19 bits) */
 #define USB_FS_DOEPTSIZx_PKTCNT(n)      (uint32_t) (n << 19)                                    /* USB device endpoint x OUT packet count (10 bits) */
-#define USB_FS_DOEPTSIZx_STUPCNT_1      (uint32_t) (1 << 29)                                    /* USB device endpoint x OUT 1 back-to-back SETUP packets allowed */
-#define USB_FS_DOEPTSIZx_STUPCNT_2      (uint32_t) (2 << 29)                                    /* USB device endpoint x OUT 2 back-to-back SETUP packets allowed */
-#define USB_FS_DOEPTSIZx_STUPCNT_3      (uint32_t) (3 << 29)                                    /* USB device endpoint x OUT 3 back-to-back SETUP packets allowed */
+#define USB_FS_DOEPTSIZx_STUPCNT(n)     (uint32_t) (n << 29)                                    /* USB device endpoint x OUT back-to-back SETUP packets allowed */
 #define USB_FS_DOEPTSIZx_RXDPID         (uint32_t) (1 << 29 | 1 << 30)                          /* USB device endpoint x OUT received data PID */
 
 /* Powe and Clock Gating Control Register */
