@@ -235,7 +235,7 @@ void usbdev_rx(uint32_t *buf, int words) {
 
 static void usbdev_tx_inner(uint32_t *data, int size) {
     while (size > 0) {
-        while (!*USB_FS_DTXFSTS0);
+        while (*USB_FS_DTXFSTS0 < size);
 
         printk("\r\nSending word: 0x%x ", *data);
         *USB_FS_DFIFO_EP0 = *data;
@@ -543,6 +543,7 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
             break;
         case USB_SETUP_DESCRIPTOR_CONFIG:
             printk("CONFIGURATION ");
+            usbdev_tx((uint32_t *) &usb_configuration_descriptor, sizeof(usb_configuration_descriptor));
             usbdev_tx_config_desc();
             break;
         default:
@@ -553,6 +554,10 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
         printk("SET_ADDRESS %d ", setup->value);
         *USB_FS_DCFG |= USB_FS_DCFG_DAD(setup->value);
         usbdev_send_status_packet();
+        break;
+    case USB_SETUP_REQUEST_SET_CONFIGURATION:
+        printk("SET_CONFIGURATION %d ", setup->value);
+        // Do stuff
         break;
     case USB_SETUP_REQUEST_GET_STATUS:
         printk("GET_STATUS ");
