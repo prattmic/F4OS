@@ -543,8 +543,12 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
             break;
         case USB_SETUP_DESCRIPTOR_CONFIG:
             printk("CONFIGURATION ");
-            usbdev_tx((uint32_t *) &usb_configuration_descriptor, sizeof(usb_configuration_descriptor));
-            usbdev_tx_config_desc();
+            if (setup->length <= sizeof(usb_configuration_descriptor)) {
+                usbdev_tx((uint32_t *) &usb_configuration_descriptor, sizeof(usb_configuration_descriptor));
+            }
+            else {
+                usbdev_tx_config_desc();
+            }
             break;
         default:
             printk("OTHER DESCRIPTOR %d ", setup->value >> 8);
