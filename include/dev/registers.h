@@ -837,11 +837,11 @@ inline uint32_t *PSP(void) {
 
 #define USB_FS_DIEPEMPMSK_INEPTXFEM(n)  (uint32_t) (1 << n)                                     /* USB device IN EP TX FIFO empty interrupt mask bits */
 
-#define USB_FS_DIEPCTL0_MPSIZ          (uint32_t) (3 << 0)                                     /* USB device endpoint 0 IN maximum packet size */
-#define USB_FS_DIEPCTL0_MPSIZ_64       (uint32_t) (0 << 0)                                     /* USB device endpoint 0 IN maximum packet size 64 bytes */
-#define USB_FS_DIEPCTL0_MPSIZ_32       (uint32_t) (1 << 0)                                     /* USB device endpoint 0 IN maximum packet size 32 bytes */
-#define USB_FS_DIEPCTL0_MPSIZ_16       (uint32_t) (2 << 0)                                     /* USB device endpoint 0 IN maximum packet size 16 bytes */
-#define USB_FS_DIEPCTL0_MPSIZ_8        (uint32_t) (3 << 0)                                     /* USB device endpoint 0 IN maximum packet size 8 bytes */
+#define USB_FS_DIEPCTL0_MPSIZE          (uint32_t) (3 << 0)                                     /* USB device endpoint 0 IN maximum packet size */
+#define USB_FS_DIEPCTL0_MPSIZE_64       (uint32_t) (0 << 0)                                     /* USB device endpoint 0 IN maximum packet size 64 bytes */
+#define USB_FS_DIEPCTL0_MPSIZE_32       (uint32_t) (1 << 0)                                     /* USB device endpoint 0 IN maximum packet size 32 bytes */
+#define USB_FS_DIEPCTL0_MPSIZE_16       (uint32_t) (2 << 0)                                     /* USB device endpoint 0 IN maximum packet size 16 bytes */
+#define USB_FS_DIEPCTL0_MPSIZE_8        (uint32_t) (3 << 0)                                     /* USB device endpoint 0 IN maximum packet size 8 bytes */
 #define USB_FS_DIEPCTL0_USBAEP          (uint32_t) (1 << 15)                                    /* USB device endpoint 0 IN USB active endpoint (always 1) */
 #define USB_FS_DIEPCTL0_NAKSTS          (uint32_t) (1 << 17)                                    /* USB device endpoint 0 IN NAK status */
 #define USB_FS_DIEPCTL0_STALL           (uint32_t) (1 << 21)                                    /* USB device endpoint 0 IN STALL handshake */
@@ -872,13 +872,14 @@ inline uint32_t *PSP(void) {
 #define USB_FS_DIEPCTLx_EPDIS           (uint32_t) (1 << 30)                                    /* USB device endpoint x IN endpoint disable */
 #define USB_FS_DIEPCTLx_EPENA           (uint32_t) (1 << 31)                                    /* USB device endpoint x IN endpoint enable */
 
-#define USB_FS_D0EPCTL0_MPSIZE_64       (uint32_t) (0 << 0)                                     /* USB device endpoint 0 OUT maximum packet size 64 bytes */
-#define USB_FS_D0EPCTL0_MPSIZE_32       (uint32_t) (1 << 0)                                     /* USB device endpoint 0 OUT maximum packet size 32 bytes */
-#define USB_FS_D0EPCTL0_MPSIZE_16       (uint32_t) (2 << 0)                                     /* USB device endpoint 0 OUT maximum packet size 16 bytes */
-#define USB_FS_D0EPCTL0_MPSIZE_8        (uint32_t) (3 << 0)                                     /* USB device endpoint 0 OUT maximum packet size 8 bytes */
-#define USB_FS_D0EPCTL0_USBAEP          (uint32_t) (1 << 15)                                    /* USB device endpoint 0 OUT USB active endpoint (always 1) */
-#define USB_FS_D0EPCTL0_NAKSTS          (uint32_t) (1 << 17)                                    /* USB device endpoint 0 OUT NAK status */
-#define USB_FS_D0EPCTL0_SNPM            (uint32_t) (1 << 20)                                    /* USB device endpoint 0 OUT snoop mode */
+#define USB_FS_DOEPCTL0_MPSIZE          (uint32_t) (3 << 0)                                     /* USB device endpoint 0 OUT maximum packet size */
+#define USB_FS_DOEPCTL0_MPSIZE_64       (uint32_t) (0 << 0)                                     /* USB device endpoint 0 OUT maximum packet size 64 bytes */
+#define USB_FS_DOEPCTL0_MPSIZE_32       (uint32_t) (1 << 0)                                     /* USB device endpoint 0 OUT maximum packet size 32 bytes */
+#define USB_FS_DOEPCTL0_MPSIZE_16       (uint32_t) (2 << 0)                                     /* USB device endpoint 0 OUT maximum packet size 16 bytes */
+#define USB_FS_DOEPCTL0_MPSIZE_8        (uint32_t) (3 << 0)                                     /* USB device endpoint 0 OUT maximum packet size 8 bytes */
+#define USB_FS_DOEPCTL0_USBAEP          (uint32_t) (1 << 15)                                    /* USB device endpoint 0 OUT USB active endpoint (always 1) */
+#define USB_FS_DOEPCTL0_NAKSTS          (uint32_t) (1 << 17)                                    /* USB device endpoint 0 OUT NAK status */
+#define USB_FS_DOEPCTL0_SNPM            (uint32_t) (1 << 20)                                    /* USB device endpoint 0 OUT snoop mode */
 #define USB_FS_DOEPCTL0_STALL           (uint32_t) (1 << 21)                                    /* USB device endpoint 0 OUT STALL handshake */
 #define USB_FS_DOEPCTL0_CNAK            (uint32_t) (1 << 26)                                    /* USB device endpoint 0 OUT clear NAK */
 #define USB_FS_DOEPCTL0_SNAK            (uint32_t) (1 << 27)                                    /* USB device endpoint 0 OUT set NAK */

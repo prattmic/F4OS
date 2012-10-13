@@ -245,7 +245,8 @@ void init_usbdev(void) {
 }
 
 static inline void usbdev_enable_receive(void) {
-    *USB_FS_DOEPCTL0 |= USB_FS_DOEPCTL0_CNAK;
+    *USB_FS_DOEPTSIZ0 = USB_FS_DOEPTSIZ0_XFRSIZ(64) | USB_FS_DOEPTSIZ0_PKTCNT(1) | USB_FS_DOEPTSIZ0_STUPCNT(3);
+    *USB_FS_DOEPCTL0 |= USB_FS_DOEPCTL0_CNAK | USB_FS_DOEPCTL0_EPENA;
 }
 
 void usbdev_rx(uint32_t *buf, int words) {
@@ -267,10 +268,12 @@ int usbdev_tx(uint32_t *packet, int size) {
 
     *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
 
+    printk("Sending data: ");
+
     while (size > 0) {
         while (!*USB_FS_DTXFSTS0);
 
-        printk("\r\nSending word: 0x%x ", *packet);
+        printk("0x%x ", *packet);
         *USB_FS_DFIFO_EP0 = *packet;
         packet++;
         size -= 4;
@@ -329,14 +332,6 @@ void usbdev_handler(void) {
     }
     interrupts &= ~USB_FS_GINTSTS_SOF;
 
-    if (interrupts & USB_FS_GINTSTS_RXFLVL) {
-        handled = 1;
-        printk("USB: Received packet: ");
-        usbdev_handle_rxflvl();
-        usbdev_enable_receive();
-    }
-    interrupts &= ~USB_FS_GINTSTS_RXFLVL;
-
     if (interrupts & USB_FS_GINTSTS_IEPINT) {
         handled = 1;
         printk("USB: IN endpoint interrupt\r\n");
@@ -374,6 +369,14 @@ void usbdev_handler(void) {
         *USB_FS_GOTGINT = 0xFFFFFFFF;
     }
     interrupts &= ~USB_FS_GINTSTS_OTGINT;
+
+    if (interrupts & USB_FS_GINTSTS_RXFLVL) {
+        handled = 1;
+        printk("USB: Received packet: ");
+        usbdev_handle_rxflvl();
+        usbdev_enable_receive();
+    }
+    interrupts &= ~USB_FS_GINTSTS_RXFLVL;
 
     if (!handled) {
         printk("USB: Unhandled interrupt: 0x%x \r\n", interrupts);
@@ -429,8 +432,10 @@ static inline void usbdev_handle_enumdne(void) {
     }
 
     /* Set maximum packet size */
-    *USB_FS_DIEPCTL0 &= ~(USB_FS_DIEPCTL0_MPSIZ);
-    *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_MPSIZ_64;
+    *USB_FS_DIEPCTL0 &= ~(USB_FS_DIEPCTL0_MPSIZE);
+    *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_MPSIZE_64;
+    *USB_FS_DOEPCTL0 &= ~(USB_FS_DOEPCTL0_MPSIZE);
+    *USB_FS_DOEPCTL0 |= USB_FS_DOEPCTL0_MPSIZE_64;
 
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_ENUMDNE;
@@ -505,6 +510,11 @@ static inline void usbdev_handle_setup_packet_received(uint32_t status) {
     for (int i = 0; i < word_count; i++) {
         //printk("0x%x ", buf[i]);
         printk("0x%x ", setup_packet[i]);
+    }
+
+    struct usbdev_setup_packet *pack = (struct usbdev_setup_packet *) setup_packet;
+    if (!pack->direction && pack->length) {
+        printk("Data to receive. ");
     }
 
     //parse_setup_packet(buf, word_count);
