@@ -24,7 +24,9 @@ static inline void usbdev_handle_out_packet_received(uint32_t status);
 static inline void usbdev_handle_setup_packet_received(uint32_t status);
 
 static void parse_setup_packet(uint32_t *packet, uint32_t len);
+static void usbdev_set_configuration(uint16_t configuration);
 
+/* Changing the endpoint numbers here won't do what you want */
 #define USB_CDC_ACM_ENDPOINT    (1)
 #define USB_CDC_ACM_MPSIZE      (64)
 
@@ -50,8 +52,6 @@ const struct usb_device_descriptor usb_device_descriptor = {
     .iSerialNumber =       0,
     .bNumConfigurations =  1
 };
-
-#define CONFIG_TOT_LEN  (sizeof(struct usb_configuration_descriptor) + 2*sizeof(struct usb_interface_descriptor) + sizeof(struct usb_cdc_header_functional_descriptor) + sizeof(struct usb_cdc_call_management_functional_descriptor) + sizeof(struct usb_cdc_acm_functional_descriptor) + sizeof(struct usb_cdc_acm_union_functional_descriptor) + 3*sizeof(struct usb_endpoint_descriptor))
 
 const struct __attribute__((packed)) usbdev_configuration1 {
     struct usb_configuration_descriptor                     config;
@@ -256,6 +256,10 @@ void usbdev_rx(uint32_t *buf, int words) {
 /* packet points to first word in packet.  size is packet size in bytes */
 int usbdev_tx(uint32_t *packet, int size) {
     uint8_t packets = size % 64 ? size/64 + 1 : size/64;
+    if (!packets) {
+        packets = 1;
+    }
+
     *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(size);
 
     *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
@@ -528,7 +532,6 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
                 usbdev_tx((uint32_t *) &usbdev_configuration1_descriptor, sizeof(usbdev_configuration1_descriptor));
             }
             else {
-                //usbdev_tx_config_desc();
                 usbdev_tx((uint32_t *) &usbdev_configuration1, sizeof(usbdev_configuration1));
             }
             break;
@@ -543,7 +546,8 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
         break;
     case USB_SETUP_REQUEST_SET_CONFIGURATION:
         printk("SET_CONFIGURATION %d ", setup->value);
-        // Do stuff
+        usbdev_set_configuration(setup->value);
+        usbdev_send_status_packet();
         break;
     case USB_SETUP_REQUEST_GET_STATUS:
         printk("GET_STATUS ");
@@ -557,7 +561,7 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
         }
         break;
     default:
-        printk("OTHER_REQUEST ");
+        printk("OTHER_REQUEST %d ", setup->request);
     }
 }
 
@@ -586,7 +590,6 @@ static inline void usbdev_handle_oepint(void) {
         *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_STUP;
         printk("SETUP phase done. ");
         parse_setup_packet(setup_packet, 2);
-        //usbdev_handle_rxflvl();
     }
 
     if (interrupts & USB_FS_DOEPINTx_OTEPDIS) {
@@ -603,4 +606,24 @@ static inline void usbdev_handle_oepint(void) {
 
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_OEPINT;
+}
+
+static void usbdev_set_configuration(uint16_t configuration) {
+    if (configuration != 1) {
+        printk("Cannot set configuration %u. ", configuration);
+    }
+
+    printk("Setting configuration %u. ", configuration);
+
+    /* ACM Endpoint (1) */
+    *USB_FS_DIEPCTL1 |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_ACM_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_INT | USB_FS_DIEPCTLx_TXFNUM(1) | USB_FS_DIEPCTLx_EPENA;
+
+    /* RX Endpoint (2) */
+    *USB_FS_DOEPCTL2 |= USB_FS_DOEPCTLx_MPSIZE(USB_CDC_RX_MPSIZE) | USB_FS_DOEPCTLx_EPTYP_BLK | USB_FS_DOEPCTLx_EPENA;
+
+    /* TX Endpoint (3) */
+    *USB_FS_DIEPCTL3 |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_TX_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_BLK | USB_FS_DIEPCTLx_TXFNUM(3) | USB_FS_DIEPCTLx_EPENA;
+
+    /* Unmask interrupts */
+    *USB_FS_DAINTMSK |= USB_FS_DAINT_IEPM(1) | USB_FS_DAINT_IEPM(3) | USB_FS_DAINT_OEPM(2);
 }
