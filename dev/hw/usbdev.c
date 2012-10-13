@@ -24,6 +24,9 @@ static inline void usbdev_handle_out_packet_received(uint32_t status);
 static inline void usbdev_handle_setup_packet_received(uint32_t status);
 
 static void parse_setup_packet(uint32_t *packet, uint32_t len);
+static void handle_std_setup_packet(struct usbdev_setup_packet *setup);
+static void handle_class_setup_packet(struct usbdev_setup_packet *setup);
+
 static void usbdev_set_configuration(uint16_t configuration);
 
 /* Changing the endpoint numbers here won't do what you want */
@@ -470,7 +473,7 @@ static inline void usbdev_handle_rxflvl(void) {
 }
 
 static inline void usbdev_handle_out_packet_received(uint32_t status) {
-    uint32_t word_count = USB_FS_GRXSTS_BCNT(status)/4;
+    uint32_t word_count = USB_FS_GRXSTS_BCNT(status) % 4 ? USB_FS_GRXSTS_BCNT(status)/4 + 1 : USB_FS_GRXSTS_BCNT(status)/4;
 
     if (word_count == 0) {
         return;
@@ -518,6 +521,19 @@ static inline void usbdev_send_status_packet(void) {
 static void parse_setup_packet(uint32_t *packet, uint32_t len) {
     struct usbdev_setup_packet *setup = (struct usbdev_setup_packet *) packet;
 
+    switch (setup->type) {
+        case USB_SETUP_REQUEST_TYPE_TYPE_STD:
+            handle_std_setup_packet(setup);
+            break;
+        case USB_SETUP_REQUEST_TYPE_TYPE_CLASS:
+            handle_class_setup_packet(setup);
+            break;
+        default:
+            printk("Unhandled SETUP packet, type %d. ", setup->type);
+    }
+}
+
+static void handle_std_setup_packet(struct usbdev_setup_packet *setup) {
     switch (setup->request) {
     case USB_SETUP_REQUEST_GET_DESCRIPTOR:
         printk("GET_DESCRIPTOR ");
@@ -561,7 +577,28 @@ static void parse_setup_packet(uint32_t *packet, uint32_t len) {
         }
         break;
     default:
-        printk("OTHER_REQUEST %d ", setup->request);
+        printk("STD: OTHER_REQUEST %d ", setup->request);
+    }
+}
+
+static void handle_class_setup_packet(struct usbdev_setup_packet *setup) {
+    switch (setup->request) {
+    case USB_SETUP_REQUEST_CDC_SET_CONTROL_LINE_STATE:
+        printk("CDC: SET_CONTROL_LINE_STATE ");
+        if (setup->value & USB_SETUP_REQUEST_CDC_SET_CONTROL_LINE_STATE_DTE) {
+            printk("warning: not handling DTE. ");
+        }
+        if (setup->value & USB_SETUP_REQUEST_CDC_SET_CONTROL_LINE_STATE_CARRIER) {
+            printk("warning: not handling carrier. ");
+        }
+        usbdev_send_status_packet();
+        break;
+    case USB_SETUP_REQUEST_CDC_SET_LINE_CODING:
+        printk("CDC: SET_LINE_CODING ");
+        usbdev_send_status_packet();
+        break;
+    default:
+        printk("CDC: OTHER_REQUEST %d ", setup->request);
     }
 }
 

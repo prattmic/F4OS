@@ -66,6 +66,13 @@
 #define     USB_SETUP_ENDPOINT_SYNC_ADAPT                   (2)
 #define     USB_SETUP_ENDPOINT_SYNC_SYNC                    (3)
 
+/* CDC Requests */
+#define     USB_SETUP_REQUEST_CDC_SET_CONTROL_LINE_STATE            (0x22)
+#define     USB_SETUP_REQUEST_CDC_SET_CONTROL_LINE_STATE_DTE        (1 << 0)
+#define     USB_SETUP_REQUEST_CDC_SET_CONTROL_LINE_STATE_CARRIER    (1 << 1)
+
+#define     USB_SETUP_REQUEST_CDC_SET_LINE_CODING           (0x20)
+
 struct __attribute__((packed)) usbdev_setup_packet {
     uint8_t     recipient:5;
     uint8_t     type:2;
