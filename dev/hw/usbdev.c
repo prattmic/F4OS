@@ -16,6 +16,7 @@ static inline void usbdev_handle_srqint(void);
 static inline void usbdev_handle_enumdne(void);
 static inline void usbdev_handle_sof(void);
 static inline void usbdev_handle_rxflvl(void);
+static inline void usbdev_handle_iepint(void);
 static inline void usbdev_handle_oepint(void);
 
 static inline void usbdev_send_status_packet(void);
@@ -29,16 +30,25 @@ static void handle_class_setup_packet(struct usbdev_setup_packet *setup);
 
 static void usbdev_set_configuration(uint16_t configuration);
 
+static void fill_fifo(int endpoint);
+
 uint8_t setup_complete = 0;
+
+struct fifo_buf {
+    uint32_t *buf;
+    int len;
+};
+
+struct fifo_buf fifo_buf[4] = {{NULL, 0}, {NULL, 0}, {NULL, 0}, {NULL, 0}};
 
 #define USB_CDC_ACM_ENDPOINT    (1)
 #define USB_CDC_ACM_MPSIZE      (64)
 
-#define USB_CDC_RX_ENDPOINT     (2)
-#define USB_CDC_RX_MPSIZE       (64)
-
-#define USB_CDC_TX_ENDPOINT     (3)
+#define USB_CDC_TX_ENDPOINT     (2)
 #define USB_CDC_TX_MPSIZE       (64)
+
+#define USB_CDC_RX_ENDPOINT     (3)
+#define USB_CDC_RX_MPSIZE       (64)
 
 const struct usb_device_descriptor usb_device_descriptor = {
     .bLength =             sizeof(struct usb_device_descriptor),
@@ -279,18 +289,24 @@ int usbdev_tx(uint8_t endpoint, uint32_t *packet, int size) {
         *USB_FS_DIEPCTL(endpoint) |= USB_FS_DIEPCTLx_CNAK | USB_FS_DIEPCTLx_EPENA;
     }
 
-    printk("Sending data: ");
+    fifo_buf[endpoint].buf = packet;
+    fifo_buf[endpoint].len = size;
 
-    while (size > 0) {
-        while (*USB_FS_DTXFSTS(endpoint) < size/packets);
+    /* Enable TX FIFO empty interrupt */
+    *USB_FS_DIEPEMPMSK |= (1 << endpoint);
 
-        printk("0x%x ", *packet);
-        *USB_FS_DFIFO_EP(endpoint) = *packet;
-        packet++;
-        size -= 4;
-    }
+    //printk("Sending data: ");
 
-    printk("Done writing ");
+    //while (size > 0) {
+    //    while (*USB_FS_DTXFSTS(endpoint) < size/packets);
+
+    //    printk("0x%x ", *packet);
+    //    *USB_FS_DFIFO_EP(endpoint) = *packet;
+    //    packet++;
+    //    size -= 4;
+    //}
+
+    //printk("Done writing ");
 
     return 0;
 }
@@ -339,7 +355,8 @@ void usbdev_handler(void) {
 
     if (interrupts & USB_FS_GINTSTS_IEPINT) {
         handled = 1;
-        printk("USB: IN endpoint interrupt\r\n");
+        printk("USB: IN endpoint interrupt. ");
+        usbdev_handle_iepint();
     }
     interrupts &= ~USB_FS_GINTSTS_IEPINT;
 
@@ -391,7 +408,7 @@ void usbdev_handler(void) {
 #define RX_FIFO_SIZE    128
 #define TX0_FIFO_SIZE   128
 #define TX1_FIFO_SIZE   128
-#define TX2_FIFO_SIZE   0
+#define TX2_FIFO_SIZE   128
 #define TX3_FIFO_SIZE   128
 
 static inline void usbdev_handle_usbrst(void) {
@@ -499,8 +516,8 @@ static inline void usbdev_handle_out_packet_received(uint32_t status) {
 
     if (USB_FS_GRXSTS_EPNUM(status) == USB_CDC_RX_ENDPOINT && USB_FS_GRXSTS_BCNT(status) == 1) {
         printk("\r\n\r\nReceived: '%c'\r\n", (char) (buf[0]));
-        uint32_t penis[] = {0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767};
-        usbdev_tx(USB_CDC_TX_ENDPOINT, penis, sizeof(penis));
+        uint32_t crap[] = {0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767};
+        usbdev_tx(USB_CDC_TX_ENDPOINT, crap, sizeof(crap));
     }
 }
 
@@ -623,6 +640,79 @@ static void handle_class_setup_packet(struct usbdev_setup_packet *setup) {
     }
 }
 
+static inline void usbdev_handle_iepint(void) {
+    for (int i = 0; i <= 3; i++) {
+        if (*USB_FS_DAINT & USB_FS_DAINT_IEPINT(i)) {
+            printk("Endpoint %d. ", i);
+        }
+        else {
+            continue;
+        }
+
+        uint32_t interrupts = *USB_FS_DIEPINT(i);
+
+        if (interrupts & USB_FS_DIEPINTx_XFRC) {
+            *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_XFRC;
+            printk("Transfer complete. ");
+        }
+
+        if (interrupts & USB_FS_DIEPINTx_EPDISD) {
+            *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_EPDISD;
+            printk("Endpoint disabled. ");
+        }
+
+        if (interrupts & USB_FS_DIEPINTx_TOC) {
+            *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_TOC;
+            printk("Timeout condition. ");
+        }
+
+        if (interrupts & USB_FS_DIEPINTx_ITTXFE) {
+            *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_ITTXFE;
+            printk("IN token received when endpoint disabled. ");
+        }
+
+        if (interrupts & USB_FS_DIEPINTx_INEPNE) {
+            *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_INEPNE;
+            printk("IN endpoint NAK effective. ");
+        }
+
+        if (interrupts & USB_FS_DIEPINTx_TXFE) {
+            *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_TXFE;
+            printk("Transmit FIFO empty. ");
+            fill_fifo(i);
+        }
+    }
+
+    printk("\r\n");
+}
+
+static void fill_fifo(int endpoint) {
+    if (!fifo_buf[endpoint].buf) {
+        return;
+    }
+
+    int min = fifo_buf[endpoint].len - 64;
+    min = min >= 0 ? min : 0;
+
+    printk("Writing FIFO %d: ", endpoint);
+
+    while (fifo_buf[endpoint].len > min) {
+        printk("0x%x ", *fifo_buf[endpoint].buf);
+        *USB_FS_DFIFO_EP(endpoint) = *fifo_buf[endpoint].buf;
+        fifo_buf[endpoint].buf++;
+        fifo_buf[endpoint].len -= 4;
+    }
+
+    if (fifo_buf[endpoint].len <= 0) {
+        fifo_buf[endpoint].buf = NULL;
+        *USB_FS_DIEPEMPMSK &= ~(1 << endpoint);
+
+        if (fifo_buf[endpoint].len < 0) {
+            printk("warning: wrote past end of buffer. ");
+        }
+    }
+}
+
 static inline void usbdev_handle_oepint(void) {
     for (int i = 0; i <= 3; i++) {
         if (*USB_FS_DAINT & USB_FS_DAINT_OEPINT(i)) {
@@ -682,6 +772,10 @@ static void usbdev_set_configuration(uint16_t configuration) {
 
     /* TX Endpoint */
     *USB_FS_DIEPCTL(USB_CDC_TX_ENDPOINT) |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_TX_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_BLK | USB_FS_DIEPCTLx_SD0PID | USB_FS_DIEPCTLx_TXFNUM(USB_CDC_TX_ENDPOINT) | USB_FS_DIEPCTLx_EPENA | USB_FS_DIEPCTLx_USBAEP;
+
+    /* Flush TX FIFOs */
+    *USB_FS_GRSTCTL |= USB_FS_GRSTCTL_TXFNUM(USB_CDC_TX_ENDPOINT) | USB_FS_GRSTCTL_TXFNUM(USB_CDC_ACM_ENDPOINT) | USB_FS_GRSTCTL_TXFFLSH;
+    while (*USB_FS_GRSTCTL & USB_FS_GRSTCTL_TXFFLSH);
 
     /* Unmask interrupts */
     *USB_FS_DAINTMSK |= USB_FS_DAINT_IEPM(USB_CDC_ACM_ENDPOINT) | USB_FS_DAINT_IEPM(USB_CDC_TX_ENDPOINT) | USB_FS_DAINT_OEPM(USB_CDC_RX_ENDPOINT);

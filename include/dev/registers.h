@@ -687,7 +687,7 @@ inline uint32_t *PSP(void) {
 #define USB_FS_GRSTCTL_FCRST            (uint32_t) (1 << 2)                                     /* USB host frame counter reset */
 #define USB_FS_GRSTCTL_RXFFLSH          (uint32_t) (1 << 4)                                     /* USB RX FIFO flush */
 #define USB_FS_GRSTCTL_TXFFLSH          (uint32_t) (1 << 5)                                     /* USB TX FIFO flush */
-#define USB_FS_GRSTCTL_TXFNUM           (uint32_t) (1 << 6)                                     /* USB TX FIFO number */
+#define USB_FS_GRSTCTL_TXFNUM(n)        (uint32_t) (n << 6)                                     /* USB TX FIFO number */
 #define USB_FS_GRSTCTL_AHBIDL           (uint32_t) (1 << 31)                                    /* USB AHB master idle */
 
 #define USB_FS_GINTSTS_CMOD             (uint32_t) (1 << 0)                                     /* USB current mode of operation */
