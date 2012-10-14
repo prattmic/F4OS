@@ -373,39 +373,19 @@ inline uint32_t *PSP(void) {
 #define USB_FS_DVBUSPULSE               (volatile uint32_t *) (USB_FS_BASE + 0x082C)            /* USB device VBUS pulse time register */
 #define USB_FS_DIEPEMPMSK               (volatile uint32_t *) (USB_FS_BASE + 0x0834)            /* USB device IN endpoint FIFO empty interrupt mask register */
 #define USB_FS_DIEPCTL0                 (volatile uint32_t *) (USB_FS_BASE + 0x0900)            /* USB device IN endpoint 0 control register */
-#define USB_FS_DIEPCTL1                 (volatile uint32_t *) (USB_FS_BASE + 0x0920)            /* USB device endpoint 1 control register */
-#define USB_FS_DIEPCTL2                 (volatile uint32_t *) (USB_FS_BASE + 0x0940)            /* USB device endpoint 2 control register */
-#define USB_FS_DIEPCTL3                 (volatile uint32_t *) (USB_FS_BASE + 0x0980)            /* USB device endpoint 3 control register */
-#define USB_FS_DIEPINT0                 (volatile uint32_t *) (USB_FS_BASE + 0x0908)            /* USB device endpoint 0 interrupt register */
-#define USB_FS_DIEPINT1                 (volatile uint32_t *) (USB_FS_BASE + 0x0928)            /* USB device endpoint 1 interrupt register */
-#define USB_FS_DIEPINT2                 (volatile uint32_t *) (USB_FS_BASE + 0x0948)            /* USB device endpoint 2 interrupt register */
-#define USB_FS_DIEPINT3                 (volatile uint32_t *) (USB_FS_BASE + 0x0988)            /* USB device endpoint 3 interrupt register */
+#define USB_FS_DIEPCTL(n)               (volatile uint32_t *) (USB_FS_BASE + 0x0900 + n*0x20)   /* USB device endpoint n control register */
+#define USB_FS_DIEPINT(n)               (volatile uint32_t *) (USB_FS_BASE + 0x0908 + n*0x20)   /* USB device endpoint n interrupt register */
 #define USB_FS_DIEPTSIZ0                (volatile uint32_t *) (USB_FS_BASE + 0x0910)            /* USB device IN endpoint 0 transfer size register */
-#define USB_FS_DIEPTSIZ1                (volatile uint32_t *) (USB_FS_BASE + 0x0930)            /* USB device OUT endpoint 1 transfer size register */
-#define USB_FS_DIEPTSIZ2                (volatile uint32_t *) (USB_FS_BASE + 0x0950)            /* USB device OUT endpoint 2 transfer size register */
-#define USB_FS_DIEPTSIZ3                (volatile uint32_t *) (USB_FS_BASE + 0x0970)            /* USB device OUT endpoint 3 transfer size register */
-#define USB_FS_DTXFSTS0                 (volatile uint32_t *) (USB_FS_BASE + 0x0918)            /* USB device IN endpoint 0 FIFO status register */
-#define USB_FS_DTXFSTS1                 (volatile uint32_t *) (USB_FS_BASE + 0x0938)            /* USB device IN endpoint 1 FIFO status register */
-#define USB_FS_DTXFSTS2                 (volatile uint32_t *) (USB_FS_BASE + 0x0958)            /* USB device IN endpoint 2 FIFO status register */
-#define USB_FS_DTXFSTS3                 (volatile uint32_t *) (USB_FS_BASE + 0x0978)            /* USB device IN endpoint 3 FIFO status register */
+#define USB_FS_DIEPTSIZ(n)              (volatile uint32_t *) (USB_FS_BASE + 0x0910 + n*0x20)   /* USB device OUT endpoint n transfer size register */
+#define USB_FS_DTXFSTS(n)               (volatile uint32_t *) (USB_FS_BASE + 0x0918 + n*0x20)   /* USB device IN endpoint n FIFO status register */
 #define USB_FS_DOEPCTL0                 (volatile uint32_t *) (USB_FS_BASE + 0x0B00)            /* USB device OUT endpoint 0 control register */
-#define USB_FS_DOEPCTL1                 (volatile uint32_t *) (USB_FS_BASE + 0x0B20)            /* USB device endpoint 1 control register */
-#define USB_FS_DOEPCTL2                 (volatile uint32_t *) (USB_FS_BASE + 0x0B40)            /* USB device endpoint 2 control register */
-#define USB_FS_DOEPCTL3                 (volatile uint32_t *) (USB_FS_BASE + 0x0B80)            /* USB device endpoint 3 control register */
-#define USB_FS_DOEPINT0                 (volatile uint32_t *) (USB_FS_BASE + 0x0B08)            /* USB device endpoint 0 interrupt register */
-#define USB_FS_DOEPINT1                 (volatile uint32_t *) (USB_FS_BASE + 0x0B28)            /* USB device endpoint 1 interrupt register */
-#define USB_FS_DOEPINT2                 (volatile uint32_t *) (USB_FS_BASE + 0x0B48)            /* USB device endpoint 2 interrupt register */
-#define USB_FS_DOEPINT3                 (volatile uint32_t *) (USB_FS_BASE + 0x0B88)            /* USB device endpoint 3 interrupt register */
+#define USB_FS_DOEPCTL(n)               (volatile uint32_t *) (USB_FS_BASE + 0x0B00 + n*0x20)   /* USB device endpoint n control register */
+#define USB_FS_DOEPINT(n)               (volatile uint32_t *) (USB_FS_BASE + 0x0B08 + n*0x20)   /* USB device endpoint 1 interrupt register */
 #define USB_FS_DOEPTSIZ0                (volatile uint32_t *) (USB_FS_BASE + 0x0B10)            /* USB device OUT endpoint 0 transfer size register */
-#define USB_FS_DOEPTSIZ1                (volatile uint32_t *) (USB_FS_BASE + 0x0B30)            /* USB device OUT endpoint 1 transfer size register */
-#define USB_FS_DOEPTSIZ2                (volatile uint32_t *) (USB_FS_BASE + 0x0B50)            /* USB device OUT endpoint 2 transfer size register */
-#define USB_FS_DOEPTSIZ3                (volatile uint32_t *) (USB_FS_BASE + 0x0B70)            /* USB device OUT endpoint 3 transfer size register */
+#define USB_FS_DOEPTSIZ(n)              (volatile uint32_t *) (USB_FS_BASE + 0x0B10 + n*0x20)   /* USB device OUT endpoint n transfer size register */
 
 /* Data FIFO Registers */
-#define USB_FS_DFIFO_EP0                (volatile uint32_t *) (USB_FS_BASE + 0x1000)            /* USB endpoint 0 data FIFO base address */
-#define USB_FS_DFIFO_EP1                (volatile uint32_t *) (USB_FS_BASE + 0x2000)            /* USB endpoint 1 data FIFO base address */
-#define USB_FS_DFIFO_EP2                (volatile uint32_t *) (USB_FS_BASE + 0x3000)            /* USB endpoint 2 data FIFO base address */
-#define USB_FS_DFIFO_EP3                (volatile uint32_t *) (USB_FS_BASE + 0x4000)            /* USB endpoint 3 data FIFO base address */
+#define USB_FS_DFIFO_EP(n)              (volatile uint32_t *) (USB_FS_BASE + 0x1000 + n*0x1000) /* USB endpoint n data FIFO base address */
 
 /* Power and Clock Gating Registers */
 #define USB_FS_PCGCR                    (volatile uint32_t *) (USB_FS_BASE + 0x0E00)            /* USB power and clock gating control register */

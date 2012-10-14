@@ -29,7 +29,8 @@ static void handle_class_setup_packet(struct usbdev_setup_packet *setup);
 
 static void usbdev_set_configuration(uint16_t configuration);
 
-/* Changing the endpoint numbers here won't do what you want */
+uint8_t setup_complete = 0;
+
 #define USB_CDC_ACM_ENDPOINT    (1)
 #define USB_CDC_ACM_MPSIZE      (64)
 
@@ -247,45 +248,49 @@ void init_usbdev(void) {
 static inline void usbdev_enable_receive(void) {
     *USB_FS_DOEPTSIZ0 = USB_FS_DOEPTSIZ0_XFRSIZ(64) | USB_FS_DOEPTSIZ0_PKTCNT(1) | USB_FS_DOEPTSIZ0_STUPCNT(3);
     *USB_FS_DOEPCTL0 |= USB_FS_DOEPCTL0_CNAK | USB_FS_DOEPCTL0_EPENA;
+
+    if (setup_complete) {
+        *USB_FS_DOEPTSIZ(USB_CDC_RX_ENDPOINT) = USB_FS_DOEPTSIZx_XFRSIZ(USB_CDC_RX_MPSIZE) | USB_FS_DOEPTSIZx_PKTCNT(1);
+        *USB_FS_DOEPCTL(USB_CDC_RX_ENDPOINT) |= USB_FS_DOEPCTLx_CNAK | USB_FS_DOEPCTLx_EPENA;
+    }
 }
 
 void usbdev_rx(uint32_t *buf, int words) {
     while (words > 0) {
-        *buf = *USB_FS_DFIFO_EP0;
+        *buf = *USB_FS_DFIFO_EP(0);
         buf++;
         words--;
     }
 }
 
 /* packet points to first word in packet.  size is packet size in bytes */
-int usbdev_tx(uint32_t *packet, int size) {
+int usbdev_tx(uint8_t endpoint, uint32_t *packet, int size) {
     uint8_t packets = size % 64 ? size/64 + 1 : size/64;
     if (!packets) {
         packets = 1;
     }
 
-    *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(size);
-
-    *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
+    if (endpoint == 0) {
+        *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(size);
+        *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
+    }
+    else {
+        *USB_FS_DIEPTSIZ(endpoint) = USB_FS_DIEPTSIZx_PKTCNT(packets) | USB_FS_DIEPTSIZx_XFRSIZ(size);
+        *USB_FS_DIEPCTL(endpoint) |= USB_FS_DIEPCTLx_CNAK | USB_FS_DIEPCTLx_EPENA;
+    }
 
     printk("Sending data: ");
 
     while (size > 0) {
-        while (!*USB_FS_DTXFSTS0);
+        while (*USB_FS_DTXFSTS(endpoint) < size/packets);
 
         printk("0x%x ", *packet);
-        *USB_FS_DFIFO_EP0 = *packet;
+        *USB_FS_DFIFO_EP(endpoint) = *packet;
         packet++;
         size -= 4;
     }
 
     printk("Done writing ");
-
-    while (!(*USB_FS_DIEPINT0 & USB_FS_DIEPINTx_XFRC));
-
-    *USB_FS_DIEPINT0 = USB_FS_DIEPINTx_XFRC;
-
-    printk("Transfer complete");
 
     return 0;
 }
@@ -387,7 +392,7 @@ void usbdev_handler(void) {
 #define TX0_FIFO_SIZE   128
 #define TX1_FIFO_SIZE   128
 #define TX2_FIFO_SIZE   0
-#define TX3_FIFO_SIZE   0
+#define TX3_FIFO_SIZE   128
 
 static inline void usbdev_handle_usbrst(void) {
     // Clear interrupt
@@ -395,9 +400,9 @@ static inline void usbdev_handle_usbrst(void) {
 
     /* NAK bits */
     *USB_FS_DOEPCTL0 |= USB_FS_DOEPCTL0_SNAK;
-    *USB_FS_DOEPCTL1 |= USB_FS_DOEPCTLx_SNAK;
-    *USB_FS_DOEPCTL2 |= USB_FS_DOEPCTLx_SNAK;
-    *USB_FS_DOEPCTL3 |= USB_FS_DOEPCTLx_SNAK;
+    *USB_FS_DOEPCTL(1) |= USB_FS_DOEPCTLx_SNAK;
+    *USB_FS_DOEPCTL(2) |= USB_FS_DOEPCTLx_SNAK;
+    *USB_FS_DOEPCTL(3) |= USB_FS_DOEPCTLx_SNAK;
 
     /* Unmask interrupts */
     *USB_FS_DAINTMSK |= USB_FS_DAINT_IEPM(0) | USB_FS_DAINT_OEPM(0);
@@ -491,6 +496,12 @@ static inline void usbdev_handle_out_packet_received(uint32_t status) {
     for (int i = 0; i < word_count; i++) {
         printk("0x%x ", buf[i]);
     }
+
+    if (USB_FS_GRXSTS_EPNUM(status) == USB_CDC_RX_ENDPOINT && USB_FS_GRXSTS_BCNT(status) == 1) {
+        printk("\r\n\r\nReceived: '%c'\r\n", (char) (buf[0]));
+        uint32_t penis[] = {0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767};
+        usbdev_tx(USB_CDC_TX_ENDPOINT, penis, sizeof(penis));
+    }
 }
 
 uint32_t setup_packet[2];
@@ -550,15 +561,15 @@ static void handle_std_setup_packet(struct usbdev_setup_packet *setup) {
         switch (setup->value >> 8) {
         case USB_SETUP_DESCRIPTOR_DEVICE:
             printk("DEVICE ");
-            usbdev_tx((uint32_t *) &usb_device_descriptor, sizeof(struct usb_device_descriptor));
+            usbdev_tx(0, (uint32_t *) &usb_device_descriptor, sizeof(struct usb_device_descriptor));
             break;
         case USB_SETUP_DESCRIPTOR_CONFIG:
             printk("CONFIGURATION ");
             if (setup->length <= sizeof(usbdev_configuration1_descriptor)) {
-                usbdev_tx((uint32_t *) &usbdev_configuration1_descriptor, sizeof(usbdev_configuration1_descriptor));
+                usbdev_tx(0, (uint32_t *) &usbdev_configuration1_descriptor, sizeof(usbdev_configuration1_descriptor));
             }
             else {
-                usbdev_tx((uint32_t *) &usbdev_configuration1, sizeof(usbdev_configuration1));
+                usbdev_tx(0, (uint32_t *) &usbdev_configuration1, sizeof(usbdev_configuration1));
             }
             break;
         default:
@@ -580,7 +591,7 @@ static void handle_std_setup_packet(struct usbdev_setup_packet *setup) {
         if (setup->recipient == USB_SETUP_REQUEST_TYPE_RECIPIENT_DEVICE) {
             printk("DEVICE ");
             uint32_t buf = 0x11; /* Self powered and remote wakeup */
-            usbdev_tx(&buf, sizeof(buf));
+            usbdev_tx(0, &buf, sizeof(buf));
         }
         else {
             printk("OTHER ");
@@ -613,40 +624,41 @@ static void handle_class_setup_packet(struct usbdev_setup_packet *setup) {
 }
 
 static inline void usbdev_handle_oepint(void) {
-    if (*USB_FS_DAINT & (1 << 16)) {
-        printk("On endpoint 0. ");
-    }
-    else {
-        printk("Not on endpoint 0.\r\n");
-        return;
-    }
+    for (int i = 0; i <= 3; i++) {
+        if (*USB_FS_DAINT & USB_FS_DAINT_OEPINT(i)) {
+            printk("Endpoint %d. ", i);
+        }
+        else {
+            continue;
+        }
 
-    uint32_t interrupts = *USB_FS_DOEPINT0;
+        uint32_t interrupts = *USB_FS_DOEPINT(i);
 
-    if (interrupts & USB_FS_DOEPINTx_XFRC) {
-        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_XFRC;
-        printk("Transfer complete. ");
-    }
+        if (interrupts & USB_FS_DOEPINTx_XFRC) {
+            *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_XFRC;
+            printk("Transfer complete. ");
+        }
 
-    if (interrupts & USB_FS_DOEPINTx_EPDISD) {
-        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_EPDISD;
-        printk("Endpoint disabled. ");
-    }
+        if (interrupts & USB_FS_DOEPINTx_EPDISD) {
+            *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_EPDISD;
+            printk("Endpoint disabled. ");
+        }
 
-    if (interrupts & USB_FS_DOEPINTx_STUP) {
-        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_STUP;
-        printk("SETUP phase done. ");
-        parse_setup_packet(setup_packet, 2);
-    }
+        if (interrupts & USB_FS_DOEPINTx_STUP) {
+            *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_STUP;
+            printk("SETUP phase done. ");
+            parse_setup_packet(setup_packet, 2);
+        }
 
-    if (interrupts & USB_FS_DOEPINTx_OTEPDIS) {
-        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_OTEPDIS;
-        printk("OUT token received when endpoint disabled. ");
-    }
+        if (interrupts & USB_FS_DOEPINTx_OTEPDIS) {
+            *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_OTEPDIS;
+            printk("OUT token received when endpoint disabled. ");
+        }
 
-    if (interrupts & USB_FS_DOEPINTx_B2BSTUP) {
-        *USB_FS_DOEPINT0 = USB_FS_DOEPINTx_B2BSTUP;
-        printk("Back-to-back SETUP packets received.");
+        if (interrupts & USB_FS_DOEPINTx_B2BSTUP) {
+            *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_B2BSTUP;
+            printk("Back-to-back SETUP packets received.");
+        }
     }
 
     printk("\r\n");
@@ -662,15 +674,18 @@ static void usbdev_set_configuration(uint16_t configuration) {
 
     printk("Setting configuration %u. ", configuration);
 
-    /* ACM Endpoint (1) */
-    *USB_FS_DIEPCTL1 |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_ACM_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_INT | USB_FS_DIEPCTLx_TXFNUM(1) | USB_FS_DIEPCTLx_EPENA;
+    /* ACM Endpoint */
+    *USB_FS_DIEPCTL(USB_CDC_ACM_ENDPOINT) |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_ACM_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_INT | USB_FS_DIEPCTLx_TXFNUM(USB_CDC_ACM_ENDPOINT) | USB_FS_DIEPCTLx_EPENA | USB_FS_DIEPCTLx_USBAEP;
 
-    /* RX Endpoint (2) */
-    *USB_FS_DOEPCTL2 |= USB_FS_DOEPCTLx_MPSIZE(USB_CDC_RX_MPSIZE) | USB_FS_DOEPCTLx_EPTYP_BLK | USB_FS_DOEPCTLx_EPENA;
+    /* RX Endpoint */
+    *USB_FS_DOEPCTL(USB_CDC_RX_ENDPOINT) |= USB_FS_DOEPCTLx_MPSIZE(USB_CDC_RX_MPSIZE) | USB_FS_DOEPCTLx_EPTYP_BLK | USB_FS_DOEPCTLx_SD0PID | USB_FS_DOEPCTLx_EPENA | USB_FS_DIEPCTLx_USBAEP;
 
-    /* TX Endpoint (3) */
-    *USB_FS_DIEPCTL3 |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_TX_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_BLK | USB_FS_DIEPCTLx_TXFNUM(3) | USB_FS_DIEPCTLx_EPENA;
+    /* TX Endpoint */
+    *USB_FS_DIEPCTL(USB_CDC_TX_ENDPOINT) |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_TX_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_BLK | USB_FS_DIEPCTLx_SD0PID | USB_FS_DIEPCTLx_TXFNUM(USB_CDC_TX_ENDPOINT) | USB_FS_DIEPCTLx_EPENA | USB_FS_DIEPCTLx_USBAEP;
 
     /* Unmask interrupts */
-    *USB_FS_DAINTMSK |= USB_FS_DAINT_IEPM(1) | USB_FS_DAINT_IEPM(3) | USB_FS_DAINT_OEPM(2);
+    *USB_FS_DAINTMSK |= USB_FS_DAINT_IEPM(USB_CDC_ACM_ENDPOINT) | USB_FS_DAINT_IEPM(USB_CDC_TX_ENDPOINT) | USB_FS_DAINT_OEPM(USB_CDC_RX_ENDPOINT);
+
+    setup_complete = 1;
+    usbdev_enable_receive();
 }
