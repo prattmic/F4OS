@@ -236,7 +236,7 @@ void init_usbdev(void) {
     usbdev_clocks_init();
 
     /* Global unmask of USB interrupts, TX empty interrupt when TX is actually empty */
-    *USB_FS_GAHBCFG |= USB_FS_GAHBCFG_GINTMSK | USB_FS_GAHBCFG_TXFELVL;
+    *USB_FS_GAHBCFG |= USB_FS_GAHBCFG_GINTMSK;
 
     /* Enable session request protocol, USB turnaround time 15, force device mode */
     *USB_FS_GUSBCFG |= USB_FS_GUSBCFG_SRPCAP | USB_FS_GUSBCFG_TRDT(15) | USB_FS_GUSBCFG_FDMOD;
@@ -406,10 +406,10 @@ void usbdev_handler(void) {
 }
 
 #define RX_FIFO_SIZE    128
-#define TX0_FIFO_SIZE   128
-#define TX1_FIFO_SIZE   128
+#define TX0_FIFO_SIZE   32
+#define TX1_FIFO_SIZE   16
 #define TX2_FIFO_SIZE   128
-#define TX3_FIFO_SIZE   128
+#define TX3_FIFO_SIZE   16
 
 static inline void usbdev_handle_usbrst(void) {
     // Clear interrupt
@@ -499,6 +499,11 @@ static inline void usbdev_handle_rxflvl(void) {
     printk("\r\n");
 }
 
+//uint32_t crap[] = {0x30303030,0x31313131,0x32323232,0x33333333,0x34343434,0x35353535,0x36363636,0x37373737,0x38383838,0x39393939,0x3a3a3a3a,0x3b3b3b3b,0x3c3c3c3c,0x3d3d3d3d,0x3f3f3f3f,0x40404040};
+//uint32_t crap[] = {0x494E4550, 0x00002053};
+//uint32_t crap[] = {0x30303030};
+char crap[] = {'H','e','l','l','o',' ','W','o','r','l','d',' '};
+
 static inline void usbdev_handle_out_packet_received(uint32_t status) {
     uint32_t word_count = USB_FS_GRXSTS_BCNT(status) % 4 ? USB_FS_GRXSTS_BCNT(status)/4 + 1 : USB_FS_GRXSTS_BCNT(status)/4;
 
@@ -516,8 +521,7 @@ static inline void usbdev_handle_out_packet_received(uint32_t status) {
 
     if (USB_FS_GRXSTS_EPNUM(status) == USB_CDC_RX_ENDPOINT && USB_FS_GRXSTS_BCNT(status) == 1) {
         printk("\r\n\r\nReceived: '%c'\r\n", (char) (buf[0]));
-        uint32_t crap[] = {0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767,0x65656565,0x66666666,0x67676767};
-        usbdev_tx(USB_CDC_TX_ENDPOINT, crap, sizeof(crap));
+        usbdev_tx(USB_CDC_TX_ENDPOINT, (uint32_t *) crap, sizeof(crap));
     }
 }
 
@@ -668,7 +672,7 @@ static inline void usbdev_handle_iepint(void) {
 
         if (interrupts & USB_FS_DIEPINTx_ITTXFE) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_ITTXFE;
-            printk("IN token received when endpoint disabled. ");
+            printk("IN token received when TX FIFO empty. ");
         }
 
         if (interrupts & USB_FS_DIEPINTx_INEPNE) {
@@ -765,13 +769,13 @@ static void usbdev_set_configuration(uint16_t configuration) {
     printk("Setting configuration %u. ", configuration);
 
     /* ACM Endpoint */
-    *USB_FS_DIEPCTL(USB_CDC_ACM_ENDPOINT) |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_ACM_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_INT | USB_FS_DIEPCTLx_TXFNUM(USB_CDC_ACM_ENDPOINT) | USB_FS_DIEPCTLx_EPENA | USB_FS_DIEPCTLx_USBAEP;
+    *USB_FS_DIEPCTL(USB_CDC_ACM_ENDPOINT) |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_ACM_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_INT | USB_FS_DIEPCTLx_TXFNUM(USB_CDC_ACM_ENDPOINT) | USB_FS_DIEPCTLx_USBAEP;
 
     /* RX Endpoint */
-    *USB_FS_DOEPCTL(USB_CDC_RX_ENDPOINT) |= USB_FS_DOEPCTLx_MPSIZE(USB_CDC_RX_MPSIZE) | USB_FS_DOEPCTLx_EPTYP_BLK | USB_FS_DOEPCTLx_SD0PID | USB_FS_DOEPCTLx_EPENA | USB_FS_DIEPCTLx_USBAEP;
+    *USB_FS_DOEPCTL(USB_CDC_RX_ENDPOINT) |= USB_FS_DOEPCTLx_MPSIZE(USB_CDC_RX_MPSIZE) | USB_FS_DOEPCTLx_EPTYP_BLK | USB_FS_DOEPCTLx_SD0PID | USB_FS_DOEPCTLx_EPENA | USB_FS_DOEPCTLx_USBAEP;
 
     /* TX Endpoint */
-    *USB_FS_DIEPCTL(USB_CDC_TX_ENDPOINT) |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_TX_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_BLK | USB_FS_DIEPCTLx_SD0PID | USB_FS_DIEPCTLx_TXFNUM(USB_CDC_TX_ENDPOINT) | USB_FS_DIEPCTLx_EPENA | USB_FS_DIEPCTLx_USBAEP;
+    *USB_FS_DIEPCTL(USB_CDC_TX_ENDPOINT) |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_TX_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_BLK | USB_FS_DIEPCTLx_SD0PID | USB_FS_DIEPCTLx_TXFNUM(USB_CDC_TX_ENDPOINT) | USB_FS_DIEPCTLx_USBAEP;
 
     /* Flush TX FIFOs */
     *USB_FS_GRSTCTL |= USB_FS_GRSTCTL_TXFNUM(USB_CDC_TX_ENDPOINT) | USB_FS_GRSTCTL_TXFNUM(USB_CDC_ACM_ENDPOINT) | USB_FS_GRSTCTL_TXFFLSH;
@@ -779,6 +783,7 @@ static void usbdev_set_configuration(uint16_t configuration) {
 
     /* Unmask interrupts */
     *USB_FS_DAINTMSK |= USB_FS_DAINT_IEPM(USB_CDC_ACM_ENDPOINT) | USB_FS_DAINT_IEPM(USB_CDC_TX_ENDPOINT) | USB_FS_DAINT_OEPM(USB_CDC_RX_ENDPOINT);
+    *USB_FS_DIEPMSK |= USB_FS_DIEPMSK_XFRCM;
 
     setup_complete = 1;
     usbdev_enable_receive();
