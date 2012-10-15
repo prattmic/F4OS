@@ -35,6 +35,9 @@
 #define     USB_SETUP_REQUEST_TYPE_DIR_H2D                  (0)
 #define     USB_SETUP_REQUEST_TYPE_DIR_D2H                  (1)
 
+#define     USB_DIR_OUT                                     (0)
+#define     USB_DIR_IN                                      (1)
+
 #define     USB_SETUP_REQUEST_CLEAR_FEATURE                 (1)
 #define     USB_SETUP_REQUEST_GET_CONFIGURATION             (8)
 #define     USB_SETUP_REQUEST_GET_DESCRIPTOR                (6)
@@ -177,5 +180,21 @@ struct __attribute__((packed)) usb_cdc_acm_union_functional_descriptor {
     uint8_t     bMasterInterface;
     uint8_t     bSlaveInterface0;
 };
+
+struct endpoint {
+    uint8_t     num;
+    uint8_t     dir;
+    uint16_t    mpsize;
+    uint32_t    *buf;       /* For IN endpoints, buffer to copy to FIFO, for OUT, buffer to write to from FIFO */
+    int         buf_len;
+};
+
+void usbdev_reset(void);
+void usbdev_write(struct endpoint *ep, uint32_t *packet, int size);
+void usbdev_read(uint32_t *buf, int words);
+void usbdev_data_out(uint32_t status);
+void usbdev_data_in(struct endpoint *ep);
+void usbdev_status_in_packet(void);
+void usbdev_enable_receive(struct endpoint *ep);
 
 #endif
