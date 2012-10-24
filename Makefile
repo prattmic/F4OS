@@ -78,7 +78,7 @@ CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
 
 DATE := "$(shell date -u)"
-REV := $(shell git rev-list HEAD | wc -l)
+REV := $(shell git rev-list HEAD | wc -l | tr -d ' ')
 CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_REV=$(REV)
 
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
