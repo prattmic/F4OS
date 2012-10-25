@@ -141,12 +141,12 @@ static void gint_rxflvl(void) {
         case USB_FS_GRXSTS_PKTSTS_STUPCP:
             printk("SETUP complete ");
             uint32_t discard;
-            usbdev_read(&discard, sizeof(discard)/4);
+            usbdev_fifo_read(&discard, sizeof(discard)/4);
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPRX:
             printk("SETUP received: ");
             /* This will be parsed on interrupt after SETUP complete */
-            usbdev_read(setup_packet, 2);
+            usbdev_fifo_read(setup_packet, 2);
             break;
         default:
             printk("Error: Undefined receive status: 0x%x ", receive_status);

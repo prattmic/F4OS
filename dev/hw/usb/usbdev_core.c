@@ -1,13 +1,52 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <kernel/fault.h>
+#include <kernel/sched.h>
 #include <dev/registers.h>
 
 #include "usbdev_internals.h"
 #include "usbdev_desc.h"
 #include <dev/hw/usbdev.h>
 
-void usbdev_read(uint32_t *buf, int words) {
+/* packet points to first word in packet.  size is packet size in bytes */
+void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
+    if (ep == NULL) {
+        printk("Warning: Invalid endpoint in usbdev_write. ");
+        return;
+    }
+
+    /* Wait until current buffer has been written */
+    if (task_switching && !IPSR()) {
+        while (ep->buf) {
+            SVC(SVC_YIELD);
+        }
+    }
+    else {
+        while(ep->buf);
+    }
+
+    uint8_t packets = size % ep->mpsize ? size/ep->mpsize + 1 : size/ep->mpsize;
+    if (!packets) {
+        packets = 1;
+    }
+
+    ep->buf = packet;
+    ep->buf_len = size;
+
+    if (ep->num == 0) {
+        *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(size);
+        *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
+    }
+    else {
+        *USB_FS_DIEPTSIZ(ep->num) = USB_FS_DIEPTSIZx_PKTCNT(packets) | USB_FS_DIEPTSIZx_XFRSIZ(size);
+        *USB_FS_DIEPCTL(ep->num) |= USB_FS_DIEPCTLx_CNAK | USB_FS_DIEPCTLx_EPENA;
+    }
+
+    /* Enable TX FIFO empty interrupt */
+    *USB_FS_DIEPEMPMSK |= (1 << ep->num);
+}
+
+void usbdev_fifo_read(uint32_t *buf, int words) {
     uint32_t keep = (uint32_t) buf;
     uint32_t null;
 
@@ -23,34 +62,6 @@ void usbdev_read(uint32_t *buf, int words) {
         }
         words--;
     }
-}
-
-/* packet points to first word in packet.  size is packet size in bytes */
-void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
-    if (ep == NULL) {
-        printk("Warning: Invalid endpoint in usbdev_write. ");
-        return;
-    }
-
-    uint8_t packets = size % ep->mpsize ? size/ep->mpsize + 1 : size/ep->mpsize;
-    if (!packets) {
-        packets = 1;
-    }
-
-    if (ep->num == 0) {
-        *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(size);
-        *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
-    }
-    else {
-        *USB_FS_DIEPTSIZ(ep->num) = USB_FS_DIEPTSIZx_PKTCNT(packets) | USB_FS_DIEPTSIZx_XFRSIZ(size);
-        *USB_FS_DIEPCTL(ep->num) |= USB_FS_DIEPCTLx_CNAK | USB_FS_DIEPCTLx_EPENA;
-    }
-
-    ep->buf = packet;
-    ep->buf_len = size;
-
-    /* Enable TX FIFO empty interrupt */
-    *USB_FS_DIEPEMPMSK |= (1 << ep->num);
 }
 
 void usbdev_data_out(uint32_t status) {
@@ -71,11 +82,11 @@ void usbdev_data_out(uint32_t status) {
         extra = (ep->buf_len - size + 3) / 4;
     }
 
-    usbdev_read(ep->buf, words);
+    usbdev_fifo_read(ep->buf, words);
 
     /* Throw away data that doesn't fit */
     if (extra) {
-        usbdev_read(NULL, extra);
+        usbdev_fifo_read(NULL, extra);
     }
 }
 

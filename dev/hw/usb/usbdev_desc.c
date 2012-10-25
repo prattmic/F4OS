@@ -9,8 +9,10 @@ struct endpoint ep_ctl = {
     .num = 0,
     .dir = USB_DIR_IN,
     .mpsize = 64,
-    .buf = ep_ctl_buf,
-    .buf_len = USB_RX_FIFO_SIZE
+    .buf = NULL,
+    .buf_len = 0
+    /*.buf = ep_ctl_buf,
+    .buf_len = USB_RX_FIFO_SIZE*/
 };
 
 struct endpoint ep_acm = {

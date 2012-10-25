@@ -191,7 +191,7 @@ struct endpoint {
 
 void usbdev_reset(void);
 void usbdev_write(struct endpoint *ep, uint32_t *packet, int size);
-void usbdev_read(uint32_t *buf, int words);
+void usbdev_fifo_read(uint32_t *buf, int words);
 void usbdev_data_out(uint32_t status);
 void usbdev_data_in(struct endpoint *ep);
 void usbdev_status_in_packet(void);
