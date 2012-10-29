@@ -90,37 +90,37 @@ static void gint_mmis(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_MMIS;
 
-    printk("USB: Mode mismatch interrupt.  Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Mode mismatch interrupt.  Warning: Unhandled.\r\n");
 }
 
 static void gint_otgint(void) {
-    printk("USB: OTG interrupt. ");
+    DEBUG_PRINT("USB: OTG interrupt. ");
 
     /* Handle */
     uint32_t interrupts = *USB_FS_GOTGINT;
 
     if (interrupts & USB_FS_GOTGINT_SEDET) {
         *USB_FS_GOTGINT = USB_FS_GOTGINT_SEDET;
-        printk("Session end detected. Warning: Unhandled. ");
+        DEBUG_PRINT("Session end detected. Warning: Unhandled. ");
     }
     if (interrupts & USB_FS_GOTGINT_SRSSCHG) {
         *USB_FS_GOTGINT = USB_FS_GOTGINT_SRSSCHG;
-        printk("Session request status change. Warning: Unhandled. ");
+        DEBUG_PRINT("Session request status change. Warning: Unhandled. ");
     }
     if (interrupts & USB_FS_GOTGINT_HNSSCHG) {
         *USB_FS_GOTGINT = USB_FS_GOTGINT_HNSSCHG;
-        printk("Host negotiation success status change. Warning: Unhandled. ");
+        DEBUG_PRINT("Host negotiation success status change. Warning: Unhandled. ");
     }
     if (interrupts & USB_FS_GOTGINT_HNGDET) {
         *USB_FS_GOTGINT = USB_FS_GOTGINT_HNGDET;
-        printk("Host negotiation detected. Warning: Unhandled. ");
+        DEBUG_PRINT("Host negotiation detected. Warning: Unhandled. ");
     }
     if (interrupts & USB_FS_GOTGINT_ADTOCHG) {
         *USB_FS_GOTGINT = USB_FS_GOTGINT_ADTOCHG;
-        printk("A-device timeout change. Warning: Unhandled. ");
+        DEBUG_PRINT("A-device timeout change. Warning: Unhandled. ");
     }
 
-    printk("\r\n");
+    DEBUG_PRINT("\r\n");
 }
 
 static void gint_sof(void) {
@@ -129,71 +129,71 @@ static void gint_sof(void) {
 }
 
 static void gint_rxflvl(void) {
-    printk("USB: Received data. ");
+    DEBUG_PRINT("USB: Received data. ");
 
     /* Handle */
     uint32_t receive_status = *USB_FS_GRXSTSP;
 
     switch (USB_FS_GRXSTS_PKTSTS(receive_status)) {
         case USB_FS_GRXSTS_PKTSTS_NAK:
-            printk("Global OUT NAK.");
+            DEBUG_PRINT("Global OUT NAK.");
             break;
         case USB_FS_GRXSTS_PKTSTS_ORX:
-            printk("OUT received: ");
+            DEBUG_PRINT("OUT received: ");
             usbdev_data_out(receive_status);
             break;
         case USB_FS_GRXSTS_PKTSTS_OCP:
-            printk("OUT complete ");
+            DEBUG_PRINT("OUT complete ");
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPCP:
-            printk("SETUP complete ");
+            DEBUG_PRINT("SETUP complete ");
             usbdev_fifo_read(NULL, 1);
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPRX:
-            printk("SETUP received: ");
+            DEBUG_PRINT("SETUP received: ");
             /* This will be parsed on interrupt after SETUP complete */
             usbdev_fifo_read(&setup_packet, 2);
             break;
         default:
-            printk("Error: Undefined receive status: 0x%x ", receive_status);
+            DEBUG_PRINT("Error: Undefined receive status: 0x%x ", receive_status);
     }
 
-    printk("\r\n");
+    DEBUG_PRINT("\r\n");
 
     usbdev_enable_receive(endpoints[USB_FS_GRXSTS_EPNUM(receive_status)]);
 }
 
 /* static void gint_nptxfe(void) {
-    printk("USB: Non-periodic TX FIFO empty.  Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Non-periodic TX FIFO empty.  Warning: Unhandled.\r\n");
 } */
 
 static void gint_ginakeff(void) {
-    printk("USB: Global IN NAK effective.  Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Global IN NAK effective.  Warning: Unhandled.\r\n");
 }
 
 static void gint_gonakeff(void) {
-    printk("USB: Global OUT NAK effective.  Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Global OUT NAK effective.  Warning: Unhandled.\r\n");
 }
 
 static void gint_esusp(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_ESUSP;
 
-    printk("USB: Early suspend. Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Early suspend. Warning: Unhandled.\r\n");
 }
 
 static void gint_usbsusp(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_USBSUSP;
 
-    printk("USB: USB suspend. Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: USB suspend. Warning: Unhandled.\r\n");
 }
 
 static void gint_usbrst(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_USBRST;
 
-    printk("USB: USB reset.\r\n");
+    DEBUG_PRINT("USB: USB reset.\r\n");
 
     /* Handle */
     usbdev_reset();
@@ -203,11 +203,11 @@ static void gint_enumdne(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_ENUMDNE;
 
-    printk("USB: Enumeration done.\r\n");
+    DEBUG_PRINT("USB: Enumeration done.\r\n");
 
     /* Handle */
     if ((*USB_FS_DSTS & USB_FS_DSTS_ENUMSPD) != USB_FS_DSTS_ENUMSPD_FS) {
-        printk("USB: Warning: USB FS enumerated a speed other than FS.\r\n");
+        DEBUG_PRINT("USB: Warning: USB FS enumerated a speed other than FS.\r\n");
     }
 
     /* Set maximum packet size */
@@ -221,7 +221,7 @@ static void gint_isoodrp(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_ISOODRP;
 
-    printk("USB: Isochronous OUT packet dropped. Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Isochronous OUT packet dropped. Warning: Unhandled.\r\n");
 }
 
 static void gint_eopf(void) {
@@ -230,12 +230,12 @@ static void gint_eopf(void) {
 }
 
 static void gint_iepint(void) {
-    printk("USB: IN endpoint interrupt. ");
+    DEBUG_PRINT("USB: IN endpoint interrupt. ");
 
     /* Handle */
     for (int i = 0; i <= 3; i++) {
         if (*USB_FS_DAINT & USB_FS_DAINT_IEPINT(i)) {
-            printk("Endpoint %d. ", i);
+            DEBUG_PRINT("Endpoint %d. ", i);
         }
         else {
             continue;
@@ -245,41 +245,41 @@ static void gint_iepint(void) {
 
         if (interrupts & USB_FS_DIEPINTx_XFRC) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_XFRC;
-            printk("Transfer complete. ");
+            DEBUG_PRINT("Transfer complete. ");
         }
         if (interrupts & USB_FS_DIEPINTx_EPDISD) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_EPDISD;
-            printk("Endpoint disabled. ");
+            DEBUG_PRINT("Endpoint disabled. ");
         }
         if (interrupts & USB_FS_DIEPINTx_TOC) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_TOC;
-            printk("Timeout condition. ");
+            DEBUG_PRINT("Timeout condition. ");
         }
         if (interrupts & USB_FS_DIEPINTx_ITTXFE) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_ITTXFE;
-            printk("IN token received when TX FIFO empty. ");
+            DEBUG_PRINT("IN token received when TX FIFO empty. ");
         }
         if (interrupts & USB_FS_DIEPINTx_INEPNE) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_INEPNE;
-            printk("IN endpoint NAK effective. ");
+            DEBUG_PRINT("IN endpoint NAK effective. ");
         }
         if (interrupts & USB_FS_DIEPINTx_TXFE) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_TXFE;
-            printk("Transmit FIFO empty. ");
+            DEBUG_PRINT("Transmit FIFO empty. ");
             usbdev_data_in(endpoints[i]);
         }
     }
 
-    printk("\r\n");
+    DEBUG_PRINT("\r\n");
 }
 
 static void gint_oepint(void) {
-    printk("USB: OUT endpoint interrupt. ");
+    DEBUG_PRINT("USB: OUT endpoint interrupt. ");
 
     /* Handle */
     for (int i = 0; i <= 3; i++) {
         if (*USB_FS_DAINT & USB_FS_DAINT_OEPINT(i)) {
-            printk("Endpoint %d. ", i);
+            DEBUG_PRINT("Endpoint %d. ", i);
         }
         else {
             continue;
@@ -289,56 +289,56 @@ static void gint_oepint(void) {
 
         if (interrupts & USB_FS_DOEPINTx_XFRC) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_XFRC;
-            printk("Transfer complete. ");
+            DEBUG_PRINT("Transfer complete. ");
         }
         if (interrupts & USB_FS_DOEPINTx_EPDISD) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_EPDISD;
-            printk("Endpoint disabled. ");
+            DEBUG_PRINT("Endpoint disabled. ");
         }
         if (interrupts & USB_FS_DOEPINTx_STUP) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_STUP;
-            printk("SETUP phase done. ");
+            DEBUG_PRINT("SETUP phase done. ");
             usbdev_setup(&setup_packet, 2);
         }
         if (interrupts & USB_FS_DOEPINTx_OTEPDIS) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_OTEPDIS;
-            printk("OUT token received when endpoint disabled. ");
+            DEBUG_PRINT("OUT token received when endpoint disabled. ");
         }
         if (interrupts & USB_FS_DOEPINTx_B2BSTUP) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_B2BSTUP;
-            printk("Back-to-back SETUP packets received.");
+            DEBUG_PRINT("Back-to-back SETUP packets received.");
         }
     }
 
-    printk("\r\n");
+    DEBUG_PRINT("\r\n");
 }
 
 static void gint_iisoixfr(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_IISOIXFR;
 
-    printk("USB: Incomplete isochronous IN transfer interrupt. Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Incomplete isochronous IN transfer interrupt. Warning: Unhandled.\r\n");
 }
 
 static void gint_ipxfr(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_IPXFR;
 
-    printk("USB: Incomplete periodic transfer interrupt. Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Incomplete periodic transfer interrupt. Warning: Unhandled.\r\n");
 }
 
 static void gint_cidschg(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_CIDSCHG;
 
-    printk("USB: Core ID change interrupt. Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Core ID change interrupt. Warning: Unhandled.\r\n");
 }
 
 static void gint_srqint(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_SRQINT;
 
-    printk("USB: New session detected.\r\n");
+    DEBUG_PRINT("USB: New session detected.\r\n");
 
     /* Handle */
 }
@@ -347,5 +347,5 @@ static void gint_wkupint(void) {
     /* Clear interrupt */
     *USB_FS_GINTSTS = USB_FS_GINTSTS_WKUPINT;
 
-    printk("USB: Remote wakeup interrupt. Warning: Unhandled.\r\n");
+    DEBUG_PRINT("USB: Remote wakeup interrupt. Warning: Unhandled.\r\n");
 }

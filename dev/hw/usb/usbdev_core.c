@@ -12,11 +12,11 @@
 /* packet points to first word in packet.  size is packet size in bytes */
 void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
     if (ep == NULL) {
-        printk("Warning: Invalid endpoint in usbdev_write. ");
+        DEBUG_PRINT("Warning: Invalid endpoint in usbdev_write. ");
         return;
     }
     if (ep->tx.buf == NULL) {
-        printk("Warning: Endpoint has no tx buffer in usbdev_write. ");
+        DEBUG_PRINT("Warning: Endpoint has no tx buffer in usbdev_write. ");
         return;
     }
 
@@ -93,7 +93,7 @@ void usbdev_fifo_read(volatile struct ring_buffer *ring, int words) {
             words--;
 
             if (ring_buf_full(ring)) {
-                printk("Warning: USB: Buffer full.\r\n");
+                DEBUG_PRINT("Warning: USB: Buffer full.\r\n");
                 ring->start = (ring->start + 1) % ring->len;
             }
             ring->end = (ring->end + 1) % ring->len;
@@ -106,7 +106,7 @@ void usbdev_data_out(uint32_t status) {
     struct endpoint *ep = endpoints[USB_FS_GRXSTS_EPNUM(status)];
 
     if (ep == NULL) {
-        printk("Warning: Invalid endpoint in usbdev_data_out. ");
+        DEBUG_PRINT("Warning: Invalid endpoint in usbdev_data_out. ");
         return;
     }
 
@@ -117,7 +117,7 @@ void usbdev_data_out(uint32_t status) {
 
 void usbdev_data_in(struct endpoint *ep) {
     if (ep == NULL) {
-        printk("Warning: Invalid endpoint in usbdev_data_in. ");
+        DEBUG_PRINT("Warning: Invalid endpoint in usbdev_data_in. ");
         return;
     }
 
@@ -125,13 +125,13 @@ void usbdev_data_in(struct endpoint *ep) {
         return;
     }
 
-    printk("Writing FIFO %d: ", ep->num);
+    DEBUG_PRINT("Writing FIFO %d: ", ep->num);
 
     /* Write until buffer empty */
     int written = 0;
     int space = *USB_FS_DTXFSTS(ep->num);
     while (written < space && !ring_buf_empty(&ep->tx)) {
-        printk("0x%x ", ep->tx.buf[ep->tx.start]);
+        DEBUG_PRINT("0x%x ", ep->tx.buf[ep->tx.start]);
         *USB_FS_DFIFO_EP(ep->num) = ep->tx.buf[ep->tx.start];
         ep->tx.start = (ep->tx.start + 1) % ep->tx.len;
         written++;
@@ -152,7 +152,7 @@ void usbdev_status_in_packet(void) {
 
 void usbdev_enable_receive(struct endpoint *ep) {
     if (ep == NULL) {
-        printk("Warning: Invalid endpoint in usbdev_enable_receive ");
+        DEBUG_PRINT("Warning: Invalid endpoint in usbdev_enable_receive ");
         return;
     }
 

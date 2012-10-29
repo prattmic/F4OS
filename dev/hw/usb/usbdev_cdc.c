@@ -31,21 +31,21 @@ void usbdev_setup(struct ring_buffer *packet, uint32_t len) {
         cdc_setup_packet(setup);
         break;
     default:
-        printk("Unhandled SETUP packet, type %d. ", setup->type);
+        DEBUG_PRINT("Unhandled SETUP packet, type %d. ", setup->type);
     }
 }
 
 static void std_setup_packet(struct usbdev_setup_packet *setup) {
     switch (setup->request) {
     case USB_SETUP_REQUEST_GET_DESCRIPTOR:
-        printk("GET_DESCRIPTOR ");
+        DEBUG_PRINT("GET_DESCRIPTOR ");
         switch (setup->value >> 8) {
         case USB_SETUP_DESCRIPTOR_DEVICE:
-            printk("DEVICE ");
+            DEBUG_PRINT("DEVICE ");
             usbdev_write(endpoints[0], (uint32_t *) &usb_device_descriptor, sizeof(struct usb_device_descriptor));
             break;
         case USB_SETUP_DESCRIPTOR_CONFIG:
-            printk("CONFIGURATION ");
+            DEBUG_PRINT("CONFIGURATION ");
             if (setup->length <= sizeof(usbdev_configuration1_descriptor)) {
                 usbdev_write(endpoints[0], (uint32_t *) &usbdev_configuration1_descriptor, sizeof(usbdev_configuration1_descriptor));
             }
@@ -54,56 +54,56 @@ static void std_setup_packet(struct usbdev_setup_packet *setup) {
             }
             break;
         default:
-            printk("OTHER DESCRIPTOR %d ", setup->value >> 8);
+            DEBUG_PRINT("OTHER DESCRIPTOR %d ", setup->value >> 8);
         }
         break;
     case USB_SETUP_REQUEST_SET_ADDRESS:
-        printk("SET_ADDRESS %d ", setup->value);
+        DEBUG_PRINT("SET_ADDRESS %d ", setup->value);
         *USB_FS_DCFG |= USB_FS_DCFG_DAD(setup->value);
         usbdev_status_in_packet();
         break;
     case USB_SETUP_REQUEST_SET_CONFIGURATION:
-        printk("SET_CONFIGURATION %d ", setup->value);
+        DEBUG_PRINT("SET_CONFIGURATION %d ", setup->value);
         cdc_set_configuration(setup->value);
         usbdev_status_in_packet();
         break;
     case USB_SETUP_REQUEST_GET_STATUS:
-        printk("GET_STATUS ");
+        DEBUG_PRINT("GET_STATUS ");
         if (setup->recipient == USB_SETUP_REQUEST_TYPE_RECIPIENT_DEVICE) {
-            printk("DEVICE ");
+            DEBUG_PRINT("DEVICE ");
             uint32_t buf = 0x11; /* Self powered and remote wakeup */
             usbdev_write(endpoints[0], &buf, sizeof(buf));
         }
         else {
-            printk("OTHER ");
+            DEBUG_PRINT("OTHER ");
         }
         break;
     default:
-        printk("STD: OTHER_REQUEST %d ", setup->request);
+        DEBUG_PRINT("STD: OTHER_REQUEST %d ", setup->request);
     }
 }
 
 static void cdc_setup_packet(struct usbdev_setup_packet *setup) {
     switch (setup->request) {
     case USB_SETUP_REQUEST_CDC_SET_CONTROL_LINE_STATE:
-        printk("CDC: SET_CONTROL_LINE_STATE Warning: Not handled ");
+        DEBUG_PRINT("CDC: SET_CONTROL_LINE_STATE Warning: Not handled ");
         usbdev_status_in_packet();
         break;
     case USB_SETUP_REQUEST_CDC_SET_LINE_CODING:
-        printk("CDC: SET_LINE_CODING Warning: Not handled ");
+        DEBUG_PRINT("CDC: SET_LINE_CODING Warning: Not handled ");
         usbdev_status_in_packet();
         break;
     default:
-        printk("CDC: OTHER_REQUEST %d ", setup->request);
+        DEBUG_PRINT("CDC: OTHER_REQUEST %d ", setup->request);
     }
 }
 
 static void cdc_set_configuration(uint16_t configuration) {
     if (configuration != 1) {
-        printk("Warning: Cannot set configuration %u. ", configuration);
+        DEBUG_PRINT("Warning: Cannot set configuration %u. ", configuration);
     }
 
-    printk("Setting configuration %u. ", configuration);
+    DEBUG_PRINT("Setting configuration %u. ", configuration);
 
     /* ACM Endpoint */
     *USB_FS_DIEPCTL(USB_CDC_ACM_ENDPOINT) |= USB_FS_DIEPCTLx_MPSIZE(USB_CDC_ACM_MPSIZE) | USB_FS_DIEPCTLx_EPTYP_INT | USB_FS_DIEPCTLx_TXFNUM(USB_CDC_ACM_ENDPOINT) | USB_FS_DIEPCTLx_USBAEP;

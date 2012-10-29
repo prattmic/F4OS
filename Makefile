@@ -13,11 +13,11 @@ UNIT_TESTS ?= 0
 ifeq ($(UNIT_TESTS),1)
 # usr/unit_tests/
 VPATH = usr/unit_tests/
-CFLAGS = 
+CFLAGS += 
 SRCS = main.c
 else
 VPATH = $(USR_VPATH)
-CFLAGS = $(USR_CFLAGS)
+CFLAGS += $(USR_CFLAGS)
 SRCS = $(USR_SRCS)
 endif
 
