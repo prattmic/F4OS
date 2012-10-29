@@ -7,6 +7,7 @@
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
 #include <dev/hw/usart.h>
+#include <dev/hw/usbdev.h>
 
 #include <dev/resource.h>
 
@@ -15,6 +16,11 @@ resource default_resources[RESOURCE_TABLE_SIZE] = {{.writer = &usart_putc,
                                                     .closer = &usart_close,
                                                     .env    = NULL,
                                                     .sem    = &usart_semaphore},
+                                                   {.writer = &usbdev_resource_write,
+                                                    .reader = &usbdev_resource_read,
+                                                    .closer = &usbdev_resource_close,
+                                                    .env    = NULL,
+                                                    .sem    = &usbdev_semaphore},
                                                    {NULL}};
 
 static inline uint8_t resource_null(resource *r) {

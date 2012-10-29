@@ -3,7 +3,7 @@
 # usr/shell/
 USR_VPATH = usr/shell/
 USR_CFLAGS = -Iusr/shell/
-USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c
+USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c usb_test.c
 
 ##########################
 LINK_SCRIPT = boot/link.ld
@@ -36,7 +36,7 @@ SRCS += i2c.c spi.c systick.c tim.c usart.c
 
 # dev/hw/usb
 VPATH += dev/hw/usb
-SRCS += usbdev_init.c usbdev_int.c usbdev_core.c usbdev_desc.c usbdev_cdc.c
+SRCS += usbdev_init.c usbdev_int.c usbdev_core.c usbdev_desc.c usbdev_cdc.c usbdev_resource.c
 
 # dev/periph/
 VPATH += dev/periph/
