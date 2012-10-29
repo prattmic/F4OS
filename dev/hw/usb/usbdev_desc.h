@@ -29,6 +29,7 @@ struct __attribute__((packed)) usbdev_configuration1 {
     struct usb_endpoint_descriptor                          interface1_endpoint2;
 };
 
+extern uint32_t *ep_tx_buf[];
 extern struct endpoint ep_ctl;
 extern struct endpoint ep_acm;
 extern struct endpoint ep_rx;

@@ -8,7 +8,14 @@
 #include <dev/hw/usbdev.h>
 
 /* Setup packet buffer */
-uint32_t setup_packet[2];
+uint32_t setup_buf[3];
+
+struct ring_buffer setup_packet = {
+    .buf = setup_buf,
+    .len = sizeof(setup_buf)/sizeof(setup_buf[0]),
+    .start = 0,
+    .end = 0
+};
 
 /* Global interrupt handlers */
 static void gint_mmis(void);
@@ -140,13 +147,12 @@ static void gint_rxflvl(void) {
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPCP:
             printk("SETUP complete ");
-            uint32_t discard;
-            usbdev_fifo_read(&discard, sizeof(discard)/4);
+            usbdev_fifo_read(NULL, 1);
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPRX:
             printk("SETUP received: ");
             /* This will be parsed on interrupt after SETUP complete */
-            usbdev_fifo_read(setup_packet, 2);
+            usbdev_fifo_read(&setup_packet, 2);
             break;
         default:
             printk("Error: Undefined receive status: 0x%x ", receive_status);
@@ -292,7 +298,7 @@ static void gint_oepint(void) {
         if (interrupts & USB_FS_DOEPINTx_STUP) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_STUP;
             printk("SETUP phase done. ");
-            usbdev_setup(setup_packet, 2);
+            usbdev_setup(&setup_packet, 2);
         }
         if (interrupts & USB_FS_DOEPINTx_OTEPDIS) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_OTEPDIS;

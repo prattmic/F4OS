@@ -3,24 +3,44 @@
 #include "usbdev_internals.h"
 #include "usbdev_desc.h"
 
-uint32_t ep_ctl_buf[USB_RX_FIFO_SIZE];
+uint32_t ep_ctl_rx_buf[USB_RX_FIFO_SIZE];
+
+uint32_t *ep_tx_buf[4];
 
 struct endpoint ep_ctl = {
     .num = 0,
     .dir = USB_DIR_IN,
     .mpsize = 64,
-    .buf = NULL,
-    .buf_len = 0
-    /*.buf = ep_ctl_buf,
-    .buf_len = USB_RX_FIFO_SIZE*/
+    .rx = {
+        .buf = ep_ctl_rx_buf,
+        .len = USB_RX_FIFO_SIZE,
+        .start = 0,
+        .end = 0
+    },
+    .tx = {
+        .buf = NULL,
+        .len = 0,
+        .start = 0,
+        .end = 0
+    }
 };
 
 struct endpoint ep_acm = {
     .num = USB_CDC_ACM_ENDPOINT,
     .dir = USB_DIR_OUT,
     .mpsize = USB_CDC_ACM_MPSIZE,
-    .buf = NULL,
-    .buf_len = 0
+    .rx = {
+        .buf = NULL,
+        .len = 0,
+        .start = 0,
+        .end = 0
+    },
+    .tx = {
+        .buf = NULL,
+        .len = 0,
+        .start = 0,
+        .end = 0
+    }
 };
 
 uint32_t ep_rx_buf[USB_RX_FIFO_SIZE];
@@ -29,16 +49,36 @@ struct endpoint ep_rx = {
     .num = USB_CDC_RX_ENDPOINT,
     .dir = USB_DIR_IN,
     .mpsize = USB_CDC_RX_MPSIZE,
-    .buf = ep_rx_buf,
-    .buf_len = USB_RX_FIFO_SIZE
+    .rx = {
+        .buf = ep_rx_buf,
+        .len = USB_RX_FIFO_SIZE,
+        .start = 0,
+        .end = 0
+    },
+    .tx = {
+        .buf = NULL,
+        .len = 0,
+        .start = 0,
+        .end = 0
+    }
 };
 
 struct endpoint ep_tx = {
     .num = USB_CDC_TX_ENDPOINT,
     .dir = USB_DIR_OUT,
     .mpsize = USB_CDC_TX_MPSIZE,
-    .buf = NULL,
-    .buf_len = 0
+    .rx = {
+        .buf = NULL,
+        .len = 0,
+        .start = 0,
+        .end = 0
+    },
+    .tx = {
+        .buf = NULL,
+        .len = 0,
+        .start = 0,
+        .end = 0
+    }
 };
 
 struct endpoint *endpoints[4] = {NULL};

@@ -1,4 +1,7 @@
+#include <stddef.h>
+#include <stdlib.h>
 #include <dev/registers.h>
+#include <kernel/fault.h>
 
 #include "usbdev_internals.h"
 #include "usbdev_desc.h"
@@ -8,6 +11,21 @@ static inline void usbdev_clocks_init(void);
 
 void init_usbdev(void) {
     usbdev_clocks_init();
+
+    ep_tx_buf[0] = malloc(4*USB_TX0_FIFO_SIZE);
+    ep_tx_buf[1] = malloc(4*USB_TX1_FIFO_SIZE);
+    ep_tx_buf[2] = malloc(4*USB_TX2_FIFO_SIZE);
+    ep_tx_buf[3] = malloc(4*USB_TX3_FIFO_SIZE);
+    for (int i = 0; i < 4; i++) {
+        if (ep_tx_buf[i] == NULL) {
+            panic_print("USB: unable to malloc buffer.");
+        }
+    }
+
+    ep_ctl.tx.buf = ep_tx_buf[0];
+    ep_ctl.tx.len = USB_TX0_FIFO_SIZE;
+    ep_ctl.tx.start = 0;
+    ep_ctl.tx.end = 0;
 
     /* Global unmask of USB interrupts, TX empty interrupt when TX is actually empty */
     *USB_FS_GAHBCFG |= USB_FS_GAHBCFG_GINTMSK;

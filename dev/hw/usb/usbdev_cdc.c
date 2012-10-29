@@ -11,8 +11,17 @@ static void std_setup_packet(struct usbdev_setup_packet *setup);
 static void cdc_setup_packet(struct usbdev_setup_packet *setup);
 static void cdc_set_configuration(uint16_t configuration);
 
-void usbdev_setup(uint32_t *packet, uint32_t len) {
-    struct usbdev_setup_packet *setup = (struct usbdev_setup_packet *) packet;
+void usbdev_setup(struct ring_buffer *packet, uint32_t len) {
+    uint32_t buf[2];
+    buf[0] = packet->buf[packet->start];
+    packet->start = (packet->start + 1) % packet->len;
+    buf[1] = packet->buf[packet->start];
+
+    /* Clear ring buffer */
+    packet->start = 0;
+    packet->end = 0;
+
+    struct usbdev_setup_packet *setup = (struct usbdev_setup_packet *) buf;
 
     switch (setup->type) {
     case USB_SETUP_REQUEST_TYPE_TYPE_STD:
@@ -116,6 +125,25 @@ static void cdc_set_configuration(uint16_t configuration) {
     endpoints[USB_CDC_ACM_ENDPOINT] = &ep_acm;
     endpoints[USB_CDC_RX_ENDPOINT] = &ep_rx;
     endpoints[USB_CDC_TX_ENDPOINT] = &ep_tx;
+
+    if (endpoints[1]) {
+        endpoints[1]->tx.buf = ep_tx_buf[1];
+        endpoints[1]->tx.len = USB_TX1_FIFO_SIZE;
+        endpoints[1]->tx.start = 0;
+        endpoints[1]->tx.end = 0;
+    }
+    if (endpoints[2]) {
+        endpoints[2]->tx.buf = ep_tx_buf[2];
+        endpoints[2]->tx.len = USB_TX2_FIFO_SIZE;
+        endpoints[2]->tx.start = 0;
+        endpoints[2]->tx.end = 0;
+    }
+    if (endpoints[3]) {
+        endpoints[3]->tx.buf = ep_tx_buf[3];
+        endpoints[3]->tx.len = USB_TX3_FIFO_SIZE;
+        endpoints[3]->tx.start = 0;
+        endpoints[3]->tx.end = 0;
+    }
 
     usbdev_enable_receive(&ep_rx);
 }

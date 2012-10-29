@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>
 #include <dev/registers.h>
@@ -14,15 +15,16 @@ void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
         printk("Warning: Invalid endpoint in usbdev_write. ");
         return;
     }
+    if (ep->tx.buf == NULL) {
+        printk("Warning: Endpoint has no tx buffer in usbdev_write. ");
+        return;
+    }
 
-    /* Wait until current buffer has been written */
-    if (task_switching && !IPSR()) {
-        while (ep->buf) {
+    /* Wait until current buffer is empty */
+    while (!ring_buf_empty(&ep->tx)) {
+        if (task_switching && !IPSR()) {
             SVC(SVC_YIELD);
         }
-    }
-    else {
-        while(ep->buf);
     }
 
     uint8_t packets = size % ep->mpsize ? size/ep->mpsize + 1 : size/ep->mpsize;
@@ -30,37 +32,72 @@ void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
         packets = 1;
     }
 
-    ep->buf = packet;
-    ep->buf_len = size;
+    int filled_buffer = 0;
+    int written = 0;
 
+    /* Copy to ring buffer */
+    while (size > 0 && !ring_buf_full(&ep->tx)) {
+        ep->tx.buf[ep->tx.end] = *packet++;
+        size -= 4;
+        written += 4;
+
+        ep->tx.end = (ep->tx.end + 1) % ep->tx.len;
+    }
+
+    /* If we write the entire buffer, but it didn't have a multiple of 4 bytes
+     * size will be negative.  This means that written is actually too large,
+     * we need to scale it back to the appropriate value */
+    if (size < 0) {
+        written += size;
+    }
+
+    if (ring_buf_full(&ep->tx)) {
+        filled_buffer = 1;
+    }
+
+    /* Setup endpoint for transmit */
     if (ep->num == 0) {
-        *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(size);
+        *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(written);
         *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
     }
     else {
-        *USB_FS_DIEPTSIZ(ep->num) = USB_FS_DIEPTSIZx_PKTCNT(packets) | USB_FS_DIEPTSIZx_XFRSIZ(size);
+        *USB_FS_DIEPTSIZ(ep->num) = USB_FS_DIEPTSIZx_PKTCNT(packets) | USB_FS_DIEPTSIZx_XFRSIZ(written);
         *USB_FS_DIEPCTL(ep->num) |= USB_FS_DIEPCTLx_CNAK | USB_FS_DIEPCTLx_EPENA;
     }
 
     /* Enable TX FIFO empty interrupt */
     *USB_FS_DIEPEMPMSK |= (1 << ep->num);
+
+    /* Filled buffer, call recursively until packet finishes */
+    if (filled_buffer) {
+        usbdev_write(ep, packet, size);
+    }
 }
 
-void usbdev_fifo_read(uint32_t *buf, int words) {
-    uint32_t keep = (uint32_t) buf;
-    uint32_t null;
-
+void usbdev_fifo_read(struct ring_buffer *ring, int words) {
     /* Allow us to read into NULL */
-    if (!keep) {
-        buf = &null;
-    }
-
-    while (words > 0) {
-        *buf = *USB_FS_DFIFO_EP(0);
-        if (keep) {
-            buf++;
+    if (ring == NULL) {
+        uint32_t null;
+        while (words > 0) {
+            null = *USB_FS_DFIFO_EP(0);
+            words--;
         }
-        words--;
+        /* Tricks GCC into thinking null is used */
+        if (null) {
+            return;
+        }
+    }
+    else {
+        while (words > 0) {
+            ring->buf[ring->end] = *USB_FS_DFIFO_EP(0);
+            words--;
+
+            if (ring_buf_full(ring)) {
+                printk("Warning: USB: Buffer full.\r\n");
+                ring->start = (ring->start + 1) % ring->len;
+            }
+            ring->end = (ring->end + 1) % ring->len;
+        }
     }
 }
 
@@ -74,20 +111,8 @@ void usbdev_data_out(uint32_t status) {
     }
 
     uint32_t words = (size + 3) / 4;
-    uint32_t extra = 0;
 
-    if (size > ep->buf_len) {
-        printk("Warning: Not enough room in buffer, only reading some data. ");
-        words = ep->buf_len;
-        extra = (ep->buf_len - size + 3) / 4;
-    }
-
-    usbdev_fifo_read(ep->buf, words);
-
-    /* Throw away data that doesn't fit */
-    if (extra) {
-        usbdev_fifo_read(NULL, extra);
-    }
+    usbdev_fifo_read(&ep->rx, words);
 }
 
 void usbdev_data_in(struct endpoint *ep) {
@@ -96,30 +121,25 @@ void usbdev_data_in(struct endpoint *ep) {
         return;
     }
 
-    if (!ep->buf) {
+    if (!ep->tx.buf) {
         return;
     }
 
     printk("Writing FIFO %d: ", ep->num);
 
+    /* Write until buffer empty */
     int written = 0;
     int space = *USB_FS_DTXFSTS(ep->num);
-    while (written < space && ep->buf_len > 0) {
-        printk("0x%x ", *ep->buf);
-        *USB_FS_DFIFO_EP(ep->num) = *ep->buf;
-        ep->buf++;
-        ep->buf_len -= 4;
+    while (written < space && !ring_buf_empty(&ep->tx)) {
+        printk("0x%x ", ep->tx.buf[ep->tx.start]);
+        *USB_FS_DFIFO_EP(ep->num) = ep->tx.buf[ep->tx.start];
+        ep->tx.start = (ep->tx.start + 1) % ep->tx.len;
         written++;
     }
 
-    if (ep->buf_len <= 0) {
-        ep->buf = NULL;
+    /* Only disable interrupt once all data has been written */
+    if (ring_buf_empty(&ep->tx)) {
         *USB_FS_DIEPEMPMSK &= ~(1 << ep->num);
-
-        if (ep->buf_len < 0) {
-            ep->buf_len = 0;
-            printk("warning: wrote past end of buffer. ");
-        }
     }
 }
 
