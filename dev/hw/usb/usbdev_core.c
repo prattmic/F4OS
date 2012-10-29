@@ -74,7 +74,7 @@ void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
     }
 }
 
-void usbdev_fifo_read(struct ring_buffer *ring, int words) {
+void usbdev_fifo_read(volatile struct ring_buffer *ring, int words) {
     /* Allow us to read into NULL */
     if (ring == NULL) {
         uint32_t null;

@@ -184,30 +184,30 @@ struct __attribute__((packed)) usb_cdc_acm_union_functional_descriptor {
 /* Ring buffer semantics always leave one space empty.
  * If start == end, buffer is empty */
 struct ring_buffer {
-    uint32_t    *buf;
-    int         len;
-    int         start;
-    int         end;
+    volatile uint32_t    *buf;
+    volatile int         len;
+    volatile int         start;
+    volatile int         end;
 };
 
 struct endpoint {
     uint8_t             num;
     uint8_t             dir;
     uint16_t            mpsize;
-    struct ring_buffer  rx;
-    struct ring_buffer  tx;
+    volatile struct ring_buffer  rx;
+    volatile struct ring_buffer  tx;
 };
 
 void usbdev_reset(void);
 void usbdev_write(struct endpoint *ep, uint32_t *packet, int size);
-void usbdev_fifo_read(struct ring_buffer *ring, int words);
+void usbdev_fifo_read(volatile struct ring_buffer *ring, int words);
 void usbdev_data_out(uint32_t status);
 void usbdev_data_in(struct endpoint *ep);
 void usbdev_status_in_packet(void);
 void usbdev_enable_receive(struct endpoint *ep);
 
-inline static int ring_buf_full(struct ring_buffer *ring);
-inline static int ring_buf_full(struct ring_buffer *ring) {
+inline static int ring_buf_full(volatile struct ring_buffer *ring);
+inline static int ring_buf_full(volatile struct ring_buffer *ring) {
     if (ring->start - ring->end == 1) {
         return 1;
     }
@@ -217,8 +217,8 @@ inline static int ring_buf_full(struct ring_buffer *ring) {
     return 0;
 }
 
-inline static int ring_buf_empty(struct ring_buffer *ring);
-inline static int ring_buf_empty(struct ring_buffer *ring) {
+inline static int ring_buf_empty(volatile struct ring_buffer *ring);
+inline static int ring_buf_empty(volatile struct ring_buffer *ring) {
     if (ring->start == ring->end) {
         return 1;
     }
