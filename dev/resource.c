@@ -13,9 +13,9 @@
 
 extern resource uart_console;
 extern resource usb_console;
-resource *default_resources[RESOURCE_TABLE_SIZE] = {&uart_console,
-                                                   &usb_console,
-                                                   NULL};
+resource *default_resources[RESOURCE_TABLE_SIZE] = {&usb_console,
+                                                    &uart_console,
+                                                    NULL};
 
 static inline uint8_t resource_null(resource *r) {
     if (r->writer == NULL && r->reader == NULL && r->closer == NULL && r->env == NULL && r->sem == NULL) {
