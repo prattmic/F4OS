@@ -57,10 +57,14 @@ void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
 
     /* Setup endpoint for transmit */
     if (ep->num == 0) {
+        /* Wait for ep to disable */
+        while (*USB_FS_DIEPCTL0 & USB_FS_DIEPCTL0_EPENA);
         *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(written);
         *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
     }
     else {
+        /* Wait for ep to disable */
+        while (*USB_FS_DIEPCTL(ep->num) & USB_FS_DIEPCTLx_EPENA);
         *USB_FS_DIEPTSIZ(ep->num) = USB_FS_DIEPTSIZx_PKTCNT(packets) | USB_FS_DIEPTSIZx_XFRSIZ(written);
         *USB_FS_DIEPCTL(ep->num) |= USB_FS_DIEPCTLx_CNAK | USB_FS_DIEPCTLx_EPENA;
     }
