@@ -13,6 +13,12 @@ struct semaphore usbdev_semaphore = {
     .waiting = NULL
 };
 
+resource usb_console = {.writer = &usbdev_resource_write,
+                        .reader = &usbdev_resource_read,
+                        .closer = &usbdev_resource_close,
+                        .env    = NULL,
+                        .sem    = &usbdev_semaphore};
+
 void usbdev_resource_write(char c, void *env) {
     uint32_t packet = c;
     usbdev_write(&ep_tx, &packet, 1);
