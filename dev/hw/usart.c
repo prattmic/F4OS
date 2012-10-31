@@ -175,7 +175,8 @@ void usart_putc(char c, void *env) {
         *DMA2_S7CR |= DMA_SxCR_EN;
 
         /* Wait for transfer to complete */
-        while (!(*DMA2_HISR & DMA_HISR_TCIF7)) {
+        int timeout = 30000000;
+        while (!(*DMA2_HISR & DMA_HISR_TCIF7) && timeout--) {
             if (task_switching && !IPSR()) {
                 SVC(SVC_YIELD);
             }
