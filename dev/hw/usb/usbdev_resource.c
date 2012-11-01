@@ -1,5 +1,7 @@
 #include <stddef.h>
 #include <dev/resource.h>
+#include <dev/registers.h>
+#include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
 
@@ -24,7 +26,13 @@ void usbdev_resource_write(char c, void *env) {
 }
 
 char usbdev_resource_read(void *env) {
-    while (ring_buf_empty(&ep_rx.rx));
+    while (ring_buf_empty(&ep_rx.rx)) {
+        if (task_switching && !IPSR()) {
+            release(&usbdev_semaphore);
+            SVC(SVC_YIELD);
+            acquire(&usbdev_semaphore);
+        }
+    }
 
     char c = (char) ep_rx.rx.buf[ep_rx.rx.start];
     ep_rx.rx.start = (ep_rx.rx.start + 1) % ep_rx.rx.len;
