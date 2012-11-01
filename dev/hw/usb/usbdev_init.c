@@ -12,7 +12,7 @@ static inline void usbdev_clocks_init(void);
 void init_usbdev(void) {
     usbdev_clocks_init();
 
-    ep_tx_buf[0] = malloc(4*USB_TX0_FIFO_SIZE);
+    ep_tx_buf[0] = malloc(4*USB_TX0_FIFO_SIZE + 1);
     ep_tx_buf[1] = malloc(4*USB_TX1_FIFO_SIZE);
     ep_tx_buf[2] = malloc(4*USB_TX2_FIFO_SIZE);
     ep_tx_buf[3] = malloc(4*USB_TX3_FIFO_SIZE);
@@ -23,7 +23,7 @@ void init_usbdev(void) {
     }
 
     ep_ctl.tx.buf = ep_tx_buf[0];
-    ep_ctl.tx.len = USB_TX0_FIFO_SIZE;
+    ep_ctl.tx.len = 4*USB_TX0_FIFO_SIZE + 1;
     ep_ctl.tx.start = 0;
     ep_ctl.tx.end = 0;
 

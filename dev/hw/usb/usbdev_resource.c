@@ -20,14 +20,12 @@ resource usb_console = {.writer = &usbdev_resource_write,
                         .sem    = &usbdev_semaphore};
 
 void usbdev_resource_write(char c, void *env) {
-    uint32_t packet = c;
-    usbdev_write(&ep_tx, &packet, 1);
+    usbdev_write(&ep_tx, (uint8_t *) &c, 1);
 }
 
 char usbdev_resource_read(void *env) {
     while (ring_buf_empty(&ep_rx.rx));
 
-    /* FIXME: ignores 3 bytes of data */
     char c = (char) ep_rx.rx.buf[ep_rx.rx.start];
     ep_rx.rx.start = (ep_rx.rx.start + 1) % ep_rx.rx.len;
 

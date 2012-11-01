@@ -3,9 +3,11 @@
 #include "usbdev_internals.h"
 #include "usbdev_desc.h"
 
-uint32_t ep_ctl_rx_buf[USB_RX_FIFO_SIZE];
+uint8_t usb_ready = 0;
 
-uint32_t *ep_tx_buf[4];
+uint8_t ep_ctl_rx_buf[4*USB_RX_FIFO_SIZE];
+
+uint8_t *ep_tx_buf[4];
 
 struct endpoint ep_ctl = {
     .num = 0,
@@ -13,7 +15,7 @@ struct endpoint ep_ctl = {
     .mpsize = 64,
     .rx = {
         .buf = ep_ctl_rx_buf,
-        .len = USB_RX_FIFO_SIZE,
+        .len = 4*USB_RX_FIFO_SIZE,
         .start = 0,
         .end = 0
     },
@@ -43,7 +45,7 @@ struct endpoint ep_acm = {
     }
 };
 
-uint32_t ep_rx_buf[USB_RX_FIFO_SIZE];
+uint8_t ep_rx_buf[4*USB_RX_FIFO_SIZE];
 
 struct endpoint ep_rx = {
     .num = USB_CDC_RX_ENDPOINT,
@@ -51,7 +53,7 @@ struct endpoint ep_rx = {
     .mpsize = USB_CDC_RX_MPSIZE,
     .rx = {
         .buf = ep_rx_buf,
-        .len = USB_RX_FIFO_SIZE,
+        .len = 4*USB_RX_FIFO_SIZE,
         .start = 0,
         .end = 0
     },

@@ -12,10 +12,14 @@ static void cdc_setup_packet(struct usbdev_setup_packet *setup);
 static void cdc_set_configuration(uint16_t configuration);
 
 void usbdev_setup(struct ring_buffer *packet, uint32_t len) {
-    uint32_t buf[2];
-    buf[0] = packet->buf[packet->start];
-    packet->start = (packet->start + 1) % packet->len;
-    buf[1] = packet->buf[packet->start];
+    uint8_t buf[8];
+    for (int i = 0; i < 8; i++) {
+        if (ring_buf_empty(packet)) {
+            break;
+        }
+        buf[i] = packet->buf[packet->start];
+        packet->start = (packet->start + 1) % packet->len;
+    }
 
     /* Clear ring buffer */
     packet->start = 0;
@@ -42,15 +46,15 @@ static void std_setup_packet(struct usbdev_setup_packet *setup) {
         switch (setup->value >> 8) {
         case USB_SETUP_DESCRIPTOR_DEVICE:
             DEBUG_PRINT("DEVICE ");
-            usbdev_write(endpoints[0], (uint32_t *) &usb_device_descriptor, sizeof(struct usb_device_descriptor));
+            usbdev_write(endpoints[0], (uint8_t *) &usb_device_descriptor, sizeof(struct usb_device_descriptor));
             break;
         case USB_SETUP_DESCRIPTOR_CONFIG:
             DEBUG_PRINT("CONFIGURATION ");
             if (setup->length <= sizeof(usbdev_configuration1_descriptor)) {
-                usbdev_write(endpoints[0], (uint32_t *) &usbdev_configuration1_descriptor, sizeof(usbdev_configuration1_descriptor));
+                usbdev_write(endpoints[0], (uint8_t *) &usbdev_configuration1_descriptor, sizeof(usbdev_configuration1_descriptor));
             }
             else {
-                usbdev_write(endpoints[0], (uint32_t *) &usbdev_configuration1, sizeof(usbdev_configuration1));
+                usbdev_write(endpoints[0], (uint8_t *) &usbdev_configuration1, sizeof(usbdev_configuration1));
             }
             break;
         default:
@@ -71,7 +75,7 @@ static void std_setup_packet(struct usbdev_setup_packet *setup) {
         DEBUG_PRINT("GET_STATUS ");
         if (setup->recipient == USB_SETUP_REQUEST_TYPE_RECIPIENT_DEVICE) {
             DEBUG_PRINT("DEVICE ");
-            uint32_t buf = 0x11; /* Self powered and remote wakeup */
+            uint8_t buf = 0x11; /* Self powered and remote wakeup */
             usbdev_write(endpoints[0], &buf, sizeof(buf));
         }
         else {
@@ -128,22 +132,24 @@ static void cdc_set_configuration(uint16_t configuration) {
 
     if (endpoints[1]) {
         endpoints[1]->tx.buf = ep_tx_buf[1];
-        endpoints[1]->tx.len = USB_TX1_FIFO_SIZE;
+        endpoints[1]->tx.len = 4*USB_TX1_FIFO_SIZE;
         endpoints[1]->tx.start = 0;
         endpoints[1]->tx.end = 0;
     }
     if (endpoints[2]) {
         endpoints[2]->tx.buf = ep_tx_buf[2];
-        endpoints[2]->tx.len = USB_TX2_FIFO_SIZE;
+        endpoints[2]->tx.len = 4*USB_TX2_FIFO_SIZE;
         endpoints[2]->tx.start = 0;
         endpoints[2]->tx.end = 0;
     }
     if (endpoints[3]) {
         endpoints[3]->tx.buf = ep_tx_buf[3];
-        endpoints[3]->tx.len = USB_TX3_FIFO_SIZE;
+        endpoints[3]->tx.len = 4*USB_TX3_FIFO_SIZE;
         endpoints[3]->tx.start = 0;
         endpoints[3]->tx.end = 0;
     }
+
+    usb_ready = 1;
 
     usbdev_enable_receive(&ep_rx);
 }

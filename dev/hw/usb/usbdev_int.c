@@ -8,7 +8,7 @@
 #include <dev/hw/usbdev.h>
 
 /* Setup packet buffer */
-uint32_t setup_buf[3];
+uint8_t setup_buf[3*4];
 
 struct ring_buffer setup_packet = {
     .buf = setup_buf,
@@ -101,7 +101,8 @@ static void gint_otgint(void) {
 
     if (interrupts & USB_FS_GOTGINT_SEDET) {
         *USB_FS_GOTGINT = USB_FS_GOTGINT_SEDET;
-        DEBUG_PRINT("Session end detected. Warning: Unhandled. ");
+        usb_ready = 0;
+        DEBUG_PRINT("Session end detected. ");
     }
     if (interrupts & USB_FS_GOTGINT_SRSSCHG) {
         *USB_FS_GOTGINT = USB_FS_GOTGINT_SRSSCHG;
@@ -147,12 +148,12 @@ static void gint_rxflvl(void) {
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPCP:
             DEBUG_PRINT("SETUP complete ");
-            usbdev_fifo_read(NULL, 1);
+            usbdev_fifo_read(NULL, 4);
             break;
         case USB_FS_GRXSTS_PKTSTS_STUPRX:
             DEBUG_PRINT("SETUP received: ");
             /* This will be parsed on interrupt after SETUP complete */
-            usbdev_fifo_read(&setup_packet, 2);
+            usbdev_fifo_read(&setup_packet, 8);
             break;
         default:
             DEBUG_PRINT("Error: Undefined receive status: 0x%x ", receive_status);
@@ -298,7 +299,7 @@ static void gint_oepint(void) {
         if (interrupts & USB_FS_DOEPINTx_STUP) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_STUP;
             DEBUG_PRINT("SETUP phase done. ");
-            usbdev_setup(&setup_packet, 2);
+            usbdev_setup(&setup_packet, 4);
         }
         if (interrupts & USB_FS_DOEPINTx_OTEPDIS) {
             *USB_FS_DOEPINT(i) = USB_FS_DOEPINTx_OTEPDIS;

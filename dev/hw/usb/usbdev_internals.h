@@ -184,10 +184,10 @@ struct __attribute__((packed)) usb_cdc_acm_union_functional_descriptor {
 /* Ring buffer semantics always leave one space empty.
  * If start == end, buffer is empty */
 struct ring_buffer {
-    volatile uint32_t    *buf;
-    volatile int         len;
-    volatile int         start;
-    volatile int         end;
+    volatile uint8_t    *buf;
+    volatile int        len;
+    volatile int        start;
+    volatile int        end;
 };
 
 struct endpoint {
@@ -199,8 +199,8 @@ struct endpoint {
 };
 
 void usbdev_reset(void);
-void usbdev_write(struct endpoint *ep, uint32_t *packet, int size);
-void usbdev_fifo_read(volatile struct ring_buffer *ring, int words);
+void usbdev_write(struct endpoint *ep, uint8_t *packet, int size);
+void usbdev_fifo_read(volatile struct ring_buffer *ring, int size);
 void usbdev_data_out(uint32_t status);
 void usbdev_data_in(struct endpoint *ep);
 void usbdev_status_in_packet(void);

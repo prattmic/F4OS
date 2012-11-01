@@ -9,10 +9,18 @@
 #include "usbdev_desc.h"
 #include <dev/hw/usbdev.h>
 
-/* packet points to first word in packet.  size is packet size in bytes */
-void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
+union uint8_uint32 {
+    uint8_t     uint8[4];
+    uint32_t    uint32;
+};
+
+/* packet points to first byte in packet.  size is packet size in bytes */
+void usbdev_write(struct endpoint *ep, uint8_t *packet, int size) {
     if (ep == NULL) {
         DEBUG_PRINT("Warning: Invalid endpoint in usbdev_write. ");
+        return;
+    }
+    if (ep->num != 0 && !usb_ready) {
         return;
     }
     if (ep->tx.buf == NULL) {
@@ -27,32 +35,25 @@ void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
         }
     }
 
-    uint8_t packets = size % ep->mpsize ? size/ep->mpsize + 1 : size/ep->mpsize;
-    if (!packets) {
-        packets = 1;
-    }
-
     int filled_buffer = 0;
     int written = 0;
 
     /* Copy to ring buffer */
     while (size > 0 && !ring_buf_full(&ep->tx)) {
         ep->tx.buf[ep->tx.end] = *packet++;
-        size -= 4;
-        written += 4;
+        size--;
+        written++;
 
         ep->tx.end = (ep->tx.end + 1) % ep->tx.len;
     }
 
-    /* If we write the entire buffer, but it didn't have a multiple of 4 bytes
-     * size will be negative.  This means that written is actually too large,
-     * we need to scale it back to the appropriate value */
-    if (size < 0) {
-        written += size;
-    }
-
     if (ring_buf_full(&ep->tx)) {
         filled_buffer = 1;
+    }
+
+    uint8_t packets = written % ep->mpsize ? written/ep->mpsize + 1 : written/ep->mpsize;
+    if (!packets) {
+        packets = 1;
     }
 
     /* Setup endpoint for transmit */
@@ -73,12 +74,14 @@ void usbdev_write(struct endpoint *ep, uint32_t *packet, int size) {
     *USB_FS_DIEPEMPMSK |= (1 << ep->num);
 
     /* Filled buffer, call recursively until packet finishes */
-    if (filled_buffer) {
+    if (filled_buffer && size) {
         usbdev_write(ep, packet, size);
     }
 }
 
-void usbdev_fifo_read(volatile struct ring_buffer *ring, int words) {
+void usbdev_fifo_read(volatile struct ring_buffer *ring, int size) {
+    int words = (size+3)/4;
+
     /* Allow us to read into NULL */
     if (ring == NULL) {
         uint32_t null;
@@ -92,15 +95,26 @@ void usbdev_fifo_read(volatile struct ring_buffer *ring, int words) {
         }
     }
     else {
-        while (words > 0) {
-            ring->buf[ring->end] = *USB_FS_DFIFO_EP(0);
+        while (words > 0 && size > 0) {
+            union uint8_uint32 data;
+            data.uint32 = *USB_FS_DFIFO_EP(0);
             words--;
 
-            if (ring_buf_full(ring)) {
-                DEBUG_PRINT("Warning: USB: Buffer full.\r\n");
-                ring->start = (ring->start + 1) % ring->len;
+            for (int i = 0; i < 4; i++) {
+                if (size <= 0) {
+                    data.uint8[i] = 0;
+                    continue;
+                }
+
+                ring->buf[ring->end] = data.uint8[i];
+                size--;
+
+                if (ring_buf_full(ring)) {
+                    DEBUG_PRINT("Warning: USB: Buffer full.\r\n");
+                    ring->start = (ring->start + 1) % ring->len;
+                }
+                ring->end = (ring->end + 1) % ring->len;
             }
-            ring->end = (ring->end + 1) % ring->len;
         }
     }
 }
@@ -114,9 +128,7 @@ void usbdev_data_out(uint32_t status) {
         return;
     }
 
-    uint32_t words = (size + 3) / 4;
-
-    usbdev_fifo_read(&ep->rx, words);
+    usbdev_fifo_read(&ep->rx, size);
 }
 
 void usbdev_data_in(struct endpoint *ep) {
@@ -135,9 +147,22 @@ void usbdev_data_in(struct endpoint *ep) {
     int written = 0;
     int space = *USB_FS_DTXFSTS(ep->num);
     while (written < space && !ring_buf_empty(&ep->tx)) {
-        DEBUG_PRINT("0x%x ", ep->tx.buf[ep->tx.start]);
-        *USB_FS_DFIFO_EP(ep->num) = ep->tx.buf[ep->tx.start];
-        ep->tx.start = (ep->tx.start + 1) % ep->tx.len;
+        union uint8_uint32 data;
+        data.uint32 = 0;
+        
+        for (int i = 0; i < 4; i++) {
+            if (!ring_buf_empty(&ep->tx)) {
+                data.uint8[i] = ep->tx.buf[ep->tx.start];
+                ep->tx.start = (ep->tx.start + 1) % ep->tx.len;
+            }
+            else {
+                data.uint8[i] = 0;
+            }
+        }
+
+        DEBUG_PRINT("0x%x ", data.uint32);
+        
+        *USB_FS_DFIFO_EP(ep->num) = data.uint32;
         written++;
     }
 
