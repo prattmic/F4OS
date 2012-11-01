@@ -15,6 +15,13 @@
 
 struct semaphore usart_semaphore;
 
+
+resource uart_console = {   .writer = &usart_putc,
+                            .reader = &usart_getc,
+                            .closer = &usart_close,
+                            .env    = NULL,
+                            .sem    = &usart_semaphore};
+
 void usart_echo(void) __attribute__((section(".kernel")));
 static uint16_t usart_baud(uint32_t baud) __attribute__((section(".kernel")));
 
@@ -157,7 +164,7 @@ void usart_putc(char c, void *env) {
 
         /* Wait for DMA to be ready */
         while (*DMA2_S7CR & DMA_SxCR_EN) {
-            if (task_switching) {
+            if (task_switching && !IPSR()) {
                 SVC(SVC_YIELD);
             }
         }
@@ -168,8 +175,9 @@ void usart_putc(char c, void *env) {
         *DMA2_S7CR |= DMA_SxCR_EN;
 
         /* Wait for transfer to complete */
-        while (!(*DMA2_HISR & DMA_HISR_TCIF7)) {
-            if (task_switching) {
+        int timeout = 30000000;
+        while (!(*DMA2_HISR & DMA_HISR_TCIF7) && timeout--) {
+            if (task_switching && !IPSR()) {
                 SVC(SVC_YIELD);
             }
         }
@@ -183,8 +191,6 @@ void usart_putc(char c, void *env) {
 }
 
 void usart_puts(char *s, void *env) {
-    acquire(&usart_semaphore);
-
     while (*s) {
         char *buf = usart_tx_buf;
         uint16_t count = 0;
@@ -196,7 +202,7 @@ void usart_puts(char *s, void *env) {
 
         /* Wait for DMA to be ready */
         while (*DMA2_S7CR & DMA_SxCR_EN) {
-            if (task_switching) {
+            if (task_switching && !IPSR()) {
                 SVC(SVC_YIELD);
             }
         }
@@ -208,7 +214,7 @@ void usart_puts(char *s, void *env) {
 
         /* Wait for transfer to complete */
         while (!(*DMA2_HISR & DMA_HISR_TCIF7)) {
-            if (task_switching) {
+            if (task_switching && !IPSR()) {
                 SVC(SVC_YIELD);
             }
         }
@@ -219,8 +225,6 @@ void usart_puts(char *s, void *env) {
         /* Clear buffer */
         memset32(usart_tx_buf, 0, (count % 4) ? (count/4 + 1) : (count/4));
     }
-
-    release(&usart_semaphore);
 }
 
 char usart_getc(void *env) {

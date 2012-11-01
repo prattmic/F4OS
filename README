@@ -19,4 +19,9 @@ boot.  The main() function in main.c is called by the scheduler
 before task switching begins and should be used to create tasks
 that run at boot.
 
+By default resource 0 is the USB device, which should appear as a
+USB CDC ACM (Virtual Terminal) device on the host.  Resource 1 is
+the UART on PB6 (TX) and PB7 (RX).  The default resources can be
+changed in dev/resources.c.
+
 Michael Pratt

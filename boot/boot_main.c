@@ -10,7 +10,7 @@
 #include <dev/hw/usart.h>
 #include <dev/hw/spi.h>
 #include <dev/hw/i2c.h>
-#include <dev/hw/tim.h>
+#include <dev/hw/usbdev.h>
 
 static void clock(void) __attribute__((section(".kernel")));
 static void power_led(void) __attribute__((section(".kernel")));
@@ -25,6 +25,7 @@ int os_start(void) {
     init_usart1();
     init_spi1();
     init_i2c1();
+    init_usbdev();
 
     puts("\r\n\r\n\r\nWelcome to...\r\n");
     puts("\r\n"

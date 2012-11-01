@@ -7,15 +7,15 @@
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
 #include <dev/hw/usart.h>
+#include <dev/hw/usbdev.h>
 
 #include <dev/resource.h>
 
-resource default_resources[RESOURCE_TABLE_SIZE] = {{.writer = &usart_putc,
-                                                    .reader = &usart_getc,
-                                                    .closer = &usart_close,
-                                                    .env    = NULL,
-                                                    .sem    = &usart_semaphore},
-                                                   {NULL}};
+extern resource uart_console;
+extern resource usb_console;
+resource *default_resources[RESOURCE_TABLE_SIZE] = {&usb_console,
+                                                    &uart_console,
+                                                    NULL};
 
 static inline uint8_t resource_null(resource *r) {
     if (r->writer == NULL && r->reader == NULL && r->closer == NULL && r->env == NULL && r->sem == NULL) {
@@ -45,8 +45,8 @@ void resource_setup(task_ctrl* task) {
         int top_rd = 0;
 
         for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
-            if (!resource_null(&default_resources[i])) {
-                task->resources[i] = &default_resources[i];
+            if (default_resources[i]) {
+                task->resources[i] = default_resources[i];
                 top_rd++;
             }
             else {
@@ -71,7 +71,7 @@ void write(rd_t rd, char* d, int n) {
     }
     else {
         for(int i = 0; i < n; i++) {
-            default_resources[rd].writer(d[i], default_resources[rd].env);
+            default_resources[rd]->writer(d[i], default_resources[rd]->env);
         }
     }
 }
@@ -89,7 +89,7 @@ void swrite(rd_t rd, char* s) {
     }
     else {
         while(*s) {
-            default_resources[rd].writer(*s++, default_resources[rd].env);
+            default_resources[rd]->writer(*s++, default_resources[rd]->env);
         }
     }
 }
@@ -107,8 +107,8 @@ void close(rd_t rd) {
         curr_task->task->resources[rd] = NULL;
     }
     else {
-        default_resources[rd].closer(default_resources[rd].env);
-        kfree(&default_resources[rd]);
+        default_resources[rd]->closer(default_resources[rd]->env);
+        kfree(default_resources[rd]);
     }
 }
 
@@ -125,7 +125,7 @@ void read(rd_t rd, char *buf, int n) {
     }
     else {
         for(int i = 0; i < n; i++) {
-            buf[i] = default_resources[rd].reader(default_resources[rd].env);
+            buf[i] = default_resources[rd]->reader(default_resources[rd]->env);
         }
     }
 }

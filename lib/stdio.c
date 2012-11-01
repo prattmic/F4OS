@@ -38,7 +38,7 @@ void sprintf(char *buf, char *fmt, ...) {
     va_start(ap, fmt);
 
     rd_t stream = open_buf_stream(buf);
-    vfprintf(stream, fmt, ap);
+    vfprintf(stream, fmt, ap, &fputs, &fputc);
     close(stream);
 
     va_end(ap);
@@ -72,11 +72,11 @@ void printx(char *s, uint8_t *x, int n) {
 void fprintf(rd_t rd, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    vfprintf(rd, fmt, ap);
+    vfprintf(rd, fmt, ap, &fputs, &fputc);
     va_end(ap);
 }
 
-void vfprintf(rd_t rd, char *fmt, va_list ap) {
+void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void (*putc_fn)(rd_t,char)) {
     while (*fmt) {
         if (*fmt == '%') {
             switch (*(++fmt)) {
@@ -93,7 +93,7 @@ void vfprintf(rd_t rd, char *fmt, va_list ap) {
                         ];
                     }
 
-                    fputs(rd, buf);
+                    puts_fn(rd, buf);
                     break;
                 }
                 case 'i': case 'd': {
@@ -102,7 +102,7 @@ void vfprintf(rd_t rd, char *fmt, va_list ap) {
 
                     itoa(num, buf);
 
-                    fputs(rd, buf);
+                    puts_fn(rd, buf);
                     break;
                 }
                 case 'u': {
@@ -111,7 +111,7 @@ void vfprintf(rd_t rd, char *fmt, va_list ap) {
 
                     uitoa(num, buf);
 
-                    fputs(rd, buf);
+                    puts_fn(rd, buf);
                     break;
                 }
                 case 'f': {
@@ -120,36 +120,36 @@ void vfprintf(rd_t rd, char *fmt, va_list ap) {
 
                     ftoa(num, 0.0001f, buf, 20);
 
-                    fputs(rd, buf);
+                    puts_fn(rd, buf);
                     break;
                 }
                 case 'c': {
                     char letter = (char) va_arg(ap, uint32_t);
 
-                    fputc(rd, letter);
+                    putc_fn(rd, letter);
                     break;
                 }
                 case 's': {
                     char *s = va_arg(ap, char*);
 
-                    fputs(rd, s);
+                    puts_fn(rd, s);
                     break;
                 }
                 case '%': {
                     /* Just print a % */
-                    fputc(rd, '%');
+                    putc_fn(rd, '%');
                     break;
                 }
                 default: {
-                    fputc(rd, '%');
-                    fputc(rd, *fmt);
+                    putc_fn(rd, '%');
+                    putc_fn(rd, *fmt);
                 }
             }
 
             fmt++;
         }
         else {
-            fputc(rd, *fmt++);
+            putc_fn(rd, *fmt++);
         }
     }
 }

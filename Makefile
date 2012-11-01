@@ -3,7 +3,7 @@
 # usr/shell/
 USR_VPATH = usr/shell/
 USR_CFLAGS = -Iusr/shell/
-USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c
+USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c rd_test.c
 
 ##########################
 LINK_SCRIPT = boot/link.ld
@@ -13,11 +13,11 @@ UNIT_TESTS ?= 0
 ifeq ($(UNIT_TESTS),1)
 # usr/unit_tests/
 VPATH = usr/unit_tests/
-CFLAGS = 
+CFLAGS += 
 SRCS = main.c
 else
 VPATH = $(USR_VPATH)
-CFLAGS = $(USR_CFLAGS)
+CFLAGS += $(USR_CFLAGS)
 SRCS = $(USR_SRCS)
 endif
 
@@ -33,6 +33,10 @@ SRCS += resource.c shared_mem.c buf_stream.c
 # dev/hw
 VPATH += dev/hw/
 SRCS += i2c.c spi.c systick.c tim.c usart.c
+
+# dev/hw/usb
+VPATH += dev/hw/usb
+SRCS += usbdev_init.c usbdev_int.c usbdev_core.c usbdev_desc.c usbdev_cdc.c usbdev_resource.c
 
 # dev/periph/
 VPATH += dev/periph/

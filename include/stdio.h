@@ -17,7 +17,7 @@ void fputs(rd_t rd, char *s);
 void fputc(rd_t rd, char letter);
 char fgetc(rd_t rd);
 void fprintf(rd_t rd, char *fmt, ...);
-void vfprintf(rd_t rd, char *fmt, va_list ap);
+void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void (*putc_fn)(rd_t,char));
 
 void puts(char *s);
 void putc(char letter);

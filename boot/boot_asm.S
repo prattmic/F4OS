@@ -63,6 +63,36 @@
 .word   hang                /* 36 ... */
 .word   hang                /* 37 USART1 Global Interrupt */
 .word   hang                /* 38 ... */
+.word   hang                /* 39 ... */
+.word   hang                /* 40 ... */
+.word   hang                /* 41 ... */
+.word   hang                /* 42 ... */
+.word   hang                /* 43 ... */
+.word   hang                /* 44 ... */
+.word   hang                /* 45 ... */
+.word   hang                /* 46 ... */
+.word   hang                /* 47 ... */
+.word   hang                /* 48 ... */
+.word   hang                /* 49 ... */
+.word   hang                /* 50 ... */
+.word   hang                /* 51 ... */
+.word   hang                /* 52 ... */
+.word   hang                /* 53 ... */
+.word   hang                /* 54 ... */
+.word   hang                /* 55 ... */
+.word   hang                /* 56 ... */
+.word   hang                /* 57 ... */
+.word   hang                /* 58 ... */
+.word   hang                /* 59 ... */
+.word   hang                /* 60 ... */
+.word   hang                /* 61 ... */
+.word   hang                /* 62 ... */
+.word   hang                /* 63 ... */
+.word   hang                /* 64 ... */
+.word   hang                /* 65 ... */
+.word   hang                /* 66 ... */
+.word   usbdev_handler      /* 67 USB OTG FS Global Interrupt */
+.word   hang                /* 68 ... */
 
 /* Bootloader */
 .section    .kernel, "ax"
