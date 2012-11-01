@@ -70,8 +70,10 @@ void write(rd_t rd, char* d, int n) {
         release(curr_task->task->resources[rd]->sem);
     }
     else {
-        for(int i = 0; i < n; i++) {
-            default_resources[rd]->writer(d[i], default_resources[rd]->env);
+        if(default_resources[rd] != NULL) {
+            for(int i = 0; i < n; i++) {
+                default_resources[rd]->writer(d[i], default_resources[rd]->env);
+            }
         }
     }
 }
@@ -88,8 +90,10 @@ void swrite(rd_t rd, char* s) {
         release(curr_task->task->resources[rd]->sem);
     }
     else {
-        while(*s) {
-            default_resources[rd]->writer(*s++, default_resources[rd]->env);
+        if(default_resources[rd] != NULL) {
+            while(*s) {
+                default_resources[rd]->writer(*s++, default_resources[rd]->env);
+            }
         }
     }
 }
@@ -107,8 +111,10 @@ void close(rd_t rd) {
         curr_task->task->resources[rd] = NULL;
     }
     else {
-        default_resources[rd]->closer(default_resources[rd]->env);
-        kfree(default_resources[rd]);
+        if(default_resources[rd] != NULL) {
+            default_resources[rd]->closer(default_resources[rd]->env);
+            kfree(default_resources[rd]);
+        }
     }
 }
 
@@ -124,8 +130,10 @@ void read(rd_t rd, char *buf, int n) {
         release(curr_task->task->resources[rd]->sem);
     }
     else {
-        for(int i = 0; i < n; i++) {
-            buf[i] = default_resources[rd]->reader(default_resources[rd]->env);
+        if(default_resources[rd] != NULL) {
+            for(int i = 0; i < n; i++) {
+                buf[i] = default_resources[rd]->reader(default_resources[rd]->env);
+            }
         }
     }
 }
