@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-void usb_test(int argc, char **argv) {
+void rd_test(int argc, char **argv) {
     char c;
 
     fprintf(1, "Press q to quit.\r\n");
