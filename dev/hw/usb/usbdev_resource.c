@@ -22,7 +22,9 @@ resource usb_console = {.writer = &usbdev_resource_write,
                         .sem    = &usbdev_semaphore};
 
 void usbdev_resource_write(char c, void *env) {
-    usbdev_write(&ep_tx, (uint8_t *) &c, 1);
+    if (usb_ready) {
+        usbdev_write(&ep_tx, (uint8_t *) &c, 1);
+    }
 }
 
 char usbdev_resource_read(void *env) {
