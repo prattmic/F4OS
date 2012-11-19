@@ -54,8 +54,8 @@ void unit_tests(void) {
     //printf("Abandoned semaphore test...");
     //abandon();
 
-    printf("Deadlock test...");
-    deadlock();
+    //printf("Deadlock test...");
+    //deadlock();
 
     printf("IPC Test...");
     infinite_ipc();
