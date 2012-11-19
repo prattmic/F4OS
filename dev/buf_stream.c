@@ -43,7 +43,7 @@ void buf_stream_write(char c, void *env) {
 }
 
 void buf_stream_close(resource *resource) {
-    acquire(resource->sem);
+    acquire_for_free(resource->sem);
     free(resource->env);
     free((void*) resource->sem);
 }

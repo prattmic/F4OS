@@ -30,6 +30,12 @@ void acquire(volatile struct semaphore *semaphore) {
     }
 }
 
+/* Acquire semaphore, but remove from held semaphores list so that it can be freed. */
+void acquire_for_free(volatile struct semaphore *semaphore) {
+    acquire(semaphore);
+    held_semaphores_remove(curr_task->task->held_semaphores, semaphore);
+}
+
 int8_t try_lock(volatile uint8_t *l) {
     uint8_t taken = 1;
     uint8_t ret;
@@ -86,6 +92,12 @@ int get_lock(volatile struct semaphore *semaphore) {
 }
 
 void release(volatile struct semaphore *semaphore) {
+    if (!semaphore->lock) { /* WTF, don't release an unlocked semaphore */
+        semaphore->held_by = NULL;
+        semaphore->waiting = NULL;
+        return;
+    }
+
     if (!task_switching) {
         semaphore->lock = 0;
         semaphore->held_by = NULL;

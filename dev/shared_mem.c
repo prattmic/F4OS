@@ -57,6 +57,6 @@ void shared_mem_write(char c, void *env) {
 
 void shared_mem_close(resource *resource) {
     kfree(resource->env);
-    acquire(resource->sem);
+    acquire_for_free(resource->sem);
     kfree((void*) resource->sem);
 }
