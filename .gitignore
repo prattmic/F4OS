@@ -9,7 +9,7 @@
 *.fuse*
 *.pyc
 *.swo
+*.out
 out/
 tags
 core
-lorem.py

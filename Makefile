@@ -117,6 +117,9 @@ burn:
 ctags:
 	ctags -R .
 
+cscope:
+	find . -name "*.[chS]" -print | xargs cscope -b -q -k
+
 $(PREFIX)/%.o : %.S
 	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
