@@ -10,11 +10,11 @@
 
 /* INSANE defs to make it obvious where the magic numbers come from */
 #define DT_TO_JIFFIES   10000
-#define DELTA_T         .01
+#define DELTA_T         .01f
 #define CUTOFF_FREQ     25
 #define TAU             1/CUTOFF_FREQ
 #define ACC_LP_GAIN     DELTA_T/(TAU+DELTA_T)
-#define G(x)            x*.018
+#define G(x)            x*.018f
 
 typedef struct accel_data {
     int8_t x;
@@ -45,5 +45,5 @@ void lowpass_test(int argc, char **argv) {
 void ghetto_lp(void) {
     read(accelrd, (char *)data, 3);
     theta = lowpass(theta, atan2(G((float)data->z), G((float)data->y)), ACC_LP_GAIN);
-    printf("Filtered roll: %f\r\n", theta*180/3.1415926);
+    printf("Filtered roll: %f\r\n", theta*180/3.1415926f);
 }

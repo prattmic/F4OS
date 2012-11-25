@@ -4,7 +4,7 @@
 float atan2(float y, float x) {
     float coeff_1 = FLOAT_PI/4;
     float coeff_2 = 3*coeff_1;
-    float abs_y = fabsf(y)+1e-10;      // kludge to prevent 0/0 condition
+    float abs_y = fabsf(y)+1e-10f;      // kludge to prevent 0/0 condition
     float angle = 0.0f;
     if (x >= 0) {
         float r = (x - abs_y) / (x + abs_y);
