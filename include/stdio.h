@@ -6,6 +6,10 @@
 
 typedef uint8_t rd_t;
 
+#define stdin   0
+#define stdout  0
+#define stderr  1
+
 void write(rd_t rd, char *d, int n) __attribute__((section(".kernel")));
 void close(rd_t rd) __attribute__((section(".kernel")));
 void read(rd_t rd, char *buf, int n) __attribute__((section(".kernel")));
@@ -23,6 +27,6 @@ void puts(char *s);
 void putc(char letter);
 char getc(void);
 void printx(char *s, uint8_t *x, int n);
-#define printf(args...) fprintf(0, args)
+#define printf(args...) fprintf(stdout, args)
 
 #endif

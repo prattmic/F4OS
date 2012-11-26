@@ -26,7 +26,7 @@ static void printk_putc(rd_t r, char c) {
 void printk(char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    vfprintf(0, fmt, ap, &printk_puts, &printk_putc);
+    vfprintf(stderr, fmt, ap, &printk_puts, &printk_putc);
     va_end(ap);
 }
 
