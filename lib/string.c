@@ -110,18 +110,25 @@ void ftoa(float num, float tolerance, char buf[], uint32_t n) {
         *(buf++) = '.';
     }
 
-    while ((num > 0 + tolerance || m >= 0) && n > 0) {
+    while ((num > 0 + tolerance || m >= 0) && n > 1) {
         float weight = powf(10.0f, m);
         digit = floorf(num / weight);
         num -= (digit*weight);
         *(buf++)= '0' + digit;
         n--;
-        if (m == 0 && n > 0) {
+        if (m == 0 && n > 1) {
             *(buf++) = '.';
             n--;
         }
         m--;
     }
+
+    /* Print zero after decimal at end */
+    if (*(buf-1) == '.' && n > 1) {
+        *(buf++) = '0';
+        n--;
+    }
+
     *(buf) = '\0';
 }
 
