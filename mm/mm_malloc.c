@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <kernel/fault.h>
 #include <mm/mm.h>
 #include "mm_internals.h"
 
@@ -42,6 +43,11 @@ void *alloc(uint8_t order, struct buddy *buddy) {
     if (buddy->list[order] != NULL) {
         node = buddy->list[order];
         buddy->list[order] = buddy->list[order]->next;
+
+        if (node->order != order) {
+            panic_print("mm: node->order != order (task probably overflowed its stack)\r\n");
+        }
+
         return (void *) ((uint32_t) node) + BUDDY_HEADER_SIZE;
     }
     else {
@@ -60,6 +66,10 @@ void *alloc(uint8_t order, struct buddy *buddy) {
         while (new_order > order) {
             node = buddy_split(node, buddy);
             new_order--;
+        }
+
+        if (node->order != order) {
+            panic_print("mm: node->order != order (task probably overflowed its stack)\r\n");
         }
 
         return (void *) ((uint32_t) node) + BUDDY_HEADER_SIZE;
