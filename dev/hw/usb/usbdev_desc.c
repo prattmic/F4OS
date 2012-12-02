@@ -24,7 +24,8 @@ struct endpoint ep_ctl = {
         .len = 0,
         .start = 0,
         .end = 0
-    }
+    },
+    .request_disable = 0
 };
 
 struct endpoint ep_acm = {
@@ -42,7 +43,8 @@ struct endpoint ep_acm = {
         .len = 0,
         .start = 0,
         .end = 0
-    }
+    },
+    .request_disable = 0
 };
 
 uint8_t ep_rx_buf[4*USB_RX_FIFO_SIZE];
@@ -62,7 +64,8 @@ struct endpoint ep_rx = {
         .len = 0,
         .start = 0,
         .end = 0
-    }
+    },
+    .request_disable = 0
 };
 
 struct endpoint ep_tx = {
@@ -80,7 +83,8 @@ struct endpoint ep_tx = {
         .len = 0,
         .start = 0,
         .end = 0
-    }
+    },
+    .request_disable = 0
 };
 
 struct endpoint *endpoints[4] = {NULL};

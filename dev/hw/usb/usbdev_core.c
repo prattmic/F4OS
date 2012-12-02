@@ -56,16 +56,49 @@ void usbdev_write(struct endpoint *ep, uint8_t *packet, int size) {
         packets = 1;
     }
 
+    int count = 500;
     /* Setup endpoint for transmit */
     if (ep->num == 0) {
         /* Wait for ep to disable */
-        while (*USB_FS_DIEPCTL0 & USB_FS_DIEPCTL0_EPENA);
+        while (*USB_FS_DIEPCTL0 & USB_FS_DIEPCTL0_EPENA && count > 0) {
+            count--;
+        }
+
+        /* Abort timed out transfer */
+        if (count <= 0) {
+            ep->request_disable = 1;
+
+            *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_SNAK;
+            *USB_FS_DIEPMSK |= USB_FS_DIEPMSK_INEPNEM | USB_FS_DIEPMSK_EPDM;
+
+            /* Wait for endpoint to disable */
+            while(ep->request_disable);
+
+            *USB_FS_DIEPMSK &= ~(USB_FS_DIEPMSK_INEPNEM | USB_FS_DIEPMSK_EPDM);
+        }
+
         *USB_FS_DIEPTSIZ0 = USB_FS_DIEPTSIZ0_PKTCNT(packets) | USB_FS_DIEPTSIZ0_XFRSIZ(written);
         *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_CNAK | USB_FS_DIEPCTL0_EPENA;
     }
     else {
         /* Wait for ep to disable */
-        while (*USB_FS_DIEPCTL(ep->num) & USB_FS_DIEPCTLx_EPENA);
+        while (*USB_FS_DIEPCTL(ep->num) & USB_FS_DIEPCTLx_EPENA && count > 0) {
+            count--;
+        }
+
+        /* Abort timed out transfer */
+        if (count <= 0) {
+            ep->request_disable = 1;
+
+            *USB_FS_DIEPCTL(ep->num) |= USB_FS_DIEPCTLx_SNAK;
+            *USB_FS_DIEPMSK |= USB_FS_DIEPMSK_INEPNEM | USB_FS_DIEPMSK_EPDM;
+
+            /* Wait for endpoint to disable */
+            while(ep->request_disable);
+
+            *USB_FS_DIEPMSK &= ~(USB_FS_DIEPMSK_INEPNEM | USB_FS_DIEPMSK_EPDM);
+        }
+
         *USB_FS_DIEPTSIZ(ep->num) = USB_FS_DIEPTSIZx_PKTCNT(packets) | USB_FS_DIEPTSIZx_XFRSIZ(written);
         *USB_FS_DIEPCTL(ep->num) |= USB_FS_DIEPCTLx_CNAK | USB_FS_DIEPCTLx_EPENA;
     }
