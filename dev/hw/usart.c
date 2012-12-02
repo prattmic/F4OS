@@ -28,6 +28,8 @@ static uint16_t usart_baud(uint32_t baud) __attribute__((section(".kernel")));
 char *usart_rx_buf;
 char *usart_tx_buf;
 
+uint8_t usart1_ready = 0;
+
 void init_usart1(void) {
     *RCC_APB2ENR |= (1 << 4);   /* Enable USART1 Clock */
     *RCC_AHB1ENR |= (1 << 1);   /* Enable GPIOB Clock */
@@ -122,6 +124,8 @@ void init_usart1(void) {
 
     /* Reset semaphore */
     init_semaphore(&usart_semaphore);
+
+    usart1_ready = 1;
 }
 
 /* Calculates the value for the USART_BRR */

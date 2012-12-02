@@ -8,5 +8,6 @@ char usart_getc(void *env) __attribute__((section(".kernel")));
 void usart_close(resource *resource) __attribute__((section(".kernel")));
 
 extern struct semaphore usart_semaphore;
+extern uint8_t usart1_ready;
 
 #endif
