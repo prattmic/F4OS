@@ -94,8 +94,8 @@ void init_usart1(void) {
     }
     else {
         /* Clear buffers */
-        memset32(usart_rx_buf, 0, USART_DMA_MSIZE);
-        memset32(usart_tx_buf, 0, USART_DMA_MSIZE);
+        memset(usart_rx_buf, 0, USART_DMA_MSIZE);
+        memset(usart_tx_buf, 0, USART_DMA_MSIZE);
         *DMA2_S2M0AR = (uint32_t) usart_rx_buf;
         *DMA2_S7M0AR = (uint32_t) usart_tx_buf;
     }
