@@ -58,6 +58,7 @@ disable_psp:
 save_context:
     mrs     r0, psp
     stmfd   r0!, {r4-r11}   /* Saves multiple registers and writes the final address back to Rn */
+    vstmdb  r0!, {s16-s31}  /* Save FPU registers */
     msr     psp, r0
     bx      lr
 
@@ -68,6 +69,7 @@ save_context:
 .type       restore_context, %function
 restore_context:
     mrs     r0, psp
+    vldmia  r0!, {s16-s31}  /* Restore FPU registers */
     ldmfd   r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
     msr     psp, r0
     bx      lr
@@ -83,6 +85,7 @@ restore_context:
 restore_full_context:
     mrs     r0, psp
 
+    vldmia  r0!, {s16-s31}  /* Restore FPU registers */
     ldmfd   r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
 
     ldr     r1, [r0, #28]        /* load xpsr */
@@ -94,8 +97,27 @@ restore_full_context:
     ldr     r12, [r0, #16]
     ldr     lr, [r0, #20]
 
-    /*vldm    r0, {s16-s31} */   /* Restore FPU registers */ /* Currently space is reserved for these, but they aren't saved */
-    add     r0, r0, #100    /* Skip FP registers, leave space for three registers */
+    vldr    s0, [r0, #32]
+    vldr    s1, [r0, #36]
+    vldr    s2, [r0, #40]
+    vldr    s3, [r0, #44]
+    vldr    s4, [r0, #48]
+    vldr    s5, [r0, #52]
+    vldr    s6, [r0, #56]
+    vldr    s7, [r0, #60]
+    vldr    s8, [r0, #64]
+    vldr    s9, [r0, #68]
+    vldr    s10, [r0, #72]
+    vldr    s11, [r0, #76]
+    vldr    s12, [r0, #80]
+    vldr    s13, [r0, #84]
+    vldr    s14, [r0, #88]
+    vldr    s15, [r0, #92]
+
+    ldr     r1, [r0, #96]
+    vmsr    fpscr, r1
+
+    add     r0, r0, #100
 
     ldr     r1, [r0, #-76]  /* load in old pc value */
 
