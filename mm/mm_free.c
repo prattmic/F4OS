@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <kernel/semaphore.h>
+#include <kernel/fault.h>
 
 #include <mm/mm.h>
 #include "mm_internals.h"
@@ -64,6 +65,10 @@ void buddy_merge(struct heapnode *node, struct buddy *buddy) {
         return;
     }
     else {  /* Buddy free */
+        if (node->order != buddy_node->order) {
+            panic_print("mm: node->order != buddy_node->order (task probably overflowed its stack)\r\n");
+        }
+
         /* Remove from list */
         if (buddy_prev_node == NULL) {
             buddy->list[node->order] = buddy_curr_node->next;
