@@ -22,7 +22,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         if (reg_task == NULL) {
             free(task->stack_limit);
             kfree(task);
-            printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
+            printk("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
             panic_print("Could not allocate task.");
         }
         else {
@@ -35,7 +35,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
                 free(task->stack_limit);
                 kfree(task);
                 kfree(reg_task);
-                printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
+                printk("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
                 panic_print("Could not allocate task.");
             }
             else {
@@ -44,7 +44,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         }
     }
     else {
-        printf("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
+        printk("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
         panic_print("Could not allocate task.");
     }
 }
