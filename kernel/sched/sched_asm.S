@@ -88,50 +88,36 @@ restore_full_context:
     vldmia  r0!, {s16-s31}  /* Restore FPU registers */
     ldmfd   r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
 
-    ldr     r1, [r0, #28]        /* load xpsr */
-    msr     apsr_nzcvq, r1  /* Restore the PSR */
-    msr     iepsr, r1       /* Restore the PSR */
+    add     r0, r0, #12     /* Skip r0,r1,r2 for now */
 
-    ldr     r2, [r0, #8]
-    ldr     r3, [r0, #12]
-    ldr     r12, [r0, #16]
-    ldr     lr, [r0, #20]
+    ldmia   r0!, {r3,r12,lr}
 
-    vldr    s0, [r0, #32]
-    vldr    s1, [r0, #36]
-    vldr    s2, [r0, #40]
-    vldr    s3, [r0, #44]
-    vldr    s4, [r0, #48]
-    vldr    s5, [r0, #52]
-    vldr    s6, [r0, #56]
-    vldr    s7, [r0, #60]
-    vldr    s8, [r0, #64]
-    vldr    s9, [r0, #68]
-    vldr    s10, [r0, #72]
-    vldr    s11, [r0, #76]
-    vldr    s12, [r0, #80]
-    vldr    s13, [r0, #84]
-    vldr    s14, [r0, #88]
-    vldr    s15, [r0, #92]
+    add     r0, r0, #4      /* Skip PC for now */
 
-    ldr     r1, [r0, #96]
+    ldr     r1, [r0]        /* Load xPSR */
+    msr     apsr_nzcvq, r1  /* Restore the xPSR */
+    msr     iepsr, r1       /* Restore the xPSR */
+    add     r0, r0, #4      /* Increment for xPSR */
+
+    vldmia  r0!, {s0-s15}
+
+    ldr     r1, [r0]        /* Load FPSCR */
     vmsr    fpscr, r1
+    add     r0, r0, #4      /* Increment for FPSCR */
 
-    add     r0, r0, #100
-
-    ldr     r1, [r0, #-76]  /* load in old pc value */
+    ldr     r1, [r0, #-76]  /* Load in old PC value */
 
     mov     r2, #0x8100000
     cmp     r1, r2
     bgt     panic           /* Panic if PC is > 0x8100000 */
-    ldr     r2, [r0, #8]
 
-    orr     r1, r1, #1      /* bit[0] must be set to 1 for thumb mode */
+    orr     r1, r1, #1      /* bit[0] of PC must be set to 1 for thumb mode */
     str     r1, [r0, #4]    /* Stack PC */
 
     ldr     r1, [r0, #-100] /* Load r0 value */
     str     r1, [r0]        /* Stack r0 */
-    
+
+    ldr     r2, [r0, #-92]  /* Restore r2 */
     ldr     r1, [r0, #-96]  /* Restore r1 */
 
     msr     psp, r0
