@@ -20,11 +20,11 @@ void memset32(void *p, int32_t value, uint32_t size) {
 }
 
 /* Set size bytes to value from p */
-void memset(void *p, int32_t value, uint32_t size) {
-    uint32_t *end = (uint32_t *) ((uint32_t) p + size);
+void memset(void *p, uint8_t value, uint32_t size) {
+    uint8_t *end = (uint8_t *) ((uint32_t) p + size);
 
-    while ( (uint32_t*) p < end ) {
-        *((uint32_t*)p) = value;
+    while ( (uint8_t*) p < end ) {
+        *((uint8_t*)p) = value;
         p++;
     }
 }
