@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <mm/mm.h>
+#include <kernel/fault.h>
 
 #include <kernel/sched.h>
 #include "sched_internals.h"
@@ -47,6 +48,10 @@ void end_task(void) {
 
 /* Called by svc_handler */
 void svc_end_task(void) {
+    if (curr_task->task->stack_limit > curr_task->task->stack_top) {
+        panic_print("Task has overflowed its stack.");
+    }
+
     remove_task(&task_list, curr_task);
 
     curr_task->prev = NULL;
