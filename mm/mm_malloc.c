@@ -45,7 +45,7 @@ void *alloc(uint8_t order, struct buddy *buddy) {
         buddy->list[order] = buddy->list[order]->next;
 
         if (node->order != order) {
-            panic_print("mm: node->order != order (task probably overflowed its stack)\r\n");
+            panic_print("mm: node->order != order\r\n");
         }
 
         return (void *) ((uint32_t) node) + BUDDY_HEADER_SIZE;
@@ -69,7 +69,7 @@ void *alloc(uint8_t order, struct buddy *buddy) {
         }
 
         if (node->order != order) {
-            panic_print("mm: node->order != order (task probably overflowed its stack)\r\n");
+            panic_print("mm: node->order != order\r\n");
         }
 
         return (void *) ((uint32_t) node) + BUDDY_HEADER_SIZE;

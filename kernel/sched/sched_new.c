@@ -104,6 +104,7 @@ void append_task(task_node_list *list, task_node *task) {
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {
     asm volatile("mov     r5, #0                                                              \n\
+                  stmdb   %[stack]!, {r5}   /* Empty */                                       \n\
                   stmdb   %[stack]!, {r5}   /* FPSCR */                                       \n\
                   stmdb   %[stack]!, {r5}   /* S15 */                                         \n\
                   stmdb   %[stack]!, {r5}                                                     \n\

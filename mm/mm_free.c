@@ -66,7 +66,7 @@ void buddy_merge(struct heapnode *node, struct buddy *buddy) {
     }
     else {  /* Buddy free */
         if (node->order != buddy_node->order) {
-            panic_print("mm: node->order != buddy_node->order (task probably overflowed its stack)\r\n");
+            panic_print("mm: node->order != buddy_node->order\r\n");
         }
 
         /* Remove from list */
