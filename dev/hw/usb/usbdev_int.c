@@ -251,6 +251,13 @@ static void gint_iepint(void) {
         if (interrupts & USB_FS_DIEPINTx_EPDISD) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_EPDISD;
             DEBUG_PRINT("Endpoint disabled. ");
+
+            *USB_FS_GRSTCTL = USB_FS_GRSTCTL_TXFNUM(i) | USB_FS_GRSTCTL_TXFFLSH;
+
+            /* Wait for FIFO to flush */
+            while (*USB_FS_GRSTCTL & USB_FS_GRSTCTL_TXFFLSH);
+
+            endpoints[i]->request_disable = 0;
         }
         if (interrupts & USB_FS_DIEPINTx_TOC) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_TOC;
@@ -263,11 +270,26 @@ static void gint_iepint(void) {
         if (interrupts & USB_FS_DIEPINTx_INEPNE) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_INEPNE;
             DEBUG_PRINT("IN endpoint NAK effective. ");
+
+            /* Disable endpoint */
+            if (endpoints[i]->request_disable) {
+                DEBUG_PRINT("Endpoint disable requested. ");
+                if (i == 0) {
+                    *USB_FS_DIEPCTL0 |= USB_FS_DIEPCTL0_EPDIS | USB_FS_DIEPCTL0_SNAK;
+                }
+                else {
+                    *USB_FS_DIEPCTL(i) |= USB_FS_DIEPCTLx_EPDIS | USB_FS_DIEPCTLx_SNAK;
+                }
+            }
         }
         if (interrupts & USB_FS_DIEPINTx_TXFE) {
             *USB_FS_DIEPINT(i) = USB_FS_DIEPINTx_TXFE;
             DEBUG_PRINT("Transmit FIFO empty. ");
-            usbdev_data_in(endpoints[i]);
+
+            /* A ternary operation in an if statement, oh yeah! */
+            if ((i == 0 ? (*USB_FS_DIEPCTL0 & USB_FS_DIEPCTL0_EPENA) : (*USB_FS_DIEPCTL(i) & USB_FS_DIEPCTLx_EPENA))) {
+                usbdev_data_in(endpoints[i]);
+            }
         }
     }
 

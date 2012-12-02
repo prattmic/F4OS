@@ -196,6 +196,7 @@ struct endpoint {
     uint16_t            mpsize;
     volatile struct ring_buffer  rx;
     volatile struct ring_buffer  tx;
+    volatile uint8_t    request_disable;
 };
 
 void usbdev_reset(void);
