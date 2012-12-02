@@ -49,7 +49,7 @@ void main(void) {
 }
 
 void unit_tests(void) {
-    printf("Print Test...Test passed.\r\n");
+    fprintf(stderr, "Print Test...Test passed.\r\n");
 
     //printf("Abandoned semaphore test...");
     //abandon();
@@ -57,7 +57,7 @@ void unit_tests(void) {
     //printf("Deadlock test...");
     //deadlock();
 
-    printf("IPC Test...");
+    fprintf(stderr, "IPC Test...");
     infinite_ipc();
 }
 
