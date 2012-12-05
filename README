@@ -27,7 +27,7 @@ recommended: https://github.com/texane/stlink
 With stlink in your path, "make burn" will flash your device.
 
 For the LM4F120H5, I have used the JLink JTAG debugger, which
-'make burn' will attempt to use.  The Stellaris Launchpad has an
+'make burn' will attempt to use.  The Stellaris Launchpad also has an
 integrated debugger, which you should be able to use with lm4tools:
 https://github.com/utzig/lm4tools
 

@@ -25,8 +25,7 @@ char banner[] = "Welcome to...\r\n"
                 "88       8888888888888  Y8,        ,8P          `8b  \r\n"
                 "88                88     Y8a.    .a8P   Y8a     a8P  \r\n"
                 "88                88      `\"Y8888Y\"\'     \"Y88888P\"   \r\n"
-                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
-                "LM4F Edition\r\n";
+                "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n";
 
 int os_start(void) __attribute__((section(".kernel")));
 void clock(void);
