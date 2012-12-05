@@ -19,7 +19,7 @@ CFLAGS += $(USR_CFLAGS)
 SRCS = $(USR_SRCS)
 endif
 ###########################
-BOARD ?= lm4f120h5
+BOARD ?= stm32f40x
 
 LINK_SCRIPT = board/$(BOARD)/link.ld
 
