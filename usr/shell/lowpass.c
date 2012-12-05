@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <board/board.h>
 #include <dev/registers.h>
 #include <kernel/sched.h>
 #include <math.h>
@@ -28,6 +29,9 @@ rd_t accelrd = 255;
 float theta = 0;
 
 void lowpass_test(int argc, char **argv) {
+#ifndef HAVE_SPI
+    printf("SPI support required.\r\n");
+#else
     if (argc != 1) {
         printf("Usage: %s\r\n", argv[0]);
         return;
@@ -40,6 +44,7 @@ void lowpass_test(int argc, char **argv) {
         accelrd = open_discovery_accel();
         new_task(&ghetto_lp, 8, DELTA_T*DT_TO_JIFFIES);
     }
+#endif
 }
 
 void ghetto_lp(void) {
