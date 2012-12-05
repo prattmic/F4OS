@@ -47,7 +47,7 @@ void i2c1_stop(void) {
     *I2C1_CR1 |= I2C_CR1_STOP;
 }
 
-void init_i2c1(void) {
+void init_i2c(void) {
     *RCC_APB1ENR |= RCC_APB1ENR_I2C1EN;     /* Enable I2C1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;    /* Enable GPIOB Clock */
 

@@ -17,13 +17,13 @@ void busfault_handler(void);
 void usagefault_handler(void);
 
 static void printk_puts(rd_t r, char *s) {
-    if (usart1_ready) {
+    if (usart_ready) {
         usart_puts(s, NULL);
     }
 }
 
 static void printk_putc(rd_t r, char c) {
-    if (usart1_ready) {
+    if (usart_ready) {
         usart_putc(c, NULL);
     }
 }

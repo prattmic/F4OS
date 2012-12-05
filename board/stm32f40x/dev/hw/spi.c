@@ -49,7 +49,7 @@ uint8_t spinoread(uint8_t addr) {
     return -1;
 }
 
-void init_spi1(void) {
+void init_spi(void) {
     *RCC_APB2ENR |= RCC_APB2ENR_SPI1EN;     /* Enable SPI1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOAEN;    /* Enable GPIOA Clock */
 
