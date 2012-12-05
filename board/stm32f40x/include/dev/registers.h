@@ -121,7 +121,7 @@
 
 /* GPIO Port D (GPIOD) */
 #define GPIOD_MODER                     (volatile uint32_t *) (GPIOD_BASE + 0x00)               /* Port D mode register */
-#define LED_ODR                         (volatile uint32_t *) (GPIOD_BASE + 0x14)               /* LED Output Data Register */
+#define GPIOD_ODR                       (volatile uint32_t *) (GPIOD_BASE + 0x14)               /* Port D Output Data Register */
 
 /* GPIO Port E (GPIOE) */
 #define GPIOE_MODER                     (volatile uint32_t *) (GPIOE_BASE + 0x00)               /* Port E mode register */
