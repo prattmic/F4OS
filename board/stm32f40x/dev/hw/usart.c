@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <dev/registers.h>
+#include <dev/cortex_m.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

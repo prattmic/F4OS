@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <dev/resource.h>
 #include <dev/registers.h>
+#include <dev/cortex_m.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
