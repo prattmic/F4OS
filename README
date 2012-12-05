@@ -1,27 +1,49 @@
-A small, real time OS for the ARM Cortex-M4F STM32F4.
+A small, real time OS for ARM Cortex-M4F microcontrollers.
 
-Developed on STM32F4DISCOVERY, but should be portable to other 
-STM32F4 boards with very little modification.  In fact, with minor
-changes (such as disabling the FPU and changing pinouts), it should
-be portable to STM32F0 and STM32F1 chips.
+Originally developed for the STM32F4DISCOVERY, but should work
+just fine on any STM32F40x microcontroller.  Other STM32F4s should
+be very easy to port to.
+
+Initial support has also been added for TI LM4F120H5 microcontrollers
+(TI Stellaris Launchpad).  Fewer peripherals have been developed, but
+the core OS works well.
+
+It should be possible to port to additional Cortex M4F cores simply
+by using the two board/ folders as an example.  The core of what is
+needed is a clock initialization function, and drivers for desired
+peripherals.
 
 Building requires arm-none-eabi-toolchain.  For hardfloat support, see
 https://github.com/prattmic/arm-cortex-m4-hardfloat-toolchain or
 https://launchpad.net/gcc-arm-embedded.
 
-For flashing and debugging, texane's stlink is recommended:
-https://github.com/texane/stlink
+Specify the device you are building for using the BOARD environmental
+variable.  For example, to build for the LM4F120H5, run 'BOARD=lm4f120h5 make'.
+By default, make builds with BOARD=stm32f40x.
+
+For flashing and debugging on the STM32F40x, texane's stlink is 
+recommended: https://github.com/texane/stlink
 
 With stlink in your path, "make burn" will flash your device.
+
+For the LM4F120H5, I have used the JLink JTAG debugger, which
+'make burn' will attempt to use.  The Stellaris Launchpad has an
+integrated debugger, which you should be able to use with lm4tools:
+https://github.com/utzig/lm4tools
+
+'make burn' calls flash.sh in the board folder, so modify it to
+your heart's content.
 
 By default, the shell program in usr/shell/ is built and run at
 boot.  The main() function in main.c is called by the scheduler
 before task switching begins and should be used to create tasks
 that run at boot.
 
-By default resource 0 is the USB device, which should appear as a
-USB CDC ACM (Virtual Terminal) device on the host.  Resource 1 is
-the UART on PB6 (TX) and PB7 (RX).  The default resources can be
-changed in dev/resources.c.
+On the STM32F40x, resource 0 (stdin/out) is the USB device, which 
+should appear as a USB CDC ACM (Virtual Terminal) device on the host.
+Resource 1 (stderr) is the UART on PB6 (TX) and PB7 (RX).  The default 
+resources can be changed in the board.c file for each board.
+
+On the LM4F120H5, resources 0 and 1 are defaulted to UART0 on PA0 and PA1.
 
 Michael Pratt
