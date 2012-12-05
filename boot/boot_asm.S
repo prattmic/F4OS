@@ -1,3 +1,5 @@
+#include <board/board.h>
+
 .syntax unified
 .thumb 
 
@@ -91,7 +93,11 @@
 .word   hang                /* 64 ... */
 .word   hang                /* 65 ... */
 .word   hang                /* 66 ... */
+#ifdef HAVE_USBDEV
 .word   usbdev_handler      /* 67 USB OTG FS Global Interrupt */
+#else
+.word   hang                /* 67 ... */
+#endif
 .word   hang                /* 68 ... */
 
 /* Bootloader */
