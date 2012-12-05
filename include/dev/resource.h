@@ -20,4 +20,6 @@ struct task_ctrl;
 void add_resource(struct task_ctrl* tcs, resource* r) __attribute__((section(".kernel")));
 void resource_setup(struct task_ctrl* tcs) __attribute__((section(".kernel")));
 
+extern resource *default_resources[];
+
 #endif

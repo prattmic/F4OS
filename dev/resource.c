@@ -6,16 +6,9 @@
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
-#include <dev/hw/usart.h>
-#include <dev/hw/usbdev.h>
+#include <board/board.h>
 
 #include <dev/resource.h>
-
-extern resource uart_console;
-extern resource usb_console;
-resource *default_resources[RESOURCE_TABLE_SIZE] = {&usb_console,
-                                                    &uart_console,
-                                                    NULL};
 
 static inline uint8_t resource_null(resource *r) {
     if (r->writer == NULL && r->reader == NULL && r->closer == NULL && r->env == NULL && r->sem == NULL) {

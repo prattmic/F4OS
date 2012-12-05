@@ -1,6 +1,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include <board/board.h>
+
 #include "mm_internals.h"
 
 extern uint32_t _suserheap;

@@ -3,12 +3,6 @@
 
 #include <kernel/semaphore.h>
 
-#define USER_MAX_ORDER   17
-#define USER_MIN_ORDER   4
-
-#define KERNEL_MAX_ORDER   15
-#define KERNEL_MIN_ORDER   4
-
 #define BUDDY_HEADER_SIZE   sizeof(uint32_t)
 
 struct heapnode {
