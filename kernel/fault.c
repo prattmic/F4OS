@@ -7,6 +7,7 @@
 
 #include <dev/resource.h>
 #include <dev/hw/usart.h>
+#include <dev/hw/gpio.h>
 
 #include <kernel/fault.h>
 
@@ -39,7 +40,7 @@ void panic_print(char *s) {
     __asm__("cpsid  i");
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
-    *LED_ODR ^= (1 << 14);
+    gpio_toggle_led(0);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
@@ -52,10 +53,10 @@ void panic_print(char *s) {
 }
 
 void toggle_led_delay(void) {
-    uint32_t count = 10000000;
+    uint32_t count = 1000000;
 
     /* Toggle LED */
-    *LED_ODR ^= (1 << 14);
+    gpio_toggle_led(0);
 
     while (--count) {
         float delay = 2.81;
@@ -69,7 +70,7 @@ void hardfault_handler(void) {
 
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
-    *LED_ODR ^= (1 << 14);
+    gpio_toggle_led(0);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
@@ -108,7 +109,7 @@ void memmanage_handler(void) {
 
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
-    *LED_ODR ^= (1 << 14);
+    gpio_toggle_led(0);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
@@ -164,7 +165,7 @@ void busfault_handler(void) {
 
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
-    *LED_ODR ^= (1 << 14);
+    gpio_toggle_led(0);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */
@@ -227,7 +228,7 @@ void usagefault_handler(void) {
 
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
-    *LED_ODR ^= (1 << 14);
+    gpio_toggle_led(0);
     /* We're done here... */
     task_switching = 0;
     /* Force release of usart semaphore */

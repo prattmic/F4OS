@@ -10,9 +10,5 @@ void init_systick(void) {
 
     /* Set PendSV to lowest priority */
     *NVIC_IPR14 = 0xFF;
-
-    /* Enable LED for handler */
-    *RCC_AHB1ENR |= (1 << 3);
-    *GPIOD_MODER |= (1 << (12 * 2));
 }
 

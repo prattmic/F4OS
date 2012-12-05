@@ -9,9 +9,6 @@ uint8_t task_switching = 0;
 static void start_task_switching(void) __attribute__((section(".kernel")));
 
 void start_sched(void) {
-    /* Enable blue and orange LEDs */
-    *GPIOD_MODER |= (1 << (13 * 2)) | (1 << (15 * 2));
-
     /* Set up initial tasks */
     new_task(&kernel_task, 1, 0);
 

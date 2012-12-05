@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dev/registers.h>
+#include <dev/hw/gpio.h>
 #include <kernel/sched.h>
 
 #include "blink.h"
@@ -43,7 +44,7 @@ void blink(int argc, char **argv) {
                 printf("Done.\r\n");
             }
         }
-        else if (!strncmp(argv[i], "green", 16)) {
+        else if ((num_leds >= 2) && !strncmp(argv[i], "green", 16)) {
             if (enabled_green) {
                 printf("Green LED already enabled.\r\n");
             }
@@ -62,15 +63,14 @@ void blink(int argc, char **argv) {
 
 void blue_led(void) {
     /* Toggle LED */
-    *LED_ODR ^= (1 << 15);
+    gpio_toggle_led(3);
 }
 
 void orange_led(void) {
     /* Toggle LED */
-    *LED_ODR ^= (1 << 13);
-
+    gpio_toggle_led(2);
 }
 
 void green_led(void) {
-    *LED_ODR ^= (1 << 12);
+    gpio_toggle_led(1);
 }
