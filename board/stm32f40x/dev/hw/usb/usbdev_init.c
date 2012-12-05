@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <dev/registers.h>
+#include <dev/cortex_m.h>
 #include <kernel/fault.h>
 
 #include "usbdev_internals.h"

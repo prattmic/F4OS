@@ -1,4 +1,5 @@
 #include <dev/registers.h>
+#include <dev/cortex_m.h>
 #include <dev/hw/tim.h>
 
 void init_tim2(void) {
