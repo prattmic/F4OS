@@ -1,27 +1,9 @@
-# End users specify objects here
-
-# usr/shell/
-USR_VPATH = usr/shell/
-USR_CFLAGS = -Iusr/shell/
-USR_SRCS = main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c rd_test.c
-
-##########################
-UNIT_TESTS ?= 0
-
-ifeq ($(UNIT_TESTS),1)
-# usr/unit_tests/
-VPATH = usr/unit_tests/
-CFLAGS += 
-SRCS = main.c
-else
-VPATH = $(USR_VPATH)
-CFLAGS += $(USR_CFLAGS)
-SRCS = $(USR_SRCS)
-endif
-###########################
 BOARD ?= stm32f40x
+USR ?= shell
 
 LINK_SCRIPT = board/$(BOARD)/link.ld
+
+###################################################
 
 # boot/
 VPATH += boot/
@@ -125,6 +107,9 @@ cscope:
 $(PREFIX)/$(BOARD).o:
 	$(MAKE) -C board/$(BOARD)/
 
+$(PREFIX)/usr_$(USR).o:
+	$(MAKE) -C usr/$(USR)/
+
 $(PREFIX)/%.o : %.S
 	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
@@ -148,7 +133,7 @@ proj: 	$(PREFIX)/$(PROJ_NAME).elf
 $(PREFIX):
 	mkdir -p $(PREFIX)
 
-$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(BOARD).o $(OBJS) 
+$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(BOARD).o $(PREFIX)/usr_$(USR).o $(OBJS) 
 	$(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
 	$(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
