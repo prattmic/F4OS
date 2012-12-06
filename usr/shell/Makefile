@@ -3,6 +3,11 @@
 # /
 SRCS += main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c rd_test.c
 
+# Date and rev for uname
+DATE := "$(shell date -u)"
+REV := $(shell git rev-list HEAD | wc -l | tr -d ' ')
+CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_REV=$(REV)
+
 ###################################################
 
 OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
