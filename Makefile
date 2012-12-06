@@ -84,9 +84,6 @@ all: $(PREFIX) proj
 unoptimized: CFLAGS += -O0
 unoptimized: $(PREFIX) proj
 
-unit-tests:
-	UNIT_TESTS=1 $(MAKE) -e
-
 again: clean all
 
 # Flash the board
