@@ -1,5 +1,3 @@
-#define TARGET_IS_BLIZZARD_RA2
-#define PART_LM4F120H5QR
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
