@@ -81,7 +81,9 @@ void usart_putc(char c, void *env) {
     /* Wait until transmit FIFO not full*/
     while (UART0_FR_R & UART_FR_TXFF) {
         if (task_switching && !IPSR()) {
+            release(&usart_semaphore);
             SVC(SVC_YIELD);
+            acquire(&usart_semaphore);
         }
     }
 
