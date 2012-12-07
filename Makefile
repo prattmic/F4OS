@@ -1,7 +1,7 @@
-BOARD ?= stm32f40x
+CHIP ?= stm32f40x
 USR ?= shell
 
-LINK_SCRIPT = board/$(BOARD)/link.ld
+LINK_SCRIPT = chip/$(CHIP)/link.ld
 
 ###################################################
 
@@ -53,7 +53,7 @@ CC=arm-none-eabi-gcc
 LD=arm-none-eabi-ld
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS += -g3 -Wall --std=gnu99 -isystem $(BASE)/include/ -isystem $(BASE)/board/$(BOARD)/include/
+CFLAGS += -g3 -Wall --std=gnu99 -isystem $(BASE)/include/ -isystem $(BASE)/chip/$(CHIP)/include/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
@@ -88,7 +88,7 @@ again: clean all
 
 # Flash the board
 burn:
-	./board/$(BOARD)/flash.sh $(PREFIX)/$(PROJ_NAME).bin
+	./chip/$(CHIP)/flash.sh $(PREFIX)/$(PROJ_NAME).bin
 
 # Create tags
 ctags:
@@ -97,8 +97,8 @@ ctags:
 cscope:
 	find . -name "*.[chS]" -print | xargs cscope -b -q -k
 
-$(PREFIX)/$(BOARD).o: .FORCE
-	$(MAKE) -C board/$(BOARD)/
+$(PREFIX)/chip_$(CHIP).o: .FORCE
+	$(MAKE) -C chip/$(CHIP)/
 
 $(PREFIX)/usr_$(USR).o: .FORCE
 	$(MAKE) -C usr/$(USR)/
@@ -126,7 +126,7 @@ proj: 	$(PREFIX)/$(PROJ_NAME).elf
 $(PREFIX):
 	mkdir -p $(PREFIX)
 
-$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(BOARD).o $(PREFIX)/usr_$(USR).o $(OBJS) 
+$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/chip_$(CHIP).o $(PREFIX)/usr_$(USR).o $(OBJS) 
 	$(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
 	$(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	$(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
