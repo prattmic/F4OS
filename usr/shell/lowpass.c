@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <board/board.h>
+#include <chip/chip.h>
 #include <dev/registers.h>
 #include <kernel/sched.h>
 #include <math.h>

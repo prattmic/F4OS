@@ -1,5 +1,5 @@
 #include <dev/registers.h>
-#include <board/rom.h>
+#include <chip/rom.h>
 #include "sysctl.h"
 
 void clock(void) {

@@ -7,7 +7,7 @@
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 
-#include <board/board.h>
+#include <chip/chip.h>
 
 #include <dev/hw/gpio.h>
 #include <dev/hw/usart.h>

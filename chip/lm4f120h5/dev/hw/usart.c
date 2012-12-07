@@ -8,7 +8,7 @@
 #include <dev/registers.h>
 #include <dev/cortex_m.h>
 #include <dev/resource.h>
-#include <board/rom.h>
+#include <chip/rom.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>

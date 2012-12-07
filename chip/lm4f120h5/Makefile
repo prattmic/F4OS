@@ -1,7 +1,7 @@
 # The goal here is to create chip_$(CHIP).o for the rest of the OS to link against
 
 # /
-SRCS += clock.c board.c
+SRCS += clock.c chip.c
 
 # dev/hw/
 VPATH += dev/hw/

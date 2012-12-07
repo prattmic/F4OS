@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <board/board.h>
+#include <chip/chip.h>
 
 #include <dev/hw/i2c.h>
 #include <dev/periph/9dof_gyro.h>

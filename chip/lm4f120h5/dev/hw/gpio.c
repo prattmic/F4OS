@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <dev/registers.h>
-#include <board/rom.h>
+#include <chip/rom.h>
 
 #include <dev/hw/gpio.h>
 

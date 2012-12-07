@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include <board/board.h>
+#include <chip/chip.h>
 
 #include "mm_internals.h"
 

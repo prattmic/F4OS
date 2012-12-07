@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <board/board.h>
+#include <chip/chip.h>
 #include <dev/hw/spi.h>
 #include <dev/periph/discovery_accel.h>
 #include <math.h>
