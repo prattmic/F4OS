@@ -1,11 +1,13 @@
 #include <stdint.h>
 #include <dev/registers.h>
 #include <dev/cortex_m.h>
+#include <chip/board.h>
 #include <kernel/fault.h>
 
 #define HSE_STARTUP_TIMEOUT     (uint16_t) (0x0500)         /* Time out for HSE start up */
 /* PLL Options - See RM0090 Reference Manual pg. 95 */
-#define PLL_M      8            /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */
+/* We set PLL_M to the board's defined oscillator frequency */
+#define PLL_M      STM32_OSC_FREQ   /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */
 #define PLL_N      336
 #define PLL_P      2            /* SYSCLK = PLL_VCO / PLL_P */
 #define PLL_Q      7            /* USB OTG FS, SDIO and RNG Clock =  PLL_VCO / PLLQ */

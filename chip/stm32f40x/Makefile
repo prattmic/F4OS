@@ -1,5 +1,10 @@
 # The goal here is to create chip_$(CHIP).o for the rest of the OS to link against
 
+BOARD ?= discovery
+
+# Add board's include dir to path
+CFLAGS += -isystem $(BASE)/chip/$(CHIP)/board/$(BOARD)/include
+
 # /
 SRCS += clock.c chip.c
 
