@@ -76,7 +76,7 @@ unexport OBJS
 
 ###################################################
 
-.PHONY: proj unoptimized
+.PHONY: proj unoptimized .FORCE
 
 all: CFLAGS += -O2
 all: $(PREFIX) proj
@@ -97,10 +97,10 @@ ctags:
 cscope:
 	find . -name "*.[chS]" -print | xargs cscope -b -q -k
 
-$(PREFIX)/$(BOARD).o:
+$(PREFIX)/$(BOARD).o: .FORCE
 	$(MAKE) -C board/$(BOARD)/
 
-$(PREFIX)/usr_$(USR).o:
+$(PREFIX)/usr_$(USR).o: .FORCE
 	$(MAKE) -C usr/$(USR)/
 
 $(PREFIX)/%.o : %.S
@@ -133,3 +133,5 @@ $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(BOARD).o $(PREFIX)/usr_$(USR).o $(OBJS)
 
 clean:
 	-rm -rf $(PREFIX)
+
+.FORCE:
