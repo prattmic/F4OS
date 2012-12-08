@@ -76,7 +76,32 @@ void fprintf(rd_t rd, char *fmt, ...) {
     va_end(ap);
 }
 
+static inline void holding_flush(char *holding, int *hold_count, rd_t rd, void (*puts_fn)(rd_t,char*)) {
+    if (*hold_count) {
+        puts_fn(rd, holding);
+        *hold_count = 0;
+        holding[0] = '\0';
+    }
+}
+
+static inline void holding_push(char c, char *holding, int hold_len, int *hold_count, rd_t rd, void (*puts_fn)(rd_t,char*)) {
+    if (*hold_count >= hold_len - 1) {
+        holding_flush(holding, hold_count, rd, puts_fn);
+    }
+
+    holding[(*hold_count)++] = c;
+    holding[*hold_count] = '\0';
+}
+
 void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void (*putc_fn)(rd_t,char)) {
+    /* We buffer data here as long as possible, because the actual puts/putc functions tend to be slow
+     * and the fewer calls we can make, the better. */
+    char holding[32];
+    int hold_count = 0;
+    const int hold_len = sizeof(holding)/sizeof(holding[0]);
+
+    holding[0] = '\0';
+
     while (*fmt) {
         if (*fmt == '%') {
             switch (*(++fmt)) {
@@ -93,6 +118,8 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
                         ];
                     }
 
+                    holding_flush(holding, &hold_count, rd, puts_fn);
+
                     puts_fn(rd, buf);
                     break;
                 }
@@ -101,6 +128,8 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
                     char buf[9];    /* 7 digits in INT_MAX + '-' and '\0' */
 
                     itoa(num, buf);
+
+                    holding_flush(holding, &hold_count, rd, puts_fn);
 
                     puts_fn(rd, buf);
                     break;
@@ -111,6 +140,8 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
 
                     uitoa(num, buf);
 
+                    holding_flush(holding, &hold_count, rd, puts_fn);
+
                     puts_fn(rd, buf);
                     break;
                 }
@@ -120,36 +151,41 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
 
                     ftoa(num, 0.0001f, buf, 20);
 
+                    holding_flush(holding, &hold_count, rd, puts_fn);
+
                     puts_fn(rd, buf);
                     break;
                 }
                 case 'c': {
                     char letter = (char) va_arg(ap, uint32_t);
 
-                    putc_fn(rd, letter);
+                    holding_push(letter, holding, hold_len, &hold_count, rd, puts_fn);
                     break;
                 }
                 case 's': {
                     char *s = va_arg(ap, char*);
 
+                    holding_flush(holding, &hold_count, rd, puts_fn);
+
                     puts_fn(rd, s);
                     break;
                 }
-                case '%': {
-                    /* Just print a % */
-                    putc_fn(rd, '%');
+                case '%': { /* Just print a % */
+                    holding_push('%', holding, hold_len, &hold_count, rd, puts_fn);
                     break;
                 }
                 default: {
-                    putc_fn(rd, '%');
-                    putc_fn(rd, *fmt);
+                    holding_push('%', holding, hold_len, &hold_count, rd, puts_fn);
+                    holding_push(*fmt, holding, hold_len, &hold_count, rd, puts_fn);
                 }
             }
 
             fmt++;
         }
         else {
-            putc_fn(rd, *fmt++);
+            holding_push(*fmt++, holding, hold_len, &hold_count, rd, puts_fn);
         }
     }
+
+    holding_flush(holding, &hold_count, rd, puts_fn);
 }
