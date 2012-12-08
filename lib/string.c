@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdint.h>
 #include <math.h>
 #include <string.h>
@@ -33,6 +34,14 @@ void memcpy(void *dst, void *src, int n) {
     while(n--) {
         *(uint8_t *)dst++ = *(uint8_t *)src++;
     }
+}
+
+size_t strlen(char *s) {
+    size_t len = 0;
+    while (*s++) {
+        len++;
+    }
+    return len;
 }
 
 void itoa(int n, char buf[]) {

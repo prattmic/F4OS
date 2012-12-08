@@ -11,7 +11,7 @@
 #include <dev/resource.h>
 
 static inline uint8_t resource_null(resource *r) {
-    if (r->writer == NULL && r->reader == NULL && r->closer == NULL && r->env == NULL && r->sem == NULL) {
+    if (r->writer == NULL && r->swriter == NULL && r->reader == NULL && r->closer == NULL && r->env == NULL && r->sem == NULL) {
         return 1;
     }
 
@@ -77,15 +77,25 @@ void swrite(rd_t rd, char* s) {
     }
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);
-        while(*s) {
-            curr_task->task->resources[rd]->writer(*s++, curr_task->task->resources[rd]->env);
+        if (curr_task->task->resources[rd]->swriter) {
+            curr_task->task->resources[rd]->swriter(s, curr_task->task->resources[rd]->env);
+        }
+        else {
+            while(*s) {
+                curr_task->task->resources[rd]->writer(*s++, curr_task->task->resources[rd]->env);
+            }
         }
         release(curr_task->task->resources[rd]->sem);
     }
     else {
         if(default_resources[rd] != NULL) {
-            while(*s) {
-                default_resources[rd]->writer(*s++, default_resources[rd]->env);
+            if (default_resources[rd]->swriter) {
+                default_resources[rd]->swriter(s, default_resources[rd]->env);
+            }
+            else {
+                while(*s) {
+                    default_resources[rd]->writer(*s++, default_resources[rd]->env);
+                }
             }
         }
     }

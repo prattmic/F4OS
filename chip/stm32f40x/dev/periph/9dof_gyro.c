@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <mm/mm.h>
@@ -34,6 +35,7 @@ rd_t open_sfe9dof_gyro(void) {
 
     new_r->env = gyro;
     new_r->writer = &sfe9dof_gyro_write;
+    new_r->swriter = NULL;
     new_r->reader = &sfe9dof_gyro_read;
     new_r->closer = &sfe9dof_gyro_close;
     new_r->sem = &i2c1_semaphore;

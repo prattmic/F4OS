@@ -11,6 +11,7 @@ typedef struct resource {
     volatile struct semaphore   *sem;
     void                        *env;
     void                        (*writer)(char, void*);
+    void                        (*swriter)(char*, void*);   /* Optional string writer function used by swrite if available  */
     char                        (*reader)(void*);
     void                        (*closer)(struct resource*);
 } resource;

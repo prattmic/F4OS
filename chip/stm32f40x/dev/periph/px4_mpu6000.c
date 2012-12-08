@@ -21,6 +21,7 @@ rd_t open_px4_mpu6000(void) {
     accel->read_ctr = 0;
     new_r->env = accel;
     new_r->writer = &discovery_accel_write;
+    new_r->swriter = NULL;
     new_r->reader = &discovery_accel_read;
     new_r->sem = kmalloc(sizeof(semaphore));
     /* Just to be sure it's 0 */

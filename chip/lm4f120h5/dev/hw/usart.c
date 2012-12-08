@@ -15,11 +15,12 @@
 
 struct semaphore usart_semaphore;
 
-resource uart_console = {   .writer = &usart_putc,
-                            .reader = &usart_getc,
-                            .closer = &usart_close,
-                            .env    = NULL,
-                            .sem    = &usart_semaphore};
+resource uart_console = {   .writer     = &usart_putc,
+                            .swriter    = &usart_puts,
+                            .reader     = &usart_getc,
+                            .closer     = &usart_close,
+                            .env        = NULL,
+                            .sem        = &usart_semaphore};
 
 static void usart_baud(uint32_t baud) __attribute__((section(".kernel")));
 

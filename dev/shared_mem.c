@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdlib.h>
 #include <mm/mm.h>
 #include <kernel/semaphore.h>
@@ -27,6 +28,7 @@ rd_t open_shared_mem(void) {
 
     new_r->env = mem;
     new_r->writer = &shared_mem_write;
+    new_r->swriter = NULL;
     new_r->reader = &shared_mem_read;
     new_r->closer = &shared_mem_close;
     new_r->sem    = kmalloc(sizeof(semaphore));

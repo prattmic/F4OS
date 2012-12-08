@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdlib.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
@@ -23,6 +24,7 @@ rd_t open_buf_stream(char *buf) {
 
     new_r->env    = env;
     new_r->writer = &buf_stream_write;
+    new_r->swriter = NULL;
     new_r->reader = &buf_stream_read;
     new_r->closer = &buf_stream_close;
     new_r->sem    = malloc(sizeof(semaphore));

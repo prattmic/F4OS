@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdlib.h>
 #include <mm/mm.h>
 #include <kernel/semaphore.h>
@@ -29,6 +30,7 @@ rd_t open_discovery_accel(void) {
 
     new_r->env = accel;
     new_r->writer = &discovery_accel_write;
+    new_r->swriter = NULL;
     new_r->reader = &discovery_accel_read;
     new_r->closer = &discovery_accel_close;
     new_r->sem = &spi1_semaphore;

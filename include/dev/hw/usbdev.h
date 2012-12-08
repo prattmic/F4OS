@@ -7,10 +7,4 @@ void usbdev_handler(void) __attribute__((section(".kernel")));
 struct semaphore;
 extern struct semaphore usbdev_semaphore;
 
-struct resource;
-
-void usbdev_resource_write(char c, void *env);
-char usbdev_resource_read(void *env);
-void usbdev_resource_close(struct resource *resource);
-
 #endif
