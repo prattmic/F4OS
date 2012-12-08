@@ -152,47 +152,25 @@ uint16_t usart_baud(uint32_t baud) {
     return (mantissa << 4) | int_fraction;
 }
 
-/* ghettohax - brought to you by mgyenik*/
 void usart_putc(char c, void *env) {
-    char str[2];
-    str[0] = c;
-    str[1] = 0x00;
-    char *s = str;
-    while (*s) {
-        char *buf = usart_tx_buf;
-        uint16_t count = 0;
-
-        while (*s && (count < USART_DMA_MSIZE)) {
-            count += 1;
-            *buf++ = *s++;
+    /* Wait for DMA to be ready */
+    while (*DMA2_S7CR & DMA_SxCR_EN) {
+        if (task_switching && !IPSR()) {
+            SVC(SVC_YIELD);
         }
+    }
 
-        /* Wait for DMA to be ready */
-        while (*DMA2_S7CR & DMA_SxCR_EN) {
-            if (task_switching && !IPSR()) {
-                SVC(SVC_YIELD);
-            }
-        }
-
-        /* Number of bytes to write */
-        *DMA2_S7NDTR = (uint16_t) count;
-        /* Enable DMA */
-        *DMA2_S7CR |= DMA_SxCR_EN;
-
-        /* Wait for transfer to complete */
-        int timeout = 300000;
-        while (!(*DMA2_HISR & DMA_HISR_TCIF7) && timeout--) {
-            if (task_switching && !IPSR()) {
-                SVC(SVC_YIELD);
-            }
-        }
-
+    if (*DMA2_HISR & DMA_HISR_TCIF7) {
         /* Clear transfer complete flag */
         *DMA2_HIFCR |= DMA_HIFCR_CTCIF7;
-
-        /* Clear buffer */
-        memset32(usart_tx_buf, 0, (count % 4) ? (count/4 + 1) : (count/4));
     }
+
+    *usart_tx_buf = c;
+
+    /* 1 byte to write */
+    *DMA2_S7NDTR = 1;
+    /* Enable DMA */
+    *DMA2_S7CR |= DMA_SxCR_EN;
 }
 
 void usart_puts(char *s, void *env) {
@@ -200,11 +178,6 @@ void usart_puts(char *s, void *env) {
         char *buf = usart_tx_buf;
         uint16_t count = 0;
 
-        while (*s && count < USART_DMA_MSIZE) {
-            count += 1;
-            *buf++ = *s++;
-        }
-
         /* Wait for DMA to be ready */
         while (*DMA2_S7CR & DMA_SxCR_EN) {
             if (task_switching && !IPSR()) {
@@ -212,23 +185,21 @@ void usart_puts(char *s, void *env) {
             }
         }
 
+        if (*DMA2_HISR & DMA_HISR_TCIF7) {
+            /* Clear transfer complete flag */
+            *DMA2_HIFCR |= DMA_HIFCR_CTCIF7;
+        }
+
+        /* Copy into buffer */
+        while (*s && count < USART_DMA_MSIZE) {
+            count += 1;
+            *buf++ = *s++;
+        }
+
         /* Number of bytes to write */
         *DMA2_S7NDTR = (uint16_t) count;
         /* Enable DMA */
         *DMA2_S7CR |= DMA_SxCR_EN;
-
-        /* Wait for transfer to complete */
-        while (!(*DMA2_HISR & DMA_HISR_TCIF7)) {
-            if (task_switching && !IPSR()) {
-                SVC(SVC_YIELD);
-            }
-        }
-
-        /* Clear transfer complete flag */
-        *DMA2_HIFCR |= DMA_HIFCR_CTCIF7;
-
-        /* Clear buffer */
-        memset32(usart_tx_buf, 0, (count % 4) ? (count/4 + 1) : (count/4));
     }
 }
 
@@ -242,6 +213,10 @@ char usart_getc(void *env) {
     while (!wrapped && dma_read == read) {
         /* Yield */
         if (task_switching && !IPSR()) {
+            /* We release the semaphore here to allow other tasks to print while we wait.
+             * This is not an ideal solution, as someone may steal the data we are waiting
+             * for, but it prevents tasks like shell, which continuously waits for input,
+             * from preventing all other tasks from printing */
             release(&usart_semaphore);
             SVC(SVC_YIELD);
             acquire(&usart_semaphore);
@@ -266,8 +241,7 @@ char usart_getc(void *env) {
         read += 1;
         return *(usart_buf + (read-1));
     }
-    /* The DMA has wrapped around, and has already caught up to us, start over
-     * if (wrapped && dma_read >= read) */
+    /* The DMA has wrapped around, and has already caught up to us, start over */
     else {
         /* Clear completion flag */
         *DMA2_LIFCR |= DMA_LIFCR_CTCIF2;
@@ -278,62 +252,4 @@ char usart_getc(void *env) {
 
 void usart_close(resource *resource) {
     panic_print("USART is a fundamental resource, it may not be closed.");
-}
-
-void usart_echo(void) {
-    char buf[17];
-    uint16_t read = 0;
-    uint16_t dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
-    char *usart_buf = usart_rx_buf;
-
-    buf[16] = '\0';
-
-    /* Clear completion flag */
-    *DMA2_LIFCR |= DMA_LIFCR_CTCIF2;
-
-    while (1) {
-        dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
-        while ((read < dma_read) && !(*DMA2_LISR & DMA_LISR_TCIF2)) {
-            uint8_t i = 0;
-            uint8_t j = ((dma_read - read) > 16) ? 16 : (dma_read - read);
-       
-            for (i = 0; i < j; i++) {
-                if (usart_buf >= (usart_rx_buf + USART_DMA_MSIZE)) {
-                    buf[i] = '\0';
-                }
-                else {
-                    buf[i] = *usart_buf++;
-                }
-
-                read++;
-            }
-            buf[i] = '\0';
-
-            puts(buf);
-            dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
-        }
-
-        /* Buffer has wrapped around */
-        while (*DMA2_LISR & DMA_LISR_TCIF2) {
-            *DMA2_LIFCR |= DMA_LIFCR_CTCIF2;
-
-            /* Read to end of buffer */
-            while (read < USART_DMA_MSIZE) {
-                for (uint8_t i = 0; i < 16; i++) {
-                    if (usart_buf >= (usart_rx_buf + USART_DMA_MSIZE)) {
-                        buf[i] = '\0';
-                    }
-                    else {
-                        buf[i] = *usart_buf++;
-                    }
-
-                    read++;
-                }
-                puts(buf);
-            }
-
-            read = 0;
-            usart_buf = usart_rx_buf;
-        }
-    }
 }
