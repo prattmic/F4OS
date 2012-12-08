@@ -88,7 +88,7 @@ again: clean all
 
 # Flash the board
 burn:
-	./chip/$(CHIP)/flash.sh $(PREFIX)/$(PROJ_NAME).bin
+	$(MAKE) -C chip/$(CHIP)/ burn
 
 # Create tags
 ctags:

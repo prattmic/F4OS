@@ -28,6 +28,9 @@ OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
 
 all: $(PREFIX)/chip_$(CHIP).o
 
+burn:
+	./flash.sh $(BOARD) $(PREFIX)/$(PROJ_NAME).bin
+
 $(PREFIX)/%.o : %.c
 	$(CC) -MD -c $(CFLAGS) $< -o $@ 
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
