@@ -7,8 +7,6 @@
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 
-#include <chip/chip.h>
-
 #include <dev/hw/gpio.h>
 #include <dev/hw/usart.h>
 #include <dev/hw/spi.h>
@@ -32,23 +30,26 @@ void clock(void);
 
 int os_start(void) {
     clock();
+
+#ifdef CONFIG_HAVE_LED
     init_gpio();
+#endif
 
     init_heap();
 
-#ifdef HAVE_USART
+#ifdef CONFIG_HAVE_USART
     init_usart();
 #endif
 
-#ifdef HAVE_SPI
+#ifdef CONFIG_HAVE_SPI
     init_spi();
 #endif
 
-#ifdef HAVE_I2C
+#ifdef CONFIG_HAVE_I2C
     init_i2c();
 #endif
 
-#ifdef HAVE_USBDEV
+#ifdef CONFIG_HAVE_USBDEV
     init_usbdev();
 #endif
 

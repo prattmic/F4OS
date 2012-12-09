@@ -5,7 +5,10 @@ SRCS += clock.c chip.c
 
 # dev/hw/
 VPATH += dev/hw/
-SRCS += gpio.c usart.c
+SRCS_$(CONFIG_HAVE_USART) += usart.c
+SRCS_$(CONFIG_HAVE_LED) += gpio.c
+
+SRCS += $(SRCS_y)
 
 ###################################################
 
@@ -13,10 +16,10 @@ OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
 
 ###################################################
 
-all: $(PREFIX)/chip_$(CHIP).o
+all: $(PREFIX)/chip_$(CONFIG_CHIP).o
 
 burn:
-	./flash.sh $(BOARD) $(PREFIX)/$(PROJ_NAME).bin
+	./flash.sh $(PREFIX)/$(PROJ_NAME).bin
 
 $(PREFIX)/%.o : %.c
 	$(CC) -MD -c $(CFLAGS) $< -o $@ 
@@ -27,5 +30,5 @@ $(PREFIX)/%.o : %.c
 
 -include $(addprefix $(PREFIX)/, $(SRCS:.c=.P))
 
-$(PREFIX)/chip_$(CHIP).o: $(OBJS)
+$(PREFIX)/chip_$(CONFIG_CHIP).o: $(OBJS)
 	$(LD) -r $^ -o $@

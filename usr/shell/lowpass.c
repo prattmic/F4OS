@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <chip/chip.h>
 #include <dev/registers.h>
 #include <kernel/sched.h>
 #include <math.h>
@@ -29,7 +28,7 @@ rd_t accelrd = 255;
 float theta = 0;
 
 void lowpass_test(int argc, char **argv) {
-#ifndef HAVE_SPI
+#ifndef CONFIG_HAVE_SPI
     printf("SPI support required.\r\n");
 #else
     if (argc != 1) {

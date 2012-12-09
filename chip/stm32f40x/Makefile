@@ -1,24 +1,27 @@
 # The goal here is to create chip_$(CHIP).o for the rest of the OS to link against
 
-BOARD ?= discovery
-
-# Add board's include dir to path
-CFLAGS += -isystem $(BASE)/chip/$(CHIP)/board/$(BOARD)/include
-
 # /
 SRCS += clock.c chip.c
 
 # dev/hw/
 VPATH += dev/hw/
-SRCS += gpio.c usart.c tim.c i2c.c spi.c 
+SRCS += tim.c
+
+SRCS_$(CONFIG_HAVE_USART) += usart.c
+SRCS_$(CONFIG_HAVE_LED) += gpio.c
+SRCS_$(CONFIG_HAVE_I2C) += i2c.c
+SRCS_$(CONFIG_HAVE_SPI) += spi.c
 
 # dev/hw/usb
 VPATH += dev/hw/usb
-SRCS += usbdev_init.c usbdev_int.c usbdev_core.c usbdev_desc.c usbdev_cdc.c usbdev_resource.c
+SRCS_$(CONFIG_HAVE_USBDEV) += usbdev_init.c usbdev_int.c usbdev_core.c usbdev_desc.c usbdev_cdc.c usbdev_resource.c
 
 # dev/periph/
 VPATH += dev/periph/
-SRCS += 9dof_gyro.c discovery_accel.c
+SRCS_$(CONFIG_HAVE_I2C) += 9dof_gyro.c 
+SRCS_$(CONFIG_HAVE_SPI) += discovery_accel.c
+
+SRCS += $(SRCS_y)
 
 ###################################################
 
@@ -26,10 +29,10 @@ OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
 
 ###################################################
 
-all: $(PREFIX)/chip_$(CHIP).o
+all: $(PREFIX)/chip_$(CONFIG_CHIP).o
 
 burn:
-	./flash.sh $(BOARD) $(PREFIX)/$(PROJ_NAME).bin
+	./flash.sh $(CONFIG_STM32_BOARD) $(PREFIX)/$(PROJ_NAME).bin
 
 $(PREFIX)/%.o : %.c
 	$(CC) -MD -c $(CFLAGS) $< -o $@ 
@@ -40,5 +43,5 @@ $(PREFIX)/%.o : %.c
 
 -include $(addprefix $(PREFIX)/, $(SRCS:.c=.P))
 
-$(PREFIX)/chip_$(CHIP).o: $(OBJS)
+$(PREFIX)/chip_$(CONFIG_CHIP).o: $(OBJS)
 	$(LD) -r $^ -o $@

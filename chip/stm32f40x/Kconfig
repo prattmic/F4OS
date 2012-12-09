@@ -1,0 +1,25 @@
+config STM32_OSC_FREQ
+    int
+    default 8
+    prompt "STM32 external crystal frequency"
+    ---help---
+        The oscillator frequency is important for configuring the system
+        clock to 168MHz.  If set incorrectly, the chip may not boot properly.
+
+choice
+    prompt "Target board"
+    default STM32_BOARD_DISCOVERY
+
+config STM32_BOARD_DISCOVERY
+    bool
+    prompt "STM32F407 Discovery Board"
+
+config STM32_BOARD_PX4
+    bool
+    prompt "PX4 Autopilot"
+endchoice
+
+config STM32_BOARD
+    string
+    default "discovery" if STM32_BOARD_DISCOVERY
+    default "px4" if STM32_BOARD_PX4

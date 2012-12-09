@@ -1,0 +1,32 @@
+# Chip selection configuration
+
+choice
+    prompt "Chip to target"
+    default CHIP_STM32F40X
+
+config CHIP_STM32F40X
+    bool "stm32f40x"
+    ---help---
+        ST Microelectronics STM32F40x line of Cortex M4Fs.
+
+config CHIP_LM4F120H5
+    bool "lm4f120h5"
+    ---help---
+        Texas Instruments LM4F120H5 Cortex M4F.
+
+endchoice
+
+config CHIP
+    string
+    default "stm32f40x" if CHIP_STM32F40X
+    default "lm4f120h5" if CHIP_LM4F120H5
+
+menu "Chip"
+if CHIP_STM32F40X
+source chip/stm32f40x/Kconfig
+endif
+
+if CHIP_LM4F120H5
+source chip/lm4f120h5/Kconfig
+endif
+endmenu

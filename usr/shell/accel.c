@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <chip/chip.h>
 #include <dev/hw/spi.h>
 #include <dev/periph/discovery_accel.h>
 #include <math.h>
@@ -14,7 +13,7 @@ typedef struct accel_data {
 } accel_data;
 
 void accel(int argc, char **argv) {
-#ifndef HAVE_SPI
+#ifndef CONFIG_HAVE_SPI
     printf("SPI support requred.\r\n");
 #else
     if (argc != 1) {

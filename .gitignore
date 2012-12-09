@@ -11,6 +11,9 @@
 *.swo
 *.out
 *.log
+*.old
+.config*
+include/config
 out/
 tags
 core
