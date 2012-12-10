@@ -20,7 +20,9 @@ static inline uint8_t resource_null(resource *r) {
 
 resource *create_new_resource(void) {
     resource *ret = kmalloc(sizeof(resource));
-    memset(ret, 0, sizeof(resource));
+    if(ret) {
+        memset(ret, 0, sizeof(resource));
+    }
     return ret;
 }
 
