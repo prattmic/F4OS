@@ -21,8 +21,10 @@ void discovery_accel_close(resource *env) __attribute__((section(".kernel")));
 
 rd_t open_discovery_accel(void) {
     discovery_accel *accel = kmalloc(sizeof(discovery_accel));
-    resource *new_r = kmalloc(sizeof(resource));
-
+    resource *new_r = create_new_resource();
+    if(!new_r || !accel) {
+        panic_print("Could not allocate space for discovery accel resource");
+    }
     /* We expect that spi1 was init'd in bootmain.c */
     accel->spi_port = &spi1;
     accel->spi_port->write(0x20, 0x47);
@@ -30,7 +32,6 @@ rd_t open_discovery_accel(void) {
 
     new_r->env = accel;
     new_r->writer = &discovery_accel_write;
-    new_r->swriter = NULL;
     new_r->reader = &discovery_accel_read;
     new_r->closer = &discovery_accel_close;
     new_r->sem = &spi1_semaphore;
