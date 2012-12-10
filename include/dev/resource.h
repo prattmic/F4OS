@@ -18,6 +18,7 @@ typedef struct resource {
 
 struct task_ctrl;
 
+resource *create_new_resource(void) __attribute__((section(".kernel")));
 void add_resource(struct task_ctrl* tcs, resource* r) __attribute__((section(".kernel")));
 void resource_setup(struct task_ctrl* tcs) __attribute__((section(".kernel")));
 

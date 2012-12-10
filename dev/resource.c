@@ -17,6 +17,12 @@ static inline uint8_t resource_null(resource *r) {
     return 0;
 }
 
+resource *create_new_resource(void) {
+    resource *ret = kmalloc(sizeof(resource));
+    memset(ret, 0, sizeof(resource));
+    return ret;
+}
+
 void add_resource(task_ctrl* tcs, resource* r) {
     tcs->resources[tcs->top_rd] = r;
     if(tcs->resources[tcs->top_rd++] == NULL) {
