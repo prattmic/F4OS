@@ -1,7 +1,13 @@
 # The goal here is to create usr_$(USR).o for the rest of the OS to link against
 
 # /
-SRCS += main.c shell.c accel.c blink.c ghetto_gyro.c ipctest.c top.c uname.c lowpass.c rd_test.c
+SRCS += main.c shell.c ipctest.c top.c uname.c rd_test.c
+
+SRCS_$(CONFIG_HAVE_LED) += blink.c
+SRCS_$(CONFIG_HAVE_I2C) += ghetto_gyro.c
+SRCS_$(CONFIG_HAVE_SPI) += accel.c lowpass.c
+
+SRCS += $(SRCS_y)
 
 # Date and rev for uname
 DATE := "$(shell date -u)"

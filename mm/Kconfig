@@ -1,0 +1,25 @@
+config MM_USER_MAX_ORDER
+    int
+    prompt "User buddy heap max order"
+    ---help---
+        Maximum buddy block order for user buddy heap.
+        Heap will be 2^order bytes.
+
+config MM_USER_MIN_ORDER
+    int
+    prompt "User buddy heap min order"
+    ---help---
+        Minimum buddy block order to allocate for user buddy.
+
+config MM_KERNEL_MAX_ORDER
+    int
+    prompt "Kernel buddy heap max order"
+    ---help---
+        Maximum buddy block order for kernel buddy heap.
+        Heap will be 2^order bytes.
+
+config MM_KERNEL_MIN_ORDER
+    int
+    prompt "Kernel buddy heap min order"
+    ---help---
+        Minimum buddy block order to allocate for kernel buddy.

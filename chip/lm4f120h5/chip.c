@@ -1,7 +1,6 @@
 #include <stddef.h>
 #include <dev/resource.h>
 #include <kernel/sched.h>
-#include <chip/chip.h>
 
 extern resource uart_console;
 

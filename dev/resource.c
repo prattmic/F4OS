@@ -6,7 +6,6 @@
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
-#include <chip/chip.h>
 
 #include <dev/resource.h>
 

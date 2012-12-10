@@ -1,0 +1,28 @@
+#
+# Automatically generated file; DO NOT EDIT.
+# F4OS Configuration
+#
+# CONFIG_CHIP_STM32F40X is not set
+CONFIG_CHIP_LM4F120H5=y
+CONFIG_CHIP="lm4f120h5"
+
+#
+# Chip
+#
+
+#
+# Drivers
+#
+CONFIG_HAVE_USART=y
+# CONFIG_HAVE_I2C is not set
+# CONFIG_HAVE_SPI is not set
+CONFIG_HAVE_LED=y
+# CONFIG_HAVE_USBDEV is not set
+
+#
+# Memory management
+#
+CONFIG_MM_USER_MAX_ORDER=14
+CONFIG_MM_USER_MIN_ORDER=4
+CONFIG_MM_KERNEL_MAX_ORDER=13
+CONFIG_MM_KERNEL_MIN_ORDER=4

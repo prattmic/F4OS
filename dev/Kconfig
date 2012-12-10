@@ -1,0 +1,19 @@
+config HAVE_USART
+    bool
+    prompt "USART Support"
+
+config HAVE_I2C
+    bool
+    prompt "I2C Support"
+
+config HAVE_SPI
+    bool
+    prompt "SPI Support"
+
+config HAVE_LED
+    bool
+    prompt "LED Support"
+
+config HAVE_USBDEV
+    bool
+    prompt "USB Device Support"

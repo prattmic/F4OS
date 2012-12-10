@@ -1,0 +1,11 @@
+mainmenu "F4OS Configuration"
+
+source chip/Kconfig
+
+menu "Drivers"
+source dev/Kconfig
+endmenu
+
+menu "Memory management"
+source mm/Kconfig
+endmenu

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <chip/chip.h>
 
 #include <dev/hw/i2c.h>
 #include <dev/periph/9dof_gyro.h>
@@ -15,7 +14,7 @@ typedef struct gyro_data {
 
 /* Basically the same as accelerometer reading. Woohoo abstraction */
 void ghetto_gyro(int argc, char **argv) {
-#ifndef HAVE_I2C
+#ifndef CONFIG_HAVE_I2C
     printf("I2C support required.\r\n");
 #else
     if(argc != 1) {

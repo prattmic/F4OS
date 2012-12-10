@@ -21,15 +21,21 @@ struct command {
     void (*fptr)(int, char **);
 };
 
-const struct command valid_commands[] = {{"blink",  &blink},
-                                         {"help",   &help},
+const struct command valid_commands[] = {{"help",   &help},
                                          {"top",    &top},
                                          {"uname",  &uname},
                                          {"ipctest", &ipctest},
+                                         {"rd_test", &rd_test},
+#ifdef CONFIG_HAVE_LED
+                                         {"blink",  &blink},
+#endif
+#ifdef CONFIG_HAVE_SPI
                                          {"accel", &accel},
+#endif
+#ifdef CONFIG_HAVE_I2C
                                          {"ghetto_gyro", &ghetto_gyro},
                                          {"lowpass", &lowpass_test},
-                                         {"rd_test", &rd_test}
+#endif
 };
 #define NUM_COMMANDS    (sizeof(valid_commands)/sizeof(valid_commands[0]))
 
