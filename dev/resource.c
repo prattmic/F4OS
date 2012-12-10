@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <mm/mm.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
