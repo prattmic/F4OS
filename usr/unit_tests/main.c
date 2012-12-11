@@ -108,7 +108,10 @@ void memreader(void) {
 void infinite_ipc(void) {
     int count = 1;
     while (1) {
-        new_task(&ipctest, 4, 0);
+        new_task(&ipctest, 1, 0);
         printf("Loop: %d\r\n", ++count);
+
+        /* Wait for number of tasks to come down */
+        while (approx_num_tasks() > 7);
     }
 }
