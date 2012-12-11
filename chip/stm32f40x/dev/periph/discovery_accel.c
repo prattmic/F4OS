@@ -3,6 +3,7 @@
 #include <mm/mm.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
+#include <kernel/fault.h>
 #include <dev/resource.h>
 
 #include <dev/hw/spi.h>
