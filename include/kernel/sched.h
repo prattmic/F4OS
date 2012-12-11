@@ -83,6 +83,7 @@ extern uint8_t task_switching;
 
 void start_sched(void);
 void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) __attribute__((section(".kernel")));
+int approx_num_tasks(void);
 
 void raise_privilege(void) __attribute__((section(".kernel")));
 
