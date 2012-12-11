@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
+#include <kernel/fault.h>
 #include <dev/resource.h>
 
 #include <dev/buf_stream.h>
@@ -17,9 +18,12 @@ void buf_stream_write(char c, void *env);
 void buf_stream_close(resource *resource);
 
 rd_t open_buf_stream(char *buf) {
-    resource *new_r = malloc(sizeof(resource));
-
     struct buf_stream *env = malloc(sizeof(struct buf_stream)); 
+    resource *new_r = create_new_resource();
+    if (!env || !new_r) {
+        panic_print("Unable to allocate space for buffer stream resource.");
+    }
+
     env->buf = buf;
 
     new_r->env    = env;
@@ -28,7 +32,12 @@ rd_t open_buf_stream(char *buf) {
     new_r->reader = &buf_stream_read;
     new_r->closer = &buf_stream_close;
     new_r->sem    = malloc(sizeof(semaphore));
-    init_semaphore(new_r->sem);
+    if (new_r->sem) {
+        init_semaphore(new_r->sem);
+    }
+    else {
+        panic_print("Unable to allocate memory for buffer stream semaphore.");
+    }
 
     add_resource(curr_task->task, new_r);
 

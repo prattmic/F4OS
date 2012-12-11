@@ -3,6 +3,8 @@
 #include <mm/mm.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
+#include <kernel/fault.h>
+#include <mm/mm.h>
 #include <dev/resource.h>
 
 #include <dev/shared_mem.h>
@@ -21,7 +23,11 @@ void shared_mem_close(resource *env) __attribute__((section(".kernel")));
 
 rd_t open_shared_mem(void) {
     shared_mem *mem = kmalloc(sizeof(shared_mem));
-    resource *new_r = kmalloc(sizeof(resource));
+    resource *new_r = create_new_resource();
+    if (!mem || !new_r) {
+        printk("Tasks: %d. User mem: %d. Kernel mem: %d", approx_num_tasks(), mm_space(), mm_kspace());
+        panic_print("Unable to allocate memory for shared memory resource.");
+    }
 
     mem->read_ctr = 0;
     mem->write_ctr = 0;
@@ -32,7 +38,12 @@ rd_t open_shared_mem(void) {
     new_r->reader = &shared_mem_read;
     new_r->closer = &shared_mem_close;
     new_r->sem    = kmalloc(sizeof(semaphore));
-    init_semaphore(new_r->sem);
+    if (new_r->sem) {
+        init_semaphore(new_r->sem);
+    }
+    else {
+        panic_print("Unable to allocate space for shared memory semaphore.");
+    }
 
     add_resource(curr_task->task, new_r);
 
