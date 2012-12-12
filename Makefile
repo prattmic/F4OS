@@ -8,6 +8,9 @@ USR ?= shell
 
 -include $(BASE)/.config
 
+# The quotes from Kconfig are annoying
+CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
+
 LINK_SCRIPT = chip/$(CONFIG_CHIP)/link.ld
 
 ###################################################
