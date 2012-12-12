@@ -17,3 +17,10 @@ config HAVE_LED
 config HAVE_USBDEV
     bool
     prompt "USB Device Support"
+
+config SYSTICK_FREQ
+    int
+    prompt "Systick Frequency"
+    default 4000
+    ---help---
+        The frequency at which system ticks (and thus, task switching), should occur.

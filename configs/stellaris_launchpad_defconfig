@@ -10,6 +10,7 @@ CONFIG_CHIP="lm4f120h5"
 # Chip
 #
 CONFIG_HAVE_FPU=y
+CONFIG_SYS_CLOCK=84000000
 
 #
 # Drivers
@@ -19,6 +20,7 @@ CONFIG_HAVE_USART=y
 # CONFIG_HAVE_SPI is not set
 CONFIG_HAVE_LED=y
 # CONFIG_HAVE_USBDEV is not set
+CONFIG_SYSTICK_FREQ=4000
 
 #
 # Memory management

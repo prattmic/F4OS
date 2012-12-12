@@ -22,12 +22,19 @@ config CHIP
     default "lm4f120h5" if CHIP_LM4F120H5
 
 menu "Chip"
+
 config HAVE_FPU
     bool
     prompt "FPU Support"
     default y
     ---help---
         Please note that this option must be set to yes.
+
+config SYS_CLOCK
+    int
+    prompt "System clock speed"
+    ---help---
+        Note: This must be set to the value configured by the chip clock function
 
 if CHIP_STM32F40X
 source chip/stm32f40x/Kconfig
