@@ -12,11 +12,6 @@
 #define PLL_Q      7            /* USB OTG FS, SDIO and RNG Clock =  PLL_VCO / PLLQ */
 
 void clock(void) {
-    /* Enable the FPU */
-    *SCB_CPACR |= (0xf << 20);
-    /* Enable floating point state preservation */
-    *FPU_CCR |= FPU_CCR_ASPEN;
-
     /********* Reset clock registers ************/
     /* Set HSION bit */
     *RCC_CR |= (uint32_t)0x00000001;
@@ -101,8 +96,4 @@ void clock(void) {
 
     /* Enable the CCM RAM clock */
     *RCC_AHB1ENR |= (1 << 20);
-
-    /* Enable Bus and Usage Faults */
-    *SCB_SHCSR |= SCB_SHCSR_BUSFAULTENA;
-    *SCB_SHCSR |= SCB_SHCSR_USEFAULTENA;
 }

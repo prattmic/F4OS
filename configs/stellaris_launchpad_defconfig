@@ -9,6 +9,7 @@ CONFIG_CHIP="lm4f120h5"
 #
 # Chip
 #
+CONFIG_HAVE_FPU=y
 
 #
 # Drivers

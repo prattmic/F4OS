@@ -22,6 +22,13 @@ config CHIP
     default "lm4f120h5" if CHIP_LM4F120H5
 
 menu "Chip"
+config HAVE_FPU
+    bool
+    prompt "FPU Support"
+    default y
+    ---help---
+        Please note that this option must be set to yes.
+
 if CHIP_STM32F40X
 source chip/stm32f40x/Kconfig
 endif

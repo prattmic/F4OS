@@ -20,6 +20,7 @@ void end_task(void) __attribute__((section(".kernel"),naked));
 void svc_end_task(void) __attribute__((section(".kernel")));
 
 void kernel_task(void) __attribute__((section(".kernel")));
+void sleep_task(void) __attribute__((section(".kernel")));
 
 extern void enable_psp(uint32_t *);
 extern void disable_psp();

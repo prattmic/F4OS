@@ -14,7 +14,7 @@ LINK_SCRIPT = chip/$(CONFIG_CHIP)/link.ld
 
 # boot/
 VPATH += boot/
-SRCS += boot_main.c
+SRCS += boot_main.c cortex_m.c
 ASM_SRCS += boot_asm.S
 
 # dev/

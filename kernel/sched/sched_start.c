@@ -10,7 +10,8 @@ static void start_task_switching(void) __attribute__((section(".kernel")));
 
 void start_sched(void) {
     /* Set up initial tasks */
-    new_task(&kernel_task, 1, 0);
+    new_task(&kernel_task, 10, 4);
+    new_task(&sleep_task, 0, 0);
 
     /* Setup boot tasks specified by end user. */
     main();

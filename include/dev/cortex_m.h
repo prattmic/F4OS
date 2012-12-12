@@ -70,12 +70,13 @@ inline uint32_t *PSP(void) {
 /* System Control Block (SCB) */
 #define SCB_ICSR                        (volatile uint32_t *) (SCB_BASE + 0x004)                /* Interrupt Control and State Register */
 #define SCB_VTOR                        (volatile uint32_t *) (SCB_BASE + 0x008)                /* Vector Table Offset Register */
-#define SCB_CPACR                       (volatile uint32_t *) (SCB_BASE + 0x088)                /* Coprocessor (FPU) Access Control Register */
+#define SCB_SCR                         (volatile uint32_t *) (SCB_BASE + 0x010)                /* System Control Register */
 #define SCB_SHCSR                       (volatile uint32_t *) (SCB_BASE + 0x024)                /* System Handler Control and State Register */
 #define SCB_CFSR                        (volatile uint32_t *) (SCB_BASE + 0x028)                /* Configurable fault status register - Describes Usage, Bus, and Memory faults */
 #define SCB_HFSR                        (volatile uint32_t *) (SCB_BASE + 0x02C)                /* Hard fault status register - Describes hard fault */
 #define SCB_MMFAR                       (volatile uint32_t *) (SCB_BASE + 0x034)                /* Memory management fault address register - Address that caused fault */
 #define SCB_BFAR                        (volatile uint32_t *) (SCB_BASE + 0x038)                /* Bus fault address register - Address that caused fault */
+#define SCB_CPACR                       (volatile uint32_t *) (SCB_BASE + 0x088)                /* Coprocessor (FPU) Access Control Register */
 
 /* Memory Protection Unit (MPU) 
  * ST PM0214 (Cortex M4 Programming Manual) pg. 195 */
@@ -95,6 +96,11 @@ inline uint32_t *PSP(void) {
 /* System Control Block */
 #define SCB_ICSR_PENDSVCLR              (uint32_t) (1 << 27)                                    /* Clear PendSV interrupt */
 #define SCB_ICSR_PENDSVSET              (uint32_t) (1 << 28)                                    /* Set PendSV interrupt */
+
+#define SCB_SCR_SLEEPONEXIT             (uint32_t) (1 << 1)                                     /* Sleep on return from interrupt routine */
+#define SCB_SCR_SLEEPDEEP               (uint32_t) (1 << 2)                                     /* Use deep sleep as low power mode */
+#define SCB_SCR_SEVONPEND               (uint32_t) (1 << 4)                                     /* Send event on pending exception */
+
 #define SCB_SHCSR_MEMFAULTENA           (uint32_t) (1 << 16)                                    /* Enables Memory Management Fault */
 #define SCB_SHCSR_BUSFAULTENA           (uint32_t) (1 << 17)                                    /* Enables Bus Fault */
 #define SCB_SHCSR_USEFAULTENA           (uint32_t) (1 << 18)                                    /* Enables Usage Fault */
@@ -127,6 +133,9 @@ inline uint32_t *PSP(void) {
 #define SCB_UFSR_NOCP                   (uint16_t) (1 << 3)                                     /* No coprocessor */
 #define SCB_UFSR_UNALIGNED              (uint16_t) (1 << 8)                                     /* Unaligned access */
 #define SCB_UFSR_DIVBYZERO              (uint16_t) (1 << 9)                                     /* Divide by zero */
+
+#define SCB_CPACR_CP10_FULL             (uint32_t) (0x3 << 20)                                  /* Access privileges for coprocessor 10 (FPU) */
+#define SCB_CPACR_CP11_FULL             (uint32_t) (0x3 << 22)                                  /* Access privileges for coprocessor 11 (FPU) */
 
 /* Memory Protection Unit */
 /* See pg. 183 in STM32F4 Prog Ref (PM0214) */

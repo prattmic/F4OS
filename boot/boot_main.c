@@ -27,9 +27,11 @@ char banner[] = "Welcome to...\r\n"
 
 int os_start(void) __attribute__((section(".kernel")));
 void clock(void);
+void init_cortex_m(void);
 
 int os_start(void) {
     clock();
+    init_cortex_m();
 
 #ifdef CONFIG_HAVE_LED
     init_gpio();
