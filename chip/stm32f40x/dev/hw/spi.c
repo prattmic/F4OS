@@ -8,10 +8,10 @@
 
 #define SPI_READ    (uint8_t) (1 << 7)
 
-uint8_t spinowrite(uint8_t addr, uint8_t data) __attribute__((section(".kernel")));
-uint8_t spinoread(uint8_t addr) __attribute__((section(".kernel")));
-uint8_t spi1_write(uint8_t addr, uint8_t data) __attribute__((section(".kernel")));
-uint8_t spi1_read(uint8_t addr) __attribute__((section(".kernel")));
+uint8_t spinowrite(uint8_t addr, uint8_t data, void(*cs_high)(void), void(*cs_low)(void)) __attribute__((section(".kernel")));
+uint8_t spinoread(uint8_t addr, void(*cs_high)(void), void(*cs_low)(void)) __attribute__((section(".kernel")));
+uint8_t spi1_write(uint8_t addr, uint8_t data, void(*cs_high)(void), void(*cs_low)(void)) __attribute__((section(".kernel")));
+uint8_t spi1_read(uint8_t addr, void(*cs_high)(void), void(*cs_low)(void)) __attribute__((section(".kernel")));
 
 spi_dev spi1 = {
     .curr_addr = 0,
@@ -26,24 +26,13 @@ struct semaphore spi1_semaphore = {
     .waiting = NULL
 };
 
-inline void spi1_cs_high(void) __attribute__((always_inline));
-inline void spi1_cs_low(void) __attribute__((always_inline));
-
-inline void spi1_cs_high(void) {
-    *GPIOE_ODR |= GPIO_ODR_PIN(3);
-}
-
-inline void spi1_cs_low(void) {
-    *GPIOE_ODR &= ~(GPIO_ODR_PIN(3));
-}
-
-uint8_t spinowrite(uint8_t addr, uint8_t data) {
+uint8_t spinowrite(uint8_t addr, uint8_t data, void(*cs_high)(void), void(*cs_low)(void)) {
     panic_print("Attempted write on uninitialized spi device.\r\n");
     /* Execution will never reach here */
     return -1;
 }
 
-uint8_t spinoread(uint8_t addr) {
+uint8_t spinoread(uint8_t addr, void(*cs_high)(void), void(*cs_low)(void)) {
     panic_print("Attempted read on uninitialized spi device.\r\n");
     /* Execution will never reach here */
     return -1;
@@ -82,10 +71,6 @@ void init_spi(void) {
 
     *SPI1_CR1 |= SPI_CR1_SPE;
 
-
-    /* GPIO PE3 is chip select */
-    *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOEEN;    /* Enable GPIOE Clock */
-
     /* Sets PE3 to output mode */
     *GPIOE_MODER &= ~(GPIO_MODER_M(3));
     *GPIOE_MODER |= (GPIO_MODER_OUT << GPIO_MODER_PIN(3));
@@ -102,9 +87,6 @@ void init_spi(void) {
     *GPIOE_OSPEEDR &= ~(GPIO_OSPEEDR_M(3));
     *GPIOE_OSPEEDR |= (GPIO_OSPEEDR_100M << GPIO_OSPEEDR_PIN(3));
 
-    /* Set high */
-    spi1_cs_high();
-
     init_semaphore(&spi1_semaphore);
 
     /* Set up abstract device for later use in device drivers */
@@ -112,7 +94,7 @@ void init_spi(void) {
     spi1.read = &spi1_read;
 }
 
-uint8_t spi1_write(uint8_t addr, uint8_t data) {
+uint8_t spi1_write(uint8_t addr, uint8_t data, void(*cs_high)(void), void(*cs_low)(void)) {
     /* Data MUST be read after each TX */
     volatile uint8_t read;
 
@@ -122,7 +104,7 @@ uint8_t spi1_write(uint8_t addr, uint8_t data) {
         read = *SPI1_SR;
     }
 
-    spi1_cs_low();
+    cs_low();
 
     while (!(*SPI1_SR & SPI_SR_TXNE));
     *SPI1_DR = addr;
@@ -136,14 +118,15 @@ uint8_t spi1_write(uint8_t addr, uint8_t data) {
 
     while (!(*SPI1_SR & SPI_SR_RXNE));
 
-    spi1_cs_high();
+    cs_high();
 
     read = *SPI1_DR;
 
     return read;
 }
 
-uint8_t spi1_read(uint8_t addr) {
+uint8_t spi1_read(uint8_t addr, void(*cs_high)(void), void(*cs_low)(void)) {
+
     /* Data MUST be read after each TX */
     volatile uint8_t read;
 
@@ -153,7 +136,7 @@ uint8_t spi1_read(uint8_t addr) {
         read = *SPI1_SR;
     }
 
-    spi1_cs_low();
+    cs_low();
 
     while (!(*SPI1_SR & SPI_SR_TXNE));
 
@@ -167,7 +150,7 @@ uint8_t spi1_read(uint8_t addr) {
 
     while (!(*SPI1_SR & SPI_SR_RXNE));
 
-    spi1_cs_high();
+    cs_high();
 
     read = *SPI1_DR;
 
