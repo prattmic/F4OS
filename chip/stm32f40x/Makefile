@@ -8,7 +8,7 @@ VPATH += dev/hw/
 SRCS += tim.c
 
 SRCS_$(CONFIG_HAVE_USART) += usart.c
-SRCS_$(CONFIG_HAVE_LED) += gpio.c
+SRCS_$(CONFIG_HAVE_LED) += led.c
 SRCS_$(CONFIG_HAVE_I2C) += i2c.c
 SRCS_$(CONFIG_HAVE_SPI) += spi.c
 

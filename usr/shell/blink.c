@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <dev/registers.h>
-#include <dev/hw/gpio.h>
+#include <dev/hw/led.h>
 #include <kernel/sched.h>
 
 #include "blink.h"
@@ -63,14 +63,14 @@ void blink(int argc, char **argv) {
 
 void blue_led(void) {
     /* Toggle LED */
-    gpio_toggle_led(3);
+    led_toggle(3);
 }
 
 void orange_led(void) {
     /* Toggle LED */
-    gpio_toggle_led(2);
+    led_toggle(2);
 }
 
 void green_led(void) {
-    gpio_toggle_led(1);
+    led_toggle(1);
 }

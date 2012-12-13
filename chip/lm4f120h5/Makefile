@@ -6,7 +6,7 @@ SRCS += clock.c chip.c
 # dev/hw/
 VPATH += dev/hw/
 SRCS_$(CONFIG_HAVE_USART) += usart.c
-SRCS_$(CONFIG_HAVE_LED) += gpio.c
+SRCS_$(CONFIG_HAVE_LED) += led.c
 
 SRCS += $(SRCS_y)
 

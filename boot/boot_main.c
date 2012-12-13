@@ -7,7 +7,7 @@
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 
-#include <dev/hw/gpio.h>
+#include <dev/hw/led.h>
 #include <dev/hw/usart.h>
 #include <dev/hw/spi.h>
 #include <dev/hw/i2c.h>
@@ -34,7 +34,7 @@ int os_start(void) {
     init_cortex_m();
 
 #ifdef CONFIG_HAVE_LED
-    init_gpio();
+    init_led();
 #endif
 
     init_heap();
