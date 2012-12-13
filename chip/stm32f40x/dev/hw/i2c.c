@@ -55,22 +55,24 @@ void init_i2c(void) {
      * See stm32f4_ref.pdf pg 141 and stm32f407.pdf pg 51 */
 
     /* Sets PB8 and PB9 to alternative function mode */
-    *GPIOB_MODER &= ~((3 << (I2C1_SCL * 2)) | (3 << (I2C1_SDA * 2)));
-    *GPIOB_MODER |= (GPIO_MODER_ALT << (I2C1_SCL * 2)) | (GPIO_MODER_ALT << (I2C1_SDA * 2));
+    *GPIOB_MODER &= ~(GPIO_MODER_M(I2C1_SCL) | GPIO_MODER_M(I2C1_SDA));
+    *GPIOB_MODER |= (GPIO_MODER_ALT << GPIO_MODER_PIN(I2C1_SCL)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(I2C1_SDA));
 
     /* Sets PB8 and PB9 to I2C mode */
-    *GPIOB_AFRH  &= ~((0xF << ((I2C1_SCL-8) * 4)) | (0xF << ((I2C1_SDA-8) * 4)));
-    *GPIOB_AFRH  |= (GPIO_AF_I2C << ((I2C1_SCL-8) * 4)) | (GPIO_AF_I2C << ((I2C1_SDA-8) * 4));
+    *GPIOB_AFRH &= ~(GPIO_AFRH_M(I2C1_SCL) | GPIO_AFRH_M(I2C1_SDA));
+    *GPIOB_AFRH |= (GPIO_AF_I2C << GPIO_AFRH_PIN(I2C1_SCL)) | (GPIO_AF_I2C << GPIO_AFRH_PIN(I2C1_SDA));
 
     /* Sets pin output to open drain */
-    *GPIOB_OTYPER |= (1 << I2C1_SCL) | (1 << I2C1_SDA);
+    *GPIOB_OTYPER &= ~(GPIO_OTYPER_M(I2C1_SCL) | GPIO_OTYPER_M(I2C1_SDA));
+    *GPIOB_OTYPER |= (GPIO_OTYPER_OD << GPIO_OTYPER_PIN(I2C1_SCL)) | (GPIO_OTYPER_OD << GPIO_OTYPER_PIN(I2C1_SDA));
 
     /* No pull-up, no pull-down */
-    *GPIOB_PUPDR  &= ~((3 << (I2C1_SCL * 2)) | (3 << (I2C1_SDA * 2)));
+    *GPIOB_PUPDR &= ~(GPIO_PUPDR_M(I2C1_SCL) | GPIO_PUPDR_M(I2C1_SDA));
+    *GPIOB_PUPDR |= (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(I2C1_SCL)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(I2C1_SDA));
 
     /* Speed to 50Mhz */
-    *GPIOB_OSPEEDR &= ~((3 << (I2C1_SCL * 2)) | (3 << (I2C1_SDA * 2)));
-    *GPIOB_OSPEEDR |= (2 << (I2C1_SCL * 2)) | (2 << (I2C1_SDA * 2));
+    *GPIOB_OSPEEDR &= ~(GPIO_OSPEEDR_M(I2C1_SCL) | GPIO_OSPEEDR_M(I2C1_SDA));
+    *GPIOB_OSPEEDR |= (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(I2C1_SCL)) | (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(I2C1_SDA));
 
     /* Configure peripheral */
     *I2C1_CR2 |= I2C_CR2_FREQ(42);

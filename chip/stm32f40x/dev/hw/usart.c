@@ -32,29 +32,31 @@ char *usart_tx_buf;
 uint8_t usart_ready = 0;
 
 void init_usart(void) {
-    *RCC_APB2ENR |= (1 << 4);   /* Enable USART1 Clock */
-    *RCC_AHB1ENR |= (1 << 1);   /* Enable GPIOB Clock */
+    *RCC_APB2ENR |= RCC_APB2ENR_USART1EN;  /* Enable USART1 Clock */
+    *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;   /* Enable GPIOB Clock */
 
     /* Set PB6 and PB7 to alternative function USART
      * See stm32f4_ref.pdf pg 141 and stm32f407.pdf pg 51 */
 
     /* Sets PB6 and PB7 to alternative function mode */
-    *GPIOB_MODER &= ~((3 << (6 * 2)) | (3 << (7 * 2)));
-    *GPIOB_MODER |= (GPIO_MODER_ALT << (6 * 2)) | (GPIO_MODER_ALT << (7 * 2));
+    *GPIOB_MODER &= ~(GPIO_MODER_M(6) | GPIO_MODER_M(7));
+    *GPIOB_MODER |= (GPIO_MODER_ALT << GPIO_MODER_PIN(6)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(7));
 
     /* Sets PB6 and PB7 to USART1-3 mode */
-    *GPIOB_AFRL  &= ~((0xF << (6 * 4)) | (0xF << (7 * 4)));
-    *GPIOB_AFRL  |= (GPIO_AF_USART13 << (6 * 4)) | (GPIO_AF_USART13 << (7 * 4));
+    *GPIOB_AFRL &= ~(GPIO_AFRL_M(6) | GPIO_AFRL_M(7));
+    *GPIOB_AFRL |= (GPIO_AF_USART13 << GPIO_AFRL_PIN(6)) | (GPIO_AF_USART13 << GPIO_AFRL_PIN(7));
 
     /* Sets pin output to push/pull */
-    *GPIOB_OTYPER &= ~((1 << 6) | (1 << 7));
+    *GPIOB_OTYPER &= ~(GPIO_OTYPER_M(6) | GPIO_OTYPER_M(7));
+    *GPIOB_OTYPER |= (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(6)) | (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(7));
 
     /* No pull-up, no pull-down */
-    *GPIOB_PUPDR  &= ~((3 << (6 * 2)) | (3 << (7 * 2)));
+    *GPIOB_PUPDR &= ~(GPIO_PUPDR_M(6) | GPIO_PUPDR_M(7));
+    *GPIOB_PUPDR |= (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(6)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(7));
 
     /* Speed to 50Mhz */
-    *GPIOB_OSPEEDR &= ~((3 << (6 * 2)) | (3 << (7 * 2)));
-    *GPIOB_OSPEEDR |= (2 << (6 * 2)) | (2 << (7 * 2));
+    *GPIOB_OSPEEDR &= ~(GPIO_OSPEEDR_M(6) | GPIO_OSPEEDR_M(7));
+    *GPIOB_OSPEEDR |= (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(6)) | (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(7));
 
     /* Enable USART1 */
     *USART1_CR1 |= USART_CR1_UE;
@@ -75,17 +77,17 @@ void init_usart(void) {
     *RCC_AHB1ENR |= RCC_AHB1ENR_DMA1EN;
 
     /* Clear configuration registers enable bits and wait for them to be ready */
-    *DMA2_S2CR &= ~(DMA_SxCR_EN);
-    *DMA2_S7CR &= ~(DMA_SxCR_EN);
-    while ( (*DMA2_S2CR & DMA_SxCR_EN) || (*DMA2_S7CR & DMA_SxCR_EN) );
+    *DMA2_CR_S(2) &= ~(DMA_SxCR_EN);
+    *DMA2_CR_S(7) &= ~(DMA_SxCR_EN);
+    while ( (*DMA2_CR_S(2) & DMA_SxCR_EN) || (*DMA2_CR_S(7) & DMA_SxCR_EN) );
 
     /* Select channel 4 */
-    *DMA2_S2CR |= DMA_SxCR_CHSEL(4);
-    *DMA2_S7CR |= DMA_SxCR_CHSEL(4);
+    *DMA2_CR_S(2) |= DMA_SxCR_CHSEL(4);
+    *DMA2_CR_S(7) |= DMA_SxCR_CHSEL(4);
 
     /* Peripheral address - Both use USART data register */
-    *DMA2_S2PAR = (uint32_t) USART1_DR;    /* RX */
-    *DMA2_S7PAR = (uint32_t) USART1_DR;    /* TX */
+    *DMA2_PAR_S(2) = (uint32_t) USART1_DR;    /* RX */
+    *DMA2_PAR_S(7) = (uint32_t) USART1_DR;    /* TX */
 
     /* Allocate buffer memory */
     usart_rx_buf = (char *) malloc(USART_DMA_MSIZE);
@@ -97,22 +99,22 @@ void init_usart(void) {
         /* Clear buffers */
         memset(usart_rx_buf, 0, USART_DMA_MSIZE);
         memset(usart_tx_buf, 0, USART_DMA_MSIZE);
-        *DMA2_S2M0AR = (uint32_t) usart_rx_buf;
-        *DMA2_S7M0AR = (uint32_t) usart_tx_buf;
+        *DMA2_M0AR_S(2) = (uint32_t) usart_rx_buf;
+        *DMA2_M0AR_S(7) = (uint32_t) usart_tx_buf;
     }
 
     /* Number of data items to be transferred */
-    *DMA2_S2NDTR = (uint16_t) USART_DMA_MSIZE;
+    *DMA2_NDTR_S(2) = (uint16_t) USART_DMA_MSIZE;
 
     /* FIFO setup */
-    *DMA2_S7FCR |= DMA_SxFCR_FTH_4 | DMA_SxFCR_DMDIS;
+    *DMA2_FCR_S(7) |= DMA_SxFCR_FTH_4 | DMA_SxFCR_DMDIS;
 
     /* Data direct, memory increment, high priority, memory burst */
-    *DMA2_S2CR |= DMA_SxCR_DIR_PM | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_CIRC;
-    *DMA2_S7CR |= DMA_SxCR_DIR_MP | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_MBURST_4;
+    *DMA2_CR_S(2) |= DMA_SxCR_DIR_PM | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_CIRC;
+    *DMA2_CR_S(7) |= DMA_SxCR_DIR_MP | DMA_SxCR_MINC | DMA_SxCR_PL_HIGH | DMA_SxCR_MBURST_4;
 
     /* Enable DMAs */
-    *DMA2_S2CR |= DMA_SxCR_EN;
+    *DMA2_CR_S(2) |= DMA_SxCR_EN;
 
     /** DMA End **/
 
@@ -154,7 +156,7 @@ uint16_t usart_baud(uint32_t baud) {
 
 void usart_putc(char c, void *env) {
     /* Wait for DMA to be ready */
-    while (*DMA2_S7CR & DMA_SxCR_EN) {
+    while (*DMA2_CR_S(7) & DMA_SxCR_EN) {
         if (task_switching && !IPSR()) {
             SVC(SVC_YIELD);
         }
@@ -168,9 +170,9 @@ void usart_putc(char c, void *env) {
     *usart_tx_buf = c;
 
     /* 1 byte to write */
-    *DMA2_S7NDTR = 1;
+    *DMA2_NDTR_S(7) = 1;
     /* Enable DMA */
-    *DMA2_S7CR |= DMA_SxCR_EN;
+    *DMA2_CR_S(7) |= DMA_SxCR_EN;
 }
 
 void usart_puts(char *s, void *env) {
@@ -179,7 +181,7 @@ void usart_puts(char *s, void *env) {
         uint16_t count = 0;
 
         /* Wait for DMA to be ready */
-        while (*DMA2_S7CR & DMA_SxCR_EN) {
+        while (*DMA2_CR_S(7) & DMA_SxCR_EN) {
             if (task_switching && !IPSR()) {
                 SVC(SVC_YIELD);
             }
@@ -197,15 +199,15 @@ void usart_puts(char *s, void *env) {
         }
 
         /* Number of bytes to write */
-        *DMA2_S7NDTR = (uint16_t) count;
+        *DMA2_NDTR_S(7) = (uint16_t) count;
         /* Enable DMA */
-        *DMA2_S7CR |= DMA_SxCR_EN;
+        *DMA2_CR_S(7) |= DMA_SxCR_EN;
     }
 }
 
 char usart_getc(void *env) {
     static uint32_t read = 0;
-    uint16_t dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
+    uint16_t dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_NDTR_S(2);
     uint8_t wrapped = *DMA2_LISR & DMA_LISR_TCIF2;
     char *usart_buf = usart_rx_buf;
 
@@ -222,7 +224,7 @@ char usart_getc(void *env) {
             acquire(&usart_semaphore);
         }
 
-        dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_S2NDTR;
+        dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_NDTR_S(2);
         wrapped = *DMA2_LISR & DMA_LISR_TCIF2;
     }
 

@@ -151,124 +151,26 @@
 #define DMA1_HISR                       (volatile uint32_t *) (DMA1_BASE + 0x04)                /* DMA1 high interrupt status register */
 #define DMA1_LIFCR                      (volatile uint32_t *) (DMA1_BASE + 0x08)                /* DMA1 low interrupt flag clear register */
 #define DMA1_HIFCR                      (volatile uint32_t *) (DMA1_BASE + 0x0C)                /* DMA1 high interrupt flag clear register */
-/* Stream 0 */
-#define DMA1_S0CR                       (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*0))     /* DMA1 stream 0 configuration register */
-#define DMA1_S0NDTR                     (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*0))     /* DMA1 stream 0 number of data register */
-#define DMA1_S0PAR                      (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*0))     /* DMA1 stream 0 peripheral address register */
-#define DMA1_S0M0AR                     (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*0))     /* DMA1 stream 0 memory 0 address register */
-#define DMA1_S0M1AR                     (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*0))     /* DMA1 stream 0 memory 1 address register */
-#define DMA1_S0FCR                      (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*0))     /* DMA1 stream 0 FIFO control register */
-/* Stream 1 */
-#define DMA1_S1CR                       (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*1))     /* DMA1 stream 1 configuration register */
-#define DMA1_S1NDTR                     (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*1))     /* DMA1 stream 1 number of data register */
-#define DMA1_S1PAR                      (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*1))     /* DMA1 stream 1 peripheral address register */
-#define DMA1_S1M0AR                     (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*1))     /* DMA1 stream 1 memory 0 address register */
-#define DMA1_S1M1AR                     (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*1))     /* DMA1 stream 1 memory 1 address register */
-#define DMA1_S1FCR                      (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*1))     /* DMA1 stream 1 FIFO control register */
-/* Stream 2 */
-#define DMA1_S2CR                       (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*2))     /* DMA1 stream 2 configuration register */
-#define DMA1_S2NDTR                     (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*2))     /* DMA1 stream 2 number of data register */
-#define DMA1_S2PAR                      (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*2))     /* DMA1 stream 2 peripheral address register */
-#define DMA1_S2M0AR                     (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*2))     /* DMA1 stream 2 memory 0 address register */
-#define DMA1_S2M1AR                     (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*2))     /* DMA1 stream 2 memory 1 address register */
-#define DMA1_S2FCR                      (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*2))     /* DMA1 stream 2 FIFO control register */
-/* Stream 3 */
-#define DMA1_S3CR                       (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*3))     /* DMA1 stream 3 configuration register */
-#define DMA1_S3NDTR                     (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*3))     /* DMA1 stream 3 number of data register */
-#define DMA1_S3PAR                      (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*3))     /* DMA1 stream 3 peripheral address register */
-#define DMA1_S3M0AR                     (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*3))     /* DMA1 stream 3 memory 0 address register */
-#define DMA1_S3M1AR                     (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*3))     /* DMA1 stream 3 memory 1 address register */
-#define DMA1_S3FCR                      (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*3))     /* DMA1 stream 3 FIFO control register */
-/* Stream 4 */
-#define DMA1_S4CR                       (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*4))     /* DMA1 stream 4 configuration register */
-#define DMA1_S4NDTR                     (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*4))     /* DMA1 stream 4 number of data register */
-#define DMA1_S4PAR                      (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*4))     /* DMA1 stream 4 peripheral address register */
-#define DMA1_S4M0AR                     (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*4))     /* DMA1 stream 4 memory 0 address register */
-#define DMA1_S4M1AR                     (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*4))     /* DMA1 stream 4 memory 1 address register */
-#define DMA1_S4FCR                      (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*4))     /* DMA1 stream 4 FIFO control register */
-/* Stream 5 */
-#define DMA1_S5CR                       (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*5))     /* DMA1 stream 5 configuration register */
-#define DMA1_S5NDTR                     (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*5))     /* DMA1 stream 5 number of data register */
-#define DMA1_S5PAR                      (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*5))     /* DMA1 stream 5 peripheral address register */
-#define DMA1_S5M0AR                     (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*5))     /* DMA1 stream 5 memory 0 address register */
-#define DMA1_S5M1AR                     (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*5))     /* DMA1 stream 5 memory 1 address register */
-#define DMA1_S5FCR                      (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*5))     /* DMA1 stream 5 FIFO control register */
-/* Stream 6 */
-#define DMA1_S6CR                       (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*6))     /* DMA1 stream 6 configuration register */
-#define DMA1_S6NDTR                     (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*6))     /* DMA1 stream 6 number of data register */
-#define DMA1_S6PAR                      (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*6))     /* DMA1 stream 6 peripheral address register */
-#define DMA1_S6M0AR                     (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*6))     /* DMA1 stream 6 memory 0 address register */
-#define DMA1_S6M1AR                     (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*6))     /* DMA1 stream 6 memory 1 address register */
-#define DMA1_S6FCR                      (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*6))     /* DMA1 stream 6 FIFO control register */
-/* Stream 7 */
-#define DMA1_S7CR                       (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*7))     /* DMA1 stream 7 configuration register */
-#define DMA1_S7NDTR                     (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*7))     /* DMA1 stream 7 number of data register */
-#define DMA1_S7PAR                      (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*7))     /* DMA1 stream 7 peripheral address register */
-#define DMA1_S7M0AR                     (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*7))     /* DMA1 stream 7 memory 0 address register */
-#define DMA1_S7M1AR                     (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*7))     /* DMA1 stream 7 memory 1 address register */
-#define DMA1_S7FCR                      (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*7))     /* DMA1 stream 7 FIFO control register */
+/* Stream n */
+#define DMA1_CR_S(n)                    (volatile uint32_t *) (DMA1_BASE + 0x10 + (0x18*n))     /* DMA1 stream n configuration register */
+#define DMA1_NDTR_S(n)                  (volatile uint32_t *) (DMA1_BASE + 0x14 + (0x18*n))     /* DMA1 stream n number of data register */
+#define DMA1_PAR_S(n)                   (volatile uint32_t *) (DMA1_BASE + 0x18 + (0x18*n))     /* DMA1 stream n peripheral address register */
+#define DMA1_M0AR_S(n)                  (volatile uint32_t *) (DMA1_BASE + 0x1C + (0x18*n))     /* DMA1 stream n memory 0 address register */
+#define DMA1_M1AR_S(n)                  (volatile uint32_t *) (DMA1_BASE + 0x20 + (0x18*n))     /* DMA1 stream n memory 1 address register */
+#define DMA1_FCR_S(n)                   (volatile uint32_t *) (DMA1_BASE + 0x24 + (0x18*n))     /* DMA1 stream n FIFO control register */
 
 /* Direct Memory Access 2 (DMA) */
 #define DMA2_LISR                       (volatile uint32_t *) (DMA2_BASE + 0x00)                /* DMA2 low interrupt status register */
 #define DMA2_HISR                       (volatile uint32_t *) (DMA2_BASE + 0x04)                /* DMA2 high interrupt status register */
 #define DMA2_LIFCR                      (volatile uint32_t *) (DMA2_BASE + 0x08)                /* DMA2 low interrupt flag clear register */
 #define DMA2_HIFCR                      (volatile uint32_t *) (DMA2_BASE + 0x0C)                /* DMA2 high interrupt flag clear register */
-/* Stream 0 */
-#define DMA2_S0CR                       (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*0))     /* DMA2 stream 0 configuration register */
-#define DMA2_S0NDTR                     (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*0))     /* DMA2 stream 0 number of data register */
-#define DMA2_S0PAR                      (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*0))     /* DMA2 stream 0 peripheral address register */
-#define DMA2_S0M0AR                     (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*0))     /* DMA2 stream 0 memory 0 address register */
-#define DMA2_S0M1AR                     (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*0))     /* DMA2 stream 0 memory 1 address register */
-#define DMA2_S0FCR                      (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*0))     /* DMA2 stream 0 FIFO control register */
-/* Stream 1 */
-#define DMA2_S1CR                       (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*1))     /* DMA2 stream 1 configuration register */
-#define DMA2_S1NDTR                     (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*1))     /* DMA2 stream 1 number of data register */
-#define DMA2_S1PAR                      (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*1))     /* DMA2 stream 1 peripheral address register */
-#define DMA2_S1M0AR                     (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*1))     /* DMA2 stream 1 memory 0 address register */
-#define DMA2_S1M1AR                     (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*1))     /* DMA2 stream 1 memory 1 address register */
-#define DMA2_S1FCR                      (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*1))     /* DMA2 stream 1 FIFO control register */
-/* Stream 2 */
-#define DMA2_S2CR                       (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*2))     /* DMA2 stream 2 configuration register */
-#define DMA2_S2NDTR                     (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*2))     /* DMA2 stream 2 number of data register */
-#define DMA2_S2PAR                      (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*2))     /* DMA2 stream 2 peripheral address register */
-#define DMA2_S2M0AR                     (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*2))     /* DMA2 stream 2 memory 0 address register */
-#define DMA2_S2M1AR                     (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*2))     /* DMA2 stream 2 memory 1 address register */
-#define DMA2_S2FCR                      (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*2))     /* DMA2 stream 2 FIFO control register */
-/* Stream 3 */
-#define DMA2_S3CR                       (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*3))     /* DMA2 stream 3 configuration register */
-#define DMA2_S3NDTR                     (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*3))     /* DMA2 stream 3 number of data register */
-#define DMA2_S3PAR                      (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*3))     /* DMA2 stream 3 peripheral address register */
-#define DMA2_S3M0AR                     (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*3))     /* DMA2 stream 3 memory 0 address register */
-#define DMA2_S3M1AR                     (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*3))     /* DMA2 stream 3 memory 1 address register */
-#define DMA2_S3FCR                      (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*3))     /* DMA2 stream 3 FIFO control register */
-/* Stream 4 */
-#define DMA2_S4CR                       (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*4))     /* DMA2 stream 4 configuration register */
-#define DMA2_S4NDTR                     (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*4))     /* DMA2 stream 4 number of data register */
-#define DMA2_S4PAR                      (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*4))     /* DMA2 stream 4 peripheral address register */
-#define DMA2_S4M0AR                     (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*4))     /* DMA2 stream 4 memory 0 address register */
-#define DMA2_S4M1AR                     (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*4))     /* DMA2 stream 4 memory 1 address register */
-#define DMA2_S4FCR                      (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*4))     /* DMA2 stream 4 FIFO control register */
-/* Stream 5 */
-#define DMA2_S5CR                       (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*5))     /* DMA2 stream 5 configuration register */
-#define DMA2_S5NDTR                     (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*5))     /* DMA2 stream 5 number of data register */
-#define DMA2_S5PAR                      (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*5))     /* DMA2 stream 5 peripheral address register */
-#define DMA2_S5M0AR                     (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*5))     /* DMA2 stream 5 memory 0 address register */
-#define DMA2_S5M1AR                     (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*5))     /* DMA2 stream 5 memory 1 address register */
-#define DMA2_S5FCR                      (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*5))     /* DMA2 stream 5 FIFO control register */
-/* Stream 6 */
-#define DMA2_S6CR                       (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*6))     /* DMA2 stream 6 configuration register */
-#define DMA2_S6NDTR                     (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*6))     /* DMA2 stream 6 number of data register */
-#define DMA2_S6PAR                      (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*6))     /* DMA2 stream 6 peripheral address register */
-#define DMA2_S6M0AR                     (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*6))     /* DMA2 stream 6 memory 0 address register */
-#define DMA2_S6M1AR                     (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*6))     /* DMA2 stream 6 memory 1 address register */
-#define DMA2_S6FCR                      (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*6))     /* DMA2 stream 6 FIFO control register */
-/* Stream 7 */
-#define DMA2_S7CR                       (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*7))     /* DMA2 stream 7 configuration register */
-#define DMA2_S7NDTR                     (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*7))     /* DMA2 stream 7 number of data register */
-#define DMA2_S7PAR                      (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*7))     /* DMA2 stream 7 peripheral address register */
-#define DMA2_S7M0AR                     (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*7))     /* DMA2 stream 7 memory 0 address register */
-#define DMA2_S7M1AR                     (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*7))     /* DMA2 stream 7 memory 1 address register */
-#define DMA2_S7FCR                      (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*7))     /* DMA2 stream 7 FIFO control register */
+/* Stream n */
+#define DMA2_CR_S(n)                    (volatile uint32_t *) (DMA2_BASE + 0x10 + (0x18*n))     /* DMA2 stream n configuration register */
+#define DMA2_NDTR_S(n)                  (volatile uint32_t *) (DMA2_BASE + 0x14 + (0x18*n))     /* DMA2 stream n number of data register */
+#define DMA2_PAR_S(n)                   (volatile uint32_t *) (DMA2_BASE + 0x18 + (0x18*n))     /* DMA2 stream n peripheral address register */
+#define DMA2_M0AR_S(n)                  (volatile uint32_t *) (DMA2_BASE + 0x1C + (0x18*n))     /* DMA2 stream n memory 0 address register */
+#define DMA2_M1AR_S(n)                  (volatile uint32_t *) (DMA2_BASE + 0x20 + (0x18*n))     /* DMA2 stream n memory 1 address register */
+#define DMA2_FCR_S(n)                   (volatile uint32_t *) (DMA2_BASE + 0x24 + (0x18*n))     /* DMA2 stream n FIFO control register */
 
 /* USB OTG Full-Speed */
 /* Global Control and Status Registers */
@@ -329,25 +231,116 @@
 /**********************************************************************************************************************************************/
 
 /* Bit Masks - See RM0090 Reference Manual for STM32F4 for details */
-#define PWR_CR_VOS                      (uint16_t) (0x4000)                                     /* Regulator voltage scaling output selection */
+#define PWR_CR_VOS                      (uint16_t) (1 << 14)                                    /* Regulator voltage scaling output selection */
 
-#define RCC_CR_HSEON                    (uint32_t) (0x00010000)                                 /* Enable HSE */
-#define RCC_CR_HSERDY                   (uint32_t) (0x00020000)                                 /* HSE Ready */
-#define RCC_CR_PLLON                    (uint32_t) (0x01000000)                                 /* Main PLL Enable */
-#define RCC_CR_PLLRDY                   (uint32_t) (0x02000000)                                 /* Main PLL clock ready */
+#define RCC_CR_HSION                    (uint32_t) (1 << 0)                                     /* HSI clock enable */
+#define RCC_CR_HSIRDY                   (uint32_t) (1 << 1)                                     /* HSI ready */
+#define RCC_CR_HSITRIM_M                (uint32_t) (0x1F << 3)                                  /* HSI trimming mask */
+#define RCC_CR_HSITRIM(n)               (uint32_t) (n << 3)                                     /* HSI trimming */
+#define RCC_CR_HSICAL_M                 (uint32_t) (0xFF << 8)                                  /* HSI calibration mask */
+#define RCC_CR_HSEON                    (uint32_t) (1 << 16)                                    /* HSE clock enable */
+#define RCC_CR_HSERDY                   (uint32_t) (1 << 17)                                    /* HSE ready */
+#define RCC_CR_HSEBYP                   (uint32_t) (1 << 18)                                    /* HSE bypass */
+#define RCC_CR_CSSON                    (uint32_t) (1 << 19)                                    /* Clock security system enable */
+#define RCC_CR_PLLON                    (uint32_t) (1 << 24)                                    /* Main PLL enable */
+#define RCC_CR_PLLRDY                   (uint32_t) (1 << 25)                                    /* Main PLL clock ready */
+#define RCC_CR_PLLI2SON                 (uint32_t) (1 << 26)                                    /* PLLI2S enable */
+#define RCC_CR_PLLI2SRDY                (uint32_t) (1 << 27)                                    /* PLLI2S clock ready */
 
-#define RCC_CFGR_SW                     (uint32_t) (0x00000003)                                 /* SW[1:0] bits (System clock Switch) */
-#define RCC_CFGR_SW_PLL                 (uint32_t) (0x00000002)                                 /* PLL selected as system clock */
-#define RCC_CFGR_SWS                    (uint32_t) (0x0000000C)                                 /* SWS[1:0] bits (System Clock Switch Status) */
-#define RCC_CFGR_SWS_PLL                (uint32_t) (0x00000008)                                 /* PLL used as system clock */
-#define RCC_CFGR_HPRE_DIV1              (uint32_t) (0x00000000)                                 /* SYSCLK not divided (highest frequency) */
-#define RCC_CFGR_PPRE2_DIV2             (uint32_t) (0x00008000)                                 /* HCLK divided by 2 */
-#define RCC_CFGR_PPRE1_DIV4             (uint32_t) (0x00001400)                                 /* HCLK divided by 4 */
+#define RCC_PLLCFGR_PLLSRC_HSE          (uint32_t) (1 << 22)                                    /* HSE oscillator selected as clock entry */
 
-#define RCC_PLLCFGR_PLLSRC_HSE          (uint32_t) (0x00400000)                                 /* HSE oscillator selected as clock entry */
+#define RCC_CFGR_SW_M                   (uint32_t) (3 << 0)                                     /* System clock switch mask */
+#define RCC_CFGR_SW_HSI                 (uint32_t) (0 << 0)                                     /* System clock switch - HSI selected as system clock */
+#define RCC_CFGR_SW_PLL                 (uint32_t) (1 << 0)                                     /* System clock switch - HSE selected as system clock */
+#define RCC_CFGR_SW_PLL                 (uint32_t) (2 << 0)                                     /* System clock switch - PLL selected as system clock */
+#define RCC_CFGR_SWS_M                  (uint32_t) (3 << 2)                                     /* System clock switch status mask */
+#define RCC_CFGR_SWS_HSI                (uint32_t) (0 << 2)                                     /* System clock switch status - HSI used as system clock */
+#define RCC_CFGR_SWS_HSE                (uint32_t) (1 << 2)                                     /* System clock switch status - HSE used as system clock */
+#define RCC_CFGR_SWS_PLL                (uint32_t) (2 << 2)                                     /* System clock switch status - PLL used as system clock */
+#define RCC_CFGR_HPRE_M                 (uint32_t) (0xF << 4)                                   /* AHB prescaler mask */
+#define RCC_CFGR_HPRE_DIV1              (uint32_t) (0x0 << 4)                                   /* AHB prescaler - SYSCLK not divided */
+#define RCC_CFGR_HPRE_DIV2              (uint32_t) (0x8 << 4)                                   /* AHB prescaler - SYSCLK/2 */
+#define RCC_CFGR_HPRE_DIV4              (uint32_t) (0x9 << 4)                                   /* AHB prescaler - SYSCLK/4 */
+#define RCC_CFGR_HPRE_DIV8              (uint32_t) (0xA << 4)                                   /* AHB prescaler - SYSCLK/8 */
+#define RCC_CFGR_HPRE_DIV16             (uint32_t) (0xB << 4)                                   /* AHB prescaler - SYSCLK/16 */
+#define RCC_CFGR_HPRE_DIV64             (uint32_t) (0xC << 4)                                   /* AHB prescaler - SYSCLK/64 */
+#define RCC_CFGR_HPRE_DIV128            (uint32_t) (0xD << 4)                                   /* AHB prescaler - SYSCLK/128 */
+#define RCC_CFGR_HPRE_DIV256            (uint32_t) (0xE << 4)                                   /* AHB prescaler - SYSCLK/256 */
+#define RCC_CFGR_HPRE_DIV512            (uint32_t) (0xF << 4)                                   /* AHB prescaler - SYSCLK/512 */
+#define RCC_CFGR_PPRE1_M                (uint32_t) (7 << 10)                                    /* APB low speed prescaler mask */
+#define RCC_CFGR_PPRE1_DIV1             (uint32_t) (0 << 10)                                    /* APB low speed prescaler - HCLK/1 */
+#define RCC_CFGR_PPRE1_DIV2             (uint32_t) (4 << 10)                                    /* APB low speed prescaler - HCLK/2 */
+#define RCC_CFGR_PPRE1_DIV4             (uint32_t) (5 << 10)                                    /* APB low speed prescaler - HCLK/4 */
+#define RCC_CFGR_PPRE1_DIV8             (uint32_t) (6 << 10)                                    /* APB low speed prescaler - HCLK/8 */
+#define RCC_CFGR_PPRE1_DIV16            (uint32_t) (7 << 10)                                    /* APB low speed prescaler - HCLK/16 */
+#define RCC_CFGR_PPRE2_M                (uint32_t) (7 << 13)                                    /* APB high speec prescaler mask */
+#define RCC_CFGR_PPRE2_DIV1             (uint32_t) (0 << 13)                                    /* APB high speed prescaler - HCLK/1 */
+#define RCC_CFGR_PPRE2_DIV2             (uint32_t) (4 << 13)                                    /* APB high speed prescaler - HCLK/2 */
+#define RCC_CFGR_PPRE2_DIV4             (uint32_t) (5 << 13)                                    /* APB high speed prescaler - HCLK/4 */
+#define RCC_CFGR_PPRE2_DIV8             (uint32_t) (6 << 13)                                    /* APB high speed prescaler - HCLK/8 */
+#define RCC_CFGR_PPRE2_DIV16            (uint32_t) (7 << 13)                                    /* APB high speed prescaler - HCLK/16 */
+#define RCC_CFGR_RTCPRE_M               (uint32_t) (0x1F << 16)                                 /* HSE division factor for RTC clock mask */
+#define RCC_CFGR_RTCPRE(n)              (uint32_t) (n << 16)                                    /* HSE division factor for RTC clock */
 
+#define RCC_AHB1RSTR_GPIOARST           (uint32_t) (1 << 0)                                     /* GPIOA reset */
+#define RCC_AHB1RSTR_GPIOBRST           (uint32_t) (1 << 1)                                     /* GPIOB reset */
+#define RCC_AHB1RSTR_GPIOCRST           (uint32_t) (1 << 2)                                     /* GPIOC reset */
+#define RCC_AHB1RSTR_GPIODRST           (uint32_t) (1 << 3)                                     /* GPIOD reset */
+#define RCC_AHB1RSTR_GPIOERST           (uint32_t) (1 << 4)                                     /* GPIOE reset */
+#define RCC_AHB1RSTR_GPIOFRST           (uint32_t) (1 << 5)                                     /* GPIOF reset */
+#define RCC_AHB1RSTR_GPIOGRST           (uint32_t) (1 << 6)                                     /* GPIOG reset */
+#define RCC_AHB1RSTR_GPIOHRST           (uint32_t) (1 << 7)                                     /* GPIOH reset */
+#define RCC_AHB1RSTR_GPIOIRST           (uint32_t) (1 << 8)                                     /* GPIOI reset */
+#define RCC_AHB1RSTR_CRCRST             (uint32_t) (1 << 12)                                    /* CRC reset */
 #define RCC_AHB1RSTR_DMA1RST            (uint32_t) (1 << 21)                                    /* DMA1 reset */
 #define RCC_AHB1RSTR_DMA2RST            (uint32_t) (1 << 22)                                    /* DMA2 reset */
+#define RCC_AHB1RSTR_ETHMACRST          (uint32_t) (1 << 25)                                    /* Ethernet MAC reset */
+#define RCC_AHB1RSTR_OTGHSRST           (uint32_t) (1 << 29)                                    /* USB OTG HS reset */
+
+#define RCC_AHB2RSTR_DCMIRST            (uint32_t) (1 << 0)                                     /* Camera interface reset */
+#define RCC_AHB2RSTR_CRYPRST            (uint32_t) (1 << 4)                                     /* Cyrpto modules reset */
+#define RCC_AHB2RSTR_HASHRST            (uint32_t) (1 << 5)                                     /* Hash modules reset */
+#define RCC_AHB2RSTR_RNGRST             (uint32_t) (1 << 6)                                     /* Random number generator reset */
+#define RCC_AHB2RSTR_OTGFSRST           (uint32_t) (1 << 7)                                     /* USB OTG FS reset */
+
+#define RCC_AHB3RSTR_FSMCRST            (uint32_t) (1 << 0)                                     /* Flexible static memeory controller reset */
+
+#define RCC_APB1RSTR_TIM2RST            (uint32_t) (1 << 0)                                     /* TIM2 reset */
+#define RCC_APB1RSTR_TIM3RST            (uint32_t) (1 << 1)                                     /* TIM3 reset */
+#define RCC_APB1RSTR_TIM4RST            (uint32_t) (1 << 2)                                     /* TIM4 reset */
+#define RCC_APB1RSTR_TIM5RST            (uint32_t) (1 << 3)                                     /* TIM5 reset */
+#define RCC_APB1RSTR_TIM6RST            (uint32_t) (1 << 4)                                     /* TIM6 reset */
+#define RCC_APB1RSTR_TIM7RST            (uint32_t) (1 << 5)                                     /* TIM7 reset */
+#define RCC_APB1RSTR_TIM12RST           (uint32_t) (1 << 6)                                     /* TIM12 reset */
+#define RCC_APB1RSTR_TIM13RST           (uint32_t) (1 << 7)                                     /* TIM13 reset */
+#define RCC_APB1RSTR_TIM14RST           (uint32_t) (1 << 8)                                     /* TIM14 reset */
+#define RCC_APB1RSTR_WWDGRST            (uint32_t) (1 << 11)                                    /* Window watchdog reset */
+#define RCC_APB1RSTR_SPI2RST            (uint32_t) (1 << 14)                                    /* SPI2 reset */
+#define RCC_APB1RSTR_SPI3RST            (uint32_t) (1 << 15)                                    /* SPI3 reset */
+#define RCC_APB1RSTR_USART2RST          (uint32_t) (1 << 17)                                    /* USART2 reset */
+#define RCC_APB1RSTR_USART3RST          (uint32_t) (1 << 18)                                    /* USART3 reset */
+#define RCC_APB1RSTR_USART4RST          (uint32_t) (1 << 19)                                    /* USART4 reset */
+#define RCC_APB1RSTR_USART5RST          (uint32_t) (1 << 20)                                    /* USART5 reset */
+#define RCC_APB1RSTR_I2C1RST            (uint32_t) (1 << 21)                                    /* I2C1 reset */
+#define RCC_APB1RSTR_I2C2RST            (uint32_t) (1 << 22)                                    /* I2C2 reset */
+#define RCC_APB1RSTR_I2C3RST            (uint32_t) (1 << 23)                                    /* I2C3 reset */
+#define RCC_APB1RSTR_CAN1RST            (uint32_t) (1 << 25)                                    /* CAN1 reset */
+#define RCC_APB1RSTR_CAN2RST            (uint32_t) (1 << 26)                                    /* CAN2 reset */
+#define RCC_APB1RSTR_PWRRST             (uint32_t) (1 << 28)                                    /* Power interface reset */
+#define RCC_APB1RSTR_DACRST             (uint32_t) (1 << 29)                                    /* DAC reset */
+
+#define RCC_APB2RSTR_TIM1RST            (uint32_t) (1 << 0)                                     /* TIM1 reset */
+#define RCC_APB2RSTR_TIM8RST            (uint32_t) (1 << 1)                                     /* TIM8 reset */
+#define RCC_APB2RSTR_USART1RST          (uint32_t) (1 << 4)                                     /* USART1 reset */
+#define RCC_APB2RSTR_USART2RST          (uint32_t) (1 << 5)                                     /* USART2 reset */
+#define RCC_APB2RSTR_ADCRST             (uint32_t) (1 << 8)                                     /* ADC1 reset */
+#define RCC_APB2RSTR_SDIORST            (uint32_t) (1 << 11)                                    /* SDIO reset */
+#define RCC_APB2RSTR_SPI1RST            (uint32_t) (1 << 12)                                    /* SPI1 reset */
+#define RCC_APB2RSTR_SYSCFGRST          (uint32_t) (1 << 14)                                    /* System configuration controller reset */
+#define RCC_APB2RSTR_TIM9RST            (uint32_t) (1 << 16)                                    /* TIM9 reset */
+#define RCC_APB2RSTR_TIM10RST           (uint32_t) (1 << 17)                                    /* TIM10 reset */
+#define RCC_APB2RSTR_TIM11RST           (uint32_t) (1 << 18)                                    /* TIM11 reset */
+
 #define RCC_AHB1ENR_GPIOAEN             (uint32_t) (1 << 0)                                     /* GPIOA clock enable */
 #define RCC_AHB1ENR_GPIOBEN             (uint32_t) (1 << 1)                                     /* GPIOB clock enable */
 #define RCC_AHB1ENR_GPIOCEN             (uint32_t) (1 << 2)                                     /* GPIOC clock enable */
@@ -357,18 +350,71 @@
 #define RCC_AHB1ENR_GPIOGEN             (uint32_t) (1 << 6)                                     /* GPIOG clock enable */
 #define RCC_AHB1ENR_GPIOHEN             (uint32_t) (1 << 7)                                     /* GPIOH clock enable */
 #define RCC_AHB1ENR_GPIOIEN             (uint32_t) (1 << 8)                                     /* GPIOI clock enable */
+#define RCC_AHB1ENR_CRCEN               (uint32_t) (1 << 12)                                    /* CRC clock enable */
+#define RCC_AHB1ENR_BKPSRAMEN           (uint32_t) (1 << 18)                                    /* Backup SRAM clock enable */
+#define RCC_AHB1ENR_CCMDATARAMEN        (uint32_t) (1 << 20)                                    /* CCM data RAM clock enable */
 #define RCC_AHB1ENR_DMA1EN              (uint32_t) (1 << 21)                                    /* DMA1 clock enable */
 #define RCC_AHB1ENR_DMA2EN              (uint32_t) (1 << 22)                                    /* DMA2 clock enable */
-#define RCC_AHB2ENR_OTGFSEN             (uint32_t) (1 << 7)                                     /* USB OTG FS clock enable */
-#define RCC_APB1ENR_TIM2EN              (uint32_t) (1 << 0)                                     /* TIM2 clock enable */
-#define RCC_APB1ENR_SPI2EN              (uint32_t) (1 << 14)                                    /* SPI2 clock enable */
-#define RCC_APB1ENR_I2C1EN              (uint32_t) (1 << 21)                                    /* SPI2 clock enable */
-#define RCC_APB1ENR_PWREN               (uint32_t) (0x10000000)                                 /* Power Interface Clock Enable */
-#define RCC_APB2ENR_SPI1EN              (uint32_t) (1 << 12)                                    /* SPI1 Enable */
+#define RCC_AHB1ENR_ETHMACEN            (uint32_t) (1 << 25)                                    /* Ethernet MAC clock enable */
+#define RCC_AHB1ENR_ETHMACTXEN          (uint32_t) (1 << 26)                                    /* Ethernet MAC TX clock enable */
+#define RCC_AHB1ENR_ETHMACRXEN          (uint32_t) (1 << 27)                                    /* Ethernet MAC RX clock enable */
+#define RCC_AHB1ENR_ETHMACPTPEN         (uint32_t) (1 << 28)                                    /* Ethernet MAC PTP clock enable */
+#define RCC_AHB1ENR_OTGHSEN             (uint32_t) (1 << 29)                                    /* USB OTG HS clock enable */
+#define RCC_AHB1ENR_OTGHSULPIEN         (uint32_t) (1 << 30)                                    /* USB OTG HSULPI clock enable */
 
-#define FLASH_ACR_ICEN                  (uint32_t) (0x00000200)                                 /* Instruction Cache Enable */
-#define FLASH_ACR_DCEN                  (uint32_t) (0x00000400)                                 /* Data Cache Enable */
-#define FLASH_ACR_LATENCY_5WS           (uint32_t) (0x00000005)                                 /* 5 Wait States Latency */
+#define RCC_AHB2ENR_DCMIEN              (uint32_t) (1 << 0)                                     /* Camera interface clock enable */
+#define RCC_AHB2ENR_CRYPEN              (uint32_t) (1 << 4)                                     /* Cyrpto modules clock enable */
+#define RCC_AHB2ENR_HASHEN              (uint32_t) (1 << 5)                                     /* Hash modules clock enable */
+#define RCC_AHB2ENR_RNGEN               (uint32_t) (1 << 6)                                     /* Random number generator clock enable */
+#define RCC_AHB2ENR_OTGFSEN             (uint32_t) (1 << 7)                                     /* USB OTG FS clock enable */
+
+#define RCC_AHB3ENR_FSMCEN              (uint32_t) (1 << 0)                                     /* Flexible static memeory controller clock enable */
+
+#define RCC_APB1ENR_TIM2EN              (uint32_t) (1 << 0)                                     /* TIM2 clock enable */
+#define RCC_APB1ENR_TIM3EN              (uint32_t) (1 << 1)                                     /* TIM3 clock enable */
+#define RCC_APB1ENR_TIM4EN              (uint32_t) (1 << 2)                                     /* TIM4 clock enable */
+#define RCC_APB1ENR_TIM5EN              (uint32_t) (1 << 3)                                     /* TIM5 clock enable */
+#define RCC_APB1ENR_TIM6EN              (uint32_t) (1 << 4)                                     /* TIM6 clock enable */
+#define RCC_APB1ENR_TIM7EN              (uint32_t) (1 << 5)                                     /* TIM7 clock enable */
+#define RCC_APB1ENR_TIM12EN             (uint32_t) (1 << 6)                                     /* TIM12 clock enable */
+#define RCC_APB1ENR_TIM13EN             (uint32_t) (1 << 7)                                     /* TIM13 clock enable */
+#define RCC_APB1ENR_TIM14EN             (uint32_t) (1 << 8)                                     /* TIM14 clock enable */
+#define RCC_APB1ENR_WWDGEN              (uint32_t) (1 << 11)                                    /* Window watchdog clock enable */
+#define RCC_APB1ENR_SPI2EN              (uint32_t) (1 << 14)                                    /* SPI2 clock enable */
+#define RCC_APB1ENR_SPI3EN              (uint32_t) (1 << 15)                                    /* SPI3 clock enable */
+#define RCC_APB1ENR_USART2EN            (uint32_t) (1 << 17)                                    /* USART2 clock enable */
+#define RCC_APB1ENR_USART3EN            (uint32_t) (1 << 18)                                    /* USART3 clock enable */
+#define RCC_APB1ENR_USART4EN            (uint32_t) (1 << 19)                                    /* USART4 clock enable */
+#define RCC_APB1ENR_USART5EN            (uint32_t) (1 << 20)                                    /* USART5 clock enable */
+#define RCC_APB1ENR_I2C1EN              (uint32_t) (1 << 21)                                    /* I2C1 clock enable */
+#define RCC_APB1ENR_I2C2EN              (uint32_t) (1 << 22)                                    /* I2C2 clock enable */
+#define RCC_APB1ENR_I2C3EN              (uint32_t) (1 << 23)                                    /* I2C3 clock enable */
+#define RCC_APB1ENR_CAN1EN              (uint32_t) (1 << 25)                                    /* CAN1 clock enable */
+#define RCC_APB1ENR_CAN2EN              (uint32_t) (1 << 26)                                    /* CAN2 clock enable */
+#define RCC_APB1ENR_PWREN               (uint32_t) (1 << 28)                                    /* Power interface clock enable */
+#define RCC_APB1ENR_DACEN               (uint32_t) (1 << 29)                                    /* DAC clock enable */
+
+#define RCC_APB2ENR_TIM1EN              (uint32_t) (1 << 0)                                     /* TIM1 clock enable */
+#define RCC_APB2ENR_TIM8EN              (uint32_t) (1 << 1)                                     /* TIM8 clock enable */
+#define RCC_APB2ENR_USART1EN            (uint32_t) (1 << 4)                                     /* USART1 clock enable */
+#define RCC_APB2ENR_USART2EN            (uint32_t) (1 << 5)                                     /* USART2 clock enable */
+#define RCC_APB2ENR_ADC1EN              (uint32_t) (1 << 8)                                     /* ADC1 clock enable */
+#define RCC_APB2ENR_ADC2EN              (uint32_t) (1 << 9)                                     /* ADC2 clock enable */
+#define RCC_APB2ENR_ADC3EN              (uint32_t) (1 << 10)                                    /* ADC3 clock enable */
+#define RCC_APB2ENR_SDIOEN              (uint32_t) (1 << 11)                                    /* SDIO clock enable */
+#define RCC_APB2ENR_SPI1EN              (uint32_t) (1 << 12)                                    /* SPI1 clock enable */
+#define RCC_APB2ENR_SYSCFGEN            (uint32_t) (1 << 14)                                    /* System configuration controller clock enable */
+#define RCC_APB2ENR_TIM9EN              (uint32_t) (1 << 16)                                    /* TIM9 clock enable */
+#define RCC_APB2ENR_TIM10EN             (uint32_t) (1 << 17)                                    /* TIM10 clock enable */
+#define RCC_APB2ENR_TIM11EN             (uint32_t) (1 << 18)                                    /* TIM11 clock enable */
+
+#define FLASH_ACR_PRFTEN                (uint32_t) (1 << 8)                                     /* Prefetch enable */
+#define FLASH_ACR_ICEN                  (uint32_t) (1 << 9)                                     /* Instruction cache enable */
+#define FLASH_ACR_DCEN                  (uint32_t) (1 << 10)                                    /* Data cache enable */
+#define FLASH_ACR_ICRST                 (uint32_t) (1 << 11)                                    /* Instruction cache reset */
+#define FLASH_ACR_CCRST                 (uint32_t) (1 << 12)                                    /* Data cache reset */
+#define FLASH_ACR_LATENCY_M             (uint32_t) (7 << 0)                                     /* Latency mask */
+#define FLASH_ACR_LATENCY(n)            (uint32_t) (n << 0)                                     /* Latency - n wait states */
 
 /* TIM2 */
 #define TIM2_CR1_CEN                    (uint32_t) (1 << 0)                                     /* TIM2 counter enable */
@@ -505,8 +551,43 @@
 #define USART_CR3_DMAT_EN               (uint32_t) (1 << 7)                                     /* USART DMA Transmit Enable */
 
 /* GPIO */
-#define GPIO_MODER_OUT                  (uint32_t) (0x1)                                        /* Sets GPIO pin to output mode */
-#define GPIO_MODER_ALT                  (uint32_t) (0x2)                                        /* Sets GPIO pin to alternative function mode */
+#define GPIO_MODER_PIN(n)               (uint32_t) (2*n)                                        /* Pin bitshift */
+#define GPIO_MODER_M(n)                 (uint32_t) (0x3 << 2*n)                                 /* Pin mask */
+#define GPIO_MODER_IN                   (uint32_t) (0x0)                                        /* Input mode */
+#define GPIO_MODER_OUT                  (uint32_t) (0x1)                                        /* Output mode */
+#define GPIO_MODER_ALT                  (uint32_t) (0x2)                                        /* Alternative function mode */
+#define GPIO_MODER_ANA                  (uint32_t) (0x3)                                        /* Analog mode */
+
+#define GPIO_OTYPER_PIN(n)              (uint32_t) (n)                                          /* Pin bitshift */
+#define GPIO_OTYPER_M(n)                (uint32_t) (1 << n)                                     /* Pin mask */
+#define GPIO_OTYPER_PP                  (uint32_t) (0x0)                                        /* Output push-pull */
+#define GPIO_OTYPER_OD                  (uint32_t) (0x1)                                        /* Output open drain */
+
+#define GPIO_OSPEEDR_PIN(n)             (uint32_t) (2*n)                                        /* Pin bitshift */
+#define GPIO_OSPEEDR_M(n)               (uint32_t) (0x3 << (2*n))                               /* Pin mask */
+#define GPIO_OSPEEDR_2M                 (uint32_t) (0x0)                                        /* Output speed 2MHz */
+#define GPIO_OSPEEDR_25M                (uint32_t) (0x1)                                        /* Output speed 25MHz */
+#define GPIO_OSPEEDR_50M                (uint32_t) (0x2)                                        /* Output speed 50MHz */
+#define GPIO_OSPEEDR_100M               (uint32_t) (0x3)                                        /* Output speed 100MHz */
+
+#define GPIO_PUPDR_PIN(n)               (uint32_t) (2*n)                                        /* Pin bitshift */
+#define GPIO_PUPDR_M(n)                 (uint32_t) (0x3 << (2*n))                               /* Pin mask */
+#define GPIO_PUPDR_NONE                 (uint32_t) (0x0)                                        /* Port no pull-up, pull-down */
+#define GPIO_PUPDR_UP                   (uint32_t) (0x1)                                        /* Port pull-up */
+#define GPIO_PUPDR_DOWN                 (uint32_t) (0x2)                                        /* Port pull-down */
+
+#define GPIO_IDR_PIN(n)                 (uint32_t) (1 << n)                                     /* Input for pin n */
+
+#define GPIO_ODR_PIN(n)                 (uint32_t) (1 << n)                                     /* Output for pin n */
+
+#define GPIO_BSRR_BS(n)                 (uint32_t) (1 << n)                                     /* Set pin n */
+#define GPIO_BSRR_BR(n)                 (uint32_t) (1 << (n+16))                                /* Reset pin n */
+
+#define GPIO_AFRL_PIN(n)                (uint32_t) (4*n)                                        /* Pin bitshift */
+#define GPIO_AFRL_M(n)                  (uint32_t) (0xF << (4*n))                               /* Pin mask */
+#define GPIO_AFRH_PIN(n)                (uint32_t) (4*(n-8))                                    /* Pin bitshift */
+#define GPIO_AFRH_M(n)                  (uint32_t) (0xF << (4*(n-8)))                           /* Pin mask */
+
 #define GPIO_AF_USART13                 (uint32_t) (0x7)                                        /* GPIO USART1-3 mode */
 #define GPIO_AF_I2C                     (uint32_t) (0x4)                                        /* GPIO I2C mode */
 #define GPIO_AF_SPI12                   (uint32_t) (0x5)                                        /* GPIO SPI1-2 mode */

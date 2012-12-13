@@ -79,14 +79,14 @@ void clock(void) {
 
         /* Configure Flash prefetch, Instruction cache, Data cache and wait state */
         //*FLASH_ACR = FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_LATENCY_5WS;
-        *FLASH_ACR = FLASH_ACR_LATENCY_5WS;
+        *FLASH_ACR = FLASH_ACR_LATENCY(5);
 
         /* Select the main PLL as system clock source */
-        *RCC_CFGR &= (uint32_t)((uint32_t)~(RCC_CFGR_SW));
+        *RCC_CFGR &= ~(RCC_CFGR_SW_M);
         *RCC_CFGR |= RCC_CFGR_SW_PLL;
 
         /* Wait till the main PLL is used as system clock source */
-        while ((*RCC_CFGR & (uint32_t) RCC_CFGR_SWS ) != RCC_CFGR_SWS_PLL); {
+        while ((*RCC_CFGR & RCC_CFGR_SWS_M) != RCC_CFGR_SWS_PLL); {
         }
     }
     else { 
@@ -95,5 +95,5 @@ void clock(void) {
     }
 
     /* Enable the CCM RAM clock */
-    *RCC_AHB1ENR |= (1 << 20);
+    *RCC_AHB1ENR |= RCC_AHB1ENR_CCMDATARAMEN;
 }

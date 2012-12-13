@@ -57,24 +57,24 @@ static inline void usbdev_clocks_init(void) {
      * See stm32f4_ref.pdf pg 141 and stm32f407.pdf pg 51 */
 
     /* Sets PA8, PA9, PA10, PA11, and PA12 to alternative function mode */
-    *GPIOA_MODER &= ~((3 << (8 * 2)) | (3 << (9 * 2)) | (3 << (10 * 2)) | (3 << (11 * 2)) | (3 << (12 * 2)));
-    *GPIOA_MODER |= (GPIO_MODER_ALT << (8 * 2)) | (GPIO_MODER_ALT << (9 * 2)) | (GPIO_MODER_ALT << (10 * 2)) | (GPIO_MODER_ALT << (11 * 2)) | (GPIO_MODER_ALT << (12 * 2));
+    *GPIOA_MODER &= ~(GPIO_MODER_M(8) | GPIO_MODER_M(9) | GPIO_MODER_M(10) | GPIO_MODER_M(11) | GPIO_MODER_M(12));
+    *GPIOA_MODER |= (GPIO_MODER_ALT << GPIO_MODER_PIN(8)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(9)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(10)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(11)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(12));
 
     /* Sets PA8, PA9, PA10, PA11, and PA12 to OTG mode */
-    *GPIOA_AFRH  &= ~((0xF << ((8-8) * 4)) | (0xF << ((9-8) * 4)) | (0xF << ((10-8) * 4)) | (0xF << ((11-8) * 4)) | (0xF << ((12-8) * 4)));
-    *GPIOA_AFRH  |= (GPIO_AF_OTG << ((8-8) * 4)) | (GPIO_AF_OTG << ((9-8) * 4)) | (GPIO_AF_OTG << ((10-8) * 4)) | (GPIO_AF_OTG << ((11-8) * 4)) | (GPIO_AF_OTG << ((12-8) * 4));
+    *GPIOA_AFRH &= ~(GPIO_AFRH_M(8) | GPIO_AFRH_M(9) | GPIO_AFRH_M(10) | GPIO_AFRH_M(11) | GPIO_AFRH_M(12));
+    *GPIOA_AFRH |= (GPIO_AF_OTG << GPIO_AFRH_PIN(8)) | (GPIO_AF_OTG << GPIO_AFRH_PIN(9)) | (GPIO_AF_OTG << GPIO_AFRH_PIN(10)) | (GPIO_AF_OTG << GPIO_AFRH_PIN(11)) | (GPIO_AF_OTG << GPIO_AFRH_PIN(12));
 
     /* Sets pin output to push/pull */
-    *GPIOA_OTYPER &= ~((1 << 8) | (1 << 9) | (1 << 11) | (1 << 12));
-    *GPIOA_OTYPER |= (1 << 10);
+    *GPIOA_OTYPER &= ~(GPIO_OTYPER_M(8) | GPIO_OTYPER_M(9) | GPIO_OTYPER_M(10) | GPIO_OTYPER_M(11) | GPIO_OTYPER_M(12));
+    *GPIOA_OTYPER |= (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(8)) | (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(9)) | (GPIO_OTYPER_OD << GPIO_OTYPER_PIN(10)) | (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(11)) | (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(12));
 
     /* No pull-up, no pull-down */
-    *GPIOA_PUPDR &= ~((3 << (8 * 2)) | (3 << (9 * 2)) | (3 << (10 * 2)) | (3 << (11 * 2)) | (3 << (12 * 2)));
-    *GPIOA_PUPDR |= (1 << (10 * 2));
+    *GPIOA_PUPDR &= ~(GPIO_PUPDR_M(8) | GPIO_PUPDR_M(9) | GPIO_PUPDR_M(10) | GPIO_PUPDR_M(11) | GPIO_PUPDR_M(12));
+    *GPIOA_PUPDR |= (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(8)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(9)) | (GPIO_PUPDR_UP << GPIO_PUPDR_PIN(10)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(11)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(12));
 
     /* Speed to 100Mhz */
-    *GPIOA_OSPEEDR &= ~((3 << (8 * 2)) | (3 << (9 * 2)) | (3 << (10 * 2)) | (3 << (11 * 2)) | (3 << (12 * 2)));
-    *GPIOA_OSPEEDR |= (3 << (8 * 2)) | (3 << (9 * 2)) | (3 << (10 * 2)) | (3 << (11 * 2)) | (3 << (12 * 2));
+    *GPIOA_OSPEEDR &= ~(GPIO_OSPEEDR_M(8) | GPIO_OSPEEDR_M(9) | GPIO_OSPEEDR_M(10) | GPIO_OSPEEDR_M(11) | GPIO_OSPEEDR_M(12));
+    *GPIOA_OSPEEDR |= (GPIO_OSPEEDR_100M << GPIO_OSPEEDR_PIN(8)) | (GPIO_OSPEEDR_100M << GPIO_OSPEEDR_PIN(9)) | (GPIO_OSPEEDR_100M << GPIO_OSPEEDR_PIN(10)) | (GPIO_OSPEEDR_100M << GPIO_OSPEEDR_PIN(11)) | (GPIO_OSPEEDR_100M << GPIO_OSPEEDR_PIN(12));
 }
 
 void usbdev_reset(void) {

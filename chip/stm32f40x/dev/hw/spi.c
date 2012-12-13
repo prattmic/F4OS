@@ -30,11 +30,11 @@ inline void spi1_cs_high(void) __attribute__((always_inline));
 inline void spi1_cs_low(void) __attribute__((always_inline));
 
 inline void spi1_cs_high(void) {
-    *GPIOE_ODR |= (1 << 3);
+    *GPIOE_ODR |= GPIO_ODR_PIN(3);
 }
 
 inline void spi1_cs_low(void) {
-    *GPIOE_ODR &= ~(1 << 3);
+    *GPIOE_ODR &= ~(GPIO_ODR_PIN(3));
 }
 
 uint8_t spinowrite(uint8_t addr, uint8_t data) {
@@ -57,22 +57,24 @@ void init_spi(void) {
      * See stm32f4_ref.pdf pg 141 and stm32f407.pdf pg 51 */
 
     /* Sets PA5, PA6, and PA7 to alternative function mode */
-    *GPIOA_MODER &= ~((3 << (5 * 2)) | (3 << (6 * 2)) | (3 << (7 * 2)));
-    *GPIOA_MODER |= (GPIO_MODER_ALT << (5 * 2)) | (GPIO_MODER_ALT << (6 * 2)) | (GPIO_MODER_ALT << (7 * 2));
+    *GPIOA_MODER &= ~(GPIO_MODER_M(5) | GPIO_MODER_M(6) | GPIO_MODER_M(7));
+    *GPIOA_MODER |= (GPIO_MODER_ALT << GPIO_MODER_PIN(5)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(6)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(7));
 
     /* Sets PA5, PA6, and PA7 to SPI1-2 mode */
-    *GPIOA_AFRL  &= ~((0xF << (5 * 4)) | (0xF << (6 * 4)) | (0xF << (7 * 4)));
-    *GPIOA_AFRL  |= (GPIO_AF_SPI12 << (5 * 4)) | (GPIO_AF_SPI12 << (6 * 4)) | (GPIO_AF_SPI12 << (7 * 4));
+    *GPIOA_AFRL &= ~(GPIO_AFRL_M(5) | GPIO_AFRL_M(6) | GPIO_AFRL_M(7));
+    *GPIOA_AFRL |= (GPIO_AF_SPI12 << GPIO_AFRL_PIN(5)) | (GPIO_AF_SPI12 << GPIO_AFRL_PIN(6)) | (GPIO_AF_SPI12 << GPIO_AFRL_PIN(7));
 
     /* Sets pin output to push/pull */
-    *GPIOA_OTYPER &= ~((1 << 5) | (1 << 6) | (1 << 7));
+    *GPIOA_OTYPER &= ~(GPIO_OTYPER_M(5) | GPIO_OTYPER_M(6) | GPIO_OTYPER_M(7));
+    *GPIOA_OTYPER |= (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(5)) | (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(6)) | (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(7));
 
     /* No pull-up, no pull-down */
-    *GPIOA_PUPDR  &= ~((3 << (5 * 2)) | (3 << (6 * 2)) | (3 << (7 * 2)));
+    *GPIOA_PUPDR &= ~(GPIO_PUPDR_M(5) | GPIO_PUPDR_M(6) | GPIO_PUPDR_M(7));
+    *GPIOA_PUPDR |= (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(5)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(6)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(7));
 
     /* Speed to 50Mhz */
-    *GPIOA_OSPEEDR &= ~((3 << (5 * 2)) | (3 << (6 * 2)) | (3 << (7 * 2)));
-    *GPIOA_OSPEEDR |= (2 << (5 * 2)) | (2 << (6 * 2)) | (2 << (7 * 2));
+    *GPIOA_OSPEEDR &= ~(GPIO_OSPEEDR_M(5) | GPIO_OSPEEDR_M(6) | GPIO_OSPEEDR_M(7));
+    *GPIOA_OSPEEDR |= (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(5)) | (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(6)) | (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(7));
 
     /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
     //*SPI1_CR1 |= SPI_CR1_BR_256 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_LSBFIRST;
@@ -85,18 +87,20 @@ void init_spi(void) {
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOEEN;    /* Enable GPIOE Clock */
 
     /* Sets PE3 to output mode */
-    *GPIOE_MODER &= ~(3 << (3 * 2));
-    *GPIOE_MODER |= (GPIO_MODER_OUT << (3 * 2));
+    *GPIOE_MODER &= ~(GPIO_MODER_M(3));
+    *GPIOE_MODER |= (GPIO_MODER_OUT << GPIO_MODER_PIN(3));
 
     /* Sets pin output to push/pull */
-    *GPIOE_OTYPER &= ~(1 << 3);
+    *GPIOE_OTYPER &= ~(GPIO_OTYPER_M(3));
+    *GPIOE_OTYPER |= (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(3));
 
     /* No pull-up, no pull-down */
-    *GPIOE_PUPDR  &= ~(3 << (3 * 2));
+    *GPIOE_PUPDR &= ~(GPIO_PUPDR_M(3));
+    *GPIOE_PUPDR |= (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(3));
 
     /* Speed to 50Mhz */
-    *GPIOE_OSPEEDR &= ~(3 << (3 * 2));
-    *GPIOE_OSPEEDR |= (2 << (3 * 2));
+    *GPIOE_OSPEEDR &= ~(GPIO_OSPEEDR_M(3));
+    *GPIOE_OSPEEDR |= (GPIO_OSPEEDR_100M << GPIO_OSPEEDR_PIN(3));
 
     /* Set high */
     spi1_cs_high();
