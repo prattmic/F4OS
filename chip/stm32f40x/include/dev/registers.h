@@ -23,7 +23,7 @@
 #define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
 #define SPI2_BASE                       (APB1PERIPH_BASE + 0x3800)                              /* SPI2 base address */
-#define I2C1_BASE                       (APB1PERIPH_BASE + 0x5400)                              /* I2C1 base address */
+#define I2C_BASE(port)                  (APB1PERIPH_BASE + 0x5400 + (0x200*(port-1)))           /* I2C base address */
 #define SPI1_BASE                       (APB2PERIPH_BASE + 0x3000)                              /* SPI1 base address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                              /* USART1 Base Address */
 #define GPIO_BASE(port)                 (AHB1PERIPH_BASE + (0x400*port))                        /* GPIO Port base address */
@@ -80,16 +80,16 @@
 #define SPI2_I2SCFGR                    (volatile uint32_t *) (SPI2_BASE + 0x1c)                /* SPI2 I2C configuration register */
 #define SPI2_I2SPR                      (volatile uint32_t *) (SPI2_BASE + 0x20)                /* SPI2 I2C prescaler register */
 
-/* I2C1 */
-#define I2C1_CR1                        (volatile uint32_t *) (I2C1_BASE + 0x00)                /* I2C1 control register 1 */
-#define I2C1_CR2                        (volatile uint32_t *) (I2C1_BASE + 0x04)                /* I2C1 control register 2 */
-#define I2C1_OAR1                       (volatile uint32_t *) (I2C1_BASE + 0x08)                /* I2C1 own address register 1 */
-#define I2C1_OAR2                       (volatile uint32_t *) (I2C1_BASE + 0x0C)                /* I2C1 own address register 2 */
-#define I2C1_DR                         (volatile uint32_t *) (I2C1_BASE + 0x10)                /* I2C1 data register */
-#define I2C1_SR1                        (volatile uint32_t *) (I2C1_BASE + 0x14)                /* I2C1 status register 1 */
-#define I2C1_SR2                        (volatile uint32_t *) (I2C1_BASE + 0x18)                /* I2C1 status register 2 */
-#define I2C1_CCR                        (volatile uint32_t *) (I2C1_BASE + 0x1C)                /* I2C1 clock control register */
-#define I2C1_TRISE                      (volatile uint32_t *) (I2C1_BASE + 0x20)                /* I2C1 TRISE register */
+/* I2C */
+#define I2C_CR1(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x00)           /* I2C control register 1 */
+#define I2C_CR2(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x04)           /* I2C control register 2 */
+#define I2C_OAR1(port)                  (volatile uint32_t *) (I2C_BASE(port) + 0x08)           /* I2C own address register 1 */
+#define I2C_OAR2(port)                  (volatile uint32_t *) (I2C_BASE(port) + 0x0C)           /* I2C own address register 2 */
+#define I2C_DR(port)                    (volatile uint32_t *) (I2C_BASE(port) + 0x10)           /* I2C data register */
+#define I2C_SR1(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x14)           /* I2C status register 1 */
+#define I2C_SR2(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x18)           /* I2C status register 2 */
+#define I2C_CCR(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x1C)           /* I2C clock control register */
+#define I2C_TRISE(port)                 (volatile uint32_t *) (I2C_BASE(port) + 0x20)           /* I2C TRISE register */
 
 /* USART 1 */
 #define USART1_SR                       (volatile uint32_t *) (USART1_BASE + 0x00)              /* USART1 status register */

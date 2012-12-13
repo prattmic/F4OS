@@ -45,7 +45,7 @@ uint8_t i2cnoread(uint8_t addr) {
  * on their own or with an inline function, despite the fact that
  * GCC inlines this function anyway. */
 void i2c1_stop(void) {
-    *I2C1_CR1 |= I2C_CR1_STOP;
+    *I2C_CR1(1) |= I2C_CR1_STOP;
 }
 
 void init_i2c(void) {
@@ -70,14 +70,14 @@ void init_i2c(void) {
     gpio_ospeedr(GPIOB, I2C1_SDA, GPIO_OSPEEDR_50M);
 
     /* Configure peripheral */
-    *I2C1_CR2 |= I2C_CR2_FREQ(42);
+    *I2C_CR2(1) |= I2C_CR2_FREQ(42);
 
     /* Should set I2C to 100kHz */
-    *I2C1_CCR |= I2C_CCR_CCR(210);
-    *I2C1_TRISE = 42;
+    *I2C_CCR(1) |= I2C_CCR_CCR(210);
+    *I2C_TRISE(1) = 42;
 
     /* Enable */
-    *I2C1_CR1 |= I2C_CR1_PE;
+    *I2C_CR1(1) |= I2C_CR1_PE;
 
     init_semaphore(&i2c1_semaphore);
 
@@ -86,29 +86,29 @@ void init_i2c(void) {
 }
 
 uint8_t i2c1_write(uint8_t addr, uint8_t *data, uint32_t num) {
-    *I2C1_CR1 |= I2C_CR1_START;
+    *I2C_CR1(1) |= I2C_CR1_START;
 
     int count = 10000;
-    while (!(*I2C1_SR1 & I2C_SR1_SB)) {
+    while (!(*I2C_SR1(1) & I2C_SR1_SB)) {
         if (!count--) {
             return -1;
         }
     }
 
-    *I2C1_DR = addr << 1;
+    *I2C_DR(1) = addr << 1;
 
-    while (!(*I2C1_SR1 & I2C_SR1_ADDR)) {
-        if (*I2C1_SR1 & I2C_SR1_AF) {
+    while (!(*I2C_SR1(1) & I2C_SR1_ADDR)) {
+        if (*I2C_SR1(1) & I2C_SR1_AF) {
             return -1;
         }
     }
 
-    while (!(*I2C1_SR2 & I2C_SR2_MSL)); 
+    while (!(*I2C_SR2(1) & I2C_SR2_MSL)); 
 
     while (num--) {
-        *I2C1_DR = *data++;
+        *I2C_DR(1) = *data++;
 
-        while (!(*I2C1_SR1 & I2C_SR1_TXE));
+        while (!(*I2C_SR1(1) & I2C_SR1_TXE));
     }
 
     i2c1_stop();
@@ -119,29 +119,29 @@ uint8_t i2c1_write(uint8_t addr, uint8_t *data, uint32_t num) {
 uint8_t i2c1_read(uint8_t addr) {
     uint8_t data;
 
-    *I2C1_CR1 |= I2C_CR1_START;
+    *I2C_CR1(1) |= I2C_CR1_START;
 
     int count = 10000;
-    while (!(*I2C1_SR1 & I2C_SR1_SB)) {
+    while (!(*I2C_SR1(1) & I2C_SR1_SB)) {
         if (!count--) {
             return 69;
         }
     }
 
-    *I2C1_DR = (addr << 1) | 1;
+    *I2C_DR(1) = (addr << 1) | 1;
 
-    while (!(*I2C1_SR1 & I2C_SR1_ADDR)) {
-        if (*I2C1_SR1 & I2C_SR1_AF) {
+    while (!(*I2C_SR1(1) & I2C_SR1_ADDR)) {
+        if (*I2C_SR1(1) & I2C_SR1_AF) {
             return 69;
         }
     }
 
-    while (!(*I2C1_SR2 & I2C_SR2_MSL)); 
-    while (!(*I2C1_SR1 & I2C_SR1_RXNE));
+    while (!(*I2C_SR2(1) & I2C_SR2_MSL)); 
+    while (!(*I2C_SR1(1) & I2C_SR1_RXNE));
 
-    data = *I2C1_DR;
-
-    return data;
+    data = *I2C_DR(1);
 
     i2c1_stop();
+
+    return data;
 }
