@@ -5,6 +5,8 @@
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <dev/resource.h>
+#include <dev/registers.h>
+#include <dev/hw/gpio.h>
 
 #include <dev/hw/spi.h>
 #include <dev/periph/discovery_accel.h>
@@ -19,8 +21,30 @@ extern spi_dev spi1;
 char discovery_accel_read(void *env) __attribute__((section(".kernel")));
 void discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
 void discovery_accel_close(resource *env) __attribute__((section(".kernel")));
+static void discovery_accel_cs_high(void) __attribute__((section(".kernel")));
+static void discovery_accel_cs_low(void) __attribute__((section(".kernel")));
+
+static void discovery_accel_cs_high(void) {
+    *GPIO_ODR(GPIOE) |= GPIO_ODR_PIN(3);
+}
+
+static void discovery_accel_cs_low(void) {
+    *GPIO_ODR(GPIOE) &= ~(GPIO_ODR_PIN(3));
+}
 
 rd_t open_discovery_accel(void) {
+    /* --- Set up CS pin and set high ---*/
+    *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOEEN;
+
+    /* PE3 */
+    gpio_moder(GPIOE, 3, GPIO_MODER_OUT);
+    gpio_otyper(GPIOE, 3, GPIO_OTYPER_PP);
+    gpio_pupdr(GPIOE, 3, GPIO_PUPDR_NONE);
+    gpio_ospeedr(GPIOE, 3, GPIO_OSPEEDR_50M);
+    
+    /* ------ Properly idle CS */
+    discovery_accel_cs_high();
+
     discovery_accel *accel = kmalloc(sizeof(discovery_accel));
     resource *new_r = create_new_resource();
     if(!new_r || !accel) {
@@ -28,7 +52,7 @@ rd_t open_discovery_accel(void) {
     }
     /* We expect that spi1 was init'd in bootmain.c */
     accel->spi_port = &spi1;
-    accel->spi_port->write(0x20, 0x47);
+    accel->spi_port->write(0x20, 0x47, &discovery_accel_cs_high, &discovery_accel_cs_low);
     accel->read_ctr = 0;
 
     new_r->env = accel;
@@ -45,7 +69,7 @@ char discovery_accel_read(void *env) {
     discovery_accel *accel = (discovery_accel *)env;
     if(accel->read_ctr > 2)
         accel->read_ctr = 0;
-    return (char)accel->spi_port->read(0x29 + 2*accel->read_ctr++);
+    return (char)accel->spi_port->read(0x29 + 2*accel->read_ctr++, &discovery_accel_cs_high, &discovery_accel_cs_low);
 }
 
 void discovery_accel_write(char d, void *env) {
