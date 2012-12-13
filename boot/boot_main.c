@@ -47,10 +47,6 @@ int os_start(void) {
     init_spi();
 #endif
 
-#ifdef CONFIG_HAVE_I2C
-    init_i2c();
-#endif
-
 #ifdef CONFIG_HAVE_USBDEV
     init_usbdev();
 #endif

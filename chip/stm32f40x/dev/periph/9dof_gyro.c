@@ -27,14 +27,18 @@ rd_t open_sfe9dof_gyro(void) {
     gyro->device_addr = 0x68;
     gyro->tmp_addr = 0x1D;
 
+    if (!(gyro->i2c_port->ready)) {
+        init_i2c1();
+    }
+
     /* Fire it up, fire it up/ When we finally turn it over, make a b-line towards the boat, or... */
     uint8_t packet[2];
     packet[0] = 0x15;
     packet[1] = 0x07;
-    gyro->i2c_port->write(gyro->device_addr, packet, 2);
+    i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
     packet[0] = 0x16;
     packet[1] = 0x18;
-    gyro->i2c_port->write(gyro->device_addr, packet, 2);
+    i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
 
     new_r->env = gyro;
     new_r->writer = &sfe9dof_gyro_write;
@@ -54,8 +58,8 @@ char sfe9dof_gyro_read(void *env) {
     }
     gyro->tmp_addr = 0x1D;
     tmp = gyro->tmp_addr + gyro->addr_ctr++;
-    gyro->i2c_port->write(gyro->device_addr, &tmp, 1);
-    return (char)gyro->i2c_port->read(gyro->device_addr);
+    i2c_write(gyro->i2c_port, gyro->device_addr, &tmp, 1);
+    return (char) i2c_read(gyro->i2c_port, gyro->device_addr);
 }
 
 void sfe9dof_gyro_write(char d, void *env) {
