@@ -26,10 +26,7 @@
 #define I2C1_BASE                       (APB1PERIPH_BASE + 0x5400)                              /* I2C1 base address */
 #define SPI1_BASE                       (APB2PERIPH_BASE + 0x3000)                              /* SPI1 base address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                              /* USART1 Base Address */
-#define GPIOA_BASE                      (AHB1PERIPH_BASE + 0x0000)                              /* GPIO Port A base address */
-#define GPIOB_BASE                      (AHB1PERIPH_BASE + 0x0400)                              /* GPIO Port B base address */
-#define GPIOD_BASE                      (AHB1PERIPH_BASE + 0x0C00)                              /* GPIO Port D base address */
-#define GPIOE_BASE                      (AHB1PERIPH_BASE + 0x1000)                              /* GPIO Port E base address */
+#define GPIO_BASE(port)                 (AHB1PERIPH_BASE + (0x400*port))                        /* GPIO Port base address */
 #define RCC_BASE                        (AHB1PERIPH_BASE + 0x3800)                              /* Reset and Clock Control base address */
 #define FLASH_R_BASE                    (AHB1PERIPH_BASE + 0x3C00)                              /* Flash registers base address */
 #define DMA1_BASE                       (AHB1PERIPH_BASE + 0x6000)                              /* DMA1 base address */
@@ -103,34 +100,17 @@
 #define USART1_CR3                      (volatile uint32_t *) (USART1_BASE + 0x14)              /* USART1 control register 3 */
 #define USART1_GTPR                     (volatile uint32_t *) (USART1_BASE + 0x18)              /* USART1 gaurd time and prescale register */
 
-/* GPIO Port A (GPIOA) */
-#define GPIOA_MODER                     (volatile uint32_t *) (GPIOA_BASE + 0x00)               /* Port A mode register */
-#define GPIOA_OTYPER                    (volatile uint32_t *) (GPIOA_BASE + 0x04)               /* Port A output type register */
-#define GPIOA_OSPEEDR                   (volatile uint32_t *) (GPIOA_BASE + 0x08)               /* Port A output speed register */
-#define GPIOA_PUPDR                     (volatile uint32_t *) (GPIOA_BASE + 0x0C)               /* Port A pull up/down register */
-#define GPIOA_AFRL                      (volatile uint32_t *) (GPIOA_BASE + 0x20)               /* Port A alternate function low register */
-#define GPIOA_AFRH                      (volatile uint32_t *) (GPIOA_BASE + 0x24)               /* Port A alternate function high register */
-
-/* GPIO Port B (GPIOB) */
-#define GPIOB_MODER                     (volatile uint32_t *) (GPIOB_BASE + 0x00)               /* Port B mode register */
-#define GPIOB_OTYPER                    (volatile uint32_t *) (GPIOB_BASE + 0x04)               /* Port B output type register */
-#define GPIOB_OSPEEDR                   (volatile uint32_t *) (GPIOB_BASE + 0x08)               /* Port B output speed register */
-#define GPIOB_PUPDR                     (volatile uint32_t *) (GPIOB_BASE + 0x0C)               /* Port B pull up/down register */
-#define GPIOB_AFRL                      (volatile uint32_t *) (GPIOB_BASE + 0x20)               /* Port B alternate function low register */
-#define GPIOB_AFRH                      (volatile uint32_t *) (GPIOB_BASE + 0x24)               /* Port B alternate function high register */
-
-/* GPIO Port D (GPIOD) */
-#define GPIOD_MODER                     (volatile uint32_t *) (GPIOD_BASE + 0x00)               /* Port D mode register */
-#define GPIOD_ODR                       (volatile uint32_t *) (GPIOD_BASE + 0x14)               /* Port D Output Data Register */
-
-/* GPIO Port E (GPIOE) */
-#define GPIOE_MODER                     (volatile uint32_t *) (GPIOE_BASE + 0x00)               /* Port E mode register */
-#define GPIOE_OTYPER                    (volatile uint32_t *) (GPIOE_BASE + 0x04)               /* Port E output type register */
-#define GPIOE_OSPEEDR                   (volatile uint32_t *) (GPIOE_BASE + 0x08)               /* Port E output speed register */
-#define GPIOE_PUPDR                     (volatile uint32_t *) (GPIOE_BASE + 0x0C)               /* Port E pull up/down register */
-#define GPIOE_ODR                       (volatile uint32_t *) (GPIOE_BASE + 0x14)               /* Port E output data register */
-#define GPIOE_AFRL                      (volatile uint32_t *) (GPIOE_BASE + 0x20)               /* Port E alternate function low register */
-#define GPIOE_AFRH                      (volatile uint32_t *) (GPIOE_BASE + 0x24)               /* Port E alternate function high register */
+/* GPIO Port (GPIO) */
+#define GPIO_MODER(port)                (volatile uint32_t *) (GPIO_BASE(port) + 0x00)          /* Port mode register */
+#define GPIO_OTYPER(port)               (volatile uint32_t *) (GPIO_BASE(port) + 0x04)          /* Port output type register */
+#define GPIO_OSPEEDR(port)              (volatile uint32_t *) (GPIO_BASE(port) + 0x08)          /* Port output speed register */
+#define GPIO_PUPDR(port)                (volatile uint32_t *) (GPIO_BASE(port) + 0x0C)          /* Port pull up/down register */
+#define GPIO_IDR(port)                  (volatile uint32_t *) (GPIO_BASE(port) + 0x10)          /* Port input data register */
+#define GPIO_ODR(port)                  (volatile uint32_t *) (GPIO_BASE(port) + 0x14)          /* Port output data register */
+#define GPIO_BSRR(port)                 (volatile uint32_t *) (GPIO_BASE(port) + 0x18)          /* Port bit set/reset register */
+#define GPIO_LCKR(port)                 (volatile uint32_t *) (GPIO_BASE(port) + 0x1C)          /* Port configuration lock register */
+#define GPIO_AFRL(port)                 (volatile uint32_t *) (GPIO_BASE(port) + 0x20)          /* Port alternate function low register */
+#define GPIO_AFRH(port)                 (volatile uint32_t *) (GPIO_BASE(port) + 0x24)          /* Port alternate function high register */
 
 /* Reset and Clock Control (RCC) */
 #define RCC_CR                          (volatile uint32_t *) (RCC_BASE + 0x00)                 /* Clock Control Register */
@@ -551,6 +531,16 @@
 #define USART_CR3_DMAT_EN               (uint32_t) (1 << 7)                                     /* USART DMA Transmit Enable */
 
 /* GPIO */
+#define GPIOA                           (uint8_t)  (0)                                          /* GPIO Port A */
+#define GPIOB                           (uint8_t)  (1)                                          /* GPIO Port B */
+#define GPIOC                           (uint8_t)  (2)                                          /* GPIO Port C */
+#define GPIOD                           (uint8_t)  (3)                                          /* GPIO Port D */
+#define GPIOE                           (uint8_t)  (4)                                          /* GPIO Port E */
+#define GPIOF                           (uint8_t)  (5)                                          /* GPIO Port F */
+#define GPIOG                           (uint8_t)  (6)                                          /* GPIO Port G */
+#define GPIOH                           (uint8_t)  (7)                                          /* GPIO Port H */
+#define GPIOI                           (uint8_t)  (8)                                          /* GPIO Port I */
+
 #define GPIO_MODER_PIN(n)               (uint32_t) (2*n)                                        /* Pin bitshift */
 #define GPIO_MODER_M(n)                 (uint32_t) (0x3 << 2*n)                                 /* Pin mask */
 #define GPIO_MODER_IN                   (uint32_t) (0x0)                                        /* Input mode */

@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <dev/registers.h>
 #include <dev/cortex_m.h>
+#include <dev/hw/gpio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -38,25 +39,19 @@ void init_usart(void) {
     /* Set PB6 and PB7 to alternative function USART
      * See stm32f4_ref.pdf pg 141 and stm32f407.pdf pg 51 */
 
-    /* Sets PB6 and PB7 to alternative function mode */
-    *GPIOB_MODER &= ~(GPIO_MODER_M(6) | GPIO_MODER_M(7));
-    *GPIOB_MODER |= (GPIO_MODER_ALT << GPIO_MODER_PIN(6)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(7));
+    /* PB6 */
+    gpio_moder(GPIOB, 6, GPIO_MODER_ALT);
+    gpio_afr(GPIOB, 6, GPIO_AF_USART13);
+    gpio_otyper(GPIOB, 6, GPIO_OTYPER_PP);
+    gpio_pupdr(GPIOB, 6, GPIO_PUPDR_NONE);
+    gpio_ospeedr(GPIOB, 6, GPIO_OSPEEDR_50M);
 
-    /* Sets PB6 and PB7 to USART1-3 mode */
-    *GPIOB_AFRL &= ~(GPIO_AFRL_M(6) | GPIO_AFRL_M(7));
-    *GPIOB_AFRL |= (GPIO_AF_USART13 << GPIO_AFRL_PIN(6)) | (GPIO_AF_USART13 << GPIO_AFRL_PIN(7));
-
-    /* Sets pin output to push/pull */
-    *GPIOB_OTYPER &= ~(GPIO_OTYPER_M(6) | GPIO_OTYPER_M(7));
-    *GPIOB_OTYPER |= (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(6)) | (GPIO_OTYPER_PP << GPIO_OTYPER_PIN(7));
-
-    /* No pull-up, no pull-down */
-    *GPIOB_PUPDR &= ~(GPIO_PUPDR_M(6) | GPIO_PUPDR_M(7));
-    *GPIOB_PUPDR |= (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(6)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(7));
-
-    /* Speed to 50Mhz */
-    *GPIOB_OSPEEDR &= ~(GPIO_OSPEEDR_M(6) | GPIO_OSPEEDR_M(7));
-    *GPIOB_OSPEEDR |= (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(6)) | (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(7));
+    /* PB7 */
+    gpio_moder(GPIOB, 7, GPIO_MODER_ALT);
+    gpio_afr(GPIOB, 7, GPIO_AF_USART13);
+    gpio_otyper(GPIOB, 7, GPIO_OTYPER_PP);
+    gpio_pupdr(GPIOB, 7, GPIO_PUPDR_NONE);
+    gpio_ospeedr(GPIOB, 7, GPIO_OSPEEDR_50M);
 
     /* Enable USART1 */
     *USART1_CR1 |= USART_CR1_UE;

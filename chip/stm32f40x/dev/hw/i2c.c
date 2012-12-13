@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <dev/registers.h>
 #include <dev/resource.h>
+#include <dev/hw/gpio.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
 
@@ -54,25 +55,19 @@ void init_i2c(void) {
     /* Set PB8 and PB9 to alternative function I2C
      * See stm32f4_ref.pdf pg 141 and stm32f407.pdf pg 51 */
 
-    /* Sets PB8 and PB9 to alternative function mode */
-    *GPIOB_MODER &= ~(GPIO_MODER_M(I2C1_SCL) | GPIO_MODER_M(I2C1_SDA));
-    *GPIOB_MODER |= (GPIO_MODER_ALT << GPIO_MODER_PIN(I2C1_SCL)) | (GPIO_MODER_ALT << GPIO_MODER_PIN(I2C1_SDA));
+    /* I2C1_SCL */
+    gpio_moder(GPIOB, I2C1_SCL, GPIO_MODER_ALT);
+    gpio_afr(GPIOB, I2C1_SCL, GPIO_AF_I2C);
+    gpio_otyper(GPIOB, I2C1_SCL, GPIO_OTYPER_OD);
+    gpio_pupdr(GPIOB, I2C1_SCL, GPIO_PUPDR_NONE);
+    gpio_ospeedr(GPIOB, I2C1_SCL, GPIO_OSPEEDR_50M);
 
-    /* Sets PB8 and PB9 to I2C mode */
-    *GPIOB_AFRH &= ~(GPIO_AFRH_M(I2C1_SCL) | GPIO_AFRH_M(I2C1_SDA));
-    *GPIOB_AFRH |= (GPIO_AF_I2C << GPIO_AFRH_PIN(I2C1_SCL)) | (GPIO_AF_I2C << GPIO_AFRH_PIN(I2C1_SDA));
-
-    /* Sets pin output to open drain */
-    *GPIOB_OTYPER &= ~(GPIO_OTYPER_M(I2C1_SCL) | GPIO_OTYPER_M(I2C1_SDA));
-    *GPIOB_OTYPER |= (GPIO_OTYPER_OD << GPIO_OTYPER_PIN(I2C1_SCL)) | (GPIO_OTYPER_OD << GPIO_OTYPER_PIN(I2C1_SDA));
-
-    /* No pull-up, no pull-down */
-    *GPIOB_PUPDR &= ~(GPIO_PUPDR_M(I2C1_SCL) | GPIO_PUPDR_M(I2C1_SDA));
-    *GPIOB_PUPDR |= (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(I2C1_SCL)) | (GPIO_PUPDR_NONE << GPIO_PUPDR_PIN(I2C1_SDA));
-
-    /* Speed to 50Mhz */
-    *GPIOB_OSPEEDR &= ~(GPIO_OSPEEDR_M(I2C1_SCL) | GPIO_OSPEEDR_M(I2C1_SDA));
-    *GPIOB_OSPEEDR |= (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(I2C1_SCL)) | (GPIO_OSPEEDR_50M << GPIO_OSPEEDR_PIN(I2C1_SDA));
+    /* I2C1_SDA */
+    gpio_moder(GPIOB, I2C1_SDA, GPIO_MODER_ALT);
+    gpio_afr(GPIOB, I2C1_SDA, GPIO_AF_I2C);
+    gpio_otyper(GPIOB, I2C1_SDA, GPIO_OTYPER_OD);
+    gpio_pupdr(GPIOB, I2C1_SDA, GPIO_PUPDR_NONE);
+    gpio_ospeedr(GPIOB, I2C1_SDA, GPIO_OSPEEDR_50M);
 
     /* Configure peripheral */
     *I2C1_CR2 |= I2C_CR2_FREQ(42);

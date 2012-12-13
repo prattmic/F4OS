@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <dev/registers.h>
+#include <dev/hw/gpio.h>
 
 #include <dev/hw/led.h>
 
@@ -15,11 +16,21 @@ void init_led(void) {
 
     /* Set LED pins to output
     * See docs/stm32f4_ref.pdf page 148 for description of GPIOD_MODER */
-    *GPIOD_MODER &= ~(GPIO_MODER_M(12) | GPIO_MODER_M(13) | GPIO_MODER_M(14) | GPIO_MODER_M(15));
-    *GPIOD_MODER |= (GPIO_MODER_OUT << GPIO_MODER_PIN(12)) | (GPIO_MODER_OUT << GPIO_MODER_PIN(13)) | (GPIO_MODER_OUT << GPIO_MODER_PIN(14)) | (GPIO_MODER_OUT << GPIO_MODER_PIN(15));
+
+    /* PD12 */
+    gpio_moder(GPIOD, 12, GPIO_MODER_OUT);
+
+    /* PD13 */
+    gpio_moder(GPIOD, 13, GPIO_MODER_OUT);
+
+    /* PD14 */
+    gpio_moder(GPIOD, 14, GPIO_MODER_OUT);
+
+    /* PD15 */
+    gpio_moder(GPIOD, 15, GPIO_MODER_OUT);
 
     /* Enable red LED */
-    *GPIOD_ODR |= GPIO_ODR_PIN(14);
+    *GPIO_ODR(GPIOD) |= GPIO_ODR_PIN(14);
 }
 
 uint8_t led_enable(uint32_t led) {
@@ -27,7 +38,7 @@ uint8_t led_enable(uint32_t led) {
         return 1;
     }
 
-    *GPIOD_ODR |= GPIO_ODR_PIN(leds_avail[led]);
+    *GPIO_ODR(GPIOD) |= GPIO_ODR_PIN(leds_avail[led]);
 
     return 0;
 }
@@ -37,7 +48,7 @@ uint8_t led_disable(uint32_t led) {
         return 1;
     }
 
-    *GPIOD_ODR &= ~(GPIO_ODR_PIN(leds_avail[led]));
+    *GPIO_ODR(GPIOD) &= ~(GPIO_ODR_PIN(leds_avail[led]));
 
     return 0;
 }
@@ -47,7 +58,7 @@ uint8_t led_toggle(uint32_t led) {
         return 1;
     }
 
-    *GPIOD_ODR ^= GPIO_ODR_PIN(leds_avail[led]);
+    *GPIO_ODR(GPIOD) ^= GPIO_ODR_PIN(leds_avail[led]);
 
     return 0;
 }
