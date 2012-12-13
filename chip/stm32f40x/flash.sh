@@ -13,7 +13,7 @@ then
 elif [ "$1" == "px4" ]
 then
     commands="speed 12000
-    exec device = stm32f40x
+    exec device = stm32f405vg
     loadbin $2,0x08000000
     r
     g
