@@ -8,9 +8,6 @@ typedef struct sfe9dof_gyro {
         uint8_t addr_ctr;
 } sfe9dof_gyro;
 
-extern struct semaphore i2c1_semaphore;
-extern i2c_dev i2c1;
-
 rd_t open_sfe9dof_gyro(void) __attribute__((section(".kernel"))); 
 
 #endif
