@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 void init_heap(void) __attribute__((section(".kernel")));
-void *kmalloc(uint32_t size) __attribute__((section(".kernel")));
+void *kmalloc(uint32_t size) __attribute__((malloc,section(".kernel")));
 void kfree(void *address) __attribute__((section(".kernel")));
 
 uint32_t mm_space(void) __attribute__((section(".kernel")));
