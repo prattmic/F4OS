@@ -30,14 +30,14 @@ const struct command valid_commands[] = {{"help",   &help},
 #ifdef CONFIG_HAVE_LED
                                          {"blink",  &blink},
 #endif
-#ifdef CONFIG_HAVE_SPI
+#if defined(CONFIG_HAVE_SPI) && defined(CONFIG_STM32_BOARD_DISCOVERY)
                                          {"accel", &accel},
 #endif
-#ifdef CONFIG_HAVE_I2C
+#if defined(CONFIG_HAVE_I2C) && defined(CONFIG_STM32_BOARD_DISCOVERY)
                                          {"ghetto_gyro", &ghetto_gyro},
                                          {"lowpass", &lowpass_test},
 #endif
-#ifdef CONFIG_STM32_BOARD_PX4
+#if defined(CONFIG_HAVE_I2C) && defined(CONFIG_STM32_BOARD_PX4)
                                          {"px4_mag", &px4_mag},
 #endif
 };
