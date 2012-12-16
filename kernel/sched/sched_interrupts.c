@@ -44,11 +44,16 @@ void svc_acquire(uint32_t *registers) {
         /* Failure */
         registers[0] = 0;
 
-        if (semaphore->held_by->task->priority <= curr_task->task->priority) {
+        if (task_exists(semaphore->held_by) && semaphore->held_by->task->priority <= curr_task->task->priority) {
             curr_task->task->stack_top = PSP();
             switch_task(semaphore->held_by);
         }
         else {
+            /* If held_by didn't exist in task list,
+             * it most likely just ended without releasing
+             * the semaphore.  kernel_task should release
+             * the semaphore on its behalf soon. */
+            /* TODO: switch directly to kernel_task in this case */
             svc_yield();
         }
     }

@@ -23,3 +23,17 @@ int approx_num_tasks(void) {
 
     return tasks;
 }
+
+/* Is task in task_list? */
+uint8_t task_exists(task_node *task) {
+    task_node *node = task_list.head;
+
+    while (node) {
+        if (node == task) {
+            return 1;
+        }
+        node = node->next;
+    }
+
+    return 0;
+}

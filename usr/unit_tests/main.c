@@ -54,8 +54,8 @@ void unit_tests(void) {
     fprintf(stderr, "Press any key on stderr to begin tests. (You passed the stderr test).\r\n");
     getc();
 
-    //printf("Abandoned semaphore test...");
-    //new_task(&abandon, 1, 0);
+    printf("Abandoned semaphore test...");
+    new_task(&abandon, 1, 0);
 
     //printf("Deadlock test...");
     //deadlock();

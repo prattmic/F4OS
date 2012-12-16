@@ -19,6 +19,8 @@ void free_task(task_node *tasknode) __attribute__((section(".kernel")));
 void end_task(void) __attribute__((section(".kernel"),naked));
 void svc_end_task(void) __attribute__((section(".kernel")));
 
+uint8_t task_exists(task_node *task) __attribute__((section(".kernel")));
+
 void kernel_task(void) __attribute__((section(".kernel")));
 void sleep_task(void) __attribute__((section(".kernel")));
 
