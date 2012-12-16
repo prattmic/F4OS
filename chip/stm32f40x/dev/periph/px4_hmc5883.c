@@ -44,8 +44,7 @@ rd_t open_px4_hmc5883(void) {
     new_r->closer = &px4_hmc5883_close;
     new_r->sem = &i2c2_semaphore;
 
-    add_resource(curr_task->task, new_r);
-    return curr_task->task->top_rd - 1;
+    return add_resource(curr_task->task, new_r);
 }
 
 static void px4_hmc5883_write(char c, void *env) {

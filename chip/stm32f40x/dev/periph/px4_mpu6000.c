@@ -26,8 +26,7 @@ rd_t open_px4_mpu6000(void) {
     new_r->sem = kmalloc(sizeof(semaphore));
     /* Just to be sure it's 0 */
     release(new_r->sem);
-    add_resource(curr_task->task, new_r);
-    return curr_task->task->top_rd - 1;
+    return add_resource(curr_task->task, new_r);
 }
 
 char px4_mpu6000_read(void *env) {

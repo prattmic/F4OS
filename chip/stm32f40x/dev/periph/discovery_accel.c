@@ -61,8 +61,7 @@ rd_t open_discovery_accel(void) {
     new_r->closer = &discovery_accel_close;
     new_r->sem = &spi1_semaphore;
 
-    add_resource(curr_task->task, new_r);
-    return curr_task->task->top_rd - 1;
+    return add_resource(curr_task->task, new_r);
 }
 
 char discovery_accel_read(void *env) {

@@ -39,9 +39,7 @@ rd_t open_buf_stream(char *buf) {
         panic_print("Unable to allocate memory for buffer stream semaphore.");
     }
 
-    add_resource(curr_task->task, new_r);
-
-    return curr_task->task->top_rd - 1;
+    return add_resource(curr_task->task, new_r);
 }
 
 char buf_stream_read(void *env) {

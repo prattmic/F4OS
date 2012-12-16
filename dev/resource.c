@@ -26,11 +26,21 @@ resource *create_new_resource(void) {
     return ret;
 }
 
-void add_resource(task_ctrl* tcs, resource* r) {
-    tcs->resources[tcs->top_rd] = r;
-    if(tcs->resources[tcs->top_rd++] == NULL) {
-        printf("Resource add failed, resource is null\n");
+rd_t add_resource(task_ctrl* tcs, resource* r) {
+    rd_t rd = tcs->top_rd;
+
+    if(r == NULL) {
+        panic_print("Cannot add NULL resource.");
     }
+
+    if (rd >= RESOURCE_TABLE_SIZE) {
+        panic_print("No room to add resources.");
+    }
+
+    tcs->resources[rd] = r;
+    tcs->top_rd++;
+
+    return rd;
 }
 
 void resource_setup(task_ctrl* task) {

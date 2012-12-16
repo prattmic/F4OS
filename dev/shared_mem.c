@@ -45,9 +45,7 @@ rd_t open_shared_mem(void) {
         panic_print("Unable to allocate space for shared memory semaphore.");
     }
 
-    add_resource(curr_task->task, new_r);
-
-    return curr_task->task->top_rd - 1;
+    return add_resource(curr_task->task, new_r);
 }
 
 char shared_mem_read(void *env) {

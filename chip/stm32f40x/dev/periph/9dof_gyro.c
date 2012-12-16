@@ -46,8 +46,7 @@ rd_t open_sfe9dof_gyro(void) {
     new_r->closer = &sfe9dof_gyro_close;
     new_r->sem = &i2c1_semaphore;
 
-    add_resource(curr_task->task, new_r);
-    return curr_task->task->top_rd - 1;
+    return add_resource(curr_task->task, new_r);
 }
 
 char sfe9dof_gyro_read(void *env) {
