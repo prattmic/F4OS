@@ -43,10 +43,12 @@ typedef struct semaphore semaphore;
 })
 
 /* SVC case names */
-#define     SVC_YIELD               0x1
-#define     SVC_END_TASK            0x2
-#define     SVC_ACQUIRE             0x3
-#define     SVC_RELEASE             0x4
+enum service_calls {
+    SVC_YIELD,
+    SVC_END_TASK,
+    SVC_ACQUIRE,
+    SVC_RELEASE
+};
    
 typedef struct task_node {
     struct task_node        *prev;
