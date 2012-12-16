@@ -38,6 +38,7 @@ void deadlock(void);
 void deadlock2(void);
 
 static void unit_tests(void);
+static void rd_test(void);
 static void ipctest(void);
 static void memreader(void);
 void infinite_ipc(void);
@@ -49,13 +50,21 @@ void main(void) {
 }
 
 void unit_tests(void) {
-    printf("Print Test...Test passed.\r\n");
+    printf("Press any key to start tests. (You passed the print test, by the way).\r\n");
+    fprintf(stderr, "Press any key on stderr to begin tests. (You passed the stderr test).\r\n");
+    getc();
 
     //printf("Abandoned semaphore test...");
-    //abandon();
+    //new_task(&abandon, 1, 0);
 
     //printf("Deadlock test...");
     //deadlock();
+
+    printf("rd_test...\r\n");
+    rd_test();
+
+    printf("Press any key to continue to infinite IPC test.\r\n");
+    getc();
 
     printf("IPC Test...");
     infinite_ipc();
@@ -85,6 +94,35 @@ void deadlock2(void) {
     acquire(&deadlock_sem2);
     acquire(&deadlock_sem1);
     printf("Deadlock 2 acquired both semaphores.\r\n");
+}
+
+void rd_test(void) {
+    rd_t rd[RESOURCE_TABLE_SIZE] = {0};
+    int max = RESOURCE_TABLE_SIZE - curr_task->task->top_rd;
+
+    for (int i = 0; i < max; i++) {
+        rd[i] = open_shared_mem();
+
+        fprintf(rd[i], "Hello from resource %d.\r\n", rd[i]);
+    }
+
+    fprintf(rd[max-1], "Test passed.\r\n");
+
+    printf("Opened %d resources.\r\nClosing resource %d.\r\n", max, rd[6]);
+    close(rd[6]);
+    
+    rd[6] = open_shared_mem();
+    fprintf(rd[6], "Hello from new resource %d.  You passed the test!\r\n", rd[6]);
+
+    for (int i = 0; i < max; i++) {
+        char buf[64] = {'\0'};
+
+        read(rd[i], buf, 64);
+
+        printf("%s", buf);
+
+        close(rd[i]);
+    }
 }
 
 void ipctest() {
