@@ -27,20 +27,41 @@ resource *create_new_resource(void) {
 }
 
 rd_t add_resource(task_ctrl* tcs, resource* r) {
-    rd_t rd = tcs->top_rd;
-
     if(r == NULL) {
         panic_print("Cannot add NULL resource.");
     }
 
-    if (rd >= RESOURCE_TABLE_SIZE) {
+    /* There is room at the end of the resource table, so add there */
+    if (tcs->top_rd < RESOURCE_TABLE_SIZE) {
+        rd_t rd = tcs->top_rd;
+
+        tcs->resources[rd] = r;
+        tcs->top_rd++;
+
+        return rd;
+    }
+    /* There is no room at end of resource table, so search for space */
+    else {
+        /* We only search up to tcs->top_rd.  Since we are here, that
+         * should be the end of the list, but just to be safe, we want
+         * to make sure we don't find a space after tcs->top_rd and then
+         * fail to increment tcs->top_rd */
+        for (int i = 0; i < tcs->top_rd; i++) {
+            /* Found an empty space! */
+            if (tcs->resources[i] == NULL) {
+                rd_t rd = i;
+
+                tcs->resources[rd] = r;
+
+                return rd;
+            }
+        }
+
+        /* If we got here, nothing was found. */
         panic_print("No room to add resources.");
     }
 
-    tcs->resources[rd] = r;
-    tcs->top_rd++;
-
-    return rd;
+    return -1;
 }
 
 void resource_setup(task_ctrl* task) {
