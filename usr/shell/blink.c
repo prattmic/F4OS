@@ -7,70 +7,60 @@
 
 #include "blink.h"
 
-void blue_led(void);
-void orange_led(void);
-void green_led(void);
+void led1(void);
+void led2(void);
+void led3(void);
 
-uint8_t enabled_blue = 0;
-uint8_t enabled_orange = 0;
-uint8_t enabled_green = 0;
+struct blinker {
+    char *name;
+    void (*func)(void);
+    uint8_t enabled;
+} blink_funcs[] = {
+    {.name = "1", .func = &led1, .enabled = 0},
+    {.name = "2", .func = &led2, .enabled = 0},
+    {.name = "3", .func = &led3, .enabled = 0}
+};
 
 void blink(int argc, char **argv) {
     if (argc < 2) {
-        printf("Usage: %s LED...\r\nExample: blink blue orange\r\n", argv[0]);
+        printf("Usage: %s LED...\r\nExample: blink 2 1\r\n", argv[0]);
         return;
     }
 
+    uint8_t found = 0;
+
     for (int i = 1; i < argc; i++) {
-        if (!strncmp(argv[i], "blue", 16)) {
-            if (enabled_blue) {
-                printf("Blue LED already enabled.\r\n");
-            }
-            else {
-                printf("Enabling blue LED...");
-                new_task(&blue_led, 5, 200);
-                enabled_blue = 1;
-                printf("Done.\r\n");
-            }
-        }
-        else if (!strncmp(argv[i], "orange", 16)) {
-            if (enabled_orange) {
-                printf("Orange LED already enabled.\r\n");
-            }
-            else {
-                printf("Enabling orange LED...");
-                new_task(&orange_led, 5, 800);
-                enabled_orange = 1;
-                printf("Done.\r\n");
+        for (int j = 0; j < num_leds - 1; j++) {
+            if (!strncmp(argv[i], blink_funcs[j].name, 16)) {
+                if (blink_funcs[j].enabled) {
+                    printf("LED %s already enabled.\r\n", blink_funcs[j].name);
+                }
+                else {
+                    printf("Enabling LED %s...", blink_funcs[j].name);
+                    new_task(blink_funcs[j].func, 5, 200*(j+1));
+                    blink_funcs[j].enabled = 1;
+                    printf("Done.\r\n");
+                }
+
+                found = 1;
+                continue;
             }
         }
-        else if ((num_leds >= 2) && !strncmp(argv[i], "green", 16)) {
-            if (enabled_green) {
-                printf("Green LED already enabled.\r\n");
-            }
-            else {
-                printf("Enabling green LED...");
-                new_task(&green_led, 5, 400);
-                enabled_green = 1;
-                printf("Done.\r\n");
-            }
-        }
-        else {
+
+        if (!found) {
             printf("Unknown LED: %s\r\n", argv[i]);
         }
     }
 }
 
-void blue_led(void) {
-    /* Toggle LED */
-    led_toggle(3);
+void led1(void) {
+    led_toggle(1);
 }
 
-void orange_led(void) {
-    /* Toggle LED */
+void led2(void) {
     led_toggle(2);
 }
 
-void green_led(void) {
-    led_toggle(1);
+void led3(void) {
+    led_toggle(3);
 }
