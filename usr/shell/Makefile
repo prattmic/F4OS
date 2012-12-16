@@ -6,6 +6,7 @@ SRCS += main.c shell.c ipctest.c top.c uname.c rd_test.c
 SRCS_$(CONFIG_HAVE_LED) += blink.c
 SRCS_$(CONFIG_HAVE_I2C) += ghetto_gyro.c
 SRCS_$(CONFIG_HAVE_SPI) += accel.c lowpass.c
+SRCS_$(CONFIG_STM32_BOARD_PX4) += px4_mag.c
 
 SRCS += $(SRCS_y)
 

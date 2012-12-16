@@ -15,6 +15,7 @@
 #include "ghetto_gyro.h"
 #include "lowpass.h"
 #include "rd_test.h"
+#include "px4_mag.h"
 
 struct command {
     char *name;
@@ -35,6 +36,9 @@ const struct command valid_commands[] = {{"help",   &help},
 #ifdef CONFIG_HAVE_I2C
                                          {"ghetto_gyro", &ghetto_gyro},
                                          {"lowpass", &lowpass_test},
+#endif
+#ifdef CONFIG_STM32_BOARD_PX4
+                                         {"px4_mag", &px4_mag},
 #endif
 };
 #define NUM_COMMANDS    (sizeof(valid_commands)/sizeof(valid_commands[0]))

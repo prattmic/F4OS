@@ -20,6 +20,7 @@ SRCS_$(CONFIG_HAVE_USBDEV) += usbdev_init.c usbdev_int.c usbdev_core.c usbdev_de
 VPATH += dev/periph/
 SRCS_$(CONFIG_HAVE_I2C) += 9dof_gyro.c 
 SRCS_$(CONFIG_HAVE_SPI) += discovery_accel.c
+SRCS_$(CONFIG_STM32_BOARD_PX4) += px4_hmc5883.c
 
 SRCS += $(SRCS_y)
 
