@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 #include <mm/mm.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
@@ -31,6 +32,7 @@ rd_t open_shared_mem(void) {
 
     mem->read_ctr = 0;
     mem->write_ctr = 0;
+    memset(mem->data, '\0', SM_SIZE);
 
     new_r->env = mem;
     new_r->writer = &shared_mem_write;
