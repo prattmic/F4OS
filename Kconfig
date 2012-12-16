@@ -9,3 +9,7 @@ endmenu
 menu "Memory management"
 source mm/Kconfig
 endmenu
+
+menu "Kernel"
+source kernel/Kconfig
+endmenu

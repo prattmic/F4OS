@@ -10,7 +10,7 @@
 
 #include <dev/shared_mem.h>
 
-#define SM_SIZE   512
+#define SM_SIZE   CONFIG_SHARED_MEM_SIZE
 
 typedef struct shared_mem { 
         char        data[SM_SIZE]; 

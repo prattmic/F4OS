@@ -24,3 +24,11 @@ config SYSTICK_FREQ
     default 4000
     ---help---
         The frequency at which system ticks (and thus, task switching), should occur.
+
+config SHARED_MEM_SIZE
+    int
+    prompt "Shared memory resource buffer size"
+    default 512
+    ---help---
+        The size of buffer to be allocated for each shared memory
+        resource opened.

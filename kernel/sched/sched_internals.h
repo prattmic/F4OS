@@ -1,7 +1,7 @@
 #ifndef KERNEL_SCHED_SCHED_INTERNALS_H_INCLUDED
 #define KERNEL_SCHED_SCHED_INTERNALS_H_INCLUDED
 
-#define STKSIZE                 255                      /* This is in words */
+#define STKSIZE     CONFIG_TASK_STACK_SIZE      /* This is in words */
 
 task_node_list task_list;
 task_node_list periodic_task_list;

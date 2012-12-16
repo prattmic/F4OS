@@ -3,12 +3,12 @@
 
 #include <stdint.h>
 
-#define RESOURCE_TABLE_SIZE         16
+#define RESOURCE_TABLE_SIZE         CONFIG_RESOURCE_TABLE_SIZE
 typedef uint8_t rd_t;
 struct resource;
 typedef struct resource resource;
 
-#define HELD_SEMAPHORES_MAX         6
+#define HELD_SEMAPHORES_MAX         CONFIG_HELD_SEMAPHORES_MAX
 struct semaphore;
 typedef struct semaphore semaphore;
 

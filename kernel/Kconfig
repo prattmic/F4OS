@@ -1,0 +1,29 @@
+config TASK_STACK_SIZE
+    int
+    prompt "Task stack size"
+    default 255
+    ---help---
+        The stack size allocated to each task, in words.
+        When building unoptimized, most tasks will need
+        more stack space, so this will probably the limiting
+        factor.  It is recommended to set this to a value
+        2^n - 1 in order to limit wasted space in the memory
+        allocator, which must allocate 2^n sized regions, and
+        will set aside one word for a header.
+
+config RESOURCE_TABLE_SIZE
+    int
+    prompt "Maximum number of resources per task"
+    default 16
+    ---help---
+        The maximum number of resources any given task will
+        be able to open at one time.
+
+config HELD_SEMAPHORES_MAX
+    int
+    prompt "Maximum number of held semaphores per task"
+    default 6
+    ---help---
+        The maximum number of semaphores any given task will
+        be able to hold at one time.  Each held semaphore must
+        be stored alongside the task to aid in deadlock checking.
