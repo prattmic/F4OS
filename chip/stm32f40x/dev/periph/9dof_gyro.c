@@ -28,7 +28,7 @@ rd_t open_sfe9dof_gyro(void) {
     gyro->tmp_addr = 0x1D;
 
     if (!(gyro->i2c_port->ready)) {
-        init_i2c1();
+        gyro->i2c_port->init();
     }
 
     /* Fire it up, fire it up/ When we finally turn it over, make a b-line towards the boat, or... */

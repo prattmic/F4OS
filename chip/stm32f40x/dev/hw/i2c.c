@@ -8,6 +8,9 @@
 
 #include <dev/hw/i2c.h>
 
+static void init_i2c1(void) __attribute__((section(".kernel")));
+static void init_i2c2(void) __attribute__((section(".kernel")));
+
 uint8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) __attribute__((section(".kernel")));
 uint8_t i2c_read(struct i2c_dev *i2c, uint8_t addr) __attribute__((section(".kernel")));
 
@@ -15,7 +18,8 @@ void i2c_stop(uint8_t port) __attribute__((section(".kernel")));
 
 struct i2c_dev i2c1 = {
     .ready = 0,
-    .port = 1
+    .port = 1,
+    .init = &init_i2c1
 };
 
 struct semaphore i2c1_semaphore = {
@@ -26,7 +30,8 @@ struct semaphore i2c1_semaphore = {
 
 struct i2c_dev i2c2 = {
     .ready = 0,
-    .port = 2
+    .port = 2,
+    .init = &init_i2c2
 };
 
 struct semaphore i2c2_semaphore = {
@@ -43,12 +48,13 @@ void i2c_stop(uint8_t port) {
     *I2C_CR1(port) |= I2C_CR1_STOP;
 }
 
-#define I2C1_SDA    9
 #define I2C1_SCL    8
-#define I2C2_SDA    11
-#define I2C2_SCL    10
+#define I2C1_SDA    9
 
-void init_i2c1(void) {
+#define I2C2_SCL    10
+#define I2C2_SDA    11
+
+static void init_i2c1(void) {
     *RCC_APB1ENR |= RCC_APB1ENR_I2C1EN;     /* Enable I2C1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;    /* Enable GPIOB Clock */
 
@@ -84,7 +90,7 @@ void init_i2c1(void) {
     i2c1.ready = 1;
 }
 
-void init_i2c2(void) {
+static void init_i2c2(void) {
     *RCC_APB1ENR |= RCC_APB1ENR_I2C2EN;     /* Enable I2C2 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;    /* Enable GPIOB Clock */
 
