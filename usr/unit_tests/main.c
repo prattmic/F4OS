@@ -170,6 +170,9 @@ void infinite_ipc(void) {
     while (1) {
         new_task(&ipctest, 1, 0);
         printf("Loop: %d\r\n", ++count);
+        if (!(count % 1000)) {
+            fprintf(stderr, "Loop %d\r\n", count);
+        }
 
         /* Wait for number of tasks to come down */
         while (approx_num_tasks() > 7);
