@@ -29,10 +29,6 @@ char fgetc(rd_t rd) {
     return ret;
 }
 
-char getc(void) {
-    return fgetc(0);
-}
-
 void sprintf(char *buf, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);

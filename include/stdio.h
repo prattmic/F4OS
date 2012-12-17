@@ -25,8 +25,9 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
 
 void puts(char *s);
 void putc(char letter);
-char getc(void);
-void printx(char *s, uint8_t *x, int n);
+#define getc() fgetc(stdin)
 #define printf(args...) fprintf(stdout, args)
+
+void printx(char *s, uint8_t *x, int n);
 
 #endif
