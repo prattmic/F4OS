@@ -4,9 +4,20 @@
 SRCS += main.c shell.c ipctest.c top.c uname.c rd_test.c
 
 SRCS_$(CONFIG_HAVE_LED) += blink.c
-SRCS_$(CONFIG_HAVE_I2C) += ghetto_gyro.c
-SRCS_$(CONFIG_HAVE_SPI) += accel.c lowpass.c
-SRCS_$(CONFIG_STM32_BOARD_PX4) += px4_mag.c
+
+ifdef CONFIG_HAVE_I2C
+	ifdef CONFIG_STM32_BOARD_DISCOVERY
+		SRCS += ghetto_gyro.c
+	endif
+	ifdef CONFIG_STM32_BOARD_PX4
+		SRCS += px4_mag.c
+	endif
+endif
+ifdef CONFIG_HAVE_SPI
+	ifdef CONFIG_STM32_BOARD_DISCOVERY
+		SRCS += accel.c lowpass.c
+	endif
+endif
 
 SRCS += $(SRCS_y)
 

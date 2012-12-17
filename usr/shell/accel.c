@@ -13,9 +13,6 @@ typedef struct accel_data {
 } accel_data;
 
 void accel(int argc, char **argv) {
-#ifndef CONFIG_HAVE_SPI
-    printf("SPI support requred.\r\n");
-#else
     if (argc != 1) {
         printf("Usage: %s\r\n", argv[0]);
         return;
@@ -47,5 +44,4 @@ void accel(int argc, char **argv) {
     }
 
     close(accelrd);
-#endif
 }

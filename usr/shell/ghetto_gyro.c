@@ -14,9 +14,6 @@ typedef struct gyro_data {
 
 /* Basically the same as accelerometer reading. Woohoo abstraction */
 void ghetto_gyro(int argc, char **argv) {
-#ifndef CONFIG_HAVE_I2C
-    printf("I2C support required.\r\n");
-#else
     if(argc != 1) {
         printf("Usage: %s\r\n", argv[0]);
     }
@@ -46,5 +43,4 @@ void ghetto_gyro(int argc, char **argv) {
 
     free(data);
     close(gyro_rd);
-#endif
 }
