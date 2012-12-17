@@ -51,7 +51,7 @@ void main(void) {
 
 void unit_tests(void) {
     printf("Press any key to start tests. (You passed the print test, by the way).\r\n");
-    fprintf(stderr, "Press any key on stderr to begin tests. (You passed the stderr test).\r\n");
+    fprintf(stderr, "Press any key on stdin to begin tests. (You passed the stderr test).\r\n");
     getc();
 
     printf("Abandoned semaphore test...");
@@ -102,20 +102,37 @@ void rd_test(void) {
 
     for (int i = 0; i < max; i++) {
         rd[i] = open_shared_mem();
+        if (rd[i] < 0) {
+            printf("Unable to open resource where i = %d\r\n", i);
+            continue;
+        }
 
         fprintf(rd[i], "Hello from resource %d.\r\n", rd[i]);
     }
 
     fprintf(rd[max-1], "Test passed.\r\n");
 
-    printf("Opened %d resources.\r\nClosing resource %d.\r\n", max, rd[6]);
-    close(rd[6]);
+    printf("Opened %d resources.\r\n", max);
+            
+    if (rd[6] > 0) {
+        printf("Closing resource %d.\r\n", rd[6]);
+        close(rd[6]);
+    }
     
     rd[6] = open_shared_mem();
-    fprintf(rd[6], "Hello from new resource %d.  You passed the test!\r\n", rd[6]);
+    if (rd[6] < 0) {
+        printf("Unable to open new resource for rd[6].\r\n");
+    }
+    else {
+        fprintf(rd[6], "Hello from new resource %d.  You passed the test!\r\n", rd[6]);
+    }
 
     for (int i = 0; i < max; i++) {
         char buf[64] = {'\0'};
+
+        if (rd[i] < 0) {
+            continue;
+        }
 
         read(rd[i], buf, 64);
 
@@ -127,6 +144,11 @@ void rd_test(void) {
 
 void ipctest() {
     rd_t memrd = open_shared_mem();
+    if (memrd < 0) {
+        printf("Unable to open shared mem.\r\n");
+        return;
+    }
+
     swrite(memrd, "IPC Test passed.\r\n");
     new_task(&memreader, 1, 0);
 }

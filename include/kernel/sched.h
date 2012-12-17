@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define RESOURCE_TABLE_SIZE         CONFIG_RESOURCE_TABLE_SIZE
-typedef uint8_t rd_t;
+typedef int8_t rd_t;
 struct resource;
 typedef struct resource resource;
 

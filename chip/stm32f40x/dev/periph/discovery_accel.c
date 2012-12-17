@@ -46,10 +46,18 @@ rd_t open_discovery_accel(void) {
     discovery_accel_cs_high();
 
     discovery_accel *accel = kmalloc(sizeof(discovery_accel));
-    resource *new_r = create_new_resource();
-    if(!new_r || !accel) {
-        panic_print("Could not allocate space for discovery accel resource");
+    if (!accel) {
+        printk("OOPS: Could not allocate space for discovery accel resource.\r\n");
+        return -1;
     }
+
+    resource *new_r = create_new_resource();
+    if(!new_r) {
+        printk("OOPS: Could not allocate space for discovery accel resource.\r\n");
+        kfree(accel);
+        return -1;
+    }
+
     /* We expect that spi1 was init'd in bootmain.c */
     accel->spi_port = &spi1;
     accel->spi_port->write(0x20, 0x47, &discovery_accel_cs_high, &discovery_accel_cs_low);

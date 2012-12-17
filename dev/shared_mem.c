@@ -24,10 +24,16 @@ void shared_mem_close(resource *env) __attribute__((section(".kernel")));
 
 rd_t open_shared_mem(void) {
     shared_mem *mem = kmalloc(sizeof(shared_mem));
+    if (!mem) {
+        printk("OOPS: Could not allocate memory for shared memory resource.\r\n");
+        return -1;
+    }
+
     resource *new_r = create_new_resource();
-    if (!mem || !new_r) {
-        printk("Tasks: %d. User mem: %d. Kernel mem: %d", approx_num_tasks(), mm_space(), mm_kspace());
-        panic_print("Unable to allocate memory for shared memory resource.");
+    if (!new_r) {
+        printk("OOPS: Unable to allocate memory for shared memory resource.\r\n");
+        kfree(mem);
+        return -1;
     }
 
     mem->read_ctr = 0;
@@ -44,7 +50,10 @@ rd_t open_shared_mem(void) {
         init_semaphore(new_r->sem);
     }
     else {
-        panic_print("Unable to allocate space for shared memory semaphore.");
+        printk("OOPS: Unable to allocate memory for shared memory resource.\r\n");
+        kfree(new_r);
+        kfree(mem);
+        return -1;
     }
 
     return add_resource(curr_task->task, new_r);

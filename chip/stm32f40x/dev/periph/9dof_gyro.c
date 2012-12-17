@@ -16,10 +16,18 @@ void sfe9dof_gyro_close(resource *env) __attribute__((section(".kernel")));
 
 rd_t open_sfe9dof_gyro(void) {
     sfe9dof_gyro *gyro = kmalloc(sizeof(sfe9dof_gyro)); 
-    resource *new_r = create_new_resource();
-    if(!new_r || !gyro) {
-        panic_print("Could not allocate space for gyro resource.");
+    if (!gyro) {
+        printk("OOPS: Could not allocate space for gyro resource.\r\n");
+        return -1;
     }
+
+    resource *new_r = create_new_resource();
+    if(!new_r) {
+        printk("OOPS: Could not allocate space for gyro resource.\r\n");
+        kfree(gyro);
+        return -1;
+    }
+
     /* We expect that spi1 was init'd in bootmain.c */
     gyro->i2c_port = &i2c1;
     gyro->addr_ctr = 0;

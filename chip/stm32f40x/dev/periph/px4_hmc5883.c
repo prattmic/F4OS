@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <mm/mm.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <dev/resource.h>
@@ -19,9 +20,16 @@ static void px4_hmc5883_close(resource *res) __attribute__((section(".kernel")))
 
 rd_t open_px4_hmc5883(void) {
     resource *new_r = create_new_resource();
+    if (!new_r) {
+        printk("OOPS: Could not allocate space for hmc5883 resource.\r\n");
+        return -1;
+    }
+
     struct hmc5883 *env = (struct hmc5883 *) malloc(sizeof(struct hmc5883));
-    if (!new_r || !env) {
-        panic_print("Could not allocate space for hmc5883 resource.");
+    if (!env) {
+        printk("OOPS: Could not allocate space for hmc5883 resource.\r\n");
+        kfree(new_r);
+        return -1;
     }
 
     if (!(i2c2.ready)) {

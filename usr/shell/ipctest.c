@@ -13,7 +13,12 @@ void ipctest(int argc, char **argv) {
         printf("Usage: %s\n", argv[0]);
         return;
     }
+
     rd_t memrd = open_shared_mem();
+    if (memrd < 0) {
+        printf("Error: unable to open shared mem.\r\n");
+    }
+
     printf("WRITING MEM.\r\n");
 
     swrite(memrd, "THIS IS A TEST OF SHARED MEMORY REGIONS N STUFF.");

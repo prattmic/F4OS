@@ -4,6 +4,10 @@
 
 void px4_mag(int argc, char **argv) {
     rd_t mag = open_px4_hmc5883();
+    if (mag < 0) {
+        printf("Error: unable to open magnetometer.\r\n");
+        return;
+    }
 
     printf("Press q to quit, any key to continue.\r\n");
 

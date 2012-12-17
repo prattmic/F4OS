@@ -22,6 +22,11 @@ void accel(int argc, char **argv) {
     }
 
     rd_t accelrd = open_discovery_accel();
+    if (accelrd < 0) {
+        printf("Error: unable to open accelerometer.\r\n");
+        return;
+    }
+
     accel_data data;
 
     printf("q to quit, any other key to get data.\r\nunits in g's\r\n");

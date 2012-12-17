@@ -28,7 +28,8 @@ resource *create_new_resource(void) {
 
 rd_t add_resource(task_ctrl* tcs, resource* r) {
     if(r == NULL) {
-        panic_print("Cannot add NULL resource.");
+        printk("OOPS: NULL resource passed to add_resource.\r\n");
+        return -1;
     }
 
     /* There is room at the end of the resource table, so add there */
@@ -58,10 +59,9 @@ rd_t add_resource(task_ctrl* tcs, resource* r) {
         }
 
         /* If we got here, nothing was found. */
-        panic_print("No room to add resources.");
+        printk("No room to add resources.\r\n");
+        return -1;
     }
-
-    return -1;
 }
 
 void resource_setup(task_ctrl* task) {
@@ -91,8 +91,8 @@ void resource_setup(task_ctrl* task) {
 }
 
 void write(rd_t rd, char* d, int n) {
-    if (rd >= RESOURCE_TABLE_SIZE) {
-        panic_print("Resource descriptor too large");
+    if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
+        panic_print("Invalid resource descriptor");
     }
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);
@@ -111,8 +111,8 @@ void write(rd_t rd, char* d, int n) {
 }
 
 void swrite(rd_t rd, char* s) {
-    if (rd >= RESOURCE_TABLE_SIZE) {
-        panic_print("Resource descriptor too large");
+    if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
+        panic_print("Invalid resource descriptor");
     }
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);
@@ -141,8 +141,8 @@ void swrite(rd_t rd, char* s) {
 }
 
 void close(rd_t rd) {
-    if (rd >= RESOURCE_TABLE_SIZE) {
-        panic_print("Resource descriptor too large");
+    if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
+        panic_print("Invalid resource descriptor");
     }
     if (task_switching) {
         if (rd == curr_task->task->top_rd - 1) {
@@ -161,8 +161,8 @@ void close(rd_t rd) {
 }
 
 void read(rd_t rd, char *buf, int n) {
-    if (rd >= RESOURCE_TABLE_SIZE) {
-        panic_print("Resource descriptor too large");
+    if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
+        panic_print("Invalid resource descriptor");
     }
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);

@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <mm/mm.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
@@ -19,9 +20,16 @@ void buf_stream_close(resource *resource);
 
 rd_t open_buf_stream(char *buf) {
     struct buf_stream *env = malloc(sizeof(struct buf_stream)); 
+    if (!env) {
+        printk("OOPS: Could not allocate space for buffer stream resource.\r\n");
+        return -1;
+    }
+
     resource *new_r = create_new_resource();
-    if (!env || !new_r) {
-        panic_print("Unable to allocate space for buffer stream resource.");
+    if (!new_r) {
+        printk("OOPS: Unable to allocate space for buffer stream resource.\r\n");
+        free(env);
+        return -1;
     }
 
     env->buf = buf;
@@ -36,7 +44,10 @@ rd_t open_buf_stream(char *buf) {
         init_semaphore(new_r->sem);
     }
     else {
-        panic_print("Unable to allocate memory for buffer stream semaphore.");
+        printk("OOPS: Unable to allocate memory for buffer stream semaphore.\r\n");
+        kfree(new_r);
+        free(env);
+        return -1;
     }
 
     return add_resource(curr_task->task, new_r);

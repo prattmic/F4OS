@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-typedef uint8_t rd_t;
+typedef int8_t rd_t;
 
 #define stdin   0
 #define stdout  0

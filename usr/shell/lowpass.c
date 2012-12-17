@@ -38,9 +38,16 @@ void lowpass_test(int argc, char **argv) {
     printf("This program will continuously print a mathematically correct filtered roll angle.\r\n\
             It is ghetto and CANNOT BE STOPPED WHEN RUN.\r\n\
             q to quit now, any other key will continue.\r\n");
+
     if(getc() != 'q') {
         printf("LOL TOO LATE NOW FOOL. HOPE YOU GOT YOUR RESET BUTTON HANDY. SCRUB.\r\n");
+
         accelrd = open_discovery_accel();
+        if (accelrd < 0) {
+            printf("Error: unable to open accelerometer.\r\n");
+            return;
+        }
+
         new_task(&ghetto_lp, 8, DELTA_T*DT_TO_JIFFIES);
     }
 #endif

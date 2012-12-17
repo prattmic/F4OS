@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef uint8_t rd_t;
+typedef int8_t rd_t;
 
 struct semaphore;
 
