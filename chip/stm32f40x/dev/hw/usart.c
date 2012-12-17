@@ -149,7 +149,11 @@ uint16_t usart_baud(uint32_t baud) {
     return (mantissa << 4) | int_fraction;
 }
 
-void usart_putc(char c, void *env) {
+int usart_putc(char c, void *env) {
+    if (!usart_ready) {
+        return -1;
+    }
+
     /* Wait for DMA to be ready */
     while (*DMA2_CR_S(7) & DMA_SxCR_EN) {
         if (task_switching && !IPSR()) {
@@ -168,9 +172,17 @@ void usart_putc(char c, void *env) {
     *DMA2_NDTR_S(7) = 1;
     /* Enable DMA */
     *DMA2_CR_S(7) |= DMA_SxCR_EN;
+
+    return 1;
 }
 
-void usart_puts(char *s, void *env) {
+int usart_puts(char *s, void *env) {
+    if (!usart_ready) {
+        return -1;
+    }
+
+    int total = 0;
+
     while (*s) {
         char *buf = usart_tx_buf;
         uint16_t count = 0;
@@ -197,10 +209,25 @@ void usart_puts(char *s, void *env) {
         *DMA2_NDTR_S(7) = (uint16_t) count;
         /* Enable DMA */
         *DMA2_CR_S(7) |= DMA_SxCR_EN;
+
+        total += count;
     }
+
+    return total;
 }
 
-char usart_getc(void *env) {
+char usart_getc(void *env, int *error) {
+    if (!usart_ready) {
+        if (error != NULL) {
+            *error = -1;
+        }
+        return 0;
+    }
+
+    if (error != NULL) {
+        *error = 0;
+    }
+
     static uint32_t read = 0;
     uint16_t dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_NDTR_S(2);
     uint8_t wrapped = *DMA2_LISR & DMA_LISR_TCIF2;
@@ -247,6 +274,7 @@ char usart_getc(void *env) {
     }
 }
 
-void usart_close(resource *resource) {
-    panic_print("USART is a fundamental resource, it may not be closed.");
+int usart_close(resource *resource) {
+    printk("OOPS: USART is a fundamental resource, it may not be closed.");
+    return -1;
 }

@@ -7,37 +7,43 @@
 
 #include <stdio.h>
 
-void fputs(rd_t rd, char *s) {
-    swrite(rd, s);
+int fputs(rd_t rd, char *s) {
+    return swrite(rd, s);
 }
 
-void puts(char *s) {
-    swrite(0, s);
+int puts(char *s) {
+    return swrite(0, s);
 }
 
-void fputc(rd_t rd, char letter) {
-    write(rd, &letter, 1);
+int fputc(rd_t rd, char letter) {
+    return write(rd, &letter, 1);
 }
 
-void putc(char letter) {
-    write(0, &letter, 1);
+int putc(char letter) {
+    return write(0, &letter, 1);
 }
 
 char fgetc(rd_t rd) {
     char ret;
-    read(rd, &ret, 1);
-    return ret;
+    if (read(rd, &ret, 1) == 1) {
+        return ret;
+    }
+    else {
+        return 0;
+    }
 }
 
-void sprintf(char *buf, char *fmt, ...) {
+int sprintf(char *buf, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
 
     rd_t stream = open_buf_stream(buf);
-    vfprintf(stream, fmt, ap, &fputs, &fputc);
+    int ret = vfprintf(stream, fmt, ap, &fputs, &fputc);
     close(stream);
 
     va_end(ap);
+
+    return ret;
 }
 
 #define PS 256
@@ -65,31 +71,49 @@ void printx(char *s, uint8_t *x, int n) {
     puts(buf);
 }
 
-void fprintf(rd_t rd, char *fmt, ...) {
+int fprintf(rd_t rd, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    vfprintf(rd, fmt, ap, &fputs, &fputc);
+    int ret = vfprintf(rd, fmt, ap, &fputs, &fputc);
     va_end(ap);
+
+    return ret;
 }
 
-static inline void holding_flush(char *holding, int *hold_count, rd_t rd, void (*puts_fn)(rd_t,char*)) {
+static inline int holding_flush(char *holding, int *hold_count, rd_t rd, int (*puts_fn)(rd_t,char*)) {
     if (*hold_count) {
-        puts_fn(rd, holding);
-        *hold_count = 0;
-        holding[0] = '\0';
+        int ret = puts_fn(rd, holding);
+        if (ret >= 0) {
+            *hold_count = 0;
+            holding[0] = '\0';
+        }
+        return ret;
+    }
+    else {
+        return 0;
     }
 }
 
-static inline void holding_push(char c, char *holding, int hold_len, int *hold_count, rd_t rd, void (*puts_fn)(rd_t,char*)) {
+static inline int holding_push(char c, char *holding, int hold_len, int *hold_count, rd_t rd, int (*puts_fn)(rd_t,char*)) {
+    int ret;
+
     if (*hold_count >= hold_len - 1) {
-        holding_flush(holding, hold_count, rd, puts_fn);
+        ret = holding_flush(holding, hold_count, rd, puts_fn);
+    }
+    else {
+        ret = 0;
     }
 
     holding[(*hold_count)++] = c;
     holding[*hold_count] = '\0';
+
+    return ret;
 }
 
-void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void (*putc_fn)(rd_t,char)) {
+/* Returns bytes written, negative on error */
+int vfprintf(rd_t rd, char *fmt, va_list ap, int (*puts_fn)(rd_t,char*), int (*putc_fn)(rd_t,char)) {
+    int total = 0;
+
     /* We buffer data here as long as possible, because the actual puts/putc functions tend to be slow
      * and the fewer calls we can make, the better. */
     char holding[32];
@@ -97,6 +121,8 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
     const int hold_len = sizeof(holding)/sizeof(holding[0]);
 
     holding[0] = '\0';
+
+    int ret;
 
     while (*fmt) {
         if (*fmt == '%') {
@@ -114,9 +140,22 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
                         ];
                     }
 
-                    holding_flush(holding, &hold_count, rd, puts_fn);
+                    ret = holding_flush(holding, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
 
-                    puts_fn(rd, buf);
+                    ret = puts_fn(rd, buf);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
+
                     break;
                 }
                 case 'i': case 'd': {
@@ -125,9 +164,21 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
 
                     itoa(num, buf);
 
-                    holding_flush(holding, &hold_count, rd, puts_fn);
+                    ret = holding_flush(holding, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
 
-                    puts_fn(rd, buf);
+                    ret = puts_fn(rd, buf);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
                     break;
                 }
                 case 'u': {
@@ -136,9 +187,21 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
 
                     uitoa(num, buf);
 
-                    holding_flush(holding, &hold_count, rd, puts_fn);
+                    ret = holding_flush(holding, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
 
-                    puts_fn(rd, buf);
+                    ret = puts_fn(rd, buf);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
                     break;
                 }
                 case 'f': {
@@ -147,41 +210,107 @@ void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void 
 
                     ftoa(num, 0.0001f, buf, 20);
 
-                    holding_flush(holding, &hold_count, rd, puts_fn);
+                    ret = holding_flush(holding, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
 
-                    puts_fn(rd, buf);
+                    ret = puts_fn(rd, buf);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
                     break;
                 }
                 case 'c': {
                     char letter = (char) va_arg(ap, uint32_t);
 
-                    holding_push(letter, holding, hold_len, &hold_count, rd, puts_fn);
+                    ret = holding_push(letter, holding, hold_len, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
+
                     break;
                 }
                 case 's': {
                     char *s = va_arg(ap, char*);
 
-                    holding_flush(holding, &hold_count, rd, puts_fn);
+                    ret = holding_flush(holding, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
 
-                    puts_fn(rd, s);
+                    ret = puts_fn(rd, s);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
+
                     break;
                 }
                 case '%': { /* Just print a % */
-                    holding_push('%', holding, hold_len, &hold_count, rd, puts_fn);
+                    ret = holding_push('%', holding, hold_len, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
+
                     break;
                 }
                 default: {
-                    holding_push('%', holding, hold_len, &hold_count, rd, puts_fn);
-                    holding_push(*fmt, holding, hold_len, &hold_count, rd, puts_fn);
+                    ret = holding_push('%', holding, hold_len, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
+
+                    ret = holding_push(*fmt, holding, hold_len, &hold_count, rd, puts_fn);
+                    if (ret >= 0) {
+                        total += ret;
+                    }
+                    else {
+                        return ret;
+                    }
                 }
             }
 
             fmt++;
         }
         else {
-            holding_push(*fmt++, holding, hold_len, &hold_count, rd, puts_fn);
+            ret = holding_push(*fmt++, holding, hold_len, &hold_count, rd, puts_fn);
+            if (ret >= 0) {
+                total += ret;
+            }
+            else {
+                return ret;
+            }
         }
     }
 
-    holding_flush(holding, &hold_count, rd, puts_fn);
+    ret = holding_flush(holding, &hold_count, rd, puts_fn);
+    if (ret >= 0) {
+        total += ret;
+    }
+    else {
+        return ret;
+    }
+
+    return total;
 }

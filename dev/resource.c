@@ -90,38 +90,81 @@ void resource_setup(task_ctrl* task) {
     }
 }
 
-void write(rd_t rd, char* d, int n) {
+/* Return bytes written, negative on error */
+int write(rd_t rd, char* d, int n) {
     if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
-        panic_print("Invalid resource descriptor");
+        return -1;
     }
+
+    int tot = 0;
+
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);
         for(int i = 0; i < n; i++) {
-            curr_task->task->resources[rd]->writer(d[i], curr_task->task->resources[rd]->env);
+            int ret = curr_task->task->resources[rd]->writer(d[i], curr_task->task->resources[rd]->env);
+            if (ret > 0) {
+                tot += ret;
+            }
+            else {
+                /* Return on error */
+                tot = ret;
+                break;
+            }
         }
         release(curr_task->task->resources[rd]->sem);
     }
     else {
         if(default_resources[rd] != NULL) {
             for(int i = 0; i < n; i++) {
-                default_resources[rd]->writer(d[i], default_resources[rd]->env);
+                int ret = default_resources[rd]->writer(d[i], default_resources[rd]->env);
+                if (ret >= 0) {
+                    tot += ret;
+                }
+                else {
+                    /* Return on error */
+                    tot = ret;
+                    break;
+                }
             }
         }
+        else {
+            return -1;
+        }
     }
+
+    return tot;
 }
 
-void swrite(rd_t rd, char* s) {
+/* Return bytes written, negative on error */
+int swrite(rd_t rd, char* s) {
     if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
-        panic_print("Invalid resource descriptor");
+        return -1;
     }
+
+    int n = 0; 
+
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);
         if (curr_task->task->resources[rd]->swriter) {
-            curr_task->task->resources[rd]->swriter(s, curr_task->task->resources[rd]->env);
+            int ret = curr_task->task->resources[rd]->swriter(s, curr_task->task->resources[rd]->env);
+            if (ret >= 0) {
+                n += ret;
+            }
+            else {
+                n = ret;
+            }
+                
         }
         else {
             while(*s) {
-                curr_task->task->resources[rd]->writer(*s++, curr_task->task->resources[rd]->env);
+                int ret = curr_task->task->resources[rd]->writer(*s++, curr_task->task->resources[rd]->env);
+                if (ret >= 0) {
+                    n += ret;
+                }
+                else {
+                    n = ret;
+                    break;
+                }
             }
         }
         release(curr_task->task->resources[rd]->sem);
@@ -129,53 +172,107 @@ void swrite(rd_t rd, char* s) {
     else {
         if(default_resources[rd] != NULL) {
             if (default_resources[rd]->swriter) {
-                default_resources[rd]->swriter(s, default_resources[rd]->env);
+                int ret = default_resources[rd]->swriter(s, default_resources[rd]->env);
+                if (ret >= 0) {
+                    n += ret;
+                }
+                else {
+                    n = ret;
+                }
             }
             else {
                 while(*s) {
-                    default_resources[rd]->writer(*s++, default_resources[rd]->env);
+                    int ret = default_resources[rd]->writer(*s++, default_resources[rd]->env);
+                    if (ret >= 0) {
+                        n += ret;
+                    }
+                    else {
+                        n = ret;
+                        break;
+                    }
                 }
             }
         }
+        else { 
+            return -1;
+        }
     }
+
+    return n;
 }
 
-void close(rd_t rd) {
+/* Returns 0 on success, else on error */
+int close(rd_t rd) {
     if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
-        panic_print("Invalid resource descriptor");
+        return -1;
     }
+
+    int ret;
+
     if (task_switching) {
-        if (rd == curr_task->task->top_rd - 1) {
-            curr_task->task->top_rd--;
+        ret = curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]);
+        if (ret >= 0) {
+            if (rd == curr_task->task->top_rd - 1) {
+                curr_task->task->top_rd--;
+            }
+            kfree(curr_task->task->resources[rd]);
+            curr_task->task->resources[rd] = NULL;
         }
-        curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]);
-        kfree(curr_task->task->resources[rd]);
-        curr_task->task->resources[rd] = NULL;
     }
     else {
         if(default_resources[rd] != NULL) {
-            default_resources[rd]->closer(default_resources[rd]->env);
-            kfree(default_resources[rd]);
+            ret = default_resources[rd]->closer(default_resources[rd]->env);
+            if (ret >= 0) {
+                kfree(default_resources[rd]);
+                default_resources[rd] = NULL;
+            }
+        }
+        else {
+            ret = -1;
         }
     }
+
+    return ret;
 }
 
-void read(rd_t rd, char *buf, int n) {
+/* Returns number of bytes read, or negative on error */
+int read(rd_t rd, char *buf, int n) {
     if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
-        panic_print("Invalid resource descriptor");
+        return -1;
     }
+
+    int tot = 0;
+
     if (task_switching) {
         acquire(curr_task->task->resources[rd]->sem);
         for(int i = 0; i < n; i++) {
-            buf[i] = curr_task->task->resources[rd]->reader(curr_task->task->resources[rd]->env);
+            int error;
+            buf[i] = curr_task->task->resources[rd]->reader(curr_task->task->resources[rd]->env, &error);
+            if (!error) {
+                tot += 1;
+            }
+            else {
+                tot = error;
+                break;
+            }
         }
         release(curr_task->task->resources[rd]->sem);
     }
     else {
         if(default_resources[rd] != NULL) {
             for(int i = 0; i < n; i++) {
-                buf[i] = default_resources[rd]->reader(default_resources[rd]->env);
+                int error;
+                buf[i] = default_resources[rd]->reader(default_resources[rd]->env, &error);
+                if (!error) {
+                    tot += 1;
+                }
+                else {
+                    tot = error;
+                    break;
+                }
             }
         }
     }
+
+    return tot;
 }

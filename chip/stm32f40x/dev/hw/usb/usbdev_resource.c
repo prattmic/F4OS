@@ -11,10 +11,10 @@
 #include "usbdev_desc.h"
 #include <dev/hw/usbdev.h>
 
-static void usbdev_resource_write(char c, void *env);
-static void usbdev_resource_swrite(char *s, void *env);
-static char usbdev_resource_read(void *env);
-static void usbdev_resource_close(struct resource *resource);
+static int usbdev_resource_write(char c, void *env);
+static int usbdev_resource_swrite(char *s, void *env);
+static char usbdev_resource_read(void *env, int *error);
+static int usbdev_resource_close(struct resource *resource);
 
 struct semaphore usbdev_semaphore = {
     .lock = 0,
@@ -29,19 +29,36 @@ resource usb_console = {.writer     = &usbdev_resource_write,
                         .env        = NULL,
                         .sem        = &usbdev_semaphore};
 
-static void usbdev_resource_write(char c, void *env) {
+static int usbdev_resource_write(char c, void *env) {
     if (usb_ready) {
-        usbdev_write(&ep_tx, (uint8_t *) &c, 1);
+        return usbdev_write(&ep_tx, (uint8_t *) &c, 1);
+    }
+    else {
+        return -1;
     }
 }
 
-static void usbdev_resource_swrite(char *s, void *env) {
+static int usbdev_resource_swrite(char *s, void *env) {
     if (usb_ready) {
-        usbdev_write(&ep_tx, (uint8_t *) s, strlen(s));
+        return usbdev_write(&ep_tx, (uint8_t *) s, strlen(s));
+    }
+    else {
+        return -1;
     }
 }
 
-static char usbdev_resource_read(void *env) {
+static char usbdev_resource_read(void *env, int *error) {
+    if (!usb_ready) {
+        if (error != NULL) {
+            *error = -1;
+        }
+        return 0;
+    }
+
+    if (error != NULL) {
+        *error = 0;
+    }
+
     while (ring_buf_empty(&ep_rx.rx)) {
         if (task_switching && !IPSR()) {
             release(&usbdev_semaphore);
@@ -56,6 +73,7 @@ static char usbdev_resource_read(void *env) {
     return c;
 }
 
-static void usbdev_resource_close(struct resource *resource) {
-    panic_print("USB is a fundamental resource, it may not be closed.");
+static int usbdev_resource_close(struct resource *resource) {
+    printk("OOPS: USB is a fundamental resource, it may not be closed.");
+    return -1;
 }

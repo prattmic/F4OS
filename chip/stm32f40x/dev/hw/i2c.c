@@ -11,9 +11,6 @@
 static void init_i2c1(void) __attribute__((section(".kernel")));
 static void init_i2c2(void) __attribute__((section(".kernel")));
 
-uint8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) __attribute__((section(".kernel")));
-uint8_t i2c_read(struct i2c_dev *i2c, uint8_t addr) __attribute__((section(".kernel")));
-
 void i2c_stop(uint8_t port) __attribute__((section(".kernel")));
 
 struct i2c_dev i2c1 = {
@@ -126,7 +123,7 @@ static void init_i2c2(void) {
     i2c2.ready = 1;
 }
 
-uint8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
+int8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
     if (!i2c || !i2c->ready || i2c->port < 1 || i2c->port > 3) {
         return -1;
     }
@@ -136,14 +133,17 @@ uint8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num
     int count = 10000;
     while (!(*I2C_SR1(i2c->port) & I2C_SR1_SB)) {
         if (!count--) {
+            i2c_stop(i2c->port);
             return -1;
         }
     }
 
     *I2C_DR(i2c->port) = addr << 1;
 
+    count = 10000;
     while (!(*I2C_SR1(i2c->port) & I2C_SR1_ADDR)) {
-        if (*I2C_SR1(i2c->port) & I2C_SR1_AF) {
+        if ((*I2C_SR1(i2c->port) & I2C_SR1_AF) || !count--) {
+            i2c_stop(i2c->port);
             return -1;
         }
     }
@@ -161,19 +161,29 @@ uint8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num
     return 0;
 }
 
-uint8_t i2c_read(struct i2c_dev *i2c, uint8_t addr) {
-    uint8_t data;
-
+uint8_t i2c_read(struct i2c_dev *i2c, uint8_t addr, int *error) {
     if (!i2c || !i2c->ready || i2c->port < 1 || i2c->port > 3) {
-        return 69;
+        if (error != NULL) {
+            *error = -1;
+        }
+        return 0;
     }
+
+    if (error != NULL) {
+        *error = 0;
+    }
+
+    uint8_t data;
 
     *I2C_CR1(i2c->port) |= I2C_CR1_START;
 
     int count = 10000;
     while (!(*I2C_SR1(i2c->port) & I2C_SR1_SB)) {
         if (!count--) {
-            return 69;
+            if (error != NULL) {
+                *error = -1;
+            }
+            return 0;
         }
     }
 
@@ -181,7 +191,10 @@ uint8_t i2c_read(struct i2c_dev *i2c, uint8_t addr) {
 
     while (!(*I2C_SR1(i2c->port) & I2C_SR1_ADDR)) {
         if (*I2C_SR1(i2c->port) & I2C_SR1_AF) {
-            return 69;
+            if (error != NULL) {
+                *error = -1;
+            }
+            return 0;
         }
     }
 

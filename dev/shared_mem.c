@@ -18,9 +18,9 @@ typedef struct shared_mem {
         int         write_ctr; 
 } shared_mem; 
 
-char shared_mem_read(void *env) __attribute__((section(".kernel")));
-void shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
-void shared_mem_close(resource *env) __attribute__((section(".kernel")));
+char shared_mem_read(void *env, int *error) __attribute__((section(".kernel")));
+int shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
+int shared_mem_close(resource *env) __attribute__((section(".kernel")));
 
 rd_t open_shared_mem(void) {
     shared_mem *mem = kmalloc(sizeof(shared_mem));
@@ -59,7 +59,11 @@ rd_t open_shared_mem(void) {
     return add_resource(curr_task->task, new_r);
 }
 
-char shared_mem_read(void *env) {
+char shared_mem_read(void *env, int *error) {
+    if (error != NULL) {
+        *error = 0;
+    }
+
     shared_mem *mem = (shared_mem *)env;
     if(mem->read_ctr > 512) {
         mem->read_ctr = 1;
@@ -68,17 +72,21 @@ char shared_mem_read(void *env) {
     else return mem->data[mem->read_ctr++];
 }
 
-void shared_mem_write(char c, void *env) {
+int shared_mem_write(char c, void *env) {
     shared_mem *mem = (shared_mem *)env;
     if(mem->write_ctr > 512) {
         mem->write_ctr = 1;
         mem->data[0] = c;
     }
     else mem->data[mem->write_ctr++] = c;
+
+    return 1;
 }
 
-void shared_mem_close(resource *resource) {
+int shared_mem_close(resource *resource) {
     kfree(resource->env);
     acquire_for_free(resource->sem);
     kfree((void*) resource->sem);
+
+    return 0;
 }

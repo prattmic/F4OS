@@ -10,9 +10,9 @@
 #include <dev/hw/i2c.h>
 #include <dev/periph/9dof_gyro.h>
 
-char sfe9dof_gyro_read(void *env) __attribute__((section(".kernel"))); 
-void sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel"))); 
-void sfe9dof_gyro_close(resource *env) __attribute__((section(".kernel"))); 
+char sfe9dof_gyro_read(void *env, int *error) __attribute__((section(".kernel"))); 
+int sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel"))); 
+int sfe9dof_gyro_close(resource *env) __attribute__((section(".kernel"))); 
 
 rd_t open_sfe9dof_gyro(void) {
     sfe9dof_gyro *gyro = kmalloc(sizeof(sfe9dof_gyro)); 
@@ -43,10 +43,21 @@ rd_t open_sfe9dof_gyro(void) {
     uint8_t packet[2];
     packet[0] = 0x15;
     packet[1] = 0x07;
-    i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
+    int ret = i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
+    if (ret) {
+        kfree(gyro);
+        kfree(new_r);
+        return ret;
+    }
+
     packet[0] = 0x16;
     packet[1] = 0x18;
-    i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
+    ret = i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
+    if (ret) {
+        kfree(gyro);
+        kfree(new_r);
+        return ret;
+    }
 
     new_r->env = gyro;
     new_r->writer = &sfe9dof_gyro_write;
@@ -57,7 +68,11 @@ rd_t open_sfe9dof_gyro(void) {
     return add_resource(curr_task->task, new_r);
 }
 
-char sfe9dof_gyro_read(void *env) {
+char sfe9dof_gyro_read(void *env, int *error) {
+    if (error != NULL) {
+        *error = 0;
+    }
+
     uint8_t tmp;
     sfe9dof_gyro *gyro = (sfe9dof_gyro *)env;
     if(gyro->addr_ctr > 5) {
@@ -65,14 +80,33 @@ char sfe9dof_gyro_read(void *env) {
     }
     gyro->tmp_addr = 0x1D;
     tmp = gyro->tmp_addr + gyro->addr_ctr++;
-    i2c_write(gyro->i2c_port, gyro->device_addr, &tmp, 1);
-    return (char) i2c_read(gyro->i2c_port, gyro->device_addr);
+
+    int ret = i2c_write(gyro->i2c_port, gyro->device_addr, &tmp, 1);
+    if (ret) {
+        if (error != NULL) {
+            *error = ret;
+        }
+        return 0;
+    }
+
+    int i2c_error;
+    char c = (char) i2c_read(gyro->i2c_port, gyro->device_addr, &i2c_error);
+    if (i2c_error) {
+        if (error != NULL) {
+            *error = i2c_error;
+        }
+        return 0;
+    }
+
+    return c;
 }
 
-void sfe9dof_gyro_write(char d, void *env) {
+int sfe9dof_gyro_write(char d, void *env) {
     /* No real meaning to this yet */
+    return -1;
 }
 
-void sfe9dof_gyro_close(resource *res) {
+int sfe9dof_gyro_close(resource *res) {
     kfree(res->env);
+    return 0;
 }

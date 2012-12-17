@@ -36,8 +36,12 @@ void ghetto_gyro(int argc, char **argv) {
 
     printf("Press any key for data and q to quit\r\n");
     while (getc() != 'q') {
-        read(gyro_rd, (char *)data, 6);
-        printf("X: %d   Y: %d   Z:%d\r\n", data->x, data->y, data->z);
+        if (read(gyro_rd, (char *)data, 6) == 6) {
+            printf("X: %d   Y: %d   Z:%d\r\n", data->x, data->y, data->z);
+        }
+        else {
+            printf("Unable to read gyro.\r\n");
+        }
     }
 
     free(data);

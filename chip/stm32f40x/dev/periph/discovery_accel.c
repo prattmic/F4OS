@@ -18,9 +18,9 @@ typedef struct discovery_accel {
 
 extern spi_dev spi1;
 
-char discovery_accel_read(void *env) __attribute__((section(".kernel")));
-void discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
-void discovery_accel_close(resource *env) __attribute__((section(".kernel")));
+char discovery_accel_read(void *env, int *error) __attribute__((section(".kernel")));
+int discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
+int discovery_accel_close(resource *env) __attribute__((section(".kernel")));
 static void discovery_accel_cs_high(void) __attribute__((section(".kernel")));
 static void discovery_accel_cs_low(void) __attribute__((section(".kernel")));
 
@@ -72,17 +72,23 @@ rd_t open_discovery_accel(void) {
     return add_resource(curr_task->task, new_r);
 }
 
-char discovery_accel_read(void *env) {
+char discovery_accel_read(void *env, int *error) {
+    if (error != NULL) {
+        *error = 0;
+    }
+
     discovery_accel *accel = (discovery_accel *)env;
     if(accel->read_ctr > 2)
         accel->read_ctr = 0;
     return (char)accel->spi_port->read(0x29 + 2*accel->read_ctr++, &discovery_accel_cs_high, &discovery_accel_cs_low);
 }
 
-void discovery_accel_write(char d, void *env) {
+int discovery_accel_write(char d, void *env) {
     /* No real meaning to this yet */
+    return -1;
 }
 
-void discovery_accel_close(resource *res) {
+int discovery_accel_close(resource *res) {
     kfree(res->env);
+    return 0;
 }

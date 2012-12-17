@@ -16,17 +16,18 @@ union uint8_uint32 {
 };
 
 /* packet points to first byte in packet.  size is packet size in bytes */
-void usbdev_write(struct endpoint *ep, uint8_t *packet, int size) {
+/* Returns bytes written, negative on error */
+int usbdev_write(struct endpoint *ep, uint8_t *packet, int size) {
     if (ep == NULL) {
         DEBUG_PRINT("Warning: Invalid endpoint in usbdev_write. ");
-        return;
+        return -1;
     }
     if (ep->num != 0 && !usb_ready) {
-        return;
+        return -1;
     }
     if (ep->tx.buf == NULL) {
         DEBUG_PRINT("Warning: Endpoint has no tx buffer in usbdev_write. ");
-        return;
+        return -1;
     }
 
     /* Wait until current buffer is empty */
@@ -109,8 +110,16 @@ void usbdev_write(struct endpoint *ep, uint8_t *packet, int size) {
 
     /* Filled buffer, call recursively until packet finishes */
     if (filled_buffer && size) {
-        usbdev_write(ep, packet, size);
+        int ret = usbdev_write(ep, packet, size);
+        if (ret >= 0) {
+            written += ret;
+        }
+        else {
+            written = ret;
+        }
     }
+
+    return written;
 }
 
 void usbdev_fifo_read(volatile struct ring_buffer *ring, int size) {

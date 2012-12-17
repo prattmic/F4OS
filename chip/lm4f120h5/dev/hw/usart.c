@@ -78,7 +78,7 @@ void usart_baud(uint32_t baud) {
     UART0_FBRD_R = brdf;
 }
 
-void usart_putc(char c, void *env) {
+int usart_putc(char c, void *env) {
     /* Wait until transmit FIFO not full*/
     while (UART0_FR_R & UART_FR_TXFF) {
         if (task_switching && !IPSR()) {
@@ -87,15 +87,31 @@ void usart_putc(char c, void *env) {
     }
 
     UART0_DR_R = c;
+
+    return 1;
 }
 
-void usart_puts(char *s, void *env) {
+int usart_puts(char *s, void *env) {
+    int total = 0;
     while (*s) {
-        usart_putc(*s++, env);
+        int ret = usart_putc(*s++, env);
+        if (ret > 0) {
+            total += ret;
+        }
+        else {
+            total = ret;
+            break;
+        }
     }
+
+    return total;
 }
 
-char usart_getc(void *env) {
+char usart_getc(void *env, int *error) {
+    if (error != NULL) {
+        *error = 0;
+    }
+
     /* Wait for data */
     while (UART0_FR_R & UART_FR_RXFE) {
         if (task_switching && !IPSR()) {
@@ -108,6 +124,7 @@ char usart_getc(void *env) {
     return UART0_DR_R & UART_DR_DATA_M;
 }
 
-void usart_close(resource *resource) {
-    panic_print("USART is a fundamental resource, it may not be closed.");
+int usart_close(resource *resource) {
+    printk("OOPS: USART is a fundamental resource, it may not be closed.");
+    return -1;
 }

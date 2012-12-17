@@ -54,7 +54,11 @@ void lowpass_test(int argc, char **argv) {
 }
 
 void ghetto_lp(void) {
-    read(accelrd, (char *)data, 3);
-    theta = lowpass(theta, atan2(G((float)data->z), G((float)data->y)), ACC_LP_GAIN);
-    printf("Filtered roll: %f\r\n", theta*180/3.1415926f);
+    if (read(accelrd, (char *)data, 3) == 3) {
+        theta = lowpass(theta, atan2(G((float)data->z), G((float)data->y)), ACC_LP_GAIN);
+        printf("Filtered roll: %f\r\n", theta*180/3.1415926f);
+    }
+    else {
+        printf("Unable to read accelerometer.\r\n");
+    }
 }

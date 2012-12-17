@@ -200,7 +200,7 @@ struct endpoint {
 };
 
 void usbdev_reset(void);
-void usbdev_write(struct endpoint *ep, uint8_t *packet, int size);
+int usbdev_write(struct endpoint *ep, uint8_t *packet, int size);
 void usbdev_fifo_read(volatile struct ring_buffer *ring, int size);
 void usbdev_data_out(uint32_t status);
 void usbdev_data_in(struct endpoint *ep);

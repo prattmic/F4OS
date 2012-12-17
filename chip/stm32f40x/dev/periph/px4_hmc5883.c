@@ -14,9 +14,9 @@ struct hmc5883 {
     uint8_t reg;
 };
 
-static void px4_hmc5883_write(char c, void *env) __attribute__((section(".kernel")));
-static char px4_hmc5883_read(void *env) __attribute__((section(".kernel")));
-static void px4_hmc5883_close(resource *res) __attribute__((section(".kernel")));
+static int px4_hmc5883_write(char c, void *env) __attribute__((section(".kernel")));
+static char px4_hmc5883_read(void *env, int *error) __attribute__((section(".kernel")));
+static int px4_hmc5883_close(resource *res) __attribute__((section(".kernel")));
 
 rd_t open_px4_hmc5883(void) {
     resource *new_r = create_new_resource();
@@ -55,16 +55,34 @@ rd_t open_px4_hmc5883(void) {
     return add_resource(curr_task->task, new_r);
 }
 
-static void px4_hmc5883_write(char c, void *env) {
+static int px4_hmc5883_write(char c, void *env) {
     /* Nope. */
+    return -1;
 }
 
-static char px4_hmc5883_read(void *env) {
+static char px4_hmc5883_read(void *env, int *error) {
+    if (error != NULL) {
+        *error = 0;
+    }
+
     struct hmc5883 *hmc = (struct hmc5883 *) env;
 
-    i2c_write(&i2c2, HMC5883_ADDR, &hmc->reg, 1);
+    int ret = i2c_write(&i2c2, HMC5883_ADDR, &hmc->reg, 1);
+    if (ret) {
+        if (error != NULL) {
+            *error = ret;
+        }
+        return 0;
+    }
 
-    char data = (char) i2c_read(&i2c2, HMC5883_ADDR);
+    int i2c_error;
+    char data = (char) i2c_read(&i2c2, HMC5883_ADDR, &i2c_error);
+    if (i2c_error) {
+        if (error != NULL) {
+            *error = i2c_error;
+        }
+        return 0;
+    }
 
     if (++hmc->reg > 0x08) {
         hmc->reg = 0x03;
@@ -73,25 +91,29 @@ static char px4_hmc5883_read(void *env) {
     return data;
 }
 
-static void px4_hmc5883_close(resource *res) {
+static int px4_hmc5883_close(resource *res) {
     uint8_t packet[2];
     packet[0] = 0x02;   /* Mode register */
     packet[1] = 0x01;   /* Idle mode */
     i2c_write(&i2c2, HMC5883_ADDR, packet, 2);
 
     free(res->env);
+    return 0;
 }
 
 /* Helper function - read all data and convert to gauss */
-void read_px4_hmc5883(rd_t rd, struct magnetometer *mag) {
+int read_px4_hmc5883(rd_t rd, struct magnetometer *mag) {
     char data[6];
     int16_t x,y,z;
 
     if (!mag) {
-        return;
+        return -1;
     }
 
-    read(rd, data, 6);
+    if (read(rd, data, 6) != 6) {
+        return -1;
+    }
+
     x = (data[0] << 8) | data[1];
     z = (data[2] << 8) | data[3];
     y = (data[4] << 8) | data[5];
@@ -99,4 +121,6 @@ void read_px4_hmc5883(rd_t rd, struct magnetometer *mag) {
     mag->x = ((float) x)/1090;
     mag->y = ((float) y)/1090;
     mag->z = ((float) z)/1090;
+
+    return 0;
 }

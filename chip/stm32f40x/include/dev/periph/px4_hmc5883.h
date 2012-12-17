@@ -9,6 +9,6 @@ struct magnetometer {
 };
 
 rd_t open_px4_hmc5883(void);
-void read_px4_hmc5883(rd_t rd, struct magnetometer *mag);
+int read_px4_hmc5883(rd_t rd, struct magnetometer *mag);
 
 #endif

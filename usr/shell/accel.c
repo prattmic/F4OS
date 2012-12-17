@@ -37,8 +37,12 @@ void accel(int argc, char **argv) {
             return;
         }
         else {
-            read(accelrd, (char *)&data, 3);
-            printf("Roll: %f X: %f Y: %f Z: %f\r\n", atan2(data.z*DISCOVERY_ACCEL_SENSITIVITY, data.y*DISCOVERY_ACCEL_SENSITIVITY)*RAD_TO_DEG, data.x*DISCOVERY_ACCEL_SENSITIVITY, data.y*DISCOVERY_ACCEL_SENSITIVITY, data.z*DISCOVERY_ACCEL_SENSITIVITY);
+            if (read(accelrd, (char *)&data, 3) == 3) {
+                printf("Roll: %f X: %f Y: %f Z: %f\r\n", atan2(data.z*DISCOVERY_ACCEL_SENSITIVITY, data.y*DISCOVERY_ACCEL_SENSITIVITY)*RAD_TO_DEG, data.x*DISCOVERY_ACCEL_SENSITIVITY, data.y*DISCOVERY_ACCEL_SENSITIVITY, data.z*DISCOVERY_ACCEL_SENSITIVITY);
+            }
+            else {
+                printf("Unable to read accelerometer.\r\n");
+            }
         }
     }
 

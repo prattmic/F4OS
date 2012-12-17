@@ -14,9 +14,12 @@ void px4_mag(int argc, char **argv) {
     struct magnetometer mag_data;
 
     while (getc() != 'q') {
-        read_px4_hmc5883(mag, &mag_data);
-
-        printf("X: %f \t Y: %f \t Z: %f \r\n", mag_data.x, mag_data.y, mag_data.z);
+        if (!read_px4_hmc5883(mag, &mag_data)) {
+            printf("X: %f \t Y: %f \t Z: %f \r\n", mag_data.x, mag_data.y, mag_data.z);
+        }
+        else {
+            printf("Unable to read mag.\r\n");
+        }
     }
 
     close(mag);

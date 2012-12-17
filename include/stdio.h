@@ -10,21 +10,21 @@ typedef int8_t rd_t;
 #define stdout  0
 #define stderr  1
 
-void write(rd_t rd, char *d, int n) __attribute__((section(".kernel")));
-void close(rd_t rd) __attribute__((section(".kernel")));
-void read(rd_t rd, char *buf, int n) __attribute__((section(".kernel")));
-void swrite(rd_t rd, char *s) __attribute__((section(".kernel")));
+int write(rd_t rd, char *d, int n) __attribute__((section(".kernel")));
+int close(rd_t rd) __attribute__((section(".kernel")));
+int read(rd_t rd, char *buf, int n) __attribute__((section(".kernel")));
+int swrite(rd_t rd, char *s) __attribute__((section(".kernel")));
 
-void sprintf(char *buf, char *fmt, ...);
+int sprintf(char *buf, char *fmt, ...);
 
-void fputs(rd_t rd, char *s);
-void fputc(rd_t rd, char letter);
+int fputs(rd_t rd, char *s);
+int fputc(rd_t rd, char letter);
 char fgetc(rd_t rd);
-void fprintf(rd_t rd, char *fmt, ...);
-void vfprintf(rd_t rd, char *fmt, va_list ap, void (*puts_fn)(rd_t,char*), void (*putc_fn)(rd_t,char));
+int fprintf(rd_t rd, char *fmt, ...);
+int vfprintf(rd_t rd, char *fmt, va_list ap, int (*puts_fn)(rd_t,char*), int (*putc_fn)(rd_t,char));
 
-void puts(char *s);
-void putc(char letter);
+int puts(char *s);
+int putc(char letter);
 #define getc() fgetc(stdin)
 #define printf(args...) fprintf(stdout, args)
 

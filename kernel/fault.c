@@ -16,15 +16,21 @@ void memmanage_handler(void);
 void busfault_handler(void);
 void usagefault_handler(void);
 
-static void printk_puts(rd_t r, char *s) {
+static int printk_puts(rd_t r, char *s) {
     if (usart_ready) {
-        usart_puts(s, NULL);
+        return usart_puts(s, NULL);
+    }
+    else {
+        return -1;
     }
 }
 
-static void printk_putc(rd_t r, char c) {
+static int printk_putc(rd_t r, char c) {
     if (usart_ready) {
-        usart_putc(c, NULL);
+        return usart_putc(c, NULL);
+    }
+    else {
+        return -1;
     }
 }
 

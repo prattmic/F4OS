@@ -63,6 +63,9 @@ void unit_tests(void) {
     printf("rd_test...\r\n");
     rd_test();
 
+    printf("Trying to close resource 0...");
+    printf("close returned %d.\r\n", close(0));
+
     printf("Press any key to continue to infinite IPC test.\r\n");
     getc();
 
