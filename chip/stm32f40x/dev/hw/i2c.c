@@ -161,29 +161,19 @@ int8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num)
     return 0;
 }
 
-uint8_t i2c_read(struct i2c_dev *i2c, uint8_t addr, int *error) {
-    if (!i2c || !i2c->ready || i2c->port < 1 || i2c->port > 3) {
-        if (error != NULL) {
-            *error = -1;
-        }
-        return 0;
+int i2c_read(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
+    if (!i2c || !i2c->ready || i2c->port < 1 || i2c->port > 3 || !data) {
+        return -1;
     }
 
-    if (error != NULL) {
-        *error = 0;
-    }
-
-    uint8_t data;
+    int total = 0;
 
     *I2C_CR1(i2c->port) |= I2C_CR1_START;
 
     int count = 10000;
     while (!(*I2C_SR1(i2c->port) & I2C_SR1_SB)) {
         if (!count--) {
-            if (error != NULL) {
-                *error = -1;
-            }
-            return 0;
+            return -1;
         }
     }
 
@@ -191,19 +181,27 @@ uint8_t i2c_read(struct i2c_dev *i2c, uint8_t addr, int *error) {
 
     while (!(*I2C_SR1(i2c->port) & I2C_SR1_ADDR)) {
         if (*I2C_SR1(i2c->port) & I2C_SR1_AF) {
-            if (error != NULL) {
-                *error = -1;
-            }
-            return 0;
+            return -1;
         }
     }
 
-    while (!(*I2C_SR2(i2c->port) & I2C_SR2_MSL)); 
-    while (!(*I2C_SR1(i2c->port) & I2C_SR1_RXNE));
+    if (num > 1) {
+        *I2C_CR1(i2c->port) |= I2C_CR1_ACK;
+    }
 
-    data = *I2C_DR(i2c->port);
+    while (num--) {
+        while (!(*I2C_SR2(i2c->port) & I2C_SR2_MSL)); 
+        while (!(*I2C_SR1(i2c->port) & I2C_SR1_RXNE));
+
+        *data++ = *I2C_DR(i2c->port);
+        total++;
+
+        if (num == 1) {
+            *I2C_CR1(i2c->port) &= ~(I2C_CR1_ACK);
+        }
+    }
 
     i2c_stop(i2c->port);
 
-    return data;
+    return total;
 }

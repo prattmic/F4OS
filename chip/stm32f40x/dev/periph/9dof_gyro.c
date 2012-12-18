@@ -89,16 +89,15 @@ char sfe9dof_gyro_read(void *env, int *error) {
         return 0;
     }
 
-    int i2c_error;
-    char c = (char) i2c_read(gyro->i2c_port, gyro->device_addr, &i2c_error);
-    if (i2c_error) {
+    uint8_t c;
+    if (i2c_read(gyro->i2c_port, gyro->device_addr, &c, 1) != 1) {
         if (error != NULL) {
-            *error = i2c_error;
+            *error = -1;
         }
         return 0;
     }
 
-    return c;
+    return (char) c;
 }
 
 int sfe9dof_gyro_write(char d, void *env) {

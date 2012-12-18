@@ -75,11 +75,10 @@ static char px4_hmc5883_read(void *env, int *error) {
         return 0;
     }
 
-    int i2c_error;
-    char data = (char) i2c_read(&i2c2, HMC5883_ADDR, &i2c_error);
-    if (i2c_error) {
+    uint8_t data;
+    if (i2c_read(&i2c2, HMC5883_ADDR, &data, 1) != 1) {
         if (error != NULL) {
-            *error = i2c_error;
+            *error = -1;
         }
         return 0;
     }
