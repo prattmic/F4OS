@@ -48,10 +48,15 @@ static void parse_command(char *command, int *argc, char ***argv);
 static void run_command(char *command, int argc, char **argv);
 
 void shell(void) {
-    char *command = malloc(SHELL_BUF_MAX+1);
     int n = -1;
     int argc;
     char **argv;
+
+    char *command = malloc(SHELL_BUF_MAX+1);
+    if (!command) {
+        printf("Shell unable to allocate buffer for command.  You are on your own.  Goodbye.\r\n");
+        return;
+    }
 
     printf("%s", SHELL_PROMPT);
 
@@ -146,6 +151,11 @@ void parse_command(char *command, int *argc, char ***argv) {
     }
 
     *argv = malloc(4 * *argc);
+    if (!*argv) {
+        printf("Memory error\r\n");
+        return;
+    }
+
     command = begin;
     *argc = 0;
 
