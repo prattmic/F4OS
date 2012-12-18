@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <time.h>
 #include <dev/cortex_m.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
@@ -15,6 +16,8 @@ void tim2_handler(void) __attribute__((section(".kernel")));
 void svc_handler(uint32_t*) __attribute__((section(".kernel")));
 
 void systick_handler(void) {
+    system_ticks++;
+
     /* Update periodic tasks */
     rtos_tick();
 

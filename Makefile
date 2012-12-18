@@ -39,7 +39,7 @@ ASM_SRCS += sched_asm.S
 
 # lib/
 VPATH += lib/
-SRCS += stdio.c string.c
+SRCS += stdio.c string.c time.c
 
 # lib/math/
 VPATH += lib/math/

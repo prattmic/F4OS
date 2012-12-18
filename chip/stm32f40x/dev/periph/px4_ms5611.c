@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 #include <mm/mm.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
@@ -105,12 +106,8 @@ char px4_ms5611_read(void *env, int *error) {
             return 0;
         }
 
-        /* FIXME: We really need a sleep.
-         * We need to wait ~10ms */
-        float count = 10000;
-        while (count--) {
-            SVC(SVC_YIELD);
-        }
+        /* Wait 10ms */
+        usleep(10000);
 
         packet = 0x00;  /* Read ADC */
         if (i2c_write(&i2c2, MS5611_ADDR, &packet, 1) < 0) {
@@ -140,12 +137,8 @@ char px4_ms5611_read(void *env, int *error) {
             return 0;
         }
 
-        /* FIXME: We really need a sleep.
-         * We need to wait ~10ms */
-        count = 10000;
-        while (count--) {
-            SVC(SVC_YIELD);
-        }
+        /* Wait 10ms */
+        usleep(10000);
 
         packet = 0x00;  /* Read ADC */
         if (i2c_write(&i2c2, MS5611_ADDR, &packet, 1) < 0) {
