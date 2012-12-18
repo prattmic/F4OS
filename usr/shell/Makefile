@@ -10,7 +10,7 @@ ifdef CONFIG_HAVE_I2C
 		SRCS += ghetto_gyro.c
 	endif
 	ifdef CONFIG_STM32_BOARD_PX4
-		SRCS += px4_mag.c
+		SRCS += px4_mag.c px4_baro.c
 	endif
 endif
 ifdef CONFIG_HAVE_SPI

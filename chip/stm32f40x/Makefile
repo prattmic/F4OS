@@ -26,9 +26,23 @@ SRCS_$(CONFIG_HAVE_USBDEV) += usbdev_init.c usbdev_int.c usbdev_core.c usbdev_de
 
 # dev/periph/
 VPATH += dev/periph/
-SRCS_$(CONFIG_HAVE_I2C) += 9dof_gyro.c 
-SRCS_$(CONFIG_HAVE_SPI) += discovery_accel.c
-SRCS_$(CONFIG_STM32_BOARD_PX4) += px4_hmc5883.c
+ifdef CONFIG_HAVE_I2C
+	ifdef CONFIG_STM32_BOARD_DISCOVERY
+		SRCS += 9dof_gyro.c
+	endif
+	ifdef CONFIG_STM32_BOARD_PX4
+		SRCS += px4_hmc5883.c px4_ms5611.c
+	endif
+endif
+
+ifdef CONFIG_HAVE_SPI
+	ifdef CONFIG_STM32_BOARD_DISCOVERY
+		SRCS += discovery_accel.c
+	endif
+	ifdef CONFIG_STM32_BOARD_PX4
+		SRCS += 
+	endif
+endif
 
 SRCS += $(SRCS_y)
 
