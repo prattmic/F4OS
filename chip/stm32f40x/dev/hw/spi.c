@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <dev/cortex_m.h>
 #include <dev/registers.h>
 #include <dev/hw/gpio.h>
 #include <kernel/semaphore.h>
@@ -9,16 +10,12 @@
 
 #define SPI_READ    (uint8_t) (1 << 7)
 
-uint8_t spinowrite(uint8_t addr, uint8_t data, void(*cs_high)(void), void(*cs_low)(void)) __attribute__((section(".kernel")));
-uint8_t spinoread(uint8_t addr, void(*cs_high)(void), void(*cs_low)(void)) __attribute__((section(".kernel")));
-uint8_t spi1_write(uint8_t addr, uint8_t data, void(*cs_high)(void), void(*cs_low)(void)) __attribute__((section(".kernel")));
-uint8_t spi1_read(uint8_t addr, void(*cs_high)(void), void(*cs_low)(void)) __attribute__((section(".kernel")));
+void init_spi1(void) __attribute__((section(".kernel")));
 
-spi_dev spi1 = {
-    .curr_addr = 0,
-    .addr_ctr = 0,
-    .read = &spinoread,
-    .write = &spinowrite
+struct spi_port spi1 = {
+    .ready = 0,
+    .port = 1,
+    .init = &init_spi1
 };
 
 struct semaphore spi1_semaphore = {
@@ -27,19 +24,7 @@ struct semaphore spi1_semaphore = {
     .waiting = NULL
 };
 
-uint8_t spinowrite(uint8_t addr, uint8_t data, void(*cs_high)(void), void(*cs_low)(void)) {
-    panic_print("Attempted write on uninitialized spi device.\r\n");
-    /* Execution will never reach here */
-    return -1;
-}
-
-uint8_t spinoread(uint8_t addr, void(*cs_high)(void), void(*cs_low)(void)) {
-    panic_print("Attempted read on uninitialized spi device.\r\n");
-    /* Execution will never reach here */
-    return -1;
-}
-
-void init_spi(void) {
+void init_spi1(void) {
     *RCC_APB2ENR |= RCC_APB2ENR_SPI1EN;     /* Enable SPI1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOAEN;    /* Enable GPIOA Clock */
 
@@ -68,77 +53,125 @@ void init_spi(void) {
     gpio_ospeedr(GPIOA, 7, GPIO_OSPEEDR_50M);
 
     /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
-    //*SPI1_CR1 |= SPI_CR1_BR_256 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI | SPI_CR1_LSBFIRST;
-    *SPI1_CR1 |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
+    *SPI_CR1(1) |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
 
-    *SPI1_CR1 |= SPI_CR1_SPE;
+    *SPI_CR1(1) |= SPI_CR1_SPE;
 
     init_semaphore(&spi1_semaphore);
 
-    /* Set up abstract device for later use in device drivers */
-    spi1.write = &spi1_write;
-    spi1.read = &spi1_read;
+    spi1.ready = 1;
 }
 
-uint8_t spi1_write(uint8_t addr, uint8_t data, void(*cs_high)(void), void(*cs_low)(void)) {
-    /* Data MUST be read after each TX */
-    volatile uint8_t read;
-
-    /* Clear overrun by reading old data */
-    if (*SPI1_SR & SPI_SR_OVR) {
-        read = *SPI1_DR;
-        read = *SPI1_SR;
+int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) {
+    /* Verify valid SPI port */
+    if (!spi || !spi->ready || spi->port < 1 || spi->port > 3) {
+        return -1;
     }
 
-    cs_low();
+    /* Verify valid SPI device */
+    if (!dev || !dev->cs_high || !dev->cs_low) {
+        return -1;
+    }
 
-    while (!(*SPI1_SR & SPI_SR_TXNE));
-    *SPI1_DR = addr;
+    if (num == 0) {
+        return 0;
+    }
 
-    while (!(*SPI1_SR & SPI_SR_RXNE));
+    if (!data) {
+        return -1;
+    }
 
-    read = *SPI1_DR;
+    uint32_t total = 0;
 
-    while (!(*SPI1_SR & SPI_SR_TXNE));
-    *SPI1_DR = data;
+    /* Data MUST be read after each TX */
 
-    while (!(*SPI1_SR & SPI_SR_RXNE));
+    /* Clear overrun by reading old data */
+    if (*SPI_SR(spi->port) & SPI_SR_OVR) {
+        READ_AND_DISCARD(SPI_DR(spi->port));
+        READ_AND_DISCARD(SPI_SR(spi->port));
+    }
 
-    cs_high();
+    dev->cs_low();
 
-    read = *SPI1_DR;
+    /* Transmit address */
+    while (!(*SPI_SR(spi->port) & SPI_SR_TXNE));
+    *SPI_DR(spi->port) = addr;
 
-    return read;
+    /* Wait for response, discard */
+    while (!(*SPI_SR(spi->port) & SPI_SR_RXNE));
+    READ_AND_DISCARD(SPI_DR(spi->port));
+
+    while (num--) {
+        /* Transmit data */
+        while (!(*SPI_SR(spi->port) & SPI_SR_TXNE));
+        *SPI_DR(spi->port) = *data++;
+
+        /* Wait for response, discard */
+        while (!(*SPI_SR(spi->port) & SPI_SR_RXNE));
+        READ_AND_DISCARD(SPI_DR(spi->port));
+
+        total += 1;
+    }
+
+    dev->cs_high();
+
+    return total;
 }
 
-uint8_t spi1_read(uint8_t addr, void(*cs_high)(void), void(*cs_low)(void)) {
-
-    /* Data MUST be read after each TX */
-    volatile uint8_t read;
-
-    /* Clear overrun by reading old data */
-    if (*SPI1_SR & SPI_SR_OVR) {
-        read = *SPI1_DR;
-        read = *SPI1_SR;
+int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) {
+    /* Verify valid SPI port */
+    if (!spi || !spi->ready || spi->port < 1 || spi->port > 3) {
+        return -1;
     }
 
-    cs_low();
+    /* Verify valid SPI device */
+    if (!dev || !dev->cs_high || !dev->cs_low) {
+        return -1;
+    }
 
-    while (!(*SPI1_SR & SPI_SR_TXNE));
+    if (num == 0) {
+        return 0;
+    }
 
-    *SPI1_DR = (addr | SPI_READ);
+    if (!data) {
+        return -1;
+    }
 
-    while (!(*SPI1_SR & SPI_SR_RXNE));
-    read = *SPI1_DR;
+    uint32_t total = 0;
 
-    while (!(*SPI1_SR & SPI_SR_TXNE));
-    *SPI1_DR = 0x00;
+    /* Data MUST be read after each TX */
 
-    while (!(*SPI1_SR & SPI_SR_RXNE));
+    /* Clear overrun by reading old data */
+    if (*SPI_SR(spi->port) & SPI_SR_OVR) {
+        READ_AND_DISCARD(SPI_DR(spi->port));
+        READ_AND_DISCARD(SPI_SR(spi->port));
+    }
 
-    cs_high();
+    dev->cs_low();
 
-    read = *SPI1_DR;
+    /* Transmit address */
+    while (!(*SPI_SR(spi->port) & SPI_SR_TXNE));
+    *SPI_DR(spi->port) = (addr | SPI_READ);
 
-    return read;
+    /* Wait for response, discard 
+     * Note: this "response" was transmitted while we were
+     * transmitting the address, it is not the data we want. */
+    while (!(*SPI_SR(spi->port) & SPI_SR_RXNE));
+    READ_AND_DISCARD(SPI_DR(spi->port));
+
+    while (num--) {
+        /* Transmit zeros while reading response */
+        while (!(*SPI_SR(spi->port) & SPI_SR_TXNE));
+        *SPI_DR(spi->port) = 0x00;
+
+        /* Wait for response, save it */
+        while (!(*SPI_SR(spi->port) & SPI_SR_RXNE));
+        *data++ = *SPI_DR(spi->port);
+
+        total += 1;
+    }
+
+    dev->cs_high();
+
+    return total;
 }

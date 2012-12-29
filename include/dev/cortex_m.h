@@ -3,6 +3,16 @@
 
 #include <stdint.h>
 
+/* Tells the compiler to provide the value in reg as
+ * an input to an inline assembly block.  Even though
+ * the block contains no instructions, the compiler may
+ * not optimize it away, and is told that the value may
+ * change and should not be relied upon. */
+inline void READ_AND_DISCARD(volatile uint32_t *reg) __attribute__((always_inline));
+inline void READ_AND_DISCARD(volatile uint32_t *reg) {
+    asm volatile ("" : "=m" (*reg) : "r" (*reg));
+}
+
 inline uint8_t FAULTMASK(void) __attribute__((always_inline));
 inline uint8_t FAULTMASK(void) {
     uint8_t val;

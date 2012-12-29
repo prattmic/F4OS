@@ -12,11 +12,10 @@
 #include <dev/periph/discovery_accel.h>
 
 typedef struct discovery_accel {
-        spi_dev *spi_port;
+        struct spi_port *spi_port;
+        struct spi_dev spi_dev;
         uint8_t read_ctr;
 } discovery_accel;
-
-extern spi_dev spi1;
 
 char discovery_accel_read(void *env, int *error) __attribute__((section(".kernel")));
 int discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
@@ -58,9 +57,23 @@ rd_t open_discovery_accel(void) {
         return -1;
     }
 
-    /* We expect that spi1 was init'd in bootmain.c */
     accel->spi_port = &spi1;
-    accel->spi_port->write(0x20, 0x47, &discovery_accel_cs_high, &discovery_accel_cs_low);
+    if (!accel->spi_port->ready) {
+        accel->spi_port->init();
+    }
+
+    accel->spi_dev.cs_high = &discovery_accel_cs_high;
+    accel->spi_dev.cs_low = &discovery_accel_cs_low;
+
+    /* Active mode, XYZ enable */
+    uint8_t data = 0x47;
+    if (spi_write(accel->spi_port, &accel->spi_dev, 0x20, &data, 1) != 1) {
+        /* Unable to activate :( */
+        kfree(accel);
+        kfree(new_r);
+        return -1;
+    }
+
     accel->read_ctr = 0;
 
     new_r->env = accel;
@@ -78,9 +91,20 @@ char discovery_accel_read(void *env, int *error) {
     }
 
     discovery_accel *accel = (discovery_accel *)env;
-    if(accel->read_ctr > 2)
+
+    if(accel->read_ctr > 2) {
         accel->read_ctr = 0;
-    return (char)accel->spi_port->read(0x29 + 2*accel->read_ctr++, &discovery_accel_cs_high, &discovery_accel_cs_low);
+    }
+
+    char data;
+    if (spi_read(accel->spi_port, &accel->spi_dev, 0x29 + 2*accel->read_ctr++, (uint8_t *) &data, 1) != 1) {
+        if (error != NULL) {
+            *error = -1;
+        }
+        return 0;
+    }
+
+    return data;
 }
 
 int discovery_accel_write(char d, void *env) {

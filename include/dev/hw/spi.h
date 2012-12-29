@@ -5,13 +5,20 @@ struct semaphore;
 
 extern struct semaphore spi1_semaphore;
 
-typedef struct spi_dev {
-    uint8_t curr_addr;
-    uint8_t addr_ctr;
-    uint8_t (*read)(uint8_t, void(*)(void), void(*)(void));
-    uint8_t (*write)(uint8_t, uint8_t, void(*)(void), void(*)(void));
+struct spi_port {
+    uint8_t ready;
+    uint8_t port;
+    void    (*init)(void);
+} spi_port;
+
+struct spi_dev {
+    void    (*cs_high)(void);
+    void    (*cs_low)(void);
 } spi_dev;
 
-void init_spi(void) __attribute__((section(".kernel")));
+extern struct spi_port spi1;
+
+int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) __attribute__((section(".kernel")));
+int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) __attribute__((section(".kernel")));
 
 #endif

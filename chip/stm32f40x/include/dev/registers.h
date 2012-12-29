@@ -22,9 +22,7 @@
 
 #define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
-#define SPI2_BASE                       (APB1PERIPH_BASE + 0x3800)                              /* SPI2 base address */
-#define I2C_BASE(port)                  (APB1PERIPH_BASE + 0x5400 + (0x400*(port-1)))           /* I2C base address */
-#define SPI1_BASE                       (APB2PERIPH_BASE + 0x3000)                              /* SPI1 base address */
+#define I2C_BASE(port)                  (APB1PERIPH_BASE + 0x5400 + (0x400*(port-1)))           /* I2C (1,2,3) base address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                              /* USART1 Base Address */
 #define GPIO_BASE(port)                 (AHB1PERIPH_BASE + (0x400*port))                        /* GPIO Port base address */
 #define RCC_BASE                        (AHB1PERIPH_BASE + 0x3800)                              /* Reset and Clock Control base address */
@@ -32,6 +30,9 @@
 #define DMA1_BASE                       (AHB1PERIPH_BASE + 0x6000)                              /* DMA1 base address */
 #define DMA2_BASE                       (AHB1PERIPH_BASE + 0x6400)                              /* DMA2 base address */
 #define USB_FS_BASE                     (AHB2PERIPH_BASE + 0x0000)                              /* USB OTG FS base address */
+
+/* SPI 1 is on a different bus than SPI 2/3, so we have to do a little more work to determine the correct base address */
+#define SPI_BASE(port)                  (port == 1 ? (APB2PERIPH_BASE + 0x3000) : (APB1PERIPH_BASE + 0x3800 + 0x400*(port-2))) /* SPI (1,2,3) base address */
 
 /* Timer 2 (TIM2) */
 #define TIM2_CR1                        (volatile uint32_t *) (TIM2_BASE + 0x00)                /* TIM2 control register 1 */
@@ -58,27 +59,16 @@
 #define PWR_CR                          (volatile uint32_t *) (PWR_BASE + 0x00)                 /* Power Control Register */
 #define PWR_CSR                         (volatile uint32_t *) (PWR_BASE + 0x04)                 /* Power Control/Status Register */
 
-/* SPI1 */
-#define SPI1_CR1                        (volatile uint32_t *) (SPI1_BASE + 0x00)                /* SPI1 control register 1 */
-#define SPI1_CR2                        (volatile uint32_t *) (SPI1_BASE + 0x04)                /* SPI1 control register 2 */
-#define SPI1_SR                         (volatile uint32_t *) (SPI1_BASE + 0x08)                /* SPI1 status register */
-#define SPI1_DR                         (volatile uint32_t *) (SPI1_BASE + 0x0c)                /* SPI1 data register */
-#define SPI1_CRCPR                      (volatile uint32_t *) (SPI1_BASE + 0x10)                /* SPI1 CRC polynomial register */
-#define SPI1_RXCRCR                     (volatile uint32_t *) (SPI1_BASE + 0x14)                /* SPI1 RX CRC register */
-#define SPI1_TXCRCR                     (volatile uint32_t *) (SPI1_BASE + 0x18)                /* SPI1 TX CRC register */
-#define SPI1_I2SCFGR                    (volatile uint32_t *) (SPI1_BASE + 0x1c)                /* SPI1 I2C configuration register */
-#define SPI1_I2SPR                      (volatile uint32_t *) (SPI1_BASE + 0x20)                /* SPI1 I2C prescaler register */
-
-/* SPI2 */
-#define SPI2_CR1                        (volatile uint32_t *) (SPI2_BASE + 0x00)                /* SPI2 control register 1 */
-#define SPI2_CR2                        (volatile uint32_t *) (SPI2_BASE + 0x04)                /* SPI2 control register 2 */
-#define SPI2_SR                         (volatile uint32_t *) (SPI2_BASE + 0x08)                /* SPI2 status register */
-#define SPI2_DR                         (volatile uint32_t *) (SPI2_BASE + 0x0c)                /* SPI2 data register */
-#define SPI2_CRCPR                      (volatile uint32_t *) (SPI2_BASE + 0x10)                /* SPI2 CRC polynomial register */
-#define SPI2_RXCRCR                     (volatile uint32_t *) (SPI2_BASE + 0x14)                /* SPI2 RX CRC register */
-#define SPI2_TXCRCR                     (volatile uint32_t *) (SPI2_BASE + 0x18)                /* SPI2 TX CRC register */
-#define SPI2_I2SCFGR                    (volatile uint32_t *) (SPI2_BASE + 0x1c)                /* SPI2 I2C configuration register */
-#define SPI2_I2SPR                      (volatile uint32_t *) (SPI2_BASE + 0x20)                /* SPI2 I2C prescaler register */
+/* SPI */
+#define SPI_CR1(port)                   (volatile uint32_t *) (SPI_BASE(port) + 0x00)           /* SPI control register 1 */
+#define SPI_CR2(port)                   (volatile uint32_t *) (SPI_BASE(port) + 0x04)           /* SPI control register 2 */
+#define SPI_SR(port)                    (volatile uint32_t *) (SPI_BASE(port) + 0x08)           /* SPI status register */
+#define SPI_DR(port)                    (volatile uint32_t *) (SPI_BASE(port) + 0x0c)           /* SPI data register */
+#define SPI_CRCPR(port)                 (volatile uint32_t *) (SPI_BASE(port) + 0x10)           /* SPI CRC polynomial register */
+#define SPI_RXCRCR(port)                (volatile uint32_t *) (SPI_BASE(port) + 0x14)           /* SPI RX CRC register */
+#define SPI_TXCRCR(port)                (volatile uint32_t *) (SPI_BASE(port) + 0x18)           /* SPI TX CRC register */
+#define SPI_I2SCFGR(port)               (volatile uint32_t *) (SPI_BASE(port) + 0x1c)           /* SPI I2C configuration register */
+#define SPI_I2SPR(port)                 (volatile uint32_t *) (SPI_BASE(port) + 0x20)           /* SPI I2C prescaler register */
 
 /* I2C */
 #define I2C_CR1(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x00)           /* I2C control register 1 */

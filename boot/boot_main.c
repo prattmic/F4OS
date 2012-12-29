@@ -43,10 +43,6 @@ int os_start(void) {
     init_usart();
 #endif
 
-#ifdef CONFIG_HAVE_SPI
-    init_spi();
-#endif
-
 #ifdef CONFIG_HAVE_USBDEV
     init_usbdev();
 #endif
