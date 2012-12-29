@@ -156,9 +156,7 @@ int usart_putc(char c, void *env) {
 
     /* Wait for DMA to be ready */
     while (*DMA2_CR_S(7) & DMA_SxCR_EN) {
-        if (task_switching && !IPSR()) {
-            SVC(SVC_YIELD);
-        }
+        yield_if_possible();
     }
 
     if (*DMA2_HISR & DMA_HISR_TCIF7) {
@@ -189,9 +187,7 @@ int usart_puts(char *s, void *env) {
 
         /* Wait for DMA to be ready */
         while (*DMA2_CR_S(7) & DMA_SxCR_EN) {
-            if (task_switching && !IPSR()) {
-                SVC(SVC_YIELD);
-            }
+            yield_if_possible();
         }
 
         if (*DMA2_HISR & DMA_HISR_TCIF7) {

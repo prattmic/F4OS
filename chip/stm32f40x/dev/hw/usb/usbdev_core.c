@@ -32,9 +32,7 @@ int usbdev_write(struct endpoint *ep, uint8_t *packet, int size) {
 
     /* Wait until current buffer is empty */
     while (!ring_buf_empty(&ep->tx)) {
-        if (task_switching && !IPSR()) {
-            SVC(SVC_YIELD);
-        }
+        yield_if_possible();
     }
 
     int filled_buffer = 0;

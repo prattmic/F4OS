@@ -2,6 +2,7 @@
 #define KERNEL_SCHED_H_INCLUDED
 
 #include <stdint.h>
+#include <dev/cortex_m.h>
 
 #define RESOURCE_TABLE_SIZE         CONFIG_RESOURCE_TABLE_SIZE
 typedef int8_t rd_t;
@@ -91,5 +92,14 @@ void raise_privilege(void) __attribute__((section(".kernel")));
 
 /* End-users set up boot tasks here */
 void main(void);
+
+/* Only perform a yield if task switching is active, and we are
+ * not in an interrupt context */
+static inline yield_if_possible(void) __attribute__((always_inline));
+static inline yield_if_possible(void) {
+    if (task_switching && !IPSR()) {
+        SVC(SVC_YIELD);
+    }
+}
 
 #endif

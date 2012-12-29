@@ -81,9 +81,7 @@ void usart_baud(uint32_t baud) {
 int usart_putc(char c, void *env) {
     /* Wait until transmit FIFO not full*/
     while (UART0_FR_R & UART_FR_TXFF) {
-        if (task_switching && !IPSR()) {
-            SVC(SVC_YIELD);
-        }
+        yield_if_possible();
     }
 
     UART0_DR_R = c;

@@ -22,16 +22,12 @@ int usleep(uint32_t usecs) {
     if (sys_time > end_time) {
         /* Wait for overflow to occur before continuing to main loop */
         while (system_ticks > end_time) {
-            if (task_switching && !IPSR()) {
-                SVC(SVC_YIELD);
-            }
+            yield_if_possible();
         }
     }
 
     while (system_ticks < end_time) {
-        if (task_switching && !IPSR()) {
-            SVC(SVC_YIELD);
-        }
+        yield_if_possible();
     }
 
     return 0;
