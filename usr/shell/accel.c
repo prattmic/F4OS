@@ -6,12 +6,6 @@
 
 #include "accel.h"
 
-typedef struct accel_data {
-    int8_t x;
-    int8_t y;
-    int8_t z;
-} accel_data;
-
 void accel(int argc, char **argv) {
     if (argc != 1) {
         printf("Usage: %s\r\n", argv[0]);
@@ -24,7 +18,7 @@ void accel(int argc, char **argv) {
         return;
     }
 
-    accel_data data;
+    struct accelerometer data;
 
     printf("q to quit, any other key to get data.\r\nunits in g's\r\n");
 
@@ -34,8 +28,8 @@ void accel(int argc, char **argv) {
             return;
         }
         else {
-            if (read(accelrd, (char *)&data, 3) == 3) {
-                printf("Roll: %f X: %f Y: %f Z: %f\r\n", atan2(data.z*DISCOVERY_ACCEL_SENSITIVITY, data.y*DISCOVERY_ACCEL_SENSITIVITY)*RAD_TO_DEG, data.x*DISCOVERY_ACCEL_SENSITIVITY, data.y*DISCOVERY_ACCEL_SENSITIVITY, data.z*DISCOVERY_ACCEL_SENSITIVITY);
+            if (!read_discovery_accel(accelrd, &data)) {
+                printf("Roll: %f X: %f Y: %f Z: %f\r\n", atan2(data.z, data.y)*RAD_TO_DEG, data.x, data.y, data.z);
             }
             else {
                 printf("Unable to read accelerometer.\r\n");

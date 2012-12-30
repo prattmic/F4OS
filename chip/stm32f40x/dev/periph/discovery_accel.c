@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <mm/mm.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
@@ -11,10 +12,15 @@
 #include <dev/hw/spi.h>
 #include <dev/periph/discovery_accel.h>
 
+/* When this bit is set, the register address on the accelerometer
+ * will automatically increment for multi-byte reads/writes */
+#define ADDR_INC (1 << 6)
+
 typedef struct discovery_accel {
         struct spi_port *spi_port;
         struct spi_dev spi_dev;
         uint8_t read_ctr;
+        uint8_t data[3];
 } discovery_accel;
 
 char discovery_accel_read(void *env, int *error) __attribute__((section(".kernel")));
@@ -90,21 +96,36 @@ char discovery_accel_read(void *env, int *error) {
         *error = 0;
     }
 
-    discovery_accel *accel = (discovery_accel *)env;
-
-    if(accel->read_ctr > 2) {
-        accel->read_ctr = 0;
-    }
-
-    char data;
-    if (spi_read(accel->spi_port, &accel->spi_dev, 0x29 + 2*accel->read_ctr++, (uint8_t *) &data, 1) != 1) {
+    if (env == NULL) {
         if (error != NULL) {
             *error = -1;
         }
         return 0;
     }
 
-    return data;
+    discovery_accel *accel = (discovery_accel *)env;
+
+    if (accel->read_ctr == 0) {
+        uint8_t data[5];
+        if (spi_read(accel->spi_port, &accel->spi_dev, 0x29 | ADDR_INC, data, 5) != 5) {
+            if (error != NULL) {
+                *error = -1;
+            }
+            return 0;
+        }
+
+        accel->data[0] = data[0];
+        accel->data[1] = data[2];
+        accel->data[2] = data[4];
+    }
+
+    char ret = (char) accel->data[accel->read_ctr++];
+
+    if(accel->read_ctr > 2) {
+        accel->read_ctr = 0;
+    }
+
+    return ret;
 }
 
 int discovery_accel_write(char d, void *env) {
@@ -114,5 +135,24 @@ int discovery_accel_write(char d, void *env) {
 
 int discovery_accel_close(resource *res) {
     kfree(res->env);
+    return 0;
+}
+
+/* Helper function - read all data and convert to G */
+int read_discovery_accel(rd_t rd, struct accelerometer *accel) {
+    char data[3];
+
+    if (!accel) {
+        return -1;
+    }
+
+    if (read(rd, data, 3) != 3) {
+        return -1;
+    }
+
+    accel->x = ((int8_t) data[0]) * DISCOVERY_ACCEL_SENSITIVITY;
+    accel->y = ((int8_t) data[1]) * DISCOVERY_ACCEL_SENSITIVITY;
+    accel->z = ((int8_t) data[2]) * DISCOVERY_ACCEL_SENSITIVITY;
+
     return 0;
 }
