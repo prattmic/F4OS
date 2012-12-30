@@ -79,9 +79,9 @@ rd_t open_px4_mpu6000(void) {
     /* Let clock settle */
     usleep(1000);
 
-    /* Gyro range +- 500deg/s, Accel range +-4g */
-    uint8_t config[2] = {MPU6000_GYRO_CONFIG_500DPS, MPU6000_ACCEL_CONFIG_4G};
-    if (spi_write(env->spi_port, &env->spi_dev, MPU6000_GYRO_CONFIG, config, 2) != 2) {
+    /* 100Hz LPF, Gyro range +- 500deg/s, Accel range +-4g */
+    uint8_t config[3] = {MPU6000_CONFIG_LPF_100HZ, MPU6000_GYRO_CONFIG_500DPS, MPU6000_ACCEL_CONFIG_4G};
+    if (spi_write(env->spi_port, &env->spi_dev, MPU6000_CONFIG, config, 3) != 3) {
         data = MPU6000_PWR_MGMT_1_SLEEP;    /* Sleep mode */
         spi_write(env->spi_port, &env->spi_dev, MPU6000_PWR_MGMT_1, &data, 1);
         kfree(env);
