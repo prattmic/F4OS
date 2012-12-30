@@ -72,14 +72,19 @@ rd_t open_discovery_accel(void) {
     accel->spi_dev.cs_high = &discovery_accel_cs_high;
     accel->spi_dev.cs_low = &discovery_accel_cs_low;
 
+    acquire(&spi1_semaphore);
+
     /* Active mode, XYZ enable */
     uint8_t data = 0x47;
     if (spi_write(accel->spi_port, &accel->spi_dev, 0x20, &data, 1) != 1) {
         /* Unable to activate :( */
+        release(&spi1_semaphore);
         kfree(accel);
         kfree(new_r);
         return -1;
     }
+
+    release(&spi1_semaphore);
 
     accel->read_ctr = 0;
 

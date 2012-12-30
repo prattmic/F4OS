@@ -39,12 +39,15 @@ rd_t open_sfe9dof_gyro(void) {
         gyro->i2c_port->init();
     }
 
+    acquire(&i2c1_semaphore);
+
     /* Fire it up, fire it up/ When we finally turn it over, make a b-line towards the boat, or... */
     uint8_t packet[2];
     packet[0] = 0x15;
     packet[1] = 0x07;
     int ret = i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
     if (ret) {
+        release(&i2c1_semaphore);
         kfree(gyro);
         kfree(new_r);
         return ret;
@@ -54,10 +57,13 @@ rd_t open_sfe9dof_gyro(void) {
     packet[1] = 0x18;
     ret = i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
     if (ret) {
+        release(&i2c1_semaphore);
         kfree(gyro);
         kfree(new_r);
         return ret;
     }
+
+    release(&i2c1_semaphore);
 
     new_r->env = gyro;
     new_r->writer = &sfe9dof_gyro_write;

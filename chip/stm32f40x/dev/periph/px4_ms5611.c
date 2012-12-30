@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <mm/mm.h>
+#include <kernel/semaphore.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <dev/resource.h>
@@ -45,10 +46,13 @@ rd_t open_px4_ms5611(void) {
     uint8_t packet;
     uint8_t data[2];
 
+    acquire(&i2c2_semaphore);
+
     for (int i = 1; i <= 6; i++) {
         packet = 0xA0 + 2*i;  /* Read C[i] */
         i2c_write(&i2c2, MS5611_ADDR, &packet, 1);
         if (i2c_read(&i2c2, MS5611_ADDR, data, 2) != 2) {
+            release(&i2c2_semaphore);
             kfree(new_r);
             free(env);
             return -1;
@@ -64,6 +68,8 @@ rd_t open_px4_ms5611(void) {
 
         env->c[i] = tmp.val;
     }
+
+    release(&i2c2_semaphore);
 
     env->pressure = 0;
     env->sent = 0;

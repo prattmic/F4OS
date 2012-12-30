@@ -5,6 +5,7 @@
 #include <mm/mm.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>
+#include <kernel/semaphore.h>
 #include <dev/registers.h>
 #include <dev/resource.h>
 #include <dev/sensors.h>
@@ -67,27 +68,37 @@ rd_t open_px4_mpu6000(void) {
     env->spi_dev.cs_low = &cs_low;
     env->read_ctr = 0;
 
+    acquire(&spi1_semaphore);
+
     /* Active mode, clock with gyro X reference */
     uint8_t data = MPU6000_PWR_MGMT_1_CLK_PLLGYROX;
     if (spi_write(env->spi_port, &env->spi_dev, MPU6000_PWR_MGMT_1, &data, 1) != 1) {
         /* Unable to activate :( */
+        release(&spi1_semaphore);
         kfree(env);
         kfree(new_r);
         return -1;
     }
 
+    release(&spi1_semaphore);
+
     /* Let clock settle */
     usleep(1000);
+
+    acquire(&spi1_semaphore);
 
     /* 100Hz LPF, Gyro range +- 500deg/s, Accel range +-4g */
     uint8_t config[3] = {MPU6000_CONFIG_LPF_100HZ, MPU6000_GYRO_CONFIG_500DPS, MPU6000_ACCEL_CONFIG_4G};
     if (spi_write(env->spi_port, &env->spi_dev, MPU6000_CONFIG, config, 3) != 3) {
         data = MPU6000_PWR_MGMT_1_SLEEP;    /* Sleep mode */
         spi_write(env->spi_port, &env->spi_dev, MPU6000_PWR_MGMT_1, &data, 1);
+        release(&spi1_semaphore);
         kfree(env);
         kfree(new_r);
         return -1;
     }
+
+    release(&spi1_semaphore);
 
     new_r->env = (void *) env;
     new_r->reader = &px4_mpu6000_read;
