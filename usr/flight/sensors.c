@@ -10,7 +10,7 @@
 
 #include "sensors.h"
 
-struct sensors current_sensor_readings;
+struct sensors current_sensor_readings = {};
 struct semaphore sensor_semaphore = {
     .lock = 0,
     .waiting = NULL,
@@ -22,6 +22,7 @@ rd_t mag_rd = -1;
 rd_t mpu_rd = -1;
 
 void read_sensors(void);
+void read_baro(void);
 
 /* Open all of the sensors resources, so that read_sensors()
  * can inherit them. */
@@ -41,8 +42,11 @@ void init_sensors(void) {
         goto fail;
     }
 
-    /* Read sensors ever 50ms */
-    new_task(&read_sensors, 3, 200);
+    /* Read sensors ever 10ms */
+    new_task(&read_sensors, 1, 40);
+
+    /* Read baro every 50ms, because it requires 20ms of sleeping */
+    new_task(&read_baro, 1, 200);
 
     return;
 
@@ -52,14 +56,8 @@ fail:
 
 void read_sensors(void) {
     struct sensors holding;
-    uint8_t baro_good = 1;
     uint8_t mag_good = 1;
     uint8_t mpu_good = 1;
-
-    if (read_px4_ms5611(baro_rd, &holding.baro)) {
-        baro_good = 0;
-        printk("WARNING: Failed to read barometer.\r\n");
-    }
 
     if (read_px4_hmc5883(mag_rd, &holding.mag)) {
         mag_good = 0;
@@ -73,22 +71,31 @@ void read_sensors(void) {
 
     acquire(&sensor_semaphore);
 
-    if (baro_good && mag_good && mpu_good) {
-        memcpy(&current_sensor_readings, &holding, sizeof(struct sensors));
+    if (mag_good) {
+        memcpy(&current_sensor_readings.mag, &holding.mag, sizeof(holding.mag));
     }
-    else {
-        if (baro_good) {
-            memcpy(&current_sensor_readings.baro, &holding.baro, sizeof(holding.baro));
-        }
-        if (mag_good) {
-            memcpy(&current_sensor_readings.mag, &holding.mag, sizeof(holding.mag));
-        }
-        if (mpu_good) {
-            memcpy(&current_sensor_readings.accel, &holding.accel, sizeof(holding.accel));
-            memcpy(&current_sensor_readings.gyro, &holding.gyro, sizeof(holding.gyro));
-            current_sensor_readings.temp = holding.temp;
-        }
+
+    if (mpu_good) {
+        memcpy(&current_sensor_readings.accel, &holding.accel, sizeof(holding.accel));
+        memcpy(&current_sensor_readings.gyro, &holding.gyro, sizeof(holding.gyro));
+        current_sensor_readings.temp = holding.temp;
     }
+
+    release(&sensor_semaphore);
+}
+
+/* Reading the baro requires 20ms of sleeping, so it gets its own task. */
+void read_baro(void) {
+    struct barometer holding;
+
+    if (read_px4_ms5611(baro_rd, &holding)) {
+        printk("WARNING: Failed to read barometer.\r\n");
+        return;
+    }
+
+    acquire(&sensor_semaphore);
+
+    memcpy(&current_sensor_readings.baro, &holding, sizeof(struct barometer));
 
     release(&sensor_semaphore);
 }
