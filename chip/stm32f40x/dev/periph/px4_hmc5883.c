@@ -5,6 +5,7 @@
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <dev/resource.h>
+#include <dev/sensors.h>
 #include <dev/hw/i2c.h>
 #include <dev/periph/px4_hmc5883.h>
 

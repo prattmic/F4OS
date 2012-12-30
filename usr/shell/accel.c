@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <dev/hw/spi.h>
+#include <dev/sensors.h>
 #include <dev/periph/discovery_accel.h>
 #include <math.h>
 

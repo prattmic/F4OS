@@ -40,7 +40,7 @@ ifdef CONFIG_HAVE_SPI
 		SRCS += discovery_accel.c
 	endif
 	ifdef CONFIG_STM32_BOARD_PX4
-		SRCS += 
+		SRCS += px4_mpu6000.c
 	endif
 endif
 

@@ -17,6 +17,7 @@
 #include "rd_test.h"
 #include "px4_mag.h"
 #include "px4_baro.h"
+#include "px4_accel_gyro.h"
 
 struct command {
     char *name;
@@ -33,6 +34,9 @@ const struct command valid_commands[] = {{"help",   &help},
 #endif
 #if defined(CONFIG_HAVE_SPI) && defined(CONFIG_STM32_BOARD_DISCOVERY)
                                          {"accel", &accel},
+#endif
+#if defined(CONFIG_HAVE_SPI) && defined(CONFIG_STM32_BOARD_PX4)
+                                         {"px4_accel_gyro", &px4_accel_gyro},
 #endif
 #if defined(CONFIG_HAVE_I2C) && defined(CONFIG_STM32_BOARD_DISCOVERY)
                                          {"ghetto_gyro", &ghetto_gyro},

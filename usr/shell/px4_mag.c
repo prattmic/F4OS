@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <dev/resource.h>
+#include <dev/sensors.h>
 #include <dev/periph/px4_hmc5883.h>
 
 void px4_mag(int argc, char **argv) {

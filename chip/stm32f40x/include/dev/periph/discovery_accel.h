@@ -3,12 +3,6 @@
 
 #define DISCOVERY_ACCEL_SENSITIVITY     (0.018f)
 
-struct accelerometer {
-    float x;
-    float y;
-    float z;
-};
-
 rd_t open_discovery_accel(void) __attribute__((section(".kernel")));
 int read_discovery_accel(rd_t rd, struct accelerometer *accel);
 

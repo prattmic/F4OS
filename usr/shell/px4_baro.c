@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <dev/resource.h>
+#include <dev/sensors.h>
 #include <dev/periph/px4_ms5611.h>
 
 void px4_baro(int argc, char **argv) {

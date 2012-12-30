@@ -17,6 +17,9 @@ ifdef CONFIG_HAVE_SPI
 	ifdef CONFIG_STM32_BOARD_DISCOVERY
 		SRCS += accel.c lowpass.c
 	endif
+	ifdef CONFIG_STM32_BOARD_PX4
+		SRCS += px4_accel_gyro.c
+	endif
 endif
 
 SRCS += $(SRCS_y)

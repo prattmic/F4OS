@@ -6,6 +6,7 @@
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <dev/resource.h>
+#include <dev/sensors.h>
 #include <dev/registers.h>
 #include <dev/hw/gpio.h>
 
