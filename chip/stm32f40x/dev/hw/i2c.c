@@ -4,7 +4,6 @@
 #include <dev/resource.h>
 #include <dev/hw/gpio.h>
 #include <kernel/semaphore.h>
-#include <kernel/fault.h>
 
 #include <dev/hw/i2c.h>
 

@@ -9,8 +9,6 @@
 
 #include <dev/hw/led.h>
 #include <dev/hw/usart.h>
-#include <dev/hw/spi.h>
-#include <dev/hw/i2c.h>
 #include <dev/hw/usbdev.h>
 
 char banner[] = "Welcome to...\r\n"

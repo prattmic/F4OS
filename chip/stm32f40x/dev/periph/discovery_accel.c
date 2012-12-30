@@ -23,9 +23,9 @@ typedef struct discovery_accel {
         uint8_t data[3];
 } discovery_accel;
 
-char discovery_accel_read(void *env, int *error) __attribute__((section(".kernel")));
-int discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
-int discovery_accel_close(resource *env) __attribute__((section(".kernel")));
+static char discovery_accel_read(void *env, int *error) __attribute__((section(".kernel")));
+static int discovery_accel_write(char d, void *env) __attribute__((section(".kernel")));
+static int discovery_accel_close(resource *env) __attribute__((section(".kernel")));
 static void discovery_accel_cs_high(void) __attribute__((section(".kernel")));
 static void discovery_accel_cs_low(void) __attribute__((section(".kernel")));
 
