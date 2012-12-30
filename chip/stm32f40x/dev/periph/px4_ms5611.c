@@ -114,7 +114,12 @@ char px4_ms5611_read(void *env, int *error) {
         }
 
         /* Wait 10ms */
+        /* This is a bit questionable, but since we don't need
+         * I2C2 while we sleep, we release the semaphore before
+         * the sleep. */
+        release(&i2c2_semaphore);
         usleep(10000);
+        acquire(&i2c2_semaphore);
 
         packet = 0x00;  /* Read ADC */
         if (i2c_write(&i2c2, MS5611_ADDR, &packet, 1) < 0) {
@@ -145,7 +150,9 @@ char px4_ms5611_read(void *env, int *error) {
         }
 
         /* Wait 10ms */
+        release(&i2c2_semaphore);
         usleep(10000);
+        acquire(&i2c2_semaphore);
 
         packet = 0x00;  /* Read ADC */
         if (i2c_write(&i2c2, MS5611_ADDR, &packet, 1) < 0) {
