@@ -45,22 +45,20 @@ rd_t open_sfe9dof_gyro(void) {
     uint8_t packet[2];
     packet[0] = 0x15;
     packet[1] = 0x07;
-    int ret = i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
-    if (ret) {
+    if (i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2) != 2) {
         release(&i2c1_semaphore);
         kfree(gyro);
         kfree(new_r);
-        return ret;
+        return -1;
     }
 
     packet[0] = 0x16;
     packet[1] = 0x18;
-    ret = i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2);
-    if (ret) {
+    if (i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2) != 2) {
         release(&i2c1_semaphore);
         kfree(gyro);
         kfree(new_r);
-        return ret;
+        return -1;
     }
 
     release(&i2c1_semaphore);
@@ -87,10 +85,9 @@ char sfe9dof_gyro_read(void *env, int *error) {
     gyro->tmp_addr = 0x1D;
     tmp = gyro->tmp_addr + gyro->addr_ctr++;
 
-    int ret = i2c_write(gyro->i2c_port, gyro->device_addr, &tmp, 1);
-    if (ret) {
+    if (i2c_write(gyro->i2c_port, gyro->device_addr, &tmp, 1) != 1) {
         if (error != NULL) {
-            *error = ret;
+            *error = -1;
         }
         return 0;
     }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <mm/mm.h>
+#include <kernel/semaphore.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <dev/resource.h>
@@ -37,13 +38,21 @@ rd_t open_px4_hmc5883(void) {
         i2c2.init();
     }
 
-    uint8_t packet[4];
+    acquire(&i2c2_semaphore);
 
+    uint8_t packet[4];
     packet[0] = 0x00;   /* Configuration register A */
     packet[1] = 0x78;   /* 8 samples/output, 75 Hz output, Normal measurement mode */
     packet[2] = 0x20;   /* auto-increment to config reg B; gain to 1090 */
     packet[3] = 0x00;   /* auto-increment to mode reg; continuous mode */
-    i2c_write(&i2c2, HMC5883_ADDR, packet, 4);
+    if (i2c_write(&i2c2, HMC5883_ADDR, packet, 4) != 4) {
+        release(&i2c2_semaphore);
+        free(env);
+        kfree(new_r);
+        return -1;
+    }
+
+    release(&i2c2_semaphore);
 
     env->reg = 0x03;
 
@@ -68,10 +77,9 @@ static char px4_hmc5883_read(void *env, int *error) {
 
     struct hmc5883 *hmc = (struct hmc5883 *) env;
 
-    int ret = i2c_write(&i2c2, HMC5883_ADDR, &hmc->reg, 1);
-    if (ret) {
+    if (i2c_write(&i2c2, HMC5883_ADDR, &hmc->reg, 1) != 1) {
         if (error != NULL) {
-            *error = ret;
+            *error = -1;
         }
         return 0;
     }

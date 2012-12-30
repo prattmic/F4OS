@@ -149,15 +149,19 @@ int8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num)
 
     while (!(*I2C_SR2(i2c->port) & I2C_SR2_MSL)); 
 
+    int total = 0;
+
     while (num--) {
         *I2C_DR(i2c->port) = *data++;
 
         while (!(*I2C_SR1(i2c->port) & I2C_SR1_TXE));
+
+        total += 1;
     }
 
     i2c_stop(i2c->port);
 
-    return 0;
+    return total;
 }
 
 int i2c_read(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
