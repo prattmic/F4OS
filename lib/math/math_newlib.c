@@ -358,3 +358,76 @@ float expf(float x) {
     N++;
     return ldexpf(R, N);
 }
+
+static const float HALF_PI = 1.570796326f;
+static const float ONE_OVER_PI = 0.318309886f;
+static const float r[] = { -0.1666665668f,
+                            0.8333025139e-02f,
+                           -0.1980741872e-03f,
+                            0.2601903036e-5f };
+
+float sinef(float x, int cosine) {
+    int sgn, N;
+    float y, XN, g, R, res;
+    float YMAX = 210828714.0f;
+
+    switch (numtestf (x)) {
+        case NAN:
+            return (x);
+        case INF:
+            return (FLOAT_NAN); 
+    }
+
+    /* Use sin and cos properties to ease computations. */
+    if (cosine) {
+        sgn = 1;
+        y = fabsf (x) + HALF_PI;
+    }
+    else {
+        if (x < 0.0) {
+            sgn = -1;
+            y = -x;
+        }
+        else {
+            sgn = 1;
+            y = x;
+        }
+    }
+
+    /* Check for values of y that will overflow here. */
+    if (y > YMAX) {
+        return (x);
+    }
+
+    /* Calculate the exponent. */
+    if (y < 0.0)
+        N = (int) (y * ONE_OVER_PI - 0.5);
+    else
+        N = (int) (y * ONE_OVER_PI + 0.5);
+    XN = (float) N;
+
+    if (N & 1)
+        sgn = -sgn;
+
+    if (cosine)
+        XN -= 0.5;
+
+    y = fabsf (x) - XN * FLOAT_PI;
+
+    if (-ROOTEPS < y && y < ROOTEPS)
+        res = y;
+
+    else {
+        g = y * y;
+
+        /* Calculate the Taylor series. */
+        R = (((r[3] * g + r[2]) * g + r[1]) * g + r[0]) * g;
+
+        /* Finally, compute the result. */
+        res = y + y * R;
+    }
+ 
+    res *= sgn;
+
+    return (res);
+}
