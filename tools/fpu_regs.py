@@ -15,12 +15,14 @@ class FPU_Regs(gdb.Command):
             for n in range(32):
                 self.print_reg(n)
             self.print_reg(0, fpscr=True)
-        elif arg == "fpscr":
-            self.print_reg(0, fpscr=True)
-        elif arg >= 's0' and arg <= 's31':
-            self.print_reg(int(arg[1:]))
         else:
-            print "Invalid register '%s'" % arg
+            for a in arg.split():
+                if a == "fpscr":
+                    self.print_reg(0, fpscr=True)
+                elif a[0] == 's' and int(a[1:]) >= 0 and int(a[1:]) <= 31:
+                    self.print_reg(int(a[1:]))
+                else:
+                    print "Invalid register '%s'" % a
 
     def print_reg(self, num, fpscr=False):
         gdb.execute("set $data_reg = 0xE000EDF8")
