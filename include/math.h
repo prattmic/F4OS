@@ -29,6 +29,10 @@ float modff(float x, float *iptr);
 float powf(float x, float y);
 float ldexpf(float d, int e);
 float expf(float x);
+float sinef(float x, int cosine);
+#define sin(x)  sinef(x, 0)
+#define cos(x)  sinef(x, 1)
+
 float atan2(float y, float x);
 float lowpass(float acc, float new, float gain);
 
