@@ -23,13 +23,13 @@ int putc(char letter) {
     return write(0, &letter, 1);
 }
 
-char fgetc(rd_t rd) {
+int fgetc(rd_t rd) {
     char ret;
     if (read(rd, &ret, 1) == 1) {
         return ret;
     }
     else {
-        return 0;
+        return -1;
     }
 }
 
