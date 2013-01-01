@@ -12,6 +12,9 @@
  * Equations 8.12 and 8.13 */
 
 void ui(void) {
+    /* Wait for stdin/stdout */
+    while (getc() < 0);
+
     printf("Press q to quit, any key to continue.\r\n");
 
     float p,q,r = 0;
