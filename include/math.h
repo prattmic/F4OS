@@ -20,6 +20,7 @@ inline float sqrtf(float num) {
 
     return num;
 }
+#define sqrt(x) sqrtf(x)
 
 float logarithm(float x, int ten);
 float frexpf (float d, int *exp);
@@ -29,11 +30,20 @@ float modff(float x, float *iptr);
 float powf(float x, float y);
 float ldexpf(float d, int e);
 float expf(float x);
+
 float sinef(float x, int cosine);
 #define sin(x)  sinef(x, 0)
 #define cos(x)  sinef(x, 1)
+float tanf(float x);
+#define tan(x)  tanf(x)
+float asinef(float x, int acosine);
+#define asin(x)  asinef(x, 0)
+#define acos(x)  asinef(x, 1)
+float atangentf(float x, float v, float u, int arctan2);
+#define atan2(v,u)  atangentf(0.0, v, u, 1)
+float atanf(float x);
+#define atan(x) atanf(x)
 
-float atan2(float y, float x);
 float lowpass(float acc, float new, float gain);
 
 #define FLOAT_INF           0x7f800000

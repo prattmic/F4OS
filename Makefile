@@ -43,7 +43,7 @@ SRCS += stdio.c string.c time.c
 
 # lib/math/
 VPATH += lib/math/
-SRCS += math_newlib.c math_other.c math_pow.c math_trig.c
+SRCS += math_newlib.c math_other.c math_pow.c math_sine.c math_tangent.c math_atangent.c
 
 # mm/
 VPATH += mm/
