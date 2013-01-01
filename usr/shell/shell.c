@@ -64,6 +64,9 @@ void shell(void) {
         return;
     }
 
+    /* Wait for stdin/stdout - getc returns a negative error when it is not connected. */
+    while (getc() < 0);
+
     printf("%s", SHELL_PROMPT);
 
     while (1) {

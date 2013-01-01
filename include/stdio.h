@@ -19,7 +19,7 @@ int sprintf(char *buf, char *fmt, ...);
 
 int fputs(rd_t rd, char *s);
 int fputc(rd_t rd, char letter);
-char fgetc(rd_t rd);
+int fgetc(rd_t rd);
 int fprintf(rd_t rd, char *fmt, ...);
 int vfprintf(rd_t rd, char *fmt, va_list ap, int (*puts_fn)(rd_t,char*), int (*putc_fn)(rd_t,char));
 
