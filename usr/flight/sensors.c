@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <kernel/fault.h>
 #include <kernel/semaphore.h>
@@ -9,6 +10,10 @@
 #include <dev/periph/px4_mpu6000.h>
 
 #include "sensors.h"
+
+/* stderr on the PX4 is a bit annoying to connect to.
+ * Change this to stdout to put errors on it instead. */
+#define ERROR_RD    stdout
 
 struct sensors current_sensor_readings = {};
 struct semaphore sensor_semaphore = {
@@ -61,12 +66,12 @@ void read_sensors(void) {
 
     if (read_px4_hmc5883(mag_rd, &holding.mag)) {
         mag_good = 0;
-        printk("WARNING: Failed to read magnetometer.\r\n");
+        fprintf(ERROR_RD, "WARNING: Failed to read magnetometer.\r\n");
     }
 
     if (read_px4_mpu6000(mpu_rd, &holding.accel, &holding.gyro, &holding.temp)) {
         mpu_good = 0;
-        printk("WARNING: Failed to read MPU6000.\r\n");
+        fprintf(ERROR_RD, "WARNING: Failed to read MPU6000.\r\n");
     }
 
     acquire(&sensor_semaphore);
@@ -89,7 +94,7 @@ void read_baro(void) {
     struct barometer holding;
 
     if (read_px4_ms5611(baro_rd, &holding)) {
-        printk("WARNING: Failed to read barometer.\r\n");
+        fprintf(ERROR_RD, "WARNING: Failed to read barometer.\r\n");
         return;
     }
 
