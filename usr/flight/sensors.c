@@ -104,12 +104,16 @@ void read_sensors(void) {
 
     if (mag_good) {
         memcpy(&current_sensor_readings.mag, &holding.mag, sizeof(holding.mag));
+        current_sensor_readings.new_mag = 1;
     }
 
     if (mpu_good) {
         memcpy(&current_sensor_readings.accel, &holding.accel, sizeof(holding.accel));
         memcpy(&current_sensor_readings.gyro, &holding.gyro, sizeof(holding.gyro));
         current_sensor_readings.temp = holding.temp;
+        current_sensor_readings.new_accel = 1;
+        current_sensor_readings.new_gyro = 1;
+        current_sensor_readings.new_temp = 1;
     }
 
     release(&sensor_semaphore);
@@ -139,6 +143,7 @@ void read_baro(void) {
     acquire(&sensor_semaphore);
 
     memcpy(&current_sensor_readings.baro, &holding, sizeof(struct barometer));
+    current_sensor_readings.new_baro = 1;
 
     release(&sensor_semaphore);
 }

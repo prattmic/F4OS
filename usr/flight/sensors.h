@@ -9,6 +9,11 @@ struct sensors {
     float temp;
     struct barometer baro;
     struct magnetometer mag;
+    uint8_t new_accel : 1;
+    uint8_t new_gyro : 1;
+    uint8_t new_temp : 1;
+    uint8_t new_baro : 1;
+    uint8_t new_mag : 1;
 };
 
 extern struct sensors current_sensor_readings;
