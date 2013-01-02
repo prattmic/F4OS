@@ -10,6 +10,7 @@
 #define SPI_READ    (uint8_t) (1 << 7)
 
 void init_spi1(void) __attribute__((section(".kernel")));
+static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive) __attribute__((section(".kernel")));
 
 struct spi_port spi1 = {
     .ready = 0,
@@ -61,6 +62,46 @@ void init_spi1(void) {
     spi1.ready = 1;
 }
 
+static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive) {
+    uint8_t *data;
+    uint8_t null;
+    int count;
+
+    if (!spi) {
+        return -1;
+    }
+
+    /* Provide a black hole to write to if receive is NULL */
+    if (receive) {
+        data = receive;
+    }
+    else {
+        data = &null;
+    }
+
+    /* Transmit data */
+    count = 10000;
+    while (!(*SPI_SR(spi->port) & SPI_SR_TXNE)) {
+        if (!count--) {
+            return -1;
+        }
+    }
+    *SPI_DR(spi->port) = send;
+
+    /* Wait for response 
+     * Note: this "response" was transmitted while we were
+     * transmitting the data above, it is not the device's response to that request. */
+    count = 10000;
+    while (!(*SPI_SR(spi->port) & SPI_SR_RXNE)) {
+        if (!count--) {
+            return -1;
+        }
+    }
+    *data = *SPI_DR(spi->port);
+
+    return 0;
+}
+
 int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) {
     /* Verify valid SPI port */
     if (!spi || !spi->ready || spi->port < 1 || spi->port > 3) {
@@ -93,21 +134,15 @@ int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *
     dev->cs_low();
 
     /* Transmit address */
-    while (!(*SPI_SR(spi->port) & SPI_SR_TXNE));
-    *SPI_DR(spi->port) = addr;
-
-    /* Wait for response, discard */
-    while (!(*SPI_SR(spi->port) & SPI_SR_RXNE));
-    READ_AND_DISCARD(SPI_DR(spi->port));
+    if (spi_send_receive(spi, addr, NULL)) {
+        goto fail;
+    }
 
     while (num--) {
         /* Transmit data */
-        while (!(*SPI_SR(spi->port) & SPI_SR_TXNE));
-        *SPI_DR(spi->port) = *data++;
-
-        /* Wait for response, discard */
-        while (!(*SPI_SR(spi->port) & SPI_SR_RXNE));
-        READ_AND_DISCARD(SPI_DR(spi->port));
+        if (spi_send_receive(spi, *data++, NULL)) {
+            goto fail;
+        }
 
         total += 1;
     }
@@ -115,6 +150,10 @@ int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *
     dev->cs_high();
 
     return total;
+
+fail:
+    dev->cs_high();
+    return -1;
 }
 
 int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) {
@@ -149,23 +188,14 @@ int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *d
     dev->cs_low();
 
     /* Transmit address */
-    while (!(*SPI_SR(spi->port) & SPI_SR_TXNE));
-    *SPI_DR(spi->port) = (addr | SPI_READ);
-
-    /* Wait for response, discard 
-     * Note: this "response" was transmitted while we were
-     * transmitting the address, it is not the data we want. */
-    while (!(*SPI_SR(spi->port) & SPI_SR_RXNE));
-    READ_AND_DISCARD(SPI_DR(spi->port));
+    if (spi_send_receive(spi, addr | SPI_READ, NULL)) {
+        goto fail;
+    }
 
     while (num--) {
-        /* Transmit zeros while reading response */
-        while (!(*SPI_SR(spi->port) & SPI_SR_TXNE));
-        *SPI_DR(spi->port) = 0x00;
-
-        /* Wait for response, save it */
-        while (!(*SPI_SR(spi->port) & SPI_SR_RXNE));
-        *data++ = *SPI_DR(spi->port);
+        if (spi_send_receive(spi, 0x00, data++)) {
+            goto fail;
+        }
 
         total += 1;
     }
@@ -173,4 +203,8 @@ int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *d
     dev->cs_high();
 
     return total;
+
+fail:
+    dev->cs_high();
+    return -1;
 }
