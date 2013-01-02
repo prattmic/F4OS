@@ -61,17 +61,43 @@ fail:
 
 void read_sensors(void) {
     struct sensors holding;
-    uint8_t mag_good = 1;
-    uint8_t mpu_good = 1;
+    uint8_t mag_good = 0;
+    uint8_t mpu_good = 0;
 
-    if (read_px4_hmc5883(mag_rd, &holding.mag)) {
-        mag_good = 0;
-        fprintf(ERROR_RD, "WARNING: Failed to read magnetometer.\r\n");
+    if (mag_rd > 0) {
+        if (read_px4_hmc5883(mag_rd, &holding.mag)) {
+            fprintf(ERROR_RD, "WARNING: Failed to read magnetometer.  Closing device.\r\n");
+            close(mag_rd);
+            mag_rd = -1;
+        }
+        else {  /* Success */
+            mag_good = 1;
+        }
+    }
+    else {
+        fprintf(ERROR_RD, "INFO: Magnetometer closed, attempting to open.\r\n");
+        mag_rd = open_px4_hmc5883();
+        if (mag_rd < 0) {
+            fprintf(ERROR_RD, "ERROR: Failed to open magnetometer.\r\n");
+        }
     }
 
-    if (read_px4_mpu6000(mpu_rd, &holding.accel, &holding.gyro, &holding.temp)) {
-        mpu_good = 0;
-        fprintf(ERROR_RD, "WARNING: Failed to read MPU6000.\r\n");
+    if (mpu_rd > 0) {
+        if (read_px4_mpu6000(mpu_rd, &holding.accel, &holding.gyro, &holding.temp)) {
+            fprintf(ERROR_RD, "WARNING: Failed to read MPU6000.  Closing device.\r\n");
+            close(mpu_rd);
+            mpu_rd = -1;
+        }
+        else {  /* Success */
+            mpu_good = 1;
+        }
+    }
+    else {
+        fprintf(ERROR_RD, "INFO: MPU6000 closed, attempting to open.\r\n");
+        mpu_rd = open_px4_mpu6000();
+        if (mpu_rd < 0) {
+            fprintf(ERROR_RD, "ERROR: Failed to open MPU6000.\r\n");
+        }
     }
 
     acquire(&sensor_semaphore);
@@ -93,8 +119,20 @@ void read_sensors(void) {
 void read_baro(void) {
     struct barometer holding;
 
-    if (read_px4_ms5611(baro_rd, &holding)) {
-        fprintf(ERROR_RD, "WARNING: Failed to read barometer.\r\n");
+    if (baro_rd > 0) {
+        if (read_px4_ms5611(baro_rd, &holding)) {
+            fprintf(ERROR_RD, "WARNING: Failed to read barometer.  Closing device.\r\n");
+            close(baro_rd);
+            baro_rd = -1;
+            return;
+        }
+    }
+    else {
+        fprintf(ERROR_RD, "INFO: Barometer closed, attempting to open.\r\n");
+        baro_rd = open_px4_ms5611();
+        if (baro_rd < 0) {
+            fprintf(ERROR_RD, "ERROR: Failed to open barometer.\r\n");
+        }
         return;
     }
 
