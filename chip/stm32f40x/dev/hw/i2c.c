@@ -76,7 +76,7 @@ static void init_i2c1(void) {
 
     /* Should set I2C to 100kHz */
     *I2C_CCR(1) |= I2C_CCR_CCR(210);
-    *I2C_TRISE(1) = 42;
+    *I2C_TRISE(1) = 43;
 
     /* Enable */
     *I2C_CR1(1) |= I2C_CR1_PE;
@@ -112,7 +112,7 @@ static void init_i2c2(void) {
 
     /* Should set I2C to 100kHz */
     *I2C_CCR(2) |= I2C_CCR_CCR(210);
-    *I2C_TRISE(2) = 42;
+    *I2C_TRISE(2) = 43;
 
     /* Enable */
     *I2C_CR1(2) |= I2C_CR1_PE;
