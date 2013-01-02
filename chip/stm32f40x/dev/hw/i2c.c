@@ -74,8 +74,8 @@ static void init_i2c1(void) {
     /* Configure peripheral */
     *I2C_CR2(1) |= I2C_CR2_FREQ(42);
 
-    /* Should set I2C to 100kHz */
-    *I2C_CCR(1) |= I2C_CCR_CCR(210);
+    /* Set I2C to 300kHz */
+    *I2C_CCR(1) |= I2C_CCR_CCR(140);
     *I2C_TRISE(1) = 43;
 
     /* Enable */
@@ -110,8 +110,8 @@ static void init_i2c2(void) {
     /* Configure peripheral */
     *I2C_CR2(2) |= I2C_CR2_FREQ(42);
 
-    /* Should set I2C to 100kHz */
-    *I2C_CCR(2) |= I2C_CCR_CCR(210);
+    /* Set I2C to 300kHz */
+    *I2C_CCR(2) |= I2C_CCR_CCR(140);
     *I2C_TRISE(2) = 43;
 
     /* Enable */
@@ -127,9 +127,17 @@ int8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num)
         return -1;
     }
 
+    /* Wait until BUSY is reset and previous transaction STOP is complete */
+    int count = 10000;
+    while ((*I2C_SR2(i2c->port) & I2C_SR2_BUSY) || (*I2C_CR1(i2c->port) & I2C_CR1_STOP)) {
+        if (!count--) {
+            return -1;
+        }
+    }
+
     *I2C_CR1(i2c->port) |= I2C_CR1_START;
 
-    int count = 10000;
+    count = 10000;
     while (!(*I2C_SR1(i2c->port) & I2C_SR1_SB)) {
         if (!count--) {
             i2c_stop(i2c->port);
@@ -181,11 +189,19 @@ int i2c_read(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
         return -1;
     }
 
+    /* Wait until BUSY is reset and previous transaction STOP is complete */
+    int count = 10000;
+    while ((*I2C_SR2(i2c->port) & I2C_SR2_BUSY) || (*I2C_CR1(i2c->port) & I2C_CR1_STOP)) {
+        if (!count--) {
+            return -1;
+        }
+    }
+
     int total = 0;
 
     *I2C_CR1(i2c->port) |= I2C_CR1_START;
 
-    int count = 10000;
+    count = 10000;
     while (!(*I2C_SR1(i2c->port) & I2C_SR1_SB)) {
         if (!count--) {
             i2c_stop(i2c->port);
