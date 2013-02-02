@@ -100,7 +100,7 @@ void svc_handler(uint32_t *registers) {
             svc_release(registers);
             break;
         default:
-            panic_print("Unknown SVC");
+            panic_print("Unknown SVC: %d", svc_number);
             break;
     }
 }

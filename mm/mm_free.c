@@ -66,7 +66,7 @@ void buddy_merge(struct heapnode *node, struct buddy *buddy) {
     }
     else {  /* Buddy free */
         if (node->order != buddy_node->order) {
-            panic_print("mm: node->order != buddy_node->order\r\n");
+            panic_print("mm: node->order != buddy_node->order, node: 0x%x node->order: %d buddy_node: 0x%x, buddy_node->order: %d", node, node->order, buddy_node, buddy_node->order);
         }
 
         /* Remove from list */

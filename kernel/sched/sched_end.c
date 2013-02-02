@@ -49,7 +49,7 @@ void end_task(void) {
 /* Called by svc_handler */
 void svc_end_task(void) {
     if (curr_task->task->stack_limit > curr_task->task->stack_top) {
-        panic_print("Task has overflowed its stack.");
+        panic_print("Task (0x%x, fptr: 0x%x) has overflowed its stack. stack_top: 0x%x stack_limit: 0x%x", curr_task->task, curr_task->task->fptr, curr_task->task->stack_top, curr_task->task->stack_limit);
     }
 
     remove_task(&task_list, curr_task);

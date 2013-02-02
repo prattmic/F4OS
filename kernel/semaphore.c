@@ -84,7 +84,7 @@ int get_lock(volatile struct semaphore *semaphore) {
             return 0;
         }
         else {
-            panic_print("Semaphore not available, but held_by unset.");
+            panic_print("Semaphore (0x%x) not available, but held_by unset.", semaphore);
         }
     }
 
@@ -115,7 +115,7 @@ static void held_semaphores_insert(struct semaphore *list[], volatile struct sem
         }
     }
 
-    panic_print("Too many semaphores already held.");
+    panic_print("Too many semaphores already held in list (0x%x).", list);
 }
 
 void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore) {
@@ -132,7 +132,7 @@ static void deadlock_check(struct task_node *task) {
     if (task->task->waiting) {
         for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
             if (curr_task->task->held_semaphores[i] == task->task->waiting) {
-                panic_print("Deadlock!");
+                panic_print("Deadlock!  Task (0x%x, fptr: 0x%x) is waiting on semaphore 0x%x, but curr_task (0x%x, fptr: 0x%x) holds it.", task->task, task->task->fptr, task->task->waiting, curr_task->task, curr_task->task->fptr);
             }
         }
     }

@@ -22,8 +22,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         if (reg_task == NULL) {
             free(task->stack_limit);
             kfree(task);
-            printk("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
-            panic_print("Could not allocate task.");
+            panic_print("Could not allocate task with function pointer 0x%x", fptr);
         }
         else {
             task->task_list_node = reg_task;
@@ -35,8 +34,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
                 free(task->stack_limit);
                 kfree(task);
                 kfree(reg_task);
-                printk("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
-                panic_print("Could not allocate task.");
+                panic_print("Could not allocate task with function pointer 0x%x", fptr);
             }
             else {
                 task->periodic_node = per_node;
@@ -44,8 +42,7 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         }
     }
     else {
-        printk("Could not allocate task with function pointer 0x%x; panicking.\r\n", fptr);
-        panic_print("Could not allocate task.");
+        panic_print("Could not allocate task with function pointer 0x%x", fptr);
     }
 }
 
@@ -59,7 +56,7 @@ void append_task(task_node_list *list, task_node *task) {
     if (list->head == NULL) {
         if (list->tail) {
             /* WTF!?  Why is the tail set but not the head? */
-            panic_print("Task list tail set, but not head.");
+            panic_print("Task list (0x%x) tail set, but not head.", list);
         }
 
         list->head = task;

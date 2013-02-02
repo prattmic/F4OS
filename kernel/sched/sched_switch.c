@@ -30,7 +30,7 @@ void switch_task(task_node *node) {
          * stack of the task we are switching from has overflowed */
         if (node->task->stack_limit > node->task->stack_top) {
             __asm__("cpsie  i");
-            panic_print("Task has overflowed its stack.");
+            panic_print("Task (0x%x, fptr: 0x%x) has overflowed its stack. stack_top: 0x%x stack_limit: 0x%x", node->task, node->task->fptr, node->task->stack_top, node->task->stack_limit);
         }
 
         /* Don't bother moving this if it is the only (high priority) task */
