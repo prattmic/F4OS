@@ -16,6 +16,8 @@ void memmanage_handler(void);
 void busfault_handler(void);
 void usagefault_handler(void);
 
+static inline int vprintk(char *fmt, va_list ap);
+
 static int printk_puts(rd_t r, char *s) {
     if (usart_ready) {
         return usart_puts(s, NULL);
@@ -34,18 +36,28 @@ static int printk_putc(rd_t r, char c) {
     }
 }
 
-void printk(char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap, &printk_puts, &printk_putc);
-    va_end(ap);
+static inline int vprintk(char *fmt, va_list ap) {
+    return vfprintf(stderr, fmt, ap, &printk_puts, &printk_putc);
 }
 
-/* Print a message and then panic */
-void panic_print(char *s) {
+int printk(char *fmt, ...) {
+    int ret;
+    va_list ap;
+
+    va_start(ap, fmt);
+    ret = vprintk(fmt, ap);
+    va_end(ap);
+
+    return ret;
+}
+
+/* Print a message and then panic 
+ * Accepts standard printf format strings. */
+void panic_print(char *fmt, ...) {
+    /* Disable interrupts, as the system is going down. */
     __asm__("cpsid  i");
     /* Toggle red LED so there is some indication that something
-     * bad has happened if this handler hangs */
+     * bad has happened if this hangs */
     led_toggle(0);
     /* We're done here... */
     task_switching = 0;
@@ -53,7 +65,12 @@ void panic_print(char *s) {
     release(&usart_semaphore);
 
     /* Print panic message */
-    printk("\r\npanic: %s\r\n", s);
+    printk("\r\npanic: ");
+
+    va_list ap;
+    va_start(ap, fmt);
+    vprintk(fmt, ap);
+    va_end(ap);
 
     panic();
 }

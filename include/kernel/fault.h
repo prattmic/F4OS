@@ -11,8 +11,8 @@
 
 extern void panic(void) __attribute__((noreturn));
 
-void printk(char *fmt, ...) __attribute__((section(".kernel")));
-void panic_print(char *s) __attribute__((noreturn));
+int printk(char *fmt, ...) __attribute__((section(".kernel")));
+void panic_print(char *fmt, ...) __attribute__((noreturn));
 void toggle_led_delay(void) __attribute__((optimize(0)));
 
 #endif
