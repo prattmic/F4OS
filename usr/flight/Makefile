@@ -3,6 +3,10 @@
 # /
 SRCS += main.c sensors.c ui.c
 
+# matlab/codegen/lib/kalman
+VPATH += matlab/codegen/lib/kalman
+SRCS += inv.c kalman.c kalman_data.c kalman_initialize.c kalman_terminate.c rtGetInf.c rtGetNaN.c rt_nonfinite.c
+
 # Date and rev for uname
 DATE := "$(shell date -u)"
 REV := $(shell git rev-list HEAD | wc -l | tr -d ' ')

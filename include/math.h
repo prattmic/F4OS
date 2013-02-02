@@ -12,6 +12,7 @@ inline float fabsf(float num) {
 
     return num;
 }
+#define fabs(x) fabsf(x)
 
 inline float sqrtf(float num) __attribute__((always_inline));
 inline float sqrtf(float num) {
@@ -26,6 +27,7 @@ float logarithm(float x, int ten);
 float frexpf (float d, int *exp);
 uint8_t numtestf(float x);
 float floorf(float x);
+#define floor(x) floorf(x)
 float modff(float x, float *iptr);
 float powf(float x, float y);
 float ldexpf(float d, int e);

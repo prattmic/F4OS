@@ -5,13 +5,15 @@
 #include <kernel/semaphore.h>
 #include <dev/sensors.h>
 
+#include "matlab/codegen/lib/kalman/kalman.h"
+#include "matlab/codegen/lib/kalman/kalman_initialize.h"
+#include "matlab/codegen/lib/kalman/kalman_terminate.h"
+
 #include "sensors.h"
 #include "ui.h"
 
-/* I'll need this citation later */
-/* Beard, McLain. Navigation, Guidance, and Control of Small Unmanned Aircraft.
- * Equations 8.12 and 8.13 */
-
+void kalman_filter(struct gyro *bias, real_T R[9]);
+void calculate_R(real_T R[9]);
 void gyro_bias(struct gyro *bias);
 void print_readings(struct gyro *bias);
 
@@ -26,6 +28,8 @@ void ui(void) {
         .y = 0.0,
         .z = 0.0
     };
+
+    real_T R[9] = {0.0};
 
     while (1) {
         int c = getc();
@@ -43,10 +47,179 @@ void ui(void) {
             gyro_bias(&bias);
             printf("Gyro bias: X: %fdps \t Y: %fdps \t Z: %fdps\r\n", bias.x, bias.y, bias.z);
             break;
+        case 'k':
+            kalman_filter(&bias, R);
+            break;
+        case 'r':
+            printf("Finding R.  Do not move device!\r\n");
+            calculate_R(R);
+            printf("R (*10^-5):\t%f \t %f \t %f\r\n\t%f \t %f \t %f\r\n\t%f \t %f \t %f\r\n", R[0]*100000, R[1]*100000, R[2]*100000, R[3]*10000, R[4]*100000, R[5]*100000, R[6]*100000, R[7]*100000, R[8]*100000);
+            break;
         default: 
             print_readings(&bias);
         }
     }
+}
+
+/* Beard, McLain. Navigation, Guidance, and Control of Small Unmanned Aircraft.
+ * Section 8.5.2 */
+void kalman_filter(struct gyro *bias, real_T R[9]) {
+    printf("Kalman filtering roll and pitch.  Press any key to continue, reset to quit :)\r\n");
+    getc();
+
+    real_T N = 10.0;
+    real_T T_out = 1.0;
+
+    /* Process noise covariance */
+    real_T Q[4] =   { 0, 0,
+                      0, 0 };
+
+    /* Measurement noise covariance */
+    /*real_T R[9] =   { 1.0, 0.0, 0.0,
+                      0.0, 1.0, 0.0,
+                      0.0, 0.0, 1.0 };*/
+
+    state state;
+    state.Va = 0;
+    state.g = 1;
+
+    real_T roll_pitch[2];
+
+    real_T accel[3];
+    uint8_t new_accel = 0;
+
+    float mag_x;
+    float temp;
+
+    kalman_initialize();
+
+    while (1) {
+        acquire(&sensor_semaphore);
+
+        if (current_sensor_readings.new_gyro) {
+            current_sensor_readings.new_gyro = 0;
+            state.p = current_sensor_readings.gyro.x - bias->x;
+            state.q = current_sensor_readings.gyro.y - bias->y;
+            state.r = current_sensor_readings.gyro.z - bias->z;
+        }
+        if (current_sensor_readings.new_accel) {
+            current_sensor_readings.new_accel = 0;
+            new_accel = 1;
+            accel[0] = current_sensor_readings.accel.x;
+            accel[1] = current_sensor_readings.accel.y;
+            accel[2] = current_sensor_readings.accel.z;
+        }
+        if (current_sensor_readings.new_mag) {
+            current_sensor_readings.new_mag = 0;
+            mag_x = current_sensor_readings.mag.x;
+        }
+        if (current_sensor_readings.new_baro) {
+            current_sensor_readings.new_baro = 0;
+            temp = current_sensor_readings.baro.temp;
+        }
+
+        release(&sensor_semaphore);
+
+        if (new_accel) {
+            new_accel = 0;
+            kalman(state, 1, accel, N, T_out, R, Q, roll_pitch);
+            //printf("New measurement! ");
+        }
+        else {
+            kalman(state, 0, NULL, N, T_out, R, Q, roll_pitch);
+        }
+
+        printf("Roll: %fdeg \t Pitch: %fdeg \t Mag X: %f \t Baro temp: %f\r\n", roll_pitch[0]*RAD_TO_DEG, roll_pitch[1]*RAD_TO_DEG, mag_x, temp);
+        usleep(10000);
+    }
+
+    kalman_terminate();
+}
+
+/* Improved Kalman Filter Method for Measurement Noise Reduction in Multi Sensor RFID Systems
+ * Equations 16 and 17 */
+void calculate_R(real_T R[9]) {
+    if (!R) {
+        return;
+    }
+
+    struct accelerometer avg = {};
+
+    int num = 0;
+    while (num < 100) {
+        acquire(&sensor_semaphore);
+
+        if (current_sensor_readings.new_accel) {
+            current_sensor_readings.new_accel = 0;
+
+            avg.x += current_sensor_readings.accel.x;
+            avg.y += current_sensor_readings.accel.y;
+            avg.z += current_sensor_readings.accel.z;
+
+            num++;
+        }
+
+        release(&sensor_semaphore);
+
+        usleep(1000);
+    }
+
+    avg.x /= 100;
+    avg.y /= 100;
+    avg.z /= 100;
+
+    printf("Accel avg: X: %f \t Y: %f \t Z: %f\r\n", avg.x, avg.y, avg.z);
+
+    R[0] = 0;
+    R[1] = 0;
+    R[2] = 0;
+    R[3] = 0;
+    R[4] = 0;
+    R[5] = 0;
+    R[6] = 0;
+    R[7] = 0;
+    R[8] = 0;
+
+    num = 0;
+    while (num < 100) {
+        acquire(&sensor_semaphore);
+
+        if (current_sensor_readings.new_accel) {
+            current_sensor_readings.new_accel = 0;
+
+            struct accelerometer diff = {
+                .x = current_sensor_readings.accel.x - avg.x,
+                .y = current_sensor_readings.accel.y - avg.y,
+                .z = current_sensor_readings.accel.z - avg.z
+            };
+
+            R[0] += diff.x * diff.x;
+            R[1] += diff.x * diff.y;
+            R[2] += diff.x * diff.z;
+            R[3] += diff.y * diff.x;
+            R[4] += diff.y * diff.y;
+            R[5] += diff.y * diff.z;
+            R[6] += diff.z * diff.x;
+            R[7] += diff.z * diff.y;
+            R[8] += diff.z * diff.z;
+
+            num++;
+        }
+
+        release(&sensor_semaphore);
+
+        usleep(1000);
+    }
+
+    R[0] /= 99;
+    R[1] /= 99;
+    R[2] /= 99;
+    R[3] /= 99;
+    R[4] /= 99;
+    R[5] /= 99;
+    R[6] /= 99;
+    R[7] /= 99;
+    R[8] /= 99;
 }
 
 /* Average 100 samples to find gyro bias */
@@ -135,4 +308,5 @@ void print_readings(struct gyro *bias) {
     printf("Roll (phi): %fdeg \t Pitch (theta): %fdeg \r\n", roll*RAD_TO_DEG, pitch*RAD_TO_DEG);
     printf("Roll rate (p): %fdps \t Pitch rate (q): %fdps \t Yaw rate (r): %fdps \r\n", p, q, r);
     printf("Uncomp Heading: %fdeg \t Comp Heading: %fdeg \r\n", uncomp_heading, comp_heading);
+
 }

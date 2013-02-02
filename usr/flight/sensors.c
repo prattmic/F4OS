@@ -13,7 +13,7 @@
 
 /* stderr on the PX4 is a bit annoying to connect to.
  * Change this to stdout to put errors on it instead. */
-#define ERROR_RD    stdout
+#define ERROR_RD    stderr
 
 struct sensors current_sensor_readings = {};
 struct semaphore sensor_semaphore = {
