@@ -30,12 +30,13 @@ void pendsv_handler(void){
     switch_task(NULL);
 }
 
-void svc_yield(void) {
+static void svc_yield(void) {
     curr_task->task->stack_top = PSP();
     switch_task(NULL);
 }
 
-void svc_acquire(uint32_t *registers) {
+static void svc_acquire(uint32_t *registers) {
+    /* R0 -> semaphore to acquire */
     struct semaphore *semaphore = (struct semaphore *) registers[0];
 
     if (get_lock(semaphore)) {
@@ -62,6 +63,7 @@ void svc_acquire(uint32_t *registers) {
 }
 
 void svc_release(uint32_t *registers) {
+    /* R0 -> semaphore to release */
     struct semaphore *semaphore = (struct semaphore *) registers[0];
 
     semaphore->lock = 0;
@@ -75,6 +77,22 @@ void svc_release(uint32_t *registers) {
         curr_task->task->stack_top = PSP();
         switch_task(task);
     }
+}
+
+void svc_register_task(uint32_t *registers) {
+    /* R0 -> standard task_node
+     * R1 -> periodic task_node - NULL for non-periodic tasks */
+
+    task_node *standard = (task_node *) registers[0];
+    task_node *periodic = (task_node *) registers[1];
+
+    append_task(&task_list, standard);
+
+    if (periodic) {
+        append_task(&periodic_task_list, periodic);
+    }
+
+    return;
 }
 
 void svc_handler(uint32_t *registers) {
@@ -97,6 +115,9 @@ void svc_handler(uint32_t *registers) {
             break;
         case SVC_RELEASE:
             svc_release(registers);
+            break;
+        case SVC_REGISTER_TASK:
+            svc_register_task(registers);
             break;
         default:
             panic_print("Unknown SVC: %d", svc_number);

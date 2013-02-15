@@ -11,39 +11,26 @@
 #include "sched_internals.h"
 
 static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) __attribute__((section(".kernel")));
-static task_node *register_task(task_node_list *list, task_ctrl *task_ptr) __attribute__((section(".kernel")));
+static int register_task(task_ctrl *task_ptr, int periodic) __attribute__((section(".kernel")));
 
 void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task_ctrl *task = create_task(fptr, priority, period);
-    if (task != NULL) {
-        task_node *reg_task;
-
-        reg_task = register_task(&task_list, task);
-        if (reg_task == NULL) {
-            free(task->stack_limit);
-            kfree(task);
-            panic_print("Could not allocate task with function pointer 0x%x", fptr);
-        }
-        else {
-            task->task_list_node = reg_task;
-        }
-
-        if (period) {
-            task_node *per_node = register_task(&periodic_task_list, task);
-            if (per_node == NULL) {
-                free(task->stack_limit);
-                kfree(task);
-                kfree(reg_task);
-                panic_print("Could not allocate task with function pointer 0x%x", fptr);
-            }
-            else {
-                task->periodic_node = per_node;
-            }
-        }
+    if (task == NULL) {
+        goto fail;
     }
-    else {
-        panic_print("Could not allocate task with function pointer 0x%x", fptr);
+
+    int ret = register_task(task, period);
+    if (ret != 0) {
+        goto fail2;
     }
+
+    return;
+
+fail2:
+    free(task->stack_limit);
+    kfree(task);
+fail:
+    panic_print("Could not allocate task with function pointer 0x%x", fptr);
 }
 
 /* Place task in task list based on priority */
@@ -196,14 +183,45 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
     return task;
 }
 
-static task_node *register_task(task_node_list *list, task_ctrl *task_ptr) {
-    task_node *new_task = kmalloc(sizeof(task_node));
-    if (new_task == NULL) {
-        return NULL;
+static int register_task(task_ctrl *task_ptr, int periodic) {
+    task_node *standard_node = kmalloc(sizeof(task_node));
+    if (standard_node == NULL) {
+        goto fail;
     }
 
-    new_task->task = task_ptr;
-    append_task(list, new_task);
+    standard_node->task = task_ptr;
 
-    return new_task;
+    task_node *periodic_node = NULL;
+    if (periodic) {
+        periodic_node = kmalloc(sizeof(task_node));
+        if (periodic_node == NULL) {
+            goto fail2;
+        }
+
+        periodic_node->task = task_ptr;
+    }
+
+    /* When task switching, we cannot safely modify the task lists
+     * ourselves, instead we must ask the OS to do so for us. */
+    if (task_switching) {
+        SVC_ARG2(SVC_REGISTER_TASK, standard_node, periodic_node);
+    }
+    else {
+        append_task(&task_list, standard_node);
+
+        if (periodic) {
+            append_task(&periodic_task_list, periodic_node);
+        }
+    }
+
+    /* Point to task nodes from task ctl */
+    task_ptr->task_list_node = standard_node;
+    task_ptr->periodic_node = periodic_node;
+
+    return 0;
+
+fail2:
+    kfree(standard_node);
+fail:
+    return 1;
 }

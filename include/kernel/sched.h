@@ -43,12 +43,25 @@ typedef struct semaphore semaphore;
     ret;    \
 })
 
+#define SVC_ARG2(call, arg1, arg2)  ({ \
+    uint32_t ret = 0;   \
+    asm volatile ("mov  r0, %[ar1]  \n"  \
+                  "mov  r1, %[ar2]  \n"  \
+                  "svc  %[code]  \n"    \
+                  "mov  %[ret], r0  \n" \
+                  :[ret] "+r" (ret)     \
+                  :[code] "I" (call), [ar1] "r" (arg1), [ar2] "r" (arg2)     \
+                  :"r0", "r1");               \
+    ret;    \
+})
+
 /* SVC case names */
 enum service_calls {
     SVC_YIELD,
     SVC_END_TASK,
     SVC_ACQUIRE,
-    SVC_RELEASE
+    SVC_RELEASE,
+    SVC_REGISTER_TASK,
 };
    
 typedef struct task_node {
