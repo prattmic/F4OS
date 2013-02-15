@@ -12,7 +12,6 @@ extern void held_semaphores_remove(struct semaphore *list[], volatile struct sem
 
 void systick_handler(void) __attribute__((section(".kernel")));
 void pendsv_handler(void) __attribute__((section(".kernel")));
-void tim2_handler(void) __attribute__((section(".kernel")));
 void svc_handler(uint32_t*) __attribute__((section(".kernel")));
 
 void systick_handler(void) {

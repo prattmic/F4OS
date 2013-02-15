@@ -5,7 +5,9 @@ SRCS += clock.c chip.c
 
 # dev/hw/
 VPATH += dev/hw/
-SRCS += tim.c
+SRCS += 
+# Unused
+#SRCS += tim.c
 
 SRCS_$(CONFIG_HAVE_USART) += usart.c
 SRCS_$(CONFIG_HAVE_I2C) += i2c.c
