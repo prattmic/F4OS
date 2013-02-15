@@ -7,7 +7,12 @@ void init_systick(void) {
     *SYSTICK_VAL = 0;
     *SYSTICK_CTL = 0x00000007;
 
-    /* Set PendSV to lowest priority */
-    *NVIC_IPR14 = 0xFF;
+    /* Set PendSV and SVC to lowest priority.
+     * This means that both will be deferred
+     * until all other exceptions have executed.
+     * Additionally, PendSV will not interrupt
+     * an SVC. */
+    *NVIC_IPR(11) = 0xFF;
+    *NVIC_IPR(14) = 0xFF;
 }
 

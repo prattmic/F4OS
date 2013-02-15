@@ -74,8 +74,7 @@ inline uint32_t *PSP(void) {
 #define NVIC_ICPR0                      (volatile uint32_t *) (NVIC_BASE + 0x180)               /* Interrupt clear-pending register 0 */
 #define NVIC_ICPR1                      (volatile uint32_t *) (NVIC_BASE + 0x184)               /* Interrupt clear-pending register 1 */
 #define NVIC_ICPR2                      (volatile uint32_t *) (NVIC_BASE + 0x188)               /* Interrupt clear-pending register 2 */
-#define NVIC_IPR0                       (volatile uint32_t *) (NVIC_BASE + 0x300)               /* Interrupt 0 priority register */
-#define NVIC_IPR14                      (volatile uint32_t *) (NVIC_BASE + 0x314)               /* Interrupt 14 priority register */
+#define NVIC_IPR(n)                     (volatile uint8_t *)  (NVIC_BASE + 0x300 + n)           /* Interrupt n priority register */
 
 /* System Control Block (SCB) */
 #define SCB_ICSR                        (volatile uint32_t *) (SCB_BASE + 0x004)                /* Interrupt Control and State Register */
