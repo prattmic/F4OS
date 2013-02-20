@@ -46,6 +46,17 @@ inline uint32_t *PSP(void) {
     return val;
 }
 
+inline uint32_t *MSP(void) __attribute__((always_inline));
+inline uint32_t *MSP(void) {
+    uint32_t *val;
+
+    asm("mrs    %[val], msp"
+        :[val] "=r" (val)
+        ::);
+
+    return val;
+}
+
 /* Cortex M4 General Registers */
 
 /* System Control Map */

@@ -75,6 +75,26 @@ void panic_print(char *fmt, ...) {
     panic();
 }
 
+static void memory_dump(uint32_t *start, int words) {
+    while (words > 0) {
+        printk("\r\n0x%x:", start);
+
+        for (int i = words < 4 ? words : 4; i > 0; i--) {
+            printk("\t0x%x", *start++);
+        }
+
+        words -= 4;
+    }
+}
+
+/* Dumps both MSP and PSP stacks to stderr. */
+static void stack_dump(void) {
+    printk("\r\nMSP dump:");
+    memory_dump(MSP(), 40);
+    printk("\r\nPSP dump:");
+    memory_dump(PSP(), 40);
+}
+
 void toggle_led_delay(void) {
     uint32_t count = 1000000;
 
@@ -120,6 +140,8 @@ void hardfault_handler(void) {
     if (!interpretation) {
         printk("No idea.  See pg. 226 in the STM32F4 Programming Reference Manual.\r\n");
     }
+
+    stack_dump();
 
     panic();
 }
@@ -176,6 +198,8 @@ void memmanage_handler(void) {
     if (!interpretation) {
         printk("No idea.  See pg. 225 in the STM32F4 Programming Reference Manual.\r\n");
     }
+
+    stack_dump();
 
     panic();
 }
@@ -240,6 +264,8 @@ void busfault_handler(void) {
         printk("No idea.  See pg. 224 in the STM32F4 Programming Reference Manual.\r\n");
     }
 
+    stack_dump();
+
     panic();
 }
 
@@ -293,6 +319,8 @@ void usagefault_handler(void) {
     if (!interpretation) {
         printk("No idea.  See pg. 223 in the STM32F4 Programming Reference Manual.\r\n");
     }
+
+    stack_dump();
 
     panic();
 }
