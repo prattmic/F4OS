@@ -178,6 +178,6 @@ void infinite_ipc(void) {
         }
 
         /* Wait for number of tasks to come down */
-        while (approx_num_tasks() > 7);
+        while (total_tasks > 7);
     }
 }

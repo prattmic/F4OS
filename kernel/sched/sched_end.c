@@ -79,6 +79,8 @@ void svc_end_task(void) {
             task_to_free = curr_task;
             node = task_to_free;
         }
+
+        total_tasks -= 1;
     }
 
     switch_task(NULL);

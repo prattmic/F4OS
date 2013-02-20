@@ -24,6 +24,8 @@ void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
         goto fail2;
     }
 
+    total_tasks += 1;
+
     return;
 
 fail2:
