@@ -9,7 +9,7 @@
 static void buddy_merge(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
 
 void free(void *address) {
-    struct heapnode *node = (struct heapnode *) ((uint32_t) address - BUDDY_HEADER_SIZE);
+    struct heapnode *node = (struct heapnode *) ((uint32_t) address - MM_HEADER_SIZE);
 
     acquire(&user_buddy.semaphore);
     buddy_merge(node, &user_buddy);
@@ -17,7 +17,7 @@ void free(void *address) {
 }
 
 void kfree(void *address) {
-    struct heapnode *node = (struct heapnode *) ((uint32_t) address - BUDDY_HEADER_SIZE);
+    struct heapnode *node = (struct heapnode *) ((uint32_t) address - MM_HEADER_SIZE);
 
     acquire(&kernel_buddy.semaphore);
     buddy_merge(node, &kernel_buddy);

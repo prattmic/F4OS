@@ -9,7 +9,7 @@ static struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) 
 static uint8_t size_to_order(uint32_t size) __attribute__((section(".kernel")));
 
 void *malloc(uint32_t size) {
-    uint8_t order = size_to_order(size + BUDDY_HEADER_SIZE);
+    uint8_t order = size_to_order(size + MM_HEADER_SIZE);
     void *address;
 
     acquire(&user_buddy.semaphore);
@@ -20,7 +20,7 @@ void *malloc(uint32_t size) {
 }
 
 void *kmalloc(uint32_t size) {
-    uint8_t order = size_to_order(size + BUDDY_HEADER_SIZE);
+    uint8_t order = size_to_order(size + MM_HEADER_SIZE);
     void *address;
 
     acquire(&kernel_buddy.semaphore);
@@ -48,7 +48,7 @@ void *alloc(uint8_t order, struct buddy *buddy) {
             panic_print("mm: node->order != order, node: 0x%x node->order: %d order: %d", node, node->order, order);
         }
 
-        return (void *) ((uint32_t) node) + BUDDY_HEADER_SIZE;
+        return (void *) ((uint32_t) node) + MM_HEADER_SIZE;
     }
     else {
         uint8_t new_order = order;
@@ -72,7 +72,7 @@ void *alloc(uint8_t order, struct buddy *buddy) {
             panic_print("mm: node->order != order, node: 0x%x node->order: %d order: %d", node, node->order, order);
         }
 
-        return (void *) ((uint32_t) node) + BUDDY_HEADER_SIZE;
+        return (void *) ((uint32_t) node) + MM_HEADER_SIZE;
     }
 }
 

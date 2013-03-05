@@ -3,8 +3,6 @@
 
 #include <kernel/semaphore.h>
 
-#define BUDDY_HEADER_SIZE   sizeof(uint32_t)
-
 struct heapnode {
     uint8_t order;
     struct heapnode *next;

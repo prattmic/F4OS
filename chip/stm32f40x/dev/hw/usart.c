@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <mm/mm.h>
 #include <dev/resource.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
@@ -14,7 +15,7 @@
 
 #include <dev/hw/usart.h>
 
-#define USART_DMA_MSIZE     (512-sizeof(uint32_t))      /* Since malloc headers take up some space, we want to request the max space we can fit in one block */
+#define USART_DMA_MSIZE     (512-MM_HEADER_SIZE)      /* Since malloc headers take up some space, we want to request the max space we can fit in one block */
 
 struct semaphore usart_semaphore;
 
