@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <dev/chip.h>
 #include <dev/registers.h>
 #include <dev/cortex_m.h>
 #include <dev/hw/gpio.h>
@@ -128,9 +129,9 @@ void init_usart(void) {
 
 /* Calculates the value for the USART_BRR */
 uint16_t usart_baud(uint32_t baud) {
-    float usartdiv = (84000000)/(16*(float)baud);
+    float usartdiv = APB2_CLOCK/(16.0*baud);
     uint16_t mantissa = (uint16_t) usartdiv;
-    float fraction = 16 * (usartdiv-mantissa);
+    float fraction = 16 * (usartdiv - mantissa);
     uint16_t int_fraction = (uint16_t) fraction;
 
     /* Round fraction */
