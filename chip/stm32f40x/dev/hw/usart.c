@@ -1,17 +1,17 @@
-#include <stdint.h>
-#include <stddef.h>
 #include <dev/chip.h>
-#include <dev/registers.h>
 #include <dev/cortex_m.h>
 #include <dev/hw/gpio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <mm/mm.h>
+#include <dev/registers.h>
 #include <dev/resource.h>
+#include <kernel/fault.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
-#include <kernel/fault.h>
+#include <mm/mm.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <dev/hw/usart.h>
 
