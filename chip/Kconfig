@@ -33,6 +33,8 @@ config HAVE_FPU
 config SYS_CLOCK
     int
     prompt "System clock speed"
+    default 168000000 if CHIP_STM32F40X
+    default 84000000 if CHIP_LM4F120H5
     ---help---
         Note: This must be set to the value configured by the chip clock function
 
