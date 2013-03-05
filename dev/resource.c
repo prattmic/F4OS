@@ -96,41 +96,28 @@ int write(rd_t rd, char* d, int n) {
         return -1;
     }
 
+    resource *resource = task_switching ? curr_task->task->resources[rd] : default_resources[rd];
+    if (!resource) {
+        return -1;
+    }
+
     int tot = 0;
 
-    if (task_switching) {
-        acquire(curr_task->task->resources[rd]->sem);
-        for(int i = 0; i < n; i++) {
-            int ret = curr_task->task->resources[rd]->writer(d[i], curr_task->task->resources[rd]->env);
-            if (ret > 0) {
-                tot += ret;
-            }
-            else {
-                /* Return on error */
-                tot = ret;
-                break;
-            }
-        }
-        release(curr_task->task->resources[rd]->sem);
-    }
-    else {
-        if(default_resources[rd] != NULL) {
-            for(int i = 0; i < n; i++) {
-                int ret = default_resources[rd]->writer(d[i], default_resources[rd]->env);
-                if (ret >= 0) {
-                    tot += ret;
-                }
-                else {
-                    /* Return on error */
-                    tot = ret;
-                    break;
-                }
-            }
+    acquire(resource->sem);
+
+    for(int i = 0; i < n; i++) {
+        int ret = resource->writer(d[i], resource->env);
+        if (ret > 0) {
+            tot += ret;
         }
         else {
-            return -1;
+            /* Return on error */
+            tot = ret;
+            break;
         }
     }
+
+    release(resource->sem);
 
     return tot;
 }
@@ -141,64 +128,34 @@ int swrite(rd_t rd, char* s) {
         return -1;
     }
 
-    int n = 0; 
+    resource *resource = task_switching ? curr_task->task->resources[rd] : default_resources[rd];
+    if (!resource) {
+        return -1;
+    }
 
-    if (task_switching) {
-        acquire(curr_task->task->resources[rd]->sem);
-        if (curr_task->task->resources[rd]->swriter) {
-            int ret = curr_task->task->resources[rd]->swriter(s, curr_task->task->resources[rd]->env);
-            if (ret >= 0) {
-                n += ret;
-            }
-            else {
-                n = ret;
-            }
-                
-        }
-        else {
-            while(*s) {
-                int ret = curr_task->task->resources[rd]->writer(*s++, curr_task->task->resources[rd]->env);
-                if (ret >= 0) {
-                    n += ret;
-                }
-                else {
-                    n = ret;
-                    break;
-                }
-            }
-        }
-        release(curr_task->task->resources[rd]->sem);
+    int ret = 0; 
+
+    acquire(resource->sem);
+
+    if (resource->swriter) {
+        ret = resource->swriter(s, resource->env);
     }
     else {
-        if(default_resources[rd] != NULL) {
-            if (default_resources[rd]->swriter) {
-                int ret = default_resources[rd]->swriter(s, default_resources[rd]->env);
-                if (ret >= 0) {
-                    n += ret;
-                }
-                else {
-                    n = ret;
-                }
+        while(*s) {
+            int n = resource->writer(*s++, resource->env);
+            if (n >= 0) {
+                ret += n;
             }
             else {
-                while(*s) {
-                    int ret = default_resources[rd]->writer(*s++, default_resources[rd]->env);
-                    if (ret >= 0) {
-                        n += ret;
-                    }
-                    else {
-                        n = ret;
-                        break;
-                    }
-                }
+                ret = n;
+                break;
             }
-        }
-        else { 
-            return -1;
         }
     }
 
-    return n;
+    release(resource->sem);
+
+    return ret;
 }
 
 /* Returns 0 on success, else on error */
@@ -207,28 +164,18 @@ int close(rd_t rd) {
         return -1;
     }
 
-    int ret;
+    resource **resource = task_switching ? &curr_task->task->resources[rd] : &default_resources[rd];
 
-    if (task_switching) {
-        ret = curr_task->task->resources[rd]->closer(curr_task->task->resources[rd]);
-        if (ret >= 0) {
-            if (rd == curr_task->task->top_rd - 1) {
-                curr_task->task->top_rd--;
-            }
-            kfree(curr_task->task->resources[rd]);
-            curr_task->task->resources[rd] = NULL;
-        }
+    if (!*resource) {
+        return -1;
     }
-    else {
-        if(default_resources[rd] != NULL) {
-            ret = default_resources[rd]->closer(default_resources[rd]->env);
-            if (ret >= 0) {
-                kfree(default_resources[rd]);
-                default_resources[rd] = NULL;
-            }
-        }
-        else {
-            ret = -1;
+
+    int ret = (*resource)->closer(*resource);
+    if (!ret) {
+        kfree(*resource);
+        *resource = NULL;
+        if (task_switching && (rd == curr_task->task->top_rd - 1)) {
+            curr_task->task->top_rd--;
         }
     }
 
@@ -241,38 +188,31 @@ int read(rd_t rd, char *buf, int n) {
         return -1;
     }
 
+    resource *resource = task_switching ? curr_task->task->resources[rd] : default_resources[rd];
+
+    if (!resource) {
+        return -1;
+    }
+
     int tot = 0;
 
-    if (task_switching) {
-        acquire(curr_task->task->resources[rd]->sem);
-        for(int i = 0; i < n; i++) {
-            int error;
-            buf[i] = curr_task->task->resources[rd]->reader(curr_task->task->resources[rd]->env, &error);
-            if (!error) {
-                tot += 1;
-            }
-            else {
-                tot = error;
-                break;
-            }
+    acquire(resource->sem);
+
+    for(int i = 0; i < n; i++) {
+        int error;
+
+        buf[i] = resource->reader(resource->env, &error);
+
+        if (!error) {
+            tot += 1;
         }
-        release(curr_task->task->resources[rd]->sem);
-    }
-    else {
-        if(default_resources[rd] != NULL) {
-            for(int i = 0; i < n; i++) {
-                int error;
-                buf[i] = default_resources[rd]->reader(default_resources[rd]->env, &error);
-                if (!error) {
-                    tot += 1;
-                }
-                else {
-                    tot = error;
-                    break;
-                }
-            }
+        else {
+            tot = error;
+            break;
         }
     }
+
+    release(resource->sem);
 
     return tot;
 }
