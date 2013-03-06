@@ -7,7 +7,6 @@ int usart_puts(char *s, void *env) __attribute__((section(".kernel")));
 char usart_getc(void *env, int *error) __attribute__((section(".kernel")));
 int usart_close(resource *resource) __attribute__((section(".kernel")));
 
-extern struct semaphore usart_semaphore;
 extern uint8_t usart_ready;
 
 #endif

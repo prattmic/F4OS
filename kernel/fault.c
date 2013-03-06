@@ -61,8 +61,6 @@ void panic_print(char *fmt, ...) {
     led_toggle(0);
     /* We're done here... */
     task_switching = 0;
-    /* Force release of usart semaphore */
-    release(&usart_semaphore);
 
     /* Print panic message */
     printk("\r\npanic: ");
@@ -116,8 +114,6 @@ void hardfault_handler(void) {
     led_toggle(0);
     /* We're done here... */
     task_switching = 0;
-    /* Force release of usart semaphore */
-    release(&usart_semaphore);
 
     status = *SCB_HFSR;
 
@@ -157,8 +153,6 @@ void memmanage_handler(void) {
     led_toggle(0);
     /* We're done here... */
     task_switching = 0;
-    /* Force release of usart semaphore */
-    release(&usart_semaphore);
 
     printk("\r\n-----------------Memory Management Fault-----------------\r\n");
     printk("The memory management fault status register contains: 0x%x\r\n", status);
@@ -215,8 +209,6 @@ void busfault_handler(void) {
     led_toggle(0);
     /* We're done here... */
     task_switching = 0;
-    /* Force release of usart semaphore */
-    release(&usart_semaphore);
 
     printk("\r\n-----------------Bus Fault-----------------\r\n");
     printk("The bus fault status register contains: 0x%x\r\n", status);
@@ -280,8 +272,6 @@ void usagefault_handler(void) {
     led_toggle(0);
     /* We're done here... */
     task_switching = 0;
-    /* Force release of usart semaphore */
-    release(&usart_semaphore);
 
     printk("\r\n-----------------Usage Fault-----------------\r\n");
     printk("The usage fault status register contains: 0x%x\r\n", status);
