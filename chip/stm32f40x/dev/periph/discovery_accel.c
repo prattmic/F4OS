@@ -39,6 +39,8 @@ static void discovery_accel_cs_low(void) {
 }
 
 rd_t open_discovery_accel(void) {
+    rd_t ret;
+
     /* --- Set up CS pin and set high ---*/
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOEEN;
 
@@ -53,15 +55,14 @@ rd_t open_discovery_accel(void) {
 
     discovery_accel *accel = kmalloc(sizeof(discovery_accel));
     if (!accel) {
-        printk("OOPS: Could not allocate space for discovery accel resource.\r\n");
-        return -1;
+        ret = -1;
+        goto err;
     }
 
     resource *new_r = create_new_resource();
     if(!new_r) {
-        printk("OOPS: Could not allocate space for discovery accel resource.\r\n");
-        kfree(accel);
-        return -1;
+        ret = -1;
+        goto err_free_accel;
     }
 
     accel->spi_port = &spi1;
@@ -78,10 +79,8 @@ rd_t open_discovery_accel(void) {
     uint8_t data = 0x47;
     if (spi_write(accel->spi_port, &accel->spi_dev, 0x20, &data, 1) != 1) {
         /* Unable to activate :( */
-        release(&spi1_semaphore);
-        kfree(accel);
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_release_sem;
     }
 
     release(&spi1_semaphore);
@@ -95,7 +94,22 @@ rd_t open_discovery_accel(void) {
     new_r->read_sem = &spi1_semaphore;
     new_r->write_sem = &spi1_semaphore;
 
-    return add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task->task, new_r);
+    if (ret < -1) {
+        goto err_free_new_r;
+    }
+
+    return ret;
+
+err_release_sem:
+    release(&spi1_semaphore);
+err_free_new_r:
+    kfree(new_r);
+err_free_accel:
+    kfree(accel);
+err:
+    printk("OOPS: Unable to open Discovery accelerometer.\r\n");
+    return ret;
 }
 
 char discovery_accel_read(void *env, int *error) {

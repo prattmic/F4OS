@@ -26,17 +26,18 @@ char px4_ms5611_read(void *env, int *error);
 int px4_ms5611_close(resource *rd);
 
 rd_t open_px4_ms5611(void) {
+    rd_t ret;
+
     resource *new_r = create_new_resource();
     if (!new_r) {
-        printk("OOPS: Could not allocate space for ms5611 resource.\r\n");
-        return -1;
+        ret = -1;
+        goto err;
     }
 
-    struct ms5611 *env = (struct ms5611 *) malloc(sizeof(struct ms5611));
+    struct ms5611 *env = (struct ms5611 *) kmalloc(sizeof(struct ms5611));
     if (!env) {
-        printk("OOPS: Could not allocate space for ms5611 resource.\r\n");
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_free_new_r;
     }
 
     if (!(i2c2.ready)) {
@@ -52,10 +53,8 @@ rd_t open_px4_ms5611(void) {
         packet = 0xA0 + 2*i;  /* Read C[i] */
         i2c_write(&i2c2, MS5611_ADDR, &packet, 1);
         if (i2c_read(&i2c2, MS5611_ADDR, data, 2) != 2) {
-            release(&i2c2_semaphore);
-            kfree(new_r);
-            free(env);
-            return -1;
+            ret = -1;
+            goto err_release_sem;
         }
 
         union {
@@ -81,7 +80,23 @@ rd_t open_px4_ms5611(void) {
     new_r->read_sem = &i2c2_semaphore;
     new_r->write_sem = &i2c2_semaphore;
 
-    return add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task->task, new_r);
+    if (ret < 0) {
+        ret = -1;
+        goto err_free_env;
+    }
+
+    return ret;
+
+err_release_sem:
+    release(&i2c2_semaphore);
+err_free_env:
+    kfree(env);
+err_free_new_r:
+    kfree(new_r);
+err:
+    printk("OOPS: Unable to open MS5611.\r\n");
+    return ret;
 }
 
 int px4_ms5611_write(char c, void *env) {

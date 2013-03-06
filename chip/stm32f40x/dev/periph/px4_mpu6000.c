@@ -34,6 +34,8 @@ static void cs_low(void) {
 }
 
 rd_t open_px4_mpu6000(void) {
+    rd_t ret;
+
     /* Set up CS pin and set high */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
 
@@ -48,15 +50,14 @@ rd_t open_px4_mpu6000(void) {
 
     resource *new_r = create_new_resource();
     if (!new_r) {
-        printk("OOPS: Could not allocate space for mpu6000 resource.\r\n");
-        return -1;
+        ret = -1;
+        goto err;
     }
 
     struct mpu6000 *env = (struct mpu6000 *) kmalloc(sizeof(struct mpu6000));
     if (!env) {
-        printk("OOPS: Could not allocate space for mpu6000 resource.\r\n");
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_free_new_r;
     }
 
     env->spi_port = &spi1;
@@ -74,10 +75,8 @@ rd_t open_px4_mpu6000(void) {
     uint8_t data = MPU6000_PWR_MGMT_1_CLK_PLLGYROX;
     if (spi_write(env->spi_port, &env->spi_dev, MPU6000_PWR_MGMT_1, &data, 1) != 1) {
         /* Unable to activate :( */
-        release(&spi1_semaphore);
-        kfree(env);
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_release_sem;
     }
 
     release(&spi1_semaphore);
@@ -90,12 +89,8 @@ rd_t open_px4_mpu6000(void) {
     /* 100Hz LPF, Gyro range +- 500deg/s, Accel range +-4g */
     uint8_t config[3] = {MPU6000_CONFIG_LPF_100HZ, MPU6000_GYRO_CONFIG_500DPS, MPU6000_ACCEL_CONFIG_4G};
     if (spi_write(env->spi_port, &env->spi_dev, MPU6000_CONFIG, config, 3) != 3) {
-        data = MPU6000_PWR_MGMT_1_SLEEP;    /* Sleep mode */
-        spi_write(env->spi_port, &env->spi_dev, MPU6000_PWR_MGMT_1, &data, 1);
-        release(&spi1_semaphore);
-        kfree(env);
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_sleep;
     }
 
     release(&spi1_semaphore);
@@ -107,7 +102,25 @@ rd_t open_px4_mpu6000(void) {
     new_r->read_sem = &spi1_semaphore;
     new_r->write_sem = &spi1_semaphore;
 
-    return add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task->task, new_r);
+    if (ret < 0) {
+        acquire(&spi1_semaphore);
+        goto err_sleep;
+    }
+
+    return ret;
+
+err_sleep:
+    data = MPU6000_PWR_MGMT_1_SLEEP;    /* Sleep mode */
+    spi_write(env->spi_port, &env->spi_dev, MPU6000_PWR_MGMT_1, &data, 1);
+err_release_sem:
+    release(&spi1_semaphore);
+    kfree(env);
+err_free_new_r:
+    kfree(new_r);
+err:
+    printk("OOPS: Unable to open MPU6000.\r\n");
+    return ret;
 }
 
 static char px4_mpu6000_read(void *env, int *error) {

@@ -61,7 +61,7 @@ rd_t add_resource(task_ctrl* tcs, resource* r) {
         }
 
         /* If we got here, nothing was found. */
-        printk("No room to add resources.\r\n");
+        printk("OOPS: No room to add resources.\r\n");
         return -1;
     }
 }

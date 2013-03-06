@@ -19,17 +19,18 @@ int buf_stream_write(char c, void *env);
 int buf_stream_close(resource *resource);
 
 rd_t open_buf_stream(char *buf) {
-    struct buf_stream *env = malloc(sizeof(struct buf_stream)); 
+    rd_t ret;
+
+    struct buf_stream *env = kmalloc(sizeof(struct buf_stream)); 
     if (!env) {
-        printk("OOPS: Could not allocate space for buffer stream resource.\r\n");
-        return -1;
+        ret = -1;
+        goto err;
     }
 
     resource *new_r = create_new_resource();
     if (!new_r) {
-        printk("OOPS: Unable to allocate space for buffer stream resource.\r\n");
-        free(env);
-        return -1;
+        ret = -1;
+        goto err_free_env;
     }
 
     env->buf = buf;
@@ -44,14 +45,25 @@ rd_t open_buf_stream(char *buf) {
         init_semaphore(new_r->read_sem);
     }
     else {
-        printk("OOPS: Unable to allocate memory for buffer stream semaphore.\r\n");
-        kfree(new_r);
-        free(env);
-        return -1;
+        ret = -1;
+        goto err_free_new_r;
     }
     new_r->write_sem = new_r->read_sem;
 
-    return add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task->task, new_r);
+    if (ret < 0) {
+        goto err_free_new_r;
+    }
+
+    return ret;
+
+err_free_new_r:
+    kfree(new_r);
+err_free_env:
+    kfree(env);
+err:
+    printk("OOPS: Unable to open buffer stream.\r\n");
+    return ret;
 }
 
 char buf_stream_read(void *env, int *error) {

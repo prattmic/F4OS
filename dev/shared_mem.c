@@ -23,17 +23,18 @@ int shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
 int shared_mem_close(resource *env) __attribute__((section(".kernel")));
 
 rd_t open_shared_mem(void) {
+    rd_t ret;
+
     shared_mem *mem = kmalloc(sizeof(shared_mem));
     if (!mem) {
-        printk("OOPS: Could not allocate memory for shared memory resource.\r\n");
-        return -1;
+        ret = -1;
+        goto err;
     }
 
     resource *new_r = create_new_resource();
     if (!new_r) {
-        printk("OOPS: Unable to allocate memory for shared memory resource.\r\n");
-        kfree(mem);
-        return -1;
+        ret = -1;
+        goto err_free_mem;
     }
 
     mem->read_ctr = 0;
@@ -50,14 +51,25 @@ rd_t open_shared_mem(void) {
         init_semaphore(new_r->read_sem);
     }
     else {
-        printk("OOPS: Unable to allocate memory for shared memory resource.\r\n");
-        kfree(new_r);
-        kfree(mem);
-        return -1;
+        ret = -1;
+        goto err_free_new_r;
     }
     new_r->write_sem = new_r->read_sem;
 
-    return add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task->task, new_r);
+    if (ret < 0) {
+        goto err_free_new_r;
+    }
+
+    return ret;
+
+err_free_new_r:
+    kfree(new_r);
+err_free_mem:
+    kfree(mem);
+err:
+    printk("OOPS: Unable to open shared mem.\r\n");
+    return ret;
 }
 
 char shared_mem_read(void *env, int *error) {

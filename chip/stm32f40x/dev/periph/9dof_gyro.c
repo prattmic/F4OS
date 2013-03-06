@@ -15,17 +15,18 @@ int sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel")));
 int sfe9dof_gyro_close(resource *env) __attribute__((section(".kernel"))); 
 
 rd_t open_sfe9dof_gyro(void) {
+    rd_t ret;
+
     sfe9dof_gyro *gyro = kmalloc(sizeof(sfe9dof_gyro)); 
     if (!gyro) {
-        printk("OOPS: Could not allocate space for gyro resource.\r\n");
-        return -1;
+        ret = -1;
+        goto err;
     }
 
     resource *new_r = create_new_resource();
     if(!new_r) {
-        printk("OOPS: Could not allocate space for gyro resource.\r\n");
-        kfree(gyro);
-        return -1;
+        ret = -1;
+        goto err_free_gyro;
     }
 
     /* We expect that spi1 was init'd in bootmain.c */
@@ -46,19 +47,15 @@ rd_t open_sfe9dof_gyro(void) {
     packet[0] = 0x15;
     packet[1] = 0x07;
     if (i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2) != 2) {
-        release(&i2c1_semaphore);
-        kfree(gyro);
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_release_sem;
     }
 
     packet[0] = 0x16;
     packet[1] = 0x18;
     if (i2c_write(gyro->i2c_port, gyro->device_addr, packet, 2) != 2) {
-        release(&i2c1_semaphore);
-        kfree(gyro);
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_release_sem;
     }
 
     release(&i2c1_semaphore);
@@ -70,7 +67,22 @@ rd_t open_sfe9dof_gyro(void) {
     new_r->read_sem = &i2c1_semaphore;
     new_r->write_sem = &i2c1_semaphore;
 
-    return add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task->task, new_r);
+    if (ret < 0) {
+        goto err_free_new_r;
+    }
+
+    return ret;
+
+err_release_sem:
+    release(&i2c1_semaphore);
+err_free_new_r:
+    kfree(new_r);
+err_free_gyro:
+    kfree(gyro);
+err:
+    printk("OOPS: Unable to open 9DOF gyro,\r\n");
+    return ret;
 }
 
 char sfe9dof_gyro_read(void *env, int *error) {

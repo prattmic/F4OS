@@ -21,17 +21,18 @@ static char px4_hmc5883_read(void *env, int *error) __attribute__((section(".ker
 static int px4_hmc5883_close(resource *res) __attribute__((section(".kernel")));
 
 rd_t open_px4_hmc5883(void) {
+    rd_t ret;
+
     resource *new_r = create_new_resource();
     if (!new_r) {
-        printk("OOPS: Could not allocate space for hmc5883 resource.\r\n");
-        return -1;
+        ret = -1;
+        goto err;
     }
 
     struct hmc5883 *env = (struct hmc5883 *) malloc(sizeof(struct hmc5883));
     if (!env) {
-        printk("OOPS: Could not allocate space for hmc5883 resource.\r\n");
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_free_new_r;
     }
 
     if (!(i2c2.ready)) {
@@ -46,10 +47,8 @@ rd_t open_px4_hmc5883(void) {
     packet[2] = 0x20;   /* auto-increment to config reg B; gain to 1090 */
     packet[3] = 0x00;   /* auto-increment to mode reg; continuous mode */
     if (i2c_write(&i2c2, HMC5883_ADDR, packet, 4) != 4) {
-        release(&i2c2_semaphore);
-        free(env);
-        kfree(new_r);
-        return -1;
+        ret = -1;
+        goto err_release_sem;
     }
 
     release(&i2c2_semaphore);
@@ -63,7 +62,22 @@ rd_t open_px4_hmc5883(void) {
     new_r->read_sem = &i2c2_semaphore;
     new_r->write_sem = &i2c2_semaphore;
 
-    return add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task->task, new_r);
+    if (ret < 0) {
+        goto err_free_env;
+    }
+
+    return ret;
+
+err_release_sem:
+    release(&i2c2_semaphore);
+err_free_env:
+    free(env);
+err_free_new_r:
+    kfree(new_r);
+err:
+    printk("OOPS: Unable to open HMC5883.\r\n");
+    return ret;
 }
 
 static int px4_hmc5883_write(char c, void *env) {
