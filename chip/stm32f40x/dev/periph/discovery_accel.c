@@ -92,7 +92,8 @@ rd_t open_discovery_accel(void) {
     new_r->writer = &discovery_accel_write;
     new_r->reader = &discovery_accel_read;
     new_r->closer = &discovery_accel_close;
-    new_r->sem = &spi1_semaphore;
+    new_r->read_sem = &spi1_semaphore;
+    new_r->write_sem = &spi1_semaphore;
 
     return add_resource(curr_task->task, new_r);
 }

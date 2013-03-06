@@ -17,15 +17,16 @@
 
 #define USART_DMA_MSIZE     (512-MM_HEADER_SIZE)      /* Since malloc headers take up some space, we want to request the max space we can fit in one block */
 
-struct semaphore usart_semaphore;
-
+struct semaphore usart_read_semaphore;
+struct semaphore usart_write_semaphore;
 
 resource uart_console = {   .writer     = &usart_putc,
                             .swriter    = &usart_puts,
                             .reader     = &usart_getc,
                             .closer     = &usart_close,
                             .env        = NULL,
-                            .sem        = &usart_semaphore};
+                            .read_sem   = &usart_read_semaphore,
+                            .write_sem  = &usart_write_semaphore};
 
 static uint16_t usart_baud(uint32_t baud) __attribute__((section(".kernel")));
 
@@ -123,7 +124,8 @@ void init_usart(void) {
     *USART1_CR1 |= USART_CR1_TE;
 
     /* Reset semaphore */
-    init_semaphore(&usart_semaphore);
+    init_semaphore(&usart_read_semaphore);
+    init_semaphore(&usart_write_semaphore);
 
     usart_ready = 1;
 }
@@ -233,16 +235,7 @@ char usart_getc(void *env, int *error) {
 
     /* Waiting... */
     while (!wrapped && dma_read == read) {
-        /* Yield */
-        if (task_switching && !IPSR()) {
-            /* We release the semaphore here to allow other tasks to print while we wait.
-             * This is not an ideal solution, as someone may steal the data we are waiting
-             * for, but it prevents tasks like shell, which continuously waits for input,
-             * from preventing all other tasks from printing */
-            release(&usart_semaphore);
-            SVC(SVC_YIELD);
-            acquire(&usart_semaphore);
-        }
+        yield_if_possible();
 
         dma_read = USART_DMA_MSIZE - (uint16_t) *DMA2_NDTR_S(2);
         wrapped = *DMA2_LISR & DMA_LISR_TCIF2;

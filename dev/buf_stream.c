@@ -39,9 +39,9 @@ rd_t open_buf_stream(char *buf) {
     new_r->swriter = NULL;
     new_r->reader = &buf_stream_read;
     new_r->closer = &buf_stream_close;
-    new_r->sem    = malloc(sizeof(semaphore));
-    if (new_r->sem) {
-        init_semaphore(new_r->sem);
+    new_r->read_sem = malloc(sizeof(semaphore));
+    if (new_r->read_sem) {
+        init_semaphore(new_r->read_sem);
     }
     else {
         printk("OOPS: Unable to allocate memory for buffer stream semaphore.\r\n");
@@ -49,6 +49,7 @@ rd_t open_buf_stream(char *buf) {
         free(env);
         return -1;
     }
+    new_r->write_sem = new_r->read_sem;
 
     return add_resource(curr_task->task, new_r);
 }
@@ -68,8 +69,8 @@ int buf_stream_write(char c, void *env) {
 }
 
 int buf_stream_close(resource *resource) {
-    acquire_for_free(resource->sem);
+    acquire_for_free(resource->read_sem);
     free(resource->env);
-    free((void*) resource->sem);
+    free((void*) resource->read_sem);
     return 0;
 }

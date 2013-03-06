@@ -104,7 +104,8 @@ rd_t open_px4_mpu6000(void) {
     new_r->reader = &px4_mpu6000_read;
     new_r->writer = &px4_mpu6000_write;
     new_r->closer = &px4_mpu6000_close;
-    new_r->sem = &spi1_semaphore;
+    new_r->read_sem = &spi1_semaphore;
+    new_r->write_sem = &spi1_semaphore;
 
     return add_resource(curr_task->task, new_r);
 }

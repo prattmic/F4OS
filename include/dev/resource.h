@@ -8,7 +8,11 @@ typedef int8_t rd_t;
 struct semaphore;
 
 typedef struct resource {
-    volatile struct semaphore   *sem;
+    /* Separate read and write semaphores available.
+     * For resources that require one lock for all
+     * actions, these should be set equal to one another. */
+    volatile struct semaphore   *read_sem;
+    volatile struct semaphore   *write_sem;
     void                        *env;
     int                         (*writer)(char, void*);
     int                         (*swriter)(char*, void*);   /* Optional string writer function used by swrite if available  */

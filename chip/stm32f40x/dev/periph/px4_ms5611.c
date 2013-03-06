@@ -78,7 +78,8 @@ rd_t open_px4_ms5611(void) {
     new_r->writer = &px4_ms5611_write;
     new_r->reader = &px4_ms5611_read;
     new_r->closer = &px4_ms5611_close;
-    new_r->sem = &i2c2_semaphore;
+    new_r->read_sem = &i2c2_semaphore;
+    new_r->write_sem = &i2c2_semaphore;
 
     return add_resource(curr_task->task, new_r);
 }

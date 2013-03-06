@@ -45,9 +45,9 @@ rd_t open_shared_mem(void) {
     new_r->swriter = NULL;
     new_r->reader = &shared_mem_read;
     new_r->closer = &shared_mem_close;
-    new_r->sem    = kmalloc(sizeof(semaphore));
-    if (new_r->sem) {
-        init_semaphore(new_r->sem);
+    new_r->read_sem = kmalloc(sizeof(semaphore));
+    if (new_r->read_sem) {
+        init_semaphore(new_r->read_sem);
     }
     else {
         printk("OOPS: Unable to allocate memory for shared memory resource.\r\n");
@@ -55,6 +55,7 @@ rd_t open_shared_mem(void) {
         kfree(mem);
         return -1;
     }
+    new_r->write_sem = new_r->read_sem;
 
     return add_resource(curr_task->task, new_r);
 }
@@ -85,8 +86,8 @@ int shared_mem_write(char c, void *env) {
 
 int shared_mem_close(resource *resource) {
     kfree(resource->env);
-    acquire_for_free(resource->sem);
-    kfree((void*) resource->sem);
+    acquire_for_free(resource->read_sem);
+    kfree((void*) resource->read_sem);
 
     return 0;
 }

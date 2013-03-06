@@ -60,7 +60,8 @@ rd_t open_px4_hmc5883(void) {
     new_r->writer = &px4_hmc5883_write;
     new_r->reader = &px4_hmc5883_read;
     new_r->closer = &px4_hmc5883_close;
-    new_r->sem = &i2c2_semaphore;
+    new_r->read_sem = &i2c2_semaphore;
+    new_r->write_sem = &i2c2_semaphore;
 
     return add_resource(curr_task->task, new_r);
 }

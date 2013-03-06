@@ -13,14 +13,16 @@
 
 #include <dev/hw/usart.h>
 
-struct semaphore usart_semaphore;
+struct semaphore usart_read_semaphore;
+struct semaphore usart_write_semaphore;
 
 resource uart_console = {   .writer     = &usart_putc,
                             .swriter    = &usart_puts,
                             .reader     = &usart_getc,
                             .closer     = &usart_close,
                             .env        = NULL,
-                            .sem        = &usart_semaphore};
+                            .read_sem   = &usart_read_semaphore,
+                            .write_sem  = &usart_write_semaphore};
 
 static void usart_baud(uint32_t baud) __attribute__((section(".kernel")));
 
@@ -62,7 +64,8 @@ void init_usart(void) {
     UART0_CTL_R |= UART_CTL_UARTEN | UART_CTL_RXE | UART_CTL_TXE;
 
     /* Reset semaphore */
-    init_semaphore(&usart_semaphore);
+    init_semaphore(&usart_read_semaphore);
+    init_semaphore(&usart_write_semaphore);
 
     usart_ready = 1;
 }
@@ -112,11 +115,7 @@ char usart_getc(void *env, int *error) {
 
     /* Wait for data */
     while (UART0_FR_R & UART_FR_RXFE) {
-        if (task_switching && !IPSR()) {
-            release(&usart_semaphore);
-            SVC(SVC_YIELD);
-            acquire(&usart_semaphore);
-        }
+        yield_if_possible();
     }
 
     return UART0_DR_R & UART_DR_DATA_M;

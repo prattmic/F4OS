@@ -11,7 +11,9 @@
 #include <dev/resource.h>
 
 static inline uint8_t resource_null(resource *r) {
-    if (r->writer == NULL && r->swriter == NULL && r->reader == NULL && r->closer == NULL && r->env == NULL && r->sem == NULL) {
+    if (r->writer == NULL && r->swriter == NULL && r->reader == NULL 
+            && r->closer == NULL && r->env == NULL && r->read_sem == NULL
+            && r->write_sem == NULL) {
         return 1;
     }
 
@@ -103,7 +105,7 @@ int write(rd_t rd, char* d, int n) {
 
     int tot = 0;
 
-    acquire(resource->sem);
+    acquire(resource->write_sem);
 
     for(int i = 0; i < n; i++) {
         int ret = resource->writer(d[i], resource->env);
@@ -117,7 +119,7 @@ int write(rd_t rd, char* d, int n) {
         }
     }
 
-    release(resource->sem);
+    release(resource->write_sem);
 
     return tot;
 }
@@ -135,7 +137,7 @@ int swrite(rd_t rd, char* s) {
 
     int ret = 0; 
 
-    acquire(resource->sem);
+    acquire(resource->write_sem);
 
     if (resource->swriter) {
         ret = resource->swriter(s, resource->env);
@@ -153,7 +155,7 @@ int swrite(rd_t rd, char* s) {
         }
     }
 
-    release(resource->sem);
+    release(resource->write_sem);
 
     return ret;
 }
@@ -196,7 +198,7 @@ int read(rd_t rd, char *buf, int n) {
 
     int tot = 0;
 
-    acquire(resource->sem);
+    acquire(resource->read_sem);
 
     for(int i = 0; i < n; i++) {
         int error;
@@ -212,7 +214,7 @@ int read(rd_t rd, char *buf, int n) {
         }
     }
 
-    release(resource->sem);
+    release(resource->read_sem);
 
     return tot;
 }

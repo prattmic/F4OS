@@ -67,7 +67,8 @@ rd_t open_sfe9dof_gyro(void) {
     new_r->writer = &sfe9dof_gyro_write;
     new_r->reader = &sfe9dof_gyro_read;
     new_r->closer = &sfe9dof_gyro_close;
-    new_r->sem = &i2c1_semaphore;
+    new_r->read_sem = &i2c1_semaphore;
+    new_r->write_sem = &i2c1_semaphore;
 
     return add_resource(curr_task->task, new_r);
 }
