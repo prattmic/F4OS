@@ -37,9 +37,12 @@ fail:
 
 /* Place task in task list based on priority */
 void append_task(task_node_list *list, task_node *task) {
-    /* Interrupts need to be disabled while modifying the task
-     * list, as an interrupt could find the list chopped in two */
-    __asm__("cpsid  i");
+    /* append_task must not be called outside interrupt
+     * context while task switching, as the task list
+     * may change at any time. */
+    if (task_switching && !IPSR()) {
+        panic_print("append_task called outside of interrupt context while task switching.");
+    }
 
     /* Check if head is set */
     if (list->head == NULL) {
@@ -59,8 +62,6 @@ void append_task(task_node_list *list, task_node *task) {
             task->next = list->head;
             task->next->prev = task;
             list->head = task;
-
-            __asm__("cpsie  i");
             return;
         }
         else {
@@ -84,8 +85,6 @@ void append_task(task_node_list *list, task_node *task) {
             prev->next = task;
         }
     }
-
-    __asm__("cpsie  i");
 }
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {

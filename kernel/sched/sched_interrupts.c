@@ -17,14 +17,14 @@ void svc_handler(uint32_t*) __attribute__((section(".kernel")));
 void systick_handler(void) {
     system_ticks++;
 
-    /* Update periodic tasks */
-    rtos_tick();
-
     /* Call PendSV to do switching */
     *SCB_ICSR |= SCB_ICSR_PENDSVSET;
 }
 
 void pendsv_handler(void){
+    /* Update periodic tasks */
+    rtos_tick();
+
     curr_task->task->stack_top = PSP();
 
     switch_task(NULL);
