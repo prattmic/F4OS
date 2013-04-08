@@ -23,11 +23,11 @@ const char banner[] = "Welcome to...\r\n"
                 "88                88      `\"Y8888Y\"\'     \"Y88888P\"   \r\n"
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n";
 
-int os_start(void) __attribute__((section(".kernel")));
+void os_start(void) __attribute__((section(".kernel")));
 void clock(void);
 void init_cortex_m(void);
 
-int os_start(void) {
+void os_start(void) {
     clock();
     init_cortex_m();
 
@@ -53,5 +53,4 @@ int os_start(void) {
 
     start_sched();
     panic_print("Task switching ended.");
-    return 0;
 }
