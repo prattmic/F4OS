@@ -23,8 +23,8 @@ int fgetc(rd_t rd);
 int fprintf(rd_t rd, char *fmt, ...);
 int vfprintf(rd_t rd, char *fmt, va_list ap, int (*puts_fn)(rd_t,char*), int (*putc_fn)(rd_t,char));
 
-int puts(char *s);
-int putc(char letter);
+#define puts(s) fputs(stdout, s)
+#define putc(c) fputc(stdout, c)
 #define getc() fgetc(stdin)
 #define printf(args...) fprintf(stdout, args)
 

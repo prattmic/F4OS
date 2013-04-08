@@ -11,16 +11,8 @@ int fputs(rd_t rd, char *s) {
     return swrite(rd, s);
 }
 
-int puts(char *s) {
-    return swrite(0, s);
-}
-
 int fputc(rd_t rd, char letter) {
     return write(rd, &letter, 1);
-}
-
-int putc(char letter) {
-    return write(0, &letter, 1);
 }
 
 int fgetc(rd_t rd) {
