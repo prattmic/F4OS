@@ -1,5 +1,3 @@
-/* mem.S: assembler memory operations. */
-
 .syntax unified
 .thumb 
 
@@ -7,8 +5,7 @@
 .arch armv7e-m
 .fpu fpv4-sp-d16
 
-/* Changes from unprivileged to privileged mode.
- * This needs to be in .kernel so only the kernel can call it. */
+/* Changes from unprivileged to privileged mode. */
 .thumb_func
 .section    .kernel
 .global     raise_privilege
@@ -74,8 +71,7 @@ restore_context:
     msr     psp, r0
     bx      lr
 
-/* Saves full context to PSP, including what the exception handler would normally do. */
-/* For save_full_context, see old revisions */
+/* For save_full_context, see f3f5b61 kernel/sched/sched_swap.c */
 
 /* Restores full context from PSP, including what the exception handler would normally do. */
 .thumb_func
