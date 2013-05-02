@@ -39,7 +39,7 @@ struct semaphore i2c2_semaphore = {
     .waiting = NULL
 };
 
-/* This has to be a function because GCC's optimizations suck 
+/* This has to be a function because GCC's optimizations suck
  * GCC's optimizations break read and write when using this line
  * on their own or with an inline function, despite the fact that
  * GCC inlines this function anyway. */

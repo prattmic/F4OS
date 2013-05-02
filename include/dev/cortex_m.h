@@ -98,7 +98,7 @@ inline uint32_t *MSP(void) {
 #define SCB_BFAR                        (volatile uint32_t *) (SCB_BASE + 0x038)                /* Bus fault address register - Address that caused fault */
 #define SCB_CPACR                       (volatile uint32_t *) (SCB_BASE + 0x088)                /* Coprocessor (FPU) Access Control Register */
 
-/* Memory Protection Unit (MPU) 
+/* Memory Protection Unit (MPU)
  * ST PM0214 (Cortex M4 Programming Manual) pg. 195 */
 #define MPU_TYPER                       (volatile uint32_t *) (MPU_BASE + 0x00)                 /* MPU Type Register - Describes HW MPU */
 #define MPU_CTRL                        (volatile uint32_t *) (MPU_BASE + 0x04)                 /* MPU Control Register */
@@ -106,7 +106,7 @@ inline uint32_t *MSP(void) {
 #define MPU_RBAR                        (volatile uint32_t *) (MPU_BASE + 0x0C)                 /* MPU Region Base Address Register */
 #define MPU_RASR                        (volatile uint32_t *) (MPU_BASE + 0x10)                 /* MPU Region Attribute and Size Register */
 
-/* Floating Point Unit (FPU)            
+/* Floating Point Unit (FPU)
  * ST PM0214 (Cortex M4 Programming Manual) pg. 236 */
 #define FPU_CCR                         (volatile uint32_t *) (FPU_BASE + 0x04)                 /* FPU Context Control Register */
 #define FPU_CAR                         (volatile uint32_t *) (FPU_BASE + 0x08)                 /* FPU Context Address Register */
@@ -125,7 +125,7 @@ inline uint32_t *MSP(void) {
 #define SCB_SHCSR_BUSFAULTENA           (uint32_t) (1 << 17)                                    /* Enables Bus Fault */
 #define SCB_SHCSR_USEFAULTENA           (uint32_t) (1 << 18)                                    /* Enables Usage Fault */
 
-/* Hard Fault Status Register */        
+/* Hard Fault Status Register */
 #define SCB_HFSR_VECTTBL                (uint32_t) (1 << 1)                                     /* Vector table hard fault.  Bus fault on vector table read during exception handling. */
 #define SCB_HFSR_FORCED                 (uint32_t) (1 << 30)                                    /* Forced hard fault.  Escalation of another fault. */
 

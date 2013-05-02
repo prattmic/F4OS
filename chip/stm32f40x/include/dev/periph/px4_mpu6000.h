@@ -61,5 +61,5 @@
 
 rd_t open_px4_mpu6000(void);
 int read_px4_mpu6000(rd_t rd, struct accelerometer *accel, struct gyro *gyro, float *temp);
-                                    
+
 #endif

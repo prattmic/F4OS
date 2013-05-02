@@ -10,14 +10,14 @@
 #include <dev/hw/i2c.h>
 #include <dev/periph/9dof_gyro.h>
 
-char sfe9dof_gyro_read(void *env, int *error) __attribute__((section(".kernel"))); 
-int sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel"))); 
-int sfe9dof_gyro_close(resource *env) __attribute__((section(".kernel"))); 
+char sfe9dof_gyro_read(void *env, int *error) __attribute__((section(".kernel")));
+int sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel")));
+int sfe9dof_gyro_close(resource *env) __attribute__((section(".kernel")));
 
 rd_t open_sfe9dof_gyro(void) {
     rd_t ret;
 
-    sfe9dof_gyro *gyro = kmalloc(sizeof(sfe9dof_gyro)); 
+    sfe9dof_gyro *gyro = kmalloc(sizeof(sfe9dof_gyro));
     if (!gyro) {
         ret = -1;
         goto err;

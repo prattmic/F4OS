@@ -47,9 +47,9 @@ float tanf(float x) {
         xden = 1.0;
     }
 
-    /* Calculate the polynomial. */ 
+    /* Calculate the polynomial. */
     else
-    { 
+    {
         g = f * f;
 
         xnum = f * (p[0] * g) + f;
@@ -61,7 +61,7 @@ float tanf(float x) {
     {
         xnum = -xnum;
         res = xden / xnum;
-    } 
+    }
     else
     {
         res = xnum / xden;

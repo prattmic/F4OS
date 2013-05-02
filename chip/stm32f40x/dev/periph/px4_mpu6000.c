@@ -44,7 +44,7 @@ rd_t open_px4_mpu6000(void) {
     gpio_otyper(GPIOB, 0, GPIO_OTYPER_PP);
     gpio_pupdr(GPIOB, 0, GPIO_PUPDR_NONE);
     gpio_ospeedr(GPIOB, 0, GPIO_OSPEEDR_50M);
-    
+
     /* idle CS */
     cs_high();
 

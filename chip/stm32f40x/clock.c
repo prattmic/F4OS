@@ -54,11 +54,11 @@ void clock(void) {
     if (HSE_status == (uint32_t)0x01) {
         /* Enable high performance mode, System frequency up to 168 MHz */
         *RCC_APB1ENR |= RCC_APB1ENR_PWREN;
-        *PWR_CR |= PWR_CR_VOS;  
+        *PWR_CR |= PWR_CR_VOS;
 
         /* HCLK = SYSCLK / 1*/
         *RCC_CFGR |= RCC_CFGR_HPRE_DIV1;
-          
+
         /* PCLK2 = HCLK / 2*/
         *RCC_CFGR |= RCC_CFGR_PPRE2_DIV2;
 
@@ -89,7 +89,7 @@ void clock(void) {
         while ((*RCC_CFGR & RCC_CFGR_SWS_M) != RCC_CFGR_SWS_PLL); {
         }
     }
-    else { 
+    else {
         /* If HSE fails to start-up, the application will have wrong clock configuration. */
         panic();
     }

@@ -11,7 +11,7 @@
 #include <dev/resource.h>
 
 static inline uint8_t resource_null(resource *r) {
-    if (r->writer == NULL && r->swriter == NULL && r->reader == NULL 
+    if (r->writer == NULL && r->swriter == NULL && r->reader == NULL
             && r->closer == NULL && r->env == NULL && r->read_sem == NULL
             && r->write_sem == NULL) {
         return 1;
@@ -135,7 +135,7 @@ int swrite(rd_t rd, char* s) {
         return -1;
     }
 
-    int ret = 0; 
+    int ret = 0;
 
     acquire(resource->write_sem);
 

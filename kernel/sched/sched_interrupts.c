@@ -104,7 +104,7 @@ void svc_handler(uint32_t *registers) {
     svc_number = ((char *)registers[6])[-2];
 
     switch (svc_number) {
-        case SVC_YIELD: 
+        case SVC_YIELD:
             svc_yield();
             break;
         case SVC_END_TASK:

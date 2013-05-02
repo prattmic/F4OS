@@ -88,7 +88,7 @@ static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive
     }
     *SPI_DR(spi->port) = send;
 
-    /* Wait for response 
+    /* Wait for response
      * Note: this "response" was transmitted while we were
      * transmitting the data above, it is not the device's response to that request. */
     count = 10000;

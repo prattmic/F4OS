@@ -190,7 +190,7 @@ void usbdev_data_in(struct endpoint *ep) {
     while (written < space && !ring_buf_empty(&ep->tx)) {
         union uint8_uint32 data;
         data.uint32 = 0;
-        
+
         for (int i = 0; i < 4; i++) {
             if (!ring_buf_empty(&ep->tx)) {
                 data.uint8[i] = ep->tx.buf[ep->tx.start];
@@ -202,7 +202,7 @@ void usbdev_data_in(struct endpoint *ep) {
         }
 
         DEBUG_PRINT("0x%x ", data.uint32);
-        
+
         *USB_FS_DFIFO_EP(ep->num) = data.uint32;
         written++;
     }

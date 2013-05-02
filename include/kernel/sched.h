@@ -63,7 +63,7 @@ enum service_calls {
     SVC_RELEASE,
     SVC_REGISTER_TASK,
 };
-   
+
 typedef struct task_node {
     struct task_node        *prev;
     struct task_node        *next;

@@ -8,6 +8,6 @@ typedef struct sfe9dof_gyro {
         uint8_t addr_ctr;
 } sfe9dof_gyro;
 
-rd_t open_sfe9dof_gyro(void) __attribute__((section(".kernel"))); 
+rd_t open_sfe9dof_gyro(void) __attribute__((section(".kernel")));
 
 #endif

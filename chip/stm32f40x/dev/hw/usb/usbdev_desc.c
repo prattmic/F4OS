@@ -133,7 +133,7 @@ const struct usbdev_configuration1 usbdev_configuration1 = {
         .iInterface =           0
     },
     {   /* CDC Header Functional Descriptor */
-        .bFunctionLength =      sizeof(struct usb_cdc_header_functional_descriptor), 
+        .bFunctionLength =      sizeof(struct usb_cdc_header_functional_descriptor),
         .bDescriptorType =      USB_CDC_DESCRIPTOR_CS_INTERFACE,
         .bDescriptorSubtype =   USB_CDC_DESCRIPTOR_SUBTYPE_HEADER,
         .bcdCDC =               USB_CDC_VERSION_1_1

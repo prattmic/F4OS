@@ -51,7 +51,7 @@ int printk(char *fmt, ...) {
     return ret;
 }
 
-/* Print a message and then panic 
+/* Print a message and then panic
  * Accepts standard printf format strings. */
 void panic_print(char *fmt, ...) {
     /* Disable interrupts, as the system is going down. */
@@ -120,10 +120,10 @@ void hardfault_handler(void) {
     printk("\r\n-----------------Hard Fault-----------------\r\n");
     printk("The hard fault status register contains: 0x%x\r\n", status);
     printk("Interpretation:\r\n");
-    
+
     if (status & SCB_HFSR_VECTTBL) {
         interpretation = 1;
-        printk("Vector table hard fault. Indicates a bus fault on a vector" 
+        printk("Vector table hard fault. Indicates a bus fault on a vector"
              " table read during exception processing.\r\n");
     }
     if (status & SCB_HFSR_FORCED) {
@@ -216,7 +216,7 @@ void busfault_handler(void) {
         printk("Address that caused exception: 0x%x\r\n", *SCB_BFAR);
     }
     printk("Interpretation:\r\n");
-    
+
     if (status & SCB_BFSR_IBUSERR) {
         interpretation = 1;
         printk("Instruction bus error. The processor detects the instruction bus error on prefetching"
@@ -276,7 +276,7 @@ void usagefault_handler(void) {
     printk("\r\n-----------------Usage Fault-----------------\r\n");
     printk("The usage fault status register contains: 0x%x\r\n", status);
     printk("Interpretation:\r\n");
-    
+
     if (status & SCB_UFSR_UNDEFINSTR) {
         interpretation = 1;
         printk("Undefined instruction usage fault. The PC value"

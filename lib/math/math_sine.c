@@ -24,7 +24,7 @@ float sinef(float x, int cosine) {
         case NAN:
             return (x);
         case INF:
-            return (FLOAT_NAN); 
+            return (FLOAT_NAN);
     }
 
     /* Use sin and cos properties to ease computations. */
@@ -75,7 +75,7 @@ float sinef(float x, int cosine) {
         /* Finally, compute the result. */
         res = y + y * R;
     }
- 
+
     res *= sgn;
 
     return (res);

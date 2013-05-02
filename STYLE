@@ -8,15 +8,15 @@
         while (x == y) {
             something();
             somethingelse();
-     
+
             if (some_error) {
                 do_correct();
-            } 
+            }
             else {
                 continue_as_usual();
             }
         }
-     
+
         finalthing();
         ...
     }

@@ -2,7 +2,7 @@
  * before beginning task switching.  The end user should use
  * this function to create tasks that should run at boot, or
  * to perform any other actions that need to take place at the
- * end of boot. 
+ * end of boot.
  *
  * main() is defined in kernel/sched.h */
 

@@ -12,11 +12,11 @@
 
 #define SM_SIZE   CONFIG_SHARED_MEM_SIZE
 
-typedef struct shared_mem { 
-        char        data[SM_SIZE]; 
-        int         read_ctr; 
-        int         write_ctr; 
-} shared_mem; 
+typedef struct shared_mem {
+        char        data[SM_SIZE];
+        int         read_ctr;
+        int         write_ctr;
+} shared_mem;
 
 char shared_mem_read(void *env, int *error) __attribute__((section(".kernel")));
 int shared_mem_write(char c, void *env) __attribute__((section(".kernel")));

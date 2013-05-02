@@ -49,7 +49,7 @@ rd_t open_discovery_accel(void) {
     gpio_otyper(GPIOE, 3, GPIO_OTYPER_PP);
     gpio_pupdr(GPIOE, 3, GPIO_PUPDR_NONE);
     gpio_ospeedr(GPIOE, 3, GPIO_OSPEEDR_50M);
-    
+
     /* ------ Properly idle CS */
     discovery_accel_cs_high();
 

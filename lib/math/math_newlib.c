@@ -81,8 +81,8 @@ float frexpf (float d, int *exp) {
     /* Get the exponent. */
     *exp = ((wd & 0x7f800000) >> 23) - 126;
 
-    /* Get the mantissa. */ 
-    wf = wd & 0x7fffff;  
+    /* Get the mantissa. */
+    wf = wd & 0x7fffff;
     wf |= 0x3f000000;
 
     f = uint_to_float(wf);
@@ -114,8 +114,8 @@ uint8_t numtestf(float x) {
             return INF;
         }
     }
-     
-    /* Otherwise it's a finite value. */ 
+
+    /* Otherwise it's a finite value. */
     else {
         return NUM;
     }
@@ -254,7 +254,7 @@ float powf(float x, float y) {
 
             x = expf(t);
 
-            if (!exponent_is_even_int) { 
+            if (!exponent_is_even_int) {
                 if (px & 0x80000000) {
                     /* y is an odd integer, and x is negative,
                        so the result is negative. */

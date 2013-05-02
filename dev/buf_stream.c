@@ -21,7 +21,7 @@ int buf_stream_close(resource *resource);
 rd_t open_buf_stream(char *buf) {
     rd_t ret;
 
-    struct buf_stream *env = kmalloc(sizeof(struct buf_stream)); 
+    struct buf_stream *env = kmalloc(sizeof(struct buf_stream));
     if (!env) {
         ret = -1;
         goto err;

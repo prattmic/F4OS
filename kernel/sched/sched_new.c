@@ -72,7 +72,7 @@ void append_task(task_node_list *list, task_node *task) {
                 prev = next;
                 next = next->next;
             }
-            
+
             if (next) {
                 task->next = next;
                 next->prev = task;
@@ -155,7 +155,7 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
     if (task == NULL) {
         return NULL;
     }
-    
+
     memory = (uint32_t *) malloc(STKSIZE*4);
     if (memory == NULL) {
         kfree(task);

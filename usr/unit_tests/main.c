@@ -2,7 +2,7 @@
  * before beginning task switching.  The end user should use
  * this function to create tasks that should run at boot, or
  * to perform any other actions that need to take place at the
- * end of boot. 
+ * end of boot.
  *
  * main() is defined in kernel/sched.h */
 
@@ -116,12 +116,12 @@ void rd_test(void) {
     fprintf(rd[max-1], "Test passed.\r\n");
 
     printf("Opened %d resources.\r\n", max);
-            
+
     if (rd[6] > 0) {
         printf("Closing resource %d.\r\n", rd[6]);
         close(rd[6]);
     }
-    
+
     rd[6] = open_shared_mem();
     if (rd[6] < 0) {
         printf("Unable to open new resource for rd[6].\r\n");

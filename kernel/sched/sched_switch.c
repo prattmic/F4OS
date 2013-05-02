@@ -21,7 +21,7 @@ void switch_task(task_node *node) {
             panic_print("No tasks to run.");
         }
 
-        /* As a workaround for lack of MPU support, check if the 
+        /* As a workaround for lack of MPU support, check if the
          * stack of the task we are switching from has overflowed */
         if (node->task->stack_limit > node->task->stack_top) {
             panic_print("Task (0x%x, fptr: 0x%x) has overflowed its stack. stack_top: 0x%x stack_limit: 0x%x", node->task, node->task->fptr, node->task->stack_top, node->task->stack_limit);
@@ -47,7 +47,7 @@ void switch_task(task_node *node) {
 
                 next->prev = node;
                 node->next = next;
-            } 
+            }
             /* Reached end of list without priority changing, place on end. */
             else {
                 if (node->next) {
