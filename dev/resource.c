@@ -38,14 +38,15 @@ static inline resource *get_resource(rd_t rd) {
 
 resource *create_new_resource(void) {
     resource *ret = kmalloc(sizeof(resource));
-    if(ret) {
+    if (ret) {
         memset(ret, 0, sizeof(resource));
     }
     return ret;
 }
 
+/* Add new resource to task */
 rd_t add_resource(task_ctrl* tcs, resource* r) {
-    if(r == NULL) {
+    if (r == NULL) {
         printk("OOPS: NULL resource passed to add_resource.\r\n");
         return -1;
     }
@@ -82,8 +83,11 @@ rd_t add_resource(task_ctrl* tcs, resource* r) {
     }
 }
 
+/* Properly set up resources in a new task.
+ * This means copying the resources from the current task,
+ * or the default resource list, if task switching has not
+ * yet begun. */
 void resource_setup(task_ctrl* task) {
-    /* Copy resources */
     if (task_switching) {
         for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
             task->resources[i] = curr_task->task->resources[i];
