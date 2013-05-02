@@ -20,6 +20,22 @@ static inline uint8_t resource_null(resource *r) {
     return 0;
 }
 
+/* Get resource struct from rd */
+static inline resource *get_resource(rd_t rd) {
+    if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
+        return NULL;
+    }
+
+    /* Before task switching begins, the default list of resources must be used.
+     * Once it begins, we can get the resouece directly from the task. */
+    if (task_switching) {
+        return curr_task->task->resources[rd];
+    }
+    else {
+        return default_resources[rd];
+    }
+}
+
 resource *create_new_resource(void) {
     resource *ret = kmalloc(sizeof(resource));
     if(ret) {
@@ -94,11 +110,7 @@ void resource_setup(task_ctrl* task) {
 
 /* Return bytes written, negative on error */
 int write(rd_t rd, char* d, int n) {
-    if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
-        return -1;
-    }
-
-    resource *resource = task_switching ? curr_task->task->resources[rd] : default_resources[rd];
+    resource *resource = get_resource(rd);
     if (!resource) {
         return -1;
     }
@@ -126,11 +138,7 @@ int write(rd_t rd, char* d, int n) {
 
 /* Return bytes written, negative on error */
 int swrite(rd_t rd, char* s) {
-    if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
-        return -1;
-    }
-
-    resource *resource = task_switching ? curr_task->task->resources[rd] : default_resources[rd];
+    resource *resource = get_resource(rd);
     if (!resource) {
         return -1;
     }
@@ -186,12 +194,7 @@ int close(rd_t rd) {
 
 /* Returns number of bytes read, or negative on error */
 int read(rd_t rd, char *buf, int n) {
-    if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
-        return -1;
-    }
-
-    resource *resource = task_switching ? curr_task->task->resources[rd] : default_resources[rd];
-
+    resource *resource = get_resource(rd);
     if (!resource) {
         return -1;
     }
