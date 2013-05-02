@@ -10,16 +10,6 @@
 
 #include <dev/resource.h>
 
-static inline uint8_t resource_null(resource *r) {
-    if (r->writer == NULL && r->swriter == NULL && r->reader == NULL
-            && r->closer == NULL && r->env == NULL && r->read_sem == NULL
-            && r->write_sem == NULL) {
-        return 1;
-    }
-
-    return 0;
-}
-
 /* Get resource struct from rd */
 static inline resource *get_resource(rd_t rd) {
     if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
