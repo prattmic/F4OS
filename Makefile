@@ -28,6 +28,10 @@ SRCS += resource.c shared_mem.c buf_stream.c
 VPATH += dev/hw/
 SRCS += systick.c
 
+ifdef CONFIG_HAVE_ITM
+	SRCS += itm.c
+endif
+
 # kernel/
 VPATH += kernel/
 SRCS += fault.c semaphore.c

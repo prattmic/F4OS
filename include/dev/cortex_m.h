@@ -57,15 +57,29 @@ inline uint32_t *MSP(void) {
     return val;
 }
 
+#define CORESIGHT_LOCK_MAGIC            (0xC5ACCE55)                                            /* Magic used to enable access to CoreSight components */
+
 /* Cortex M4 General Registers */
 
 /* System Control Map */
+#define ITM_BASE                        (uint32_t) (0xE0000000)                                 /* Instrumental Trace Macrocell Base Address */
+#define DWT_BASE                        (uint32_t) (0xE0001000)                                 /* Data Watchpoint and Trace Base Address */
 #define SCS_BASE                        (uint32_t) (0xE000E000)                                 /* System Control Space Base Address */
 #define SYSTICK_BASE                    (SCS_BASE + 0x0010)                                     /* Systick Registers Base Address */
 #define NVIC_BASE                       (SCS_BASE + 0x0100)                                     /* Nested Vector Interrupt Control */
 #define SCB_BASE                        (SCS_BASE + 0x0D00)                                     /* System Control Block Base Address */
 #define MPU_BASE                        (SCB_BASE + 0x0090)                                     /* MPU Block Base Address */
+#define DEBUG_BASE                      (SCB_BASE + 0x00F0)                                     /* Debug Base Address */
 #define FPU_BASE                        (SCB_BASE + 0x0230)                                     /* FPU Block Base Address */
+#define TPIU_BASE                       (uint32_t) (0xE0040000)                                 /* Trace Point Interface Unit Base Address */
+
+/* Instrumental Trace Macrocell (ITM) */
+#define ITM_STIM(n)                     (volatile uint32_t *) (ITM_BASE + 4*n)                  /* Stimulus (data) Port n */
+#define ITM_TER(n)                      (volatile uint32_t *) (ITM_BASE + 0xE00 + 4*n)          /* Trace enable register n */
+#define ITM_TPR                         (volatile uint32_t *) (ITM_BASE + 0xE40)                /* Trace privilege register */
+#define ITM_TCR                         (volatile uint32_t *) (ITM_BASE + 0xE80)                /* Trace control register */
+#define ITM_LAR                         (volatile uint32_t *) (ITM_BASE + 0xFB0)                /* Lock access register */
+#define ITM_LSR                         (volatile uint32_t *) (ITM_BASE + 0xFB4)                /* Lock status register */
 
 /* SysTick Timer */
 #define SYSTICK_CTL                     (volatile uint32_t *) (SYSTICK_BASE)                    /* Control register for SysTick timer peripheral */
@@ -106,12 +120,35 @@ inline uint32_t *MSP(void) {
 #define MPU_RBAR                        (volatile uint32_t *) (MPU_BASE + 0x0C)                 /* MPU Region Base Address Register */
 #define MPU_RASR                        (volatile uint32_t *) (MPU_BASE + 0x10)                 /* MPU Region Attribute and Size Register */
 
+/* Debug */
+#define DEBUG_DHCSR                     (volatile uint32_t *) (DEBUG_BASE + 0x00)               /* Debug Halting Control and Status Register */
+#define DEBUG_DEMCR                     (volatile uint32_t *) (DEBUG_BASE + 0x0C)               /* Debug Exception Monitor and Control Register */
+
 /* Floating Point Unit (FPU)
  * ST PM0214 (Cortex M4 Programming Manual) pg. 236 */
 #define FPU_CCR                         (volatile uint32_t *) (FPU_BASE + 0x04)                 /* FPU Context Control Register */
 #define FPU_CAR                         (volatile uint32_t *) (FPU_BASE + 0x08)                 /* FPU Context Address Register */
 
+/* Trace Port Interface Unit (TPIU) */
+#define TPIU_SSPSR                      (volatile uint32_t *) (TPIU_BASE + 0x000)               /* TPIU Supported Parallel Port Sizes Register */
+#define TPIU_CSPSR                      (volatile uint32_t *) (TPIU_BASE + 0x004)               /* TPIU Current Parallel Port Size Register */
+#define TPIU_ACPR                       (volatile uint32_t *) (TPIU_BASE + 0x010)               /* TPIU Asynchronous Clock Prescaler Register */
+#define TPIU_SPPR                       (volatile uint32_t *) (TPIU_BASE + 0x0F0)               /* TPIU Selected Pin Protocol Register */
+#define TPIU_FFCR                       (volatile uint32_t *) (TPIU_BASE + 0x304)               /* TPIU Formatter and Flush Control Register */
+#define TPIU_TYPE                       (volatile uint32_t *) (TPIU_BASE + 0xFC8)               /* TPIU Type Register */
+
 /**********************************************************************************************************************************************/
+
+/* Instrumental Trace Macrocell (ITM) */
+#define ITM_TCR_ITMENA                  (uint32_t) (1 << 0)                                     /* ITM Enable */
+#define ITM_TCR_TSENA                   (uint32_t) (1 << 1)                                     /* Timestamp generation enable */
+#define ITM_TCR_SYNCENA                 (uint32_t) (1 << 2)                                     /* Sync packet transmission enable */
+#define ITM_TCR_TXENA                   (uint32_t) (1 << 3)                                     /* Packet forwarding to TPIU enable */
+#define ITM_TCR_SWOENA                  (uint32_t) (1 << 4)                                     /* Timestamp asynchronous clocking enable */
+#define ITM_TCR_TSPRSC_MASK             (uint32_t) ((1 << 8) | (1 << 9))                        /* Timestamp prescale mask */
+#define ITM_TCR_GTSFREQ_MASK            (uint32_t) ((1 << 10) | (1 << 11))                      /* Global timestamp frequency mask */
+#define ITM_TCR_BUSID(x)                (uint32_t) (x << 16)                                    /* Trace bus ID */
+#define ITM_TCR_BUSY                    (uint32_t) (1 << 23)                                    /* ITM Busy */
 
 /* System Control Block */
 #define SCB_ICSR_PENDSVCLR              (uint32_t) (1 << 27)                                    /* Clear PendSV interrupt */
@@ -175,8 +212,28 @@ inline uint32_t *MSP(void) {
 #define MPU_RASR_AP_PRIV_RO_UN_RO       (uint32_t) (6 << 24)                                    /* All RO Permissions */
 #define MPU_RASR_XN                     (uint32_t) (1 << 28)                                    /* MPU Region Execute Never */
 
+/* Debug */
+#define DEBUG_DHCSR_DEBUGEN             (uint32_t) (1 << 0)                                     /* Debug enabled */
+
+#define DEBUG_DEMCR_TRCENA              (uint32_t) (1 << 24)                                    /* DWT and ITM enable */
+
 /* Floating Point Unit (FPU)
  * ST PM0214 (Cortex M4 Programming Manual) pg. 236 */
 #define FPU_CCR_ASPEN                   (uint32_t) (1 << 31)                                    /* FPU Automatic State Preservation */
+
+/* Trace Port Interface Unit (TPIU) */
+#define TPIU_SPPR_PARALLEL              (uint32_t) (0x0)                                        /* TPIU Parallel trace mode */
+#define TPIU_SPPR_SWO_MACHESTER         (uint32_t) (0x1)                                        /* TPIU SWO trace mode (Manchester encoding) */
+#define TPIU_SPPR_SWO_NRZ               (uint32_t) (0x2)                                        /* TPIU SWO trace mode (NRZ encoding) */
+
+#define TPIU_FFCR_FONFLIN               (uint32_t) (1 << 4)                                     /* TPIU Enable flush on FLUSHIN */
+#define TPIU_FFCR_FONTRIG               (uint32_t) (1 << 5)                                     /* TPIU Enable flush on trigger */
+#define TPIU_FFCR_FONMAN                (uint32_t) (1 << 6)                                     /* TPIU Manual flush */
+#define TPIU_FFCR_TRIGIN                (uint32_t) (1 << 8)                                     /* TPIU Trigger on TRIGIN */
+#define TPIU_FFCR_TRIGEVT               (uint32_t) (1 << 9)                                     /* TPIU Trigger on trigger event */
+#define TPIU_FFCR_TRIGFL                (uint32_t) (1 << 10)                                    /* TPIU Trigger on flush complete */
+#define TPIU_FFCR_STOPFL                (uint32_t) (1 << 12)                                    /* TPIU Stop formatter after flush */
+#define TPIU_FFCR_STOPTRIG              (uint32_t) (1 << 13)                                    /* TPIU Stop formatter after trigger */
+#define TPIU_FFCR_STOPMAN               (uint32_t) (1 << 14)                                    /* TPIU Stop formatter manually */
 
 #endif

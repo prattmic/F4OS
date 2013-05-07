@@ -8,6 +8,10 @@
 #include <kernel/fault.h>
 #include <dev/hw/led.h>
 
+#ifdef CONFIG_HAVE_ITM
+#include <dev/hw/itm.h>
+#endif
+
 #ifdef CONFIG_HAVE_USART
 #include <dev/hw/usart.h>
 #endif
@@ -41,6 +45,10 @@ void os_start(void) {
 #endif
 
     init_heap();
+
+#ifdef CONFIG_HAVE_ITM
+    init_itm();
+#endif
 
 #ifdef CONFIG_HAVE_USART
     init_usart();
