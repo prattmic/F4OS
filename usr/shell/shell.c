@@ -18,6 +18,7 @@
 #include "px4_mag.h"
 #include "px4_baro.h"
 #include "px4_accel_gyro.h"
+#include "trace_test.h"
 
 struct command {
     char *name;
@@ -29,6 +30,7 @@ const struct command valid_commands[] = {{"help",   &help},
                                          {"uname",  &uname},
                                          {"ipctest", &ipctest},
                                          {"rd_test", &rd_test},
+                                         {"trace_test", &trace_test},
 #ifdef CONFIG_HAVE_LED
                                          {"blink",  &blink},
 #endif
