@@ -21,11 +21,35 @@ config HAVE_USBDEV
 config HAVE_SWO
     bool
     prompt "Serial Wire Output (SWO) Support"
+    ---help---
+        Selecting this option allows the OS to make modifications to the
+        SWD configuration, and to use it as an output.
+
+config SWO_FREQ
+    int
+    prompt "Serial Wire Output (SWO) Frequency"
+    depends on HAVE_SWO
+    default 6000
 
 config HAVE_ITM
     bool
     prompt "Instrumental Trace Macrocell Support"
-    depends on HAVE_SWO && ALLOW_SWO
+    depends on HAVE_SWO
+
+config ITM_BUS_ID
+    int
+    prompt "Instrumental Trace Macrocell Bus ID"
+    depends on HAVE_ITM
+    default 1
+    ---help---
+        This selects the identifying bus ID that will be used in ITM.
+
+config ENABLE_TRACE
+    bool
+    prompt "Enable tracing"
+    default y
+    ---help---
+        Enable tracing systemwide.  When disabled, all trace calls become no-ops.
 
 config SYSTICK_FREQ
     int
@@ -41,24 +65,3 @@ config SHARED_MEM_SIZE
     ---help---
         The size of buffer to be allocated for each shared memory
         resource opened.
-
-config ALLOW_SWO
-    bool
-    prompt "Allow use of Serial Wire Output (SWO)"
-    depends on HAVE_SWO
-    ---help---
-        Allows the OS to modify SWO configuration and use it as an output.
-
-config SWO_FREQ
-    int
-    prompt "Serial Wire Output (SWO) Frequency"
-    depends on HAVE_SWO && ALLOW_SWO
-    default 6000
-
-config ITM_BUS_ID
-    int
-    prompt "Instrumental Trace Macrocell Bus ID"
-    depends on HAVE_ITM
-    default 1
-    ---help---
-        This selects the identifying bus ID that will be used in ITM.
