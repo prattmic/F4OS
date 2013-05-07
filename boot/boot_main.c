@@ -6,10 +6,15 @@
 #include <dev/resource.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
-
 #include <dev/hw/led.h>
+
+#ifdef CONFIG_HAVE_USART
 #include <dev/hw/usart.h>
+#endif
+
+#ifdef CONFIG_HAVE_USBDEV
 #include <dev/hw/usbdev.h>
+#endif
 
 const char banner[] = "Welcome to...\r\n"
                 "\r\n"
