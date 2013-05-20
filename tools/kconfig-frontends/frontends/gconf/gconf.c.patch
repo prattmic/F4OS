@@ -1,9 +1,9 @@
 diff --git a/frontends/gconf/gconf.c b/frontends/gconf/gconf.c
 --- a/frontends/gconf/gconf.c
 +++ b/frontends/gconf/gconf.c
-@@ -11,7 +11,7 @@
- #endif
+@@ -12,7 +12,7 @@
  
+ #include <stdlib.h>
  #include "lkc.h"
 -#include "images.c"
 +#include "images.h"
