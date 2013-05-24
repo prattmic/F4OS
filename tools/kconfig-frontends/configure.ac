@@ -28,10 +28,10 @@ AS_IF(
     [test "$program_prefix" = NONE],
     [program_prefix=kconfig-])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
 AS_IF(
-    [test "$(${srcdir}/scripts/version.sh --internal)" = "hg"],
+    [test "$(${srcdir}/scripts/version.sh --internal)" = "git"],
     [AM_SILENT_RULES],
     [AM_SILENT_RULES([yes])])
 
@@ -43,25 +43,33 @@ AC_SUBST([SILENT_MAKEFLAGS])
 
 #----------------------------------------
 # Prepare libtool
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR]) dnl Automake, we have a problem...
 LT_PREREQ([2.2.6])
 LT_INIT([disable-static])
 
 #---------------------------------------------------------------------------
 # Set misc options
 
-# By default, do not build with -Wall, unless the user asks for it
+# By default, do build with -Wall, unless the user asks not to
+[wall_CFLAGS=-Wall]
 AC_ARG_ENABLE(
     [wall],
     [AS_HELP_STRING(
-        [--enable-wall],
-        [build with -Wall (default=no)])],
+        [--disable-wall],
+        [build with -Wall (default=yes)])],
     [AS_CASE(
         ["$enableval"],
         [yes], [wall_CFLAGS=-Wall],
         [*],   [wall_CFLAGS=""])])
 AC_SUBST([wall_CFLAGS],[${wall_CFLAGS}])
 
-# By default, do not build with -Werror, unless the user asks for it
+# For releases, do not build with -Werror, unless the user explcitly
+# requests to build with -Werror.
+# For the devel tree, do build with -Werror by default, unless user
+# explicitly disables -Werror
+AS_IF(
+    [test "$(${srcdir}/scripts/version.sh --internal)" = "git"],
+    [werror_CFLAGS=-Werror])
 AC_ARG_ENABLE(
     [werror],
     [AS_HELP_STRING(
@@ -107,7 +115,7 @@ AC_ARG_ENABLE(
     [utils],
     [AS_HELP_STRING(
         [--disable-utils],
-        [install utilities to manage .config files (default=no)])])
+        [install utilities to manage .config files (default=yes)])])
 AC_SUBST([enable_utils], [${enable_utils:-yes}])
 
 AC_ARG_ENABLE(
@@ -215,23 +223,6 @@ AC_PROG_YACC
 AC_SUBST([AM_YFLAGS], ["-t -l -p zconf"])
 
 #----------------------------------------
-# Check for standard headers
-AC_HEADER_STDC
-AC_HEADER_STDBOOL
-AC_CHECK_HEADERS([ fcntl.h limits.h locale.h ])
-AC_CHECK_HEADERS([ stdlib.h string.h sys/time.h unistd.h ])
-AC_TYPE_SIZE_T
-
-#----------------------------------------
-# Checks for library functions.
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_FUNC_ALLOCA
-AC_CHECK_FUNCS([ bzero memmove memset ])
-AC_CHECK_FUNCS([ strcasecmp strchr strcspn strdup strncasecmp strpbrk strrchr strspn strtol ])
-AC_CHECK_FUNCS([ gettimeofday mkdir regcomp setlocale uname ])
-
-#----------------------------------------
 # Check for gettext, for the kconfig frontends
 [has_gettext="$enable_L10n"]
 AS_IF(
@@ -266,19 +257,22 @@ AC_SUBST([intl_LIBS])
 # Check for ncurses, for the mconf & nconf frontends
 AS_IF(
     [test "$need_curses" = "yes" -o "$need_curses" = "auto"],
-    [AC_SUBST([CURSES_LOC])
+    [AC_SUBST([ncurses_mconf_CPPFLAGS])
      AC_SUBST([ncurses_LIBS])
      LIBS_old="$LIBS"
      LIBS=
      AC_CHECK_HEADERS(
         [ncursesw/curses.h ncurses/ncurses.h ncurses/curses.h ncurses.h curses.h],
-        [CURSES_LOC=$ac_header; break])
+        [CURSES_LOC=$ac_header; ncurses_mconf_CPPFLAGS=-DCURSES_LOC=\\\"$ac_header\\\"; break])
      AS_IF(
         [test -z "$CURSES_LOC"],
         [AS_IF(
             [test "$need_curses" = "yes"],
             [AC_MSG_ERROR([could not find curses headers (frontends: mconf/nconf)])],
             [has_curses=no])])
+     AS_CASE(
+        [$CURSES_LOC],
+        [ncursesw/*],[ncurses_mconf_CPPFLAGS="$ncurses_mconf_CPPFLAGS -DNCURSES_WIDECHAR=1"])
      AC_SEARCH_LIBS(
         [initscr],
         [ncursesw ncurses curses],
@@ -289,6 +283,10 @@ AS_IF(
             [test "$need_curses" = "yes"],
             [AC_MSG_ERROR([could not find curses library (frontends: mconf/nconf)])],
             [has_curses=no])])
+     AC_SEARCH_LIBS(
+        [setupterm],
+        [tinfo],
+        [break])
      ncurses_LIBS="$LIBS"
      LIBS=$LIBS_old])
 
@@ -300,12 +298,12 @@ AS_IF(
 # Check for libpanel and libmenu, for the nconf frontend
 AS_IF(
     [test "$need_panel_menu" = "yes" -o "$need_panel_menu" = "auto"],
-    [AC_SUBST([ncurses_extra_LIBS])
-     AC_SUBST([ncurses_extra_CPPFLAGS])
+    [AC_SUBST([ncurses_nconf_CPPFLAGS])
+     AC_SUBST([ncurses_panel_menu_LIBS])
      AS_CASE(
         [$CURSES_LOC],
-        [ncursesw/*],[ncurses_extra_CPPFLAGS="-I/usr/include/ncursesw"],
-        [ncurses/*],[ncurses_extra_CPPFLAGS="-I/usr/include/ncurses"])
+        [ncursesw/*],[ncurses_nconf_CPPFLAGS="-I/usr/include/ncursesw"],
+        [ncurses/*],[ncurses_nconf_CPPFLAGS="-I/usr/include/ncurses"])
      LIBS_old="$LIBS"
      LIBS=
      AC_SEARCH_LIBS(
@@ -330,7 +328,7 @@ AS_IF(
             [test "$need_panel_menu" = "yes"],
             [AC_MSG_ERROR([could not find libmenu library (frontend: nconf)])],
             [has_panel_menu=no])])
-     ncurses_extra_LIBS="$LIBS"
+     ncurses_panel_menu_LIBS="$LIBS"
      LIBS=$LIBS_old])
 
 AS_IF(

@@ -29,15 +29,15 @@ k_ver_plain="$( printf "%s" "${k_ver}"  \
                 |sed -r -e 's/-rc.*//;' )"
 
 case "${kf_ver}" in
-    hg) kf_ver="hg_$( hg id -i -r . )"
-        k_ver_extra="$( printf "_%-7.7s" "${k_cset}" )"
-        ;;
-    *)  k_ver_extra="";;
+    git) kf_ver="-$( git rev-parse --short HEAD )"
+         k_ver_extra="$( printf "_%-7.7s" "${k_cset}" )"
+         ;;
+    *)   k_ver_extra="";;
 esac
 
 if [ "${plain}" -eq 1 ]; then
     echo "${k_ver_plain}"
 else
-    echo "${k_ver}${k_ver_extra}-${kf_ver}"
+    echo "${k_ver}${k_ver_extra}.${kf_ver}"
 fi
 
