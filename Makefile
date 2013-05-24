@@ -134,7 +134,7 @@ $(PREFIX)/usr_$(USR).o: $(BASE)/include/config/autoconf.h .FORCE
 	$(MAKE) -C usr/$(USR)/
 
 $(PREFIX)/%.o : %.S $(BASE)/include/config/autoconf.h
-	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@ 
+	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
@@ -143,7 +143,7 @@ $(PREFIX)/%.o : %.S $(BASE)/include/config/autoconf.h
 -include $(addprefix $(PREFIX)/, $(ASM_SRCS:.S=.P))
 
 $(PREFIX)/%.o : %.c $(BASE)/include/config/autoconf.h
-	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@ 
+	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
@@ -156,7 +156,7 @@ proj: 	$(PREFIX)/$(PROJ_NAME).elf
 $(PREFIX):
 	mkdir -p $(PREFIX)
 
-$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/chip_$(CONFIG_CHIP).o $(PREFIX)/usr_$(USR).o $(OBJS) 
+$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/chip_$(CONFIG_CHIP).o $(PREFIX)/usr_$(USR).o $(OBJS)
 	@echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
 	@echo "OBJCOPY $(PROJ_NAME).hex" && $(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	@echo "OBJCOPY $(PROJ_NAME).bin" && $(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
