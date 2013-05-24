@@ -24,8 +24,9 @@ See "make help" for a list of available defconfigs.  Kconfig is provided
 by the kconfig-frontends project
 (http://ymorin.is-a-geek.org/projects/kconfig-frontends).  This project
 is included in tools/ directory and should be built automatically before
-the first OS build.  It requires automake, libtoolize, and libncurses-dev
-to build.  See the README in tools/kconfig-frontends/ for more details.
+the first OS build.  It requires automake, libtoolize, gperf, flex, bison,
+and libncurses-dev to build.  See the README in tools/kconfig-frontends/
+for more details.
 
 For flashing and debugging on the STM32F40x, texane's stlink is
 recommended: https://github.com/texane/stlink
