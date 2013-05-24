@@ -56,9 +56,11 @@ int printk(char *fmt, ...) {
 void panic_print(char *fmt, ...) {
     /* Disable interrupts, as the system is going down. */
     __asm__("cpsid  i");
+#ifdef CONFIG_HAVE_LED
     /* Toggle red LED so there is some indication that something
      * bad has happened if this hangs */
     led_toggle(0);
+#endif
     /* We're done here... */
     task_switching = 0;
 
@@ -93,6 +95,7 @@ static void stack_dump(void) {
     memory_dump(PSP(), 40);
 }
 
+#ifdef CONFIG_HAVE_LED
 void toggle_led_delay(void) {
     uint32_t count = 1000000;
 
@@ -104,14 +107,17 @@ void toggle_led_delay(void) {
         delay *= 3.14f;
     }
 }
+#endif
 
 void hardfault_handler(void) {
     uint32_t status;
     uint8_t interpretation = 0;
 
+#ifdef CONFIG_HAVE_LED
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
     led_toggle(0);
+#endif
     /* We're done here... */
     task_switching = 0;
 
@@ -148,9 +154,11 @@ void memmanage_handler(void) {
 
     status = (uint8_t) (*SCB_CFSR & 0xff);
 
+#ifdef CONFIG_HAVE_LED
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
     led_toggle(0);
+#endif
     /* We're done here... */
     task_switching = 0;
 
@@ -204,9 +212,11 @@ void busfault_handler(void) {
 
     status = (uint8_t) ((*SCB_CFSR >> 8) & 0xff);
 
+#ifdef CONFIG_HAVE_LED
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
     led_toggle(0);
+#endif
     /* We're done here... */
     task_switching = 0;
 
@@ -267,9 +277,11 @@ void usagefault_handler(void) {
 
     status = (uint16_t) (*SCB_CFSR >> 16);
 
+#ifdef CONFIG_HAVE_LED
     /* Toggle red LED so there is some indication that something
      * bad has happened if this handler hangs */
     led_toggle(0);
+#endif
     /* We're done here... */
     task_switching = 0;
 
