@@ -22,7 +22,7 @@ burn:
 	./flash.sh $(PREFIX)/$(PROJ_NAME).bin
 
 $(PREFIX)/%.o : %.c
-	@echo "CC $(subst $(BASE)/,,$(CURDIR))/$<" && $(CC) -MD -c $(CFLAGS) $< -o $@ 
+	@echo "CC $(subst $(BASE)/,,$(CURDIR))/$<" && $(CC) -MD -c $(CFLAGS) $< -o $@
 	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
 		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \

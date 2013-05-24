@@ -1,5 +1,5 @@
 .syntax unified
-.thumb 
+.thumb
 
 .cpu cortex-m4
 .arch armv7e-m
@@ -117,7 +117,7 @@ panic:
     cpsid   i
     bl      raise_privilege
     bl      toggle_led_delay
-    b       panic 
+    b       panic
 
 .thumb_func
 hang:
@@ -125,7 +125,7 @@ hang:
 
 .thumb_func
 _reset:
-    /* Copy the data segment initializers from flash to CCM RAM */  
+    /* Copy the data segment initializers from flash to CCM RAM */
     movs    r1, #0
     b       loop_copy_data
 
@@ -134,7 +134,7 @@ copy_data_init:
     ldr     r3, [r3, r1]
     str     r3, [r0, r1]
     adds    r1, r1, #4
-    
+
 loop_copy_data:
     ldr     r0, =_sdata
     ldr     r3, =_edata
@@ -144,11 +144,11 @@ loop_copy_data:
     ldr     r2, =_sbss
     b       loop_zero_bss
 
-/* Zero fill the bss segment. */  
+/* Zero fill the bss segment. */
 zero_bss:
     movs    r3, #0
     str     r3, [r2], #4
-    
+
 loop_zero_bss:
     ldr     r3, = _ebss
     cmp     r2, r3

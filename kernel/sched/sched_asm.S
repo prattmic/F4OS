@@ -1,5 +1,5 @@
 .syntax unified
-.thumb 
+.thumb
 
 .cpu cortex-m4
 .arch armv7e-m
@@ -18,7 +18,7 @@ raise_privilege:
     isb
     bx      lr
 
-/* Sets and enables the PSP for user mode processes 
+/* Sets and enables the PSP for user mode processes
  * The stack address is given as an argument and is
  * at r0. */
 .thumb_func
