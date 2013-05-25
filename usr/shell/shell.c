@@ -174,7 +174,7 @@ void parse_command(char *command, int *argc, char ***argv) {
         *argc += 1;
         (*argv)[*argc-1] = malloc(SHELL_ARG_BUF_MAX);
 
-        if (*argv[*argc-1] == NULL) {
+        if ((*argv)[*argc-1] == NULL) {
             printf("Memory error\r\n");
             (*argc)--;
             while (*argc) {
