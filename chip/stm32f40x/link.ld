@@ -60,6 +60,14 @@ SECTIONS {
         _etext = .;
     } > FLASH
 
+    .commands :
+    {
+        _valid_commands = .;
+        *(.commands*)
+        . = ALIGN(8);
+        _end_commands = .;
+    } > FLASH
+
     _sidata = .;
     .data : AT ( _sidata )
     {

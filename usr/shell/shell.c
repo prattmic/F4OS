@@ -5,49 +5,14 @@
 #include <stdlib.h>
 
 #include "shell.h"
+#include "app.h"
 
-/* Shell commands */
-#include "blink.h"
-#include "top.h"
-#include "uname.h"
-#include "ipctest.h"
-#include "accel.h"
-#include "ghetto_gyro.h"
-#include "lowpass.h"
-#include "rd_test.h"
-#include "px4_mag.h"
-#include "px4_baro.h"
-#include "px4_accel_gyro.h"
+extern command_t _valid_commands;
+extern command_t _end_commands;
 
-struct command {
-    char *name;
-    void (*fptr)(int, char **);
-};
+command_t *valid_commands = (command_t *)&_valid_commands;
 
-const struct command valid_commands[] = {{"help",   &help},
-                                         {"top",    &top},
-                                         {"uname",  &uname},
-                                         {"ipctest", &ipctest},
-                                         {"rd_test", &rd_test},
-#ifdef CONFIG_HAVE_LED
-                                         {"blink",  &blink},
-#endif
-#if defined(CONFIG_HAVE_SPI) && defined(CONFIG_STM32_BOARD_DISCOVERY)
-                                         {"accel", &accel},
-#endif
-#if defined(CONFIG_HAVE_SPI) && defined(CONFIG_STM32_BOARD_PX4)
-                                         {"px4_accel_gyro", &px4_accel_gyro},
-#endif
-#if defined(CONFIG_HAVE_I2C) && defined(CONFIG_STM32_BOARD_DISCOVERY)
-                                         {"ghetto_gyro", &ghetto_gyro},
-                                         {"lowpass", &lowpass_test},
-#endif
-#if defined(CONFIG_HAVE_I2C) && defined(CONFIG_STM32_BOARD_PX4)
-                                         {"px4_mag", &px4_mag},
-                                         {"px4_baro", &px4_baro},
-#endif
-};
-#define NUM_COMMANDS    (sizeof(valid_commands)/sizeof(valid_commands[0]))
+#define NUM_COMMANDS ((int)(&_end_commands - &_valid_commands))
 
 static void free_argv(int argc, char ***argv);
 static void parse_command(char *command, int *argc, char ***argv);
@@ -227,3 +192,4 @@ void help(int argc, char **argv) {
         printf("%s\r\n", valid_commands[i].name);
     }
 }
+DEFINE_APP(help)
