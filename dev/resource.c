@@ -10,6 +10,12 @@
 
 #include <dev/resource.h>
 
+/* Default resources used before task switching, and inherited to all tasks */
+resource *default_resources[RESOURCE_TABLE_SIZE] = {
+    [stdout] = STDOUT_DEV,
+    [stderr] = STDERR_DEV,
+};
+
 /* Get resource struct from rd */
 static inline resource *get_resource(rd_t rd) {
     if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {

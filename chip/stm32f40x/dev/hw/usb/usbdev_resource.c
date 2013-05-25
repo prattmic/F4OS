@@ -28,7 +28,7 @@ struct semaphore usbdev_write_semaphore = {
     .waiting = NULL
 };
 
-resource usb_console = {.writer     = &usbdev_resource_write,
+resource usb_resource = {.writer     = &usbdev_resource_write,
                         .swriter    = &usbdev_resource_swrite,
                         .reader     = &usbdev_resource_read,
                         .closer     = &usbdev_resource_close,

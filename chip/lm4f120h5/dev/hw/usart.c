@@ -16,7 +16,7 @@
 struct semaphore usart_read_semaphore;
 struct semaphore usart_write_semaphore;
 
-resource uart_console = {   .writer     = &usart_putc,
+resource usart_resource = { .writer     = &usart_putc,
                             .swriter    = &usart_puts,
                             .reader     = &usart_getc,
                             .closer     = &usart_close,

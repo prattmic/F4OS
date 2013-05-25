@@ -18,6 +18,42 @@ config HAVE_USBDEV
     bool
     prompt "USB Device Support"
 
+choice
+    bool "Standard output device"
+    optional
+
+config STDOUT_USART
+    bool "USART"
+    depends on HAVE_USART
+    ---help---
+        Use USART as standard output
+
+config STDOUT_USB
+    bool "USB"
+    depends on HAVE_USBDEV
+    ---help---
+        Use USB as standard output
+
+endchoice
+
+choice
+    bool "Standard error device"
+    optional
+
+config STDERR_USART
+    bool "USART"
+    depends on HAVE_USART
+    ---help---
+        Use USART as standard error
+
+config STDERR_USB
+    bool "USB"
+    depends on HAVE_USBDEV
+    ---help---
+        Use USB as standard error
+
+endchoice
+
 config SYSTICK_FREQ
     int
     prompt "Systick Frequency"

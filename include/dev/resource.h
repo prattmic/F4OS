@@ -28,4 +28,27 @@ void resource_setup(struct task_ctrl* tcs) __attribute__((section(".kernel")));
 
 extern resource *default_resources[];
 
+/* Determine default stdout/stderr */
+extern struct resource usart_resource;
+extern struct resource usb_resource;
+
+#define USART_DEV   &usart_resource
+#define USB_DEV     &usb_resource
+
+#if defined(CONFIG_STDOUT_USART)
+#define STDOUT_DEV        USART_DEV
+#elif defined(CONFIG_STDOUT_USB)
+#define STDOUT_DEV        USB_DEV
+#else
+#define STDOUT_DEV        NULL
+#endif
+
+#if defined(CONFIG_STDERR_USART)
+#define STDERR_DEV        USART_DEV
+#elif defined(CONFIG_STDERR_USB)
+#define STDERR_DEV        USB_DEV
+#else
+#define STDERR_DEV        NULL
+#endif
+
 #endif
