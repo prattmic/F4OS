@@ -105,7 +105,6 @@ int px4_ms5611_write(char c, void *env) {
 }
 
 char px4_ms5611_read(void *env, int *error) {
-    /* Coming soon to a driver near you... */
     if (error != NULL) {
         *error = 0;
     }
