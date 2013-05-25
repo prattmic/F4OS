@@ -116,7 +116,9 @@ panic:
     /* Disable interrupts */
     cpsid   i
     bl      raise_privilege
+#ifdef CONFIG_HAVE_LED
     bl      toggle_led_delay
+#endif
     b       panic
 
 .thumb_func

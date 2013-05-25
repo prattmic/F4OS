@@ -124,9 +124,9 @@ void parse_command(char *command, int *argc, char ***argv) {
         }
     }
 
-    *argv = malloc(4 * *argc);
+    *argv = malloc(sizeof(char*) * *argc);
     if (!*argv) {
-        printf("Memory error\r\n");
+        printf("Memory error: unable to allocate space for argv table\r\n");
         return;
     }
 
@@ -139,8 +139,8 @@ void parse_command(char *command, int *argc, char ***argv) {
         *argc += 1;
         (*argv)[*argc-1] = malloc(SHELL_ARG_BUF_MAX);
 
-        if (*argv[*argc-1] == NULL) {
-            printf("Memory error\r\n");
+        if ((*argv)[*argc-1] == NULL) {
+            printf("Memory error: unable to allocate space for arguement\r\n");
             (*argc)--;
             while (*argc) {
                 free((*argv)[*argc-1]);
