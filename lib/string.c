@@ -65,6 +65,28 @@ void itoa(int n, char buf[]) {
     strreverse(buf);
 }
 
+int atoi(char buf[]) {
+    int result = 0;
+    int negate = 0;
+    int i = 0;
+    // ignore trailing whitespace
+    while (chrnlst(buf[i]," \t\r\n")) {
+        i++;
+    }
+    // check for negative
+    if (buf[i] == '-') {
+        negate = 1;
+        i++;
+    }
+    // parse decimal number
+    while (buf[i] >= '0' && buf[i] <= '9') {
+        result *= 10;
+        result += (buf[i] - '0');
+        i++;
+    }
+    return result * (negate ? -1 : 1);
+}
+
 void uitoa(uint32_t n, char buf[]) {
     int i = 0;
 
@@ -170,4 +192,13 @@ int strncmp(char *s, char *p, uint32_t n) {
     else {
         return -1;
     }
+}
+
+// Find if a character is in a list
+int chrnlst(char c, char *l) {
+    for (int i = 0; l[i] != '\0'; i++) {
+        if (c == l[i])
+            return 1;
+    }
+    return 0;
 }
