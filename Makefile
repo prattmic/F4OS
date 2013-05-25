@@ -115,7 +115,7 @@ menuconfig: $(KCONFIG_DIR)/conf/conf
 
 $(BASE)/.config: ;
 
-include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KCONFIG_DIR)/conf/conf
+include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KCONFIG_DIR)/conf/conf $(deps_config)
 	@if ! test -e $(BASE)/.config;	\
 	then	\
 		echo;	\
@@ -124,7 +124,7 @@ include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KC
 		echo;	\
 		exit 1;	\
 	fi;
-	-@mkdir $(BASE)/include/config
+	@mkdir -p $(BASE)/include/config
 	KCONFIG_AUTOHEADER=$(BASE)/include/config/autoconf.h $(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
 
 $(PREFIX)/chip_$(CONFIG_CHIP).o: $(BASE)/include/config/autoconf.h .FORCE
