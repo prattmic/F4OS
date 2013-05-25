@@ -22,14 +22,14 @@ static void parse_command(char *command, int *argc, char ***argv);
 static void run_command(char *command, int argc, char **argv);
 
 void shell(void) {
-    int n = -1;
+    int n;
     int argc;
     char **argv;
     char *command;
 
     // Allocate enough command buffers for history
     for (int i = 0; i < SHELL_HISTORY; i++) {
-        cmd_hist[i] = malloc(SHELL_BUF_MAX+1);
+        cmd_hist[i] = malloc(SHELL_BUF_MAX);
         if (cmd_hist[i] == NULL) {
             printf("Shell unable to allocate buffer for command %d. You are on"
                     "your own. Goodbye.\r\n", i);
@@ -37,41 +37,43 @@ void shell(void) {
         }
     }
     cmd_index = 0;
-    command = cmd_hist[cmd_index];
 
     /* Wait for stdin/stdout - getc returns a negative error when it is not connected. */
     while (getc() < 0);
 
-    printf("%s", SHELL_PROMPT);
 
     while (1) {
-        while ((command[++n] = getc()) != '\n' && command[n] != '\r' && n < (SHELL_BUF_MAX-1)) {
-            if (command[n] == '\b' || command[n] == 0x7F) {
-                if (n) {
-                    puts(BACKSPACE);
-                    n = n - 2;
-                }
-                else {
-                    n--;
+        printf("%s", SHELL_PROMPT);
+        command = cmd_hist[cmd_index];
+        memset(command, 0, SHELL_BUF_MAX);
+        n = 0;
+
+        // Parse a single line into a command to run
+        int done = 0;
+        while (!done && n < SHELL_BUF_MAX) {
+            int c = getc();
+            switch (c) {
+            case '\n':
+            case '\r':
+                done = 1;
+                break;
+            case '\b':
+            case 0x7F:
+                puts(BACKSPACE);
+                n--;
+                break;
+            default:
+                if (printable(c)) {
+                    putc(c);
+                    command[n] = c;
+                    n++;
                 }
             }
-            else {
-                putc(command[n]);
-            }
         }
+        puts("\r\n");
 
-        if (command[n] == '\n' || command[n] == '\r') {
-            command[n] = '\0';
-        }
-        else {
-            command[n+1] = '\0';
-        }
-
-        printf("\r\n");
-
-        if (n >= (SHELL_BUF_MAX-1)) {
-            printf("Line too long, max length is %d.\r\n%s", SHELL_BUF_MAX, SHELL_PROMPT);
-            n = -1;
+        if (n >= SHELL_BUF_MAX) {
+            printf("Line too long, max length is %d.\r\n", SHELL_BUF_MAX);
             continue;
         }
 
@@ -90,9 +92,6 @@ void shell(void) {
             cmd_index = (cmd_index + 1) % SHELL_HISTORY;
             command = cmd_hist[cmd_index];
         }
-
-        printf("%s", SHELL_PROMPT);
-        n = -1;
     }
 
     for (int i = 0; i < SHELL_HISTORY; i++) {
@@ -194,7 +193,7 @@ void run_command(char *command, int argc, char **argv) {
     }
 
     for (int i = 0; i < NUM_COMMANDS; i++) {
-        if (!strncmp(argv[0], valid_commands[i].name, SHELL_BUF_MAX+1)) {
+        if (!strncmp(argv[0], valid_commands[i].name, SHELL_BUF_MAX)) {
             valid_commands[i].fptr(argc, argv);
             return;
         }

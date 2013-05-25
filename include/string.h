@@ -16,4 +16,8 @@ void strreverse(char *s);
 int strncmp(char *s, char *p, uint32_t n);
 int chrnlst(char c, char *l);
 
+static inline int printable(char c) {
+    return c >= 0x20 && c <= 0x7E;
+}
+
 #endif
