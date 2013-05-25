@@ -18,6 +18,7 @@ void usagefault_handler(void);
 
 static inline int vprintk(char *fmt, va_list ap);
 
+#ifdef CONFIG_HAVE_USART
 static int printk_puts(rd_t r, char *s) {
     if (usart_ready) {
         return usart_puts(s, NULL);
@@ -35,6 +36,10 @@ static int printk_putc(rd_t r, char c) {
         return -1;
     }
 }
+#else
+static int printk_puts(rd_t r, char *s) {return -1;}
+static int printk_putc(rd_t r, char c) {return -1;}
+#endif
 
 static inline int vprintk(char *fmt, va_list ap) {
     return vfprintf(stderr, fmt, ap, &printk_puts, &printk_putc);
