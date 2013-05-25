@@ -9,9 +9,11 @@ void memset(void *p, uint8_t value, uint32_t size);
 void memcpy(void *dst, void *src, int n);
 size_t strlen(char *s);
 void itoa(int n, char buf[]);
+int atoi(char buf[]);
 void uitoa(uint32_t n, char buf[]);
 void ftoa(float num, float tolerance, char buf[], uint32_t n);
 void strreverse(char *s);
 int strncmp(char *s, char *p, uint32_t n);
+int chrnlst(char c, char *l);
 
 #endif
