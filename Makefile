@@ -133,23 +133,7 @@ $(PREFIX)/chip_$(CONFIG_CHIP).o: $(BASE)/include/config/autoconf.h .FORCE
 $(PREFIX)/usr_$(USR).o: $(BASE)/include/config/autoconf.h .FORCE
 	$(MAKE) -C usr/$(USR)/
 
-$(PREFIX)/%.o : %.S $(BASE)/include/config/autoconf.h
-	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
-	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
-		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
-		rm -f $(PREFIX)/$*.d
-
--include $(addprefix $(PREFIX)/, $(ASM_SRCS:.S=.P))
-
-$(PREFIX)/%.o : %.c $(BASE)/include/config/autoconf.h
-	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
-	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
-		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
-		rm -f $(PREFIX)/$*.d
-
--include $(addprefix $(PREFIX)/, $(SRCS:.c=.P))
+include $(BASE)/tools/build.mk
 
 proj: 	$(PREFIX)/$(PROJ_NAME).elf
 
