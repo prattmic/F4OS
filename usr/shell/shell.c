@@ -14,6 +14,9 @@ command_t *valid_commands = (command_t *)&_valid_commands;
 
 #define NUM_COMMANDS ((int)(&_end_commands - &_valid_commands))
 
+static char *cmd_hist[SHELL_HISTORY]; // Command history buffer
+static int   cmd_index;               // Next buffer index to fill
+
 static void free_argv(int argc, char ***argv);
 static void parse_command(char *command, int *argc, char ***argv);
 static void run_command(char *command, int argc, char **argv);
@@ -22,12 +25,19 @@ void shell(void) {
     int n = -1;
     int argc;
     char **argv;
+    char *command;
 
-    char *command = malloc(SHELL_BUF_MAX+1);
-    if (!command) {
-        printf("Shell unable to allocate buffer for command.  You are on your own.  Goodbye.\r\n");
-        return;
+    // Allocate enough command buffers for history
+    for (int i = 0; i < SHELL_HISTORY; i++) {
+        cmd_hist[i] = malloc(SHELL_BUF_MAX+1);
+        if (cmd_hist[i] == NULL) {
+            printf("Shell unable to allocate buffer for command %d. You are on"
+                    "your own. Goodbye.\r\n", i);
+            return;
+        }
     }
+    cmd_index = 0;
+    command = cmd_hist[cmd_index];
 
     /* Wait for stdin/stdout - getc returns a negative error when it is not connected. */
     while (getc() < 0);
@@ -75,11 +85,19 @@ void shell(void) {
             free_argv(argc, &argv);
         }
 
+        // Insert command into history, unless blank
+        if (argc > 0) {
+            cmd_index = (cmd_index + 1) % SHELL_HISTORY;
+            command = cmd_hist[cmd_index];
+        }
+
         printf("%s", SHELL_PROMPT);
         n = -1;
     }
 
-    free(command);
+    for (int i = 0; i < SHELL_HISTORY; i++) {
+        free(cmd_hist[i]);
+    }
 }
 
 void free_argv(int argc, char ***argv) {
@@ -193,3 +211,18 @@ void help(int argc, char **argv) {
     }
 }
 DEFINE_APP(help)
+
+void history(int argc, char **argv) {
+    int count = 0; // printed counter, skip blank lines
+
+    printf("History:\r\n");
+    // iterate through history list, printing nonempty items
+    for (int i = 1; i < SHELL_HISTORY + 1; i++) {
+        int j = (cmd_index + i) % SHELL_HISTORY;
+        if (cmd_hist[j][0] == '\0')
+            continue;
+        printf("\t%d: %s\r\n", count, cmd_hist[j]);
+        count++;
+    }
+}
+DEFINE_APP(history)
