@@ -58,9 +58,33 @@ void shell(void) {
                 done = 1;
                 break;
             case '\b':
-            case 0x7F:
-                puts(BACKSPACE);
+            case 0x7F: // Backspace
+                if (n == 0) break;
+                memmove(&command[n-1], &command[n], SHELL_BUF_MAX - n);
+                command[SHELL_BUF_MAX-1] = '\0';
                 n--;
+                printf(LEFT CLEARLINE "%s", &command[n]);
+                printf("\r\e[%dC", SHELL_PROMPT_LEN + n);
+                break;
+            case '\e': // Escape Character
+                switch (getc()) {
+                case '[': // Arrow keys
+                    switch (getc()) {
+                    case 'C': // Right
+                        if (command[n] != '\0') {
+                            puts(RIGHT);
+                            n++;
+                        }
+                        break;
+                    case 'D': // Left
+                        if (n > 0) {
+                            puts(LEFT);
+                            n--;
+                        }
+                    }
+                }
+                // Move cursor
+                //printf("\e[;%df", n);
                 break;
             default:
                 if (printable(c)) {
