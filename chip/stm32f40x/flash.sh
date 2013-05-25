@@ -14,6 +14,7 @@ elif [ "$1" == "px4" ]
 then
     commands="speed 12000
     exec device = stm32f405vg
+    erase
     loadbin $2,0x08000000
     r
     g
