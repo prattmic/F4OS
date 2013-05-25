@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "app.h"
+
 void rd_test(int argc, char **argv) {
     char c;
 
@@ -15,3 +17,4 @@ void rd_test(int argc, char **argv) {
         fputc(stderr, c);
     }
 }
+DEFINE_APP(rd_test)

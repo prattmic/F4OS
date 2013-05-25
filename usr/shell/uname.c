@@ -3,6 +3,7 @@
 
 #include "shell.h"
 #include "uname.h"
+#include "app.h"
 
 void uname(int argc, char **argv) {
     if (argc > 1) {
@@ -20,3 +21,4 @@ void uname(int argc, char **argv) {
         puts("F4OS\r\n");
     }
 }
+DEFINE_APP(uname)

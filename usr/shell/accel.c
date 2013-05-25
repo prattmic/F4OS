@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "accel.h"
+#include "app.h"
 
 void accel(int argc, char **argv) {
     if (argc != 1) {
@@ -40,3 +41,4 @@ void accel(int argc, char **argv) {
 
     close(accelrd);
 }
+DEFINE_APP(accel)

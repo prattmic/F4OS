@@ -3,6 +3,8 @@
 #include <dev/sensors.h>
 #include <dev/periph/px4_mpu6000.h>
 
+#include "app.h"
+
 void px4_accel_gyro(int argc, char **argv) {
     rd_t rd = open_px4_mpu6000();
     if (rd < 0) {
@@ -27,3 +29,4 @@ void px4_accel_gyro(int argc, char **argv) {
 
     close(rd);
 }
+DEFINE_APP(px4_accel_gyro)

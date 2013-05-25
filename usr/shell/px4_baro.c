@@ -3,6 +3,8 @@
 #include <dev/sensors.h>
 #include <dev/periph/px4_ms5611.h>
 
+#include "app.h"
+
 void px4_baro(int argc, char **argv) {
     rd_t baro = open_px4_ms5611();
     if (baro < 0) {
@@ -25,3 +27,4 @@ void px4_baro(int argc, char **argv) {
 
     close(baro);
 }
+DEFINE_APP(px4_baro)

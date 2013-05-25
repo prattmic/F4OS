@@ -5,6 +5,7 @@
 #include <dev/shared_mem.h>
 
 #include "ipctest.h"
+#include "app.h"
 
 void memreader(void);
 
@@ -26,6 +27,7 @@ void ipctest(int argc, char **argv) {
     printf("READING MEM.\r\n");
     new_task(&memreader, 5, 0);
 }
+DEFINE_APP(ipctest)
 
 void memreader(void) {
     char buf[16];

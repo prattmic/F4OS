@@ -6,6 +6,7 @@
 #include <kernel/sched.h>
 
 #include "blink.h"
+#include "app.h"
 
 void led1(void);
 void led2(void);
@@ -52,6 +53,7 @@ void blink(int argc, char **argv) {
         }
     }
 }
+DEFINE_APP(blink)
 
 void led1(void) {
     led_toggle(1);

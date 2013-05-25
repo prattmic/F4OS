@@ -7,6 +7,7 @@
 #include <dev/periph/discovery_accel.h>
 
 #include "lowpass.h"
+#include "app.h"
 
 /* INSANE defs to make it obvious where the magic numbers come from */
 #define DT_TO_JIFFIES   10000
@@ -48,6 +49,7 @@ void lowpass_test(int argc, char **argv) {
         new_task(&ghetto_lp, 8, DELTA_T*DT_TO_JIFFIES);
     }
 }
+DEFINE_APP(lowpass_test)
 
 void ghetto_lp(void) {
     if (read(accelrd, (char *)data, 3) == 3) {

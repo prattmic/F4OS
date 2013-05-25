@@ -5,6 +5,7 @@
 #include <dev/periph/9dof_gyro.h>
 
 #include "ghetto_gyro.h"
+#include "app.h"
 
 typedef struct gyro_data {
     short x;
@@ -44,3 +45,4 @@ void ghetto_gyro(int argc, char **argv) {
     free(data);
     close(gyro_rd);
 }
+DEFINE_APP(ghetto_gyro)

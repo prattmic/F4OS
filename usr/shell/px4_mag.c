@@ -3,6 +3,8 @@
 #include <dev/sensors.h>
 #include <dev/periph/px4_hmc5883.h>
 
+#include "app.h"
+
 void px4_mag(int argc, char **argv) {
     rd_t mag = open_px4_hmc5883();
     if (mag < 0) {
@@ -25,3 +27,4 @@ void px4_mag(int argc, char **argv) {
 
     close(mag);
 }
+DEFINE_APP(px4_mag)
