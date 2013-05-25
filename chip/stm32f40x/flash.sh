@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -n "$2" ] 
+if [ ! -n "$2" ]
 then
     echo "Usage: $0 board object.bin"
     exit $E_BADARGS

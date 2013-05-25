@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ ! -n "$1" ] 
+if [ ! -n "$1" ]
 then
     echo "Usage: $0 object.bin"
     exit $E_BADARGS
