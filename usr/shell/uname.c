@@ -14,7 +14,11 @@
 void uname(int argc, char **argv) {
     if (argc > 1) {
         if (!strncmp(argv[1], "-a", SHELL_ARG_BUF_MAX)) {
-            printf("F4OS build %s%s %s\r\n", BUILD_SHA, DIRTY_MESSAGE, BUILD_TIME);
+            printf("F4OS build %s%s %s %s\r\n", BUILD_SHA, DIRTY_MESSAGE,
+                    CONFIG_CHIP, BUILD_TIME);
+        }
+        else if (!strncmp(argv[1], "-m", SHELL_ARG_BUF_MAX)) {
+            printf("%s\r\n", CONFIG_CHIP);
         }
         else if (!strncmp(argv[1], "-r", SHELL_ARG_BUF_MAX)) {
             printf("build %s%s\r\n", BUILD_SHA, DIRTY_MESSAGE);
