@@ -1,7 +1,10 @@
-# The goal here is to create usr_$(USR).o for the rest of the OS to link against
-
-# /
-SRCS += main.c shell.c ipctest.c top.c uname.c rd_test.c getchar.c
+SRCS += main.c
+SRCS += shell.c
+SRCS += ipctest.c
+SRCS += top.c
+SRCS += uname.c
+SRCS += rd_test.c
+SRCS += getchar.c
 
 SRCS_$(CONFIG_HAVE_LED) += blink.c
 
@@ -21,8 +24,6 @@ ifdef CONFIG_HAVE_SPI
 		SRCS += px4_accel_gyro.c
 	endif
 endif
-
-SRCS += $(SRCS_y)
 
 # Date and rev for uname
 DATE := "$(shell date -u)"

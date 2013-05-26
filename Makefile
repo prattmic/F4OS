@@ -1,5 +1,4 @@
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
-
 PROJ_NAME=f4os
 
 # Project base
@@ -17,14 +16,10 @@ CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
 
 LINK_SCRIPT = chip/$(CONFIG_CHIP)/link.ld
 
-
-# that's it, no need to change anything below this line!
-
-###################################################
-
-CC=arm-none-eabi-gcc
-LD=arm-none-eabi-ld
-OBJCOPY=arm-none-eabi-objcopy
+CROSS_COMPILE ?= arm-none-eabi-
+CC = $(CROSS_COMPILE)gcc
+LD = $(CROSS_COMPILE)ld
+OBJCOPY = $(CROSS_COMPILE)objcopy
 
 CFLAGS += -g3 -Wall --std=gnu99 -isystem $(BASE)/include/ -isystem $(BASE)/chip/$(CONFIG_CHIP)/include/ -include $(BASE)/include/config/autoconf.h
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
@@ -36,8 +31,6 @@ CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
 LFLAGS=
 
 KCONFIG_DIR = $(BASE)/tools/kconfig-frontends/frontends/
-
-###################################################
 
 # Pass variables to submake
 export
@@ -89,8 +82,6 @@ include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KC
 	@mkdir -p $(BASE)/include/config
 	KCONFIG_AUTOHEADER=$(BASE)/include/config/autoconf.h $(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
 
-include $(BASE)/tools/build.mk
-
 proj: 	$(PREFIX)/$(PROJ_NAME).elf
 
 $(PREFIX):
@@ -127,10 +118,13 @@ help:
 	@echo	'	unoptimized - build all of OS at -O0'
 	@echo	''
 	@echo	'Configuration:'
+	@echo	'	Specify toolchain prefix with CROSS_COMPILE environmental variable'
 	@echo	'	menuconfig  - run nconf for selecting configuration'
+	@echo	''
+	@echo	'Defconfigs:'
 	@$(if $(DEFCONFIGS), \
 		$(foreach d, $(DEFCONFIGS), \
-		printf "	%-24s - configure for %s\\n" $(d) $(subst _defconfig,,$(d));))
+		printf "	%-30s - configure for %s\\n" $(d) $(subst _defconfig,,$(d));))
 	@echo	''
 	@echo	'Misc:'
 	@echo	'	burn        - burn to configured board'
