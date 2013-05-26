@@ -1,0 +1,11 @@
+config DISCOVERY_ACCEL
+    bool "STMicro LIS302DL Accelerometer"
+    depends on HAVE_SPI && STM32_BOARD_DISCOVERY
+    ---help---
+        STMicro accelerometer on STM32F4 Discovery board
+
+config MPU6000
+    bool "InvenSense MPU6000 Gyro + Accelerometer"
+    depends on HAVE_SPI && STM32_BOARD_PX4
+    ---help---
+        MPU6000 onboard PX4 autopilot

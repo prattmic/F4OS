@@ -1,0 +1,18 @@
+config 9DOF_GYRO
+    bool "ITG-3200 Gyro"
+    depends on HAVE_I2C && STM32_BOARD_DISCOVERY
+    ---help---
+        Gyroscope on Sparkfun 9DOF sensor stick, connected
+        to I2C1 on the STM32F4 Discovery board
+
+config HMC5883
+    bool "Honeywell HMC5883 Magnetometer"
+    depends on HAVE_I2C && STM32_BOARD_PX4
+    ---help---
+        Honeywell magnetometer on PX4 autopilot
+
+config MS5611
+    bool "Measurement Specialists MS5611 Barometer"
+    depends on HAVE_I2C && STM32_BOARD_PX4
+    ---help---
+        Measurement Specialists barometer on PX4 autopilot

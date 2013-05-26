@@ -68,3 +68,15 @@ config SHARED_MEM_SIZE
     ---help---
         The size of buffer to be allocated for each shared memory
         resource opened.
+
+menu "I2C Devices"
+    depends on HAVE_I2C
+
+    source "dev/Kconfig.I2C"
+endmenu
+
+menu "SPI Devices"
+    depends on HAVE_SPI
+
+    source "dev/Kconfig.SPI"
+endmenu

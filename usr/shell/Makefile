@@ -6,24 +6,12 @@ SRCS += uname.c
 SRCS += rd_test.c
 SRCS += getchar.c
 
-SRCS_$(CONFIG_HAVE_LED) += blink.c
-
-ifdef CONFIG_HAVE_I2C
-	ifdef CONFIG_STM32_BOARD_DISCOVERY
-		SRCS += ghetto_gyro.c
-	endif
-	ifdef CONFIG_STM32_BOARD_PX4
-		SRCS += px4_mag.c px4_baro.c
-	endif
-endif
-ifdef CONFIG_HAVE_SPI
-	ifdef CONFIG_STM32_BOARD_DISCOVERY
-		SRCS += accel.c lowpass.c
-	endif
-	ifdef CONFIG_STM32_BOARD_PX4
-		SRCS += px4_accel_gyro.c
-	endif
-endif
+SRCS_$(CONFIG_HAVE_LED) 	+= blink.c
+SRCS_$(CONFIG_9DOF_GYRO) 	+= ghetto_gyro.c
+SRCS_$(CONFIG_HMC5883) 		+= px4_mag.c
+SRCS_$(CONFIG_MS5611) 		+= px4_baro.c
+SRCS_$(CONFIG_DISCOVERY_ACCEL) += accel.c lowpass.c
+SRCS_$(CONFIG_MPU6000)		+= px4_accel_gyro.c
 
 # Date and rev for uname
 DATE := "$(shell date -u)"
