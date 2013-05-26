@@ -26,7 +26,8 @@ SRCS += $(SRCS_y)
 
 # Date and rev for uname
 DATE := "$(shell date -u)"
-REV := $(shell git rev-list HEAD | wc -l | tr -d ' ')
-CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_REV=$(REV)
+SHA := $(shell git log HEAD -n 1 --format='%h')
+DIRTY := $(shell git status --porcelain | wc -c)
+CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_SHA='"$(SHA)"' -D BUILD_DIRTY=$(DIRTY)
 
 include $(BASE)/tools/submake.mk

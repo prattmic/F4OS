@@ -5,13 +5,19 @@
 #include "uname.h"
 #include "app.h"
 
+#if BUILD_DIRTY
+#define DIRTY_MESSAGE   "~dirty"
+#else
+#define DIRTY_MESSAGE   ""
+#endif
+
 void uname(int argc, char **argv) {
     if (argc > 1) {
         if (!strncmp(argv[1], "-a", SHELL_ARG_BUF_MAX)) {
-            printf("F4OS rev %d %s\r\n", BUILD_REV, BUILD_TIME);
+            printf("F4OS build %s%s %s\r\n", BUILD_SHA, DIRTY_MESSAGE, BUILD_TIME);
         }
         else if (!strncmp(argv[1], "-r", SHELL_ARG_BUF_MAX)) {
-            printf("rev %d\r\n", BUILD_REV);
+            printf("build %s%s\r\n", BUILD_SHA, DIRTY_MESSAGE);
         }
         else {
             printf("%s: unrecognized option '%s'\r\n", argv[0], argv[1]);
