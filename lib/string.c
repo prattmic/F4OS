@@ -36,6 +36,16 @@ void memcpy(void *dst, void *src, int n) {
     }
 }
 
+// Overlap-safe memcpy
+void memmove(void *dst, void *src, size_t n) {
+    char *s = src;
+    char *d = dst;
+    if ((uintptr_t)s < (uintptr_t)d)
+        while(n--) d[n] = s[n];
+    else
+        while(n--) *d++ = *s++;
+}
+
 size_t strlen(char *s) {
     size_t len = 0;
     while (*s++) {
