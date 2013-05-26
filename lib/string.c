@@ -54,6 +54,14 @@ size_t strlen(char *s) {
     return len;
 }
 
+size_t strnlen(char *s, int n) {
+    size_t len = 0;
+    while (*s++ && len < n) {
+        len++;
+    }
+    return len;
+}
+
 void itoa(int n, char buf[]) {
     int i, sign;
 
