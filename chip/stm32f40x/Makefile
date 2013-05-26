@@ -46,20 +46,7 @@ ifdef CONFIG_HAVE_SPI
 	endif
 endif
 
-SRCS += $(SRCS_y)
-
-###################################################
-
-OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
-
-###################################################
-
-all: $(PREFIX)/chip_$(CONFIG_CHIP).o
-
 burn:
 	./flash.sh $(CONFIG_STM32_BOARD) $(PREFIX)/$(PROJ_NAME).bin
 
-$(PREFIX)/chip_$(CONFIG_CHIP).o: $(OBJS)
-	@echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) -r $^ -o $@
-
-include $(BASE)/tools/build.mk
+include $(BASE)/tools/submake.mk

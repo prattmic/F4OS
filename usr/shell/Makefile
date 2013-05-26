@@ -29,15 +29,4 @@ DATE := "$(shell date -u)"
 REV := $(shell git rev-list HEAD | wc -l | tr -d ' ')
 CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_REV=$(REV)
 
-###################################################
-
-OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
-
-###################################################
-
-all: $(PREFIX)/usr_$(USR).o
-
-$(PREFIX)/usr_$(USR).o: $(OBJS)
-	@echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) -r $^ -o $@
-
-include $(BASE)/tools/build.mk
+include $(BASE)/tools/submake.mk

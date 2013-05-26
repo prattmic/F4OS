@@ -128,10 +128,10 @@ include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KC
 	KCONFIG_AUTOHEADER=$(BASE)/include/config/autoconf.h $(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
 
 $(PREFIX)/chip_$(CONFIG_CHIP).o: $(BASE)/include/config/autoconf.h .FORCE
-	$(MAKE) -C chip/$(CONFIG_CHIP)/
+	$(MAKE) -C chip/$(CONFIG_CHIP)/ obj=$@
 
 $(PREFIX)/usr_$(USR).o: $(BASE)/include/config/autoconf.h .FORCE
-	$(MAKE) -C usr/$(USR)/
+	$(MAKE) -C usr/$(USR)/ obj=$@
 
 include $(BASE)/tools/build.mk
 
