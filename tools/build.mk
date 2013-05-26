@@ -1,19 +1,25 @@
 # Primary rules for building source files
 
-$(PREFIX)/%.o : %.S $(BASE)/include/config/autoconf.h
+# For nonrecursive builds, obj_prefix will be empty,
+# so the normal prefix will be used
+obj_prefix ?= $(PREFIX)/
+
+$(obj_prefix)%.o : %.S $(BASE)/include/config/autoconf.h
 	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
-	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
-		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
-		rm -f $(PREFIX)/$*.d
+	$(generate_header_depends)
 
--include $(addprefix $(PREFIX)/, $(ASM_SRCS:.S=.P))
-
-$(PREFIX)/%.o : %.c $(BASE)/include/config/autoconf.h
+$(obj_prefix)%.o : %.c $(BASE)/include/config/autoconf.h
 	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
-	@cp $(PREFIX)/$*.d $(PREFIX)/$*.P; \
-		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-			-e '/^$$/ d' -e 's/$$/ :/' < $(PREFIX)/$*.d >> $(PREFIX)/$*.P; \
-		rm -f $(PREFIX)/$*.d
+	$(generate_header_depends)
 
--include $(addprefix $(PREFIX)/, $(SRCS:.c=.P))
+-include $(addprefix $(obj_prefix), $(SRCS:.S=.P))
+-include $(addprefix $(obj_prefix), $(SRCS:.c=.P))
+
+define generate_header_depends
+	@cp $(obj_prefix)$*.d $(obj_prefix)$*.P; \
+		sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+			-e '/^$$/ d' -e 's/$$/ :/' < $(obj_prefix)$*.d >> $(obj_prefix)$*.P; \
+		rm -f $(obj_prefix)$*.d
+endef
+
+.FORCE:

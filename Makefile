@@ -1,9 +1,13 @@
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 
 PROJ_NAME=f4os
+
+# Project base
 BASE := $(CURDIR)
+# Output directory
 PREFIX := $(BASE)/out
 
+# Userspace program to build (folder in usr/)
 USR ?= shell
 
 -include $(BASE)/.config
@@ -13,41 +17,6 @@ CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
 
 LINK_SCRIPT = chip/$(CONFIG_CHIP)/link.ld
 
-###################################################
-
-# boot/
-VPATH += boot/
-SRCS += boot_main.c cortex_m.c
-ASM_SRCS += boot_asm.S
-
-# dev/
-VPATH += dev/
-SRCS += resource.c shared_mem.c buf_stream.c
-
-# dev/hw
-VPATH += dev/hw/
-SRCS += systick.c
-
-# kernel/
-VPATH += kernel/
-SRCS += fault.c semaphore.c
-
-# kernel/sched/
-VPATH += kernel/sched/
-SRCS += kernel_task.c sched_end.c sched_interrupts.c sched_new.c sched_start.c sched_switch.c sched_tasks.c
-ASM_SRCS += sched_asm.S
-
-# lib/
-VPATH += lib/
-SRCS += stdio.c string.c time.c
-
-# lib/math/
-VPATH += lib/math/
-SRCS += math_newlib.c math_other.c math_pow.c math_sine.c math_tangent.c math_atangent.c
-
-# mm/
-VPATH += mm/
-SRCS += mm_free.c mm_init.c mm_malloc.c mm_space.c
 
 # that's it, no need to change anything below this line!
 
@@ -70,15 +39,8 @@ KCONFIG_DIR = $(BASE)/tools/kconfig-frontends/frontends/
 
 ###################################################
 
-OBJS = $(addprefix $(PREFIX)/, $(SRCS:.c=.o))
-OBJS += $(addprefix $(PREFIX)/, $(ASM_SRCS:.S=.o))
-
 # Pass variables to submake
 export
-unexport VPATH
-unexport SRCS
-unexport ASM_SRCS
-unexport OBJS
 
 ###################################################
 
@@ -127,12 +89,6 @@ include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KC
 	@mkdir -p $(BASE)/include/config
 	KCONFIG_AUTOHEADER=$(BASE)/include/config/autoconf.h $(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
 
-$(PREFIX)/chip_$(CONFIG_CHIP).o: $(BASE)/include/config/autoconf.h .FORCE
-	$(MAKE) -C chip/$(CONFIG_CHIP)/ obj=$@
-
-$(PREFIX)/usr_$(USR).o: $(BASE)/include/config/autoconf.h .FORCE
-	$(MAKE) -C usr/$(USR)/ obj=$@
-
 include $(BASE)/tools/build.mk
 
 proj: 	$(PREFIX)/$(PROJ_NAME).elf
@@ -140,7 +96,10 @@ proj: 	$(PREFIX)/$(PROJ_NAME).elf
 $(PREFIX):
 	mkdir -p $(PREFIX)
 
-$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/chip_$(CONFIG_CHIP).o $(PREFIX)/usr_$(USR).o $(OBJS)
+$(PREFIX)/$(PROJ_NAME).o: $(BASE)/include/config/autoconf.h .FORCE
+	$(MAKE) -f f4os.mk obj=$@
+
+$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o
 	@echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
 	@echo "OBJCOPY $(PROJ_NAME).hex" && $(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	@echo "OBJCOPY $(PROJ_NAME).bin" && $(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
