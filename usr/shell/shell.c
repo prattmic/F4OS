@@ -51,6 +51,7 @@ void shell(void) {
         // Parse a single line into a command to run
         int done = 0;
         while (!done && n < SHELL_BUF_MAX) {
+            int direction;
             int c = getc();
             switch (c) {
             case '\n':
@@ -69,7 +70,16 @@ void shell(void) {
             case '\e': // Escape Character
                 switch (getc()) {
                 case '[': // Arrow keys
+                    direction = 1;
                     switch (getc()) {
+                    case 'A': // Up
+                        direction = SHELL_HISTORY - 1;
+                    case 'B': // Down
+                        cmd_index = (cmd_index + direction) % SHELL_HISTORY;
+                        command = cmd_hist[cmd_index];
+                        printf("\r" CLEARLINE "%s%s", SHELL_PROMPT, command);
+                        n = strnlen(command, SHELL_BUF_MAX);
+                        break;
                     case 'C': // Right
                         if (command[n] != '\0') {
                             puts(RIGHT);
@@ -83,8 +93,6 @@ void shell(void) {
                         }
                     }
                 }
-                // Move cursor
-                //printf("\e[;%df", n);
                 break;
             default:
                 if (printable(c)) {
