@@ -5,6 +5,7 @@ SRCS += top.c
 SRCS += uname.c
 SRCS += rd_test.c
 SRCS += getchar.c
+SRCS += shared_deq_test.c
 
 SRCS_$(CONFIG_HAVE_LED) 	+= blink.c
 SRCS_$(CONFIG_9DOF_GYRO) 	+= ghetto_gyro.c
