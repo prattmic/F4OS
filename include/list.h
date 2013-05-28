@@ -21,7 +21,7 @@ typedef struct list {
 }
 
 #define DEFINE_LIST(name) \
-    struct list = INIT_LIST(name);
+    struct list name = INIT_LIST(name);
 
 
 #define LIST_ELEMENT struct list _list
