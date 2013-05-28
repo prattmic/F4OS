@@ -24,6 +24,8 @@ typedef struct list {
     struct list = INIT_LIST(name);
 
 
+#define LIST_ELEMENT struct list _list
+
 #define list_empty(l) ((l) == (l)->next)
 
 /* Adds n to front of list l */

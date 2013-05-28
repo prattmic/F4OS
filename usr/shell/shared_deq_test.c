@@ -13,44 +13,42 @@
 DEFINE_SHARED_DEQ(deque)
 
 typedef struct message {
-    struct list list;
+    LIST_ELEMENT;
     char *m;
 } message_t;
 
 void t1(void) {
     if(!sdeq_empty(&deque)) {
-        message_t *m = container_of(sdeq_pop(&deque), message_t, list);
+        message_t *m = sdeq_entry(sdeq_pop(&deque), message_t);
         printf("T1 got: %s\r\n", m->m);
         free(m);
+    }
+    else {
         message_t *mret = malloc(sizeof(message_t));
         if (mret == NULL) {
             printf("Unable to malloc T1 mret\r\n");
             return;
         }
-        mret->m = "T1 here!";
-        sdeq_add(&deque, &(mret->list));
-    }
-    else {
-        printf("Goodbye from T1!\r\n");
+        mret->m = "Goodbye from T1!\r\n";
+        sdeq_add(&deque, mret);
         abort();
     }
 }
 
 void t2(void) {
     if(!sdeq_empty(&deque)) {
-        message_t *m = container_of(sdeq_pop(&deque), message_t, list);
+        message_t *m = sdeq_entry(sdeq_pop(&deque), message_t);
         printf("T2 got: %s\r\n", m->m);
         free(m);
+    }
+    else {
         message_t *mret = malloc(sizeof(message_t));
         if (mret == NULL) {
             printf("Unable to malloc T2 mret\r\n");
             return;
         }
-        mret->m = "T2 here!";
-        sdeq_add(&deque, &(mret->list));
-    }
-    else {
-        printf("Goodbye from T2!\r\n");
+        mret->m = "Goodbye from T2!\r\n";
+        sdeq_add(&deque, mret);
         abort();
     }
 }
@@ -82,16 +80,16 @@ void deq_test(int argc, char **argv) {
     }
     m3->m = "Message 3";
 
-    sdeq_add(&deque, &(m1->list));
-    sdeq_add(&deque, &(m2->list));
-    sdeq_add(&deque, &(m3->list));
+    sdeq_add(&deque, m1);
+    sdeq_add(&deque, m2);
+    sdeq_add(&deque, m3);
 
     new_task(&t1, 1, 40);
     new_task(&t2, 1, 100);
     yield_if_possible();
 
     /* Make sure other tasks are done */
-    usleep(50000);
+    usleep(1000000);
 
     if(sdeq_empty(&deque)) {
         printf("Nothing...\r\n");
@@ -99,7 +97,7 @@ void deq_test(int argc, char **argv) {
 
     message_t *curr;
     while(!sdeq_empty(&deque)) {
-        curr = container_of(sdeq_pop(&deque), message_t, list);
+        curr = sdeq_entry(sdeq_pop(&deque), message_t);
         printf("deq_test got: %s\r\n", curr->m);
         free(curr);
     }
