@@ -11,6 +11,10 @@
 #include <dev/hw/usart.h>
 #include <dev/hw/usbdev.h>
 
+#ifdef CONFIG_PERFCOUNTER
+#include <dev/hw/tim.h>
+#endif
+
 const char banner[] = "Welcome to...\r\n"
                 "\r\n"
                 "88888888888      ,d8      ,ad8888ba,     ad88888ba   \r\n"
@@ -30,6 +34,10 @@ void init_cortex_m(void);
 void os_start(void) {
     clock();
     init_cortex_m();
+
+#ifdef CONFIG_PERFCOUNTER
+    init_tim2();
+#endif
 
 #ifdef CONFIG_HAVE_LED
     init_led();

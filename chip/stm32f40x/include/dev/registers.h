@@ -20,6 +20,8 @@
 #define AHB1PERIPH_BASE                 (PERIPH_BASE + 0x00020000)
 #define AHB2PERIPH_BASE                 (PERIPH_BASE + 0x10000000)
 
+#define TIM1_BASE                       (APB2PERIPH_BASE + 0x0000)
+
 #define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
 #define I2C_BASE(port)                  (APB1PERIPH_BASE + 0x5400 + (0x400*(port-1)))           /* I2C (1,2,3) base address */
@@ -34,7 +36,27 @@
 /* SPI 1 is on a different bus than SPI 2/3, so we have to do a little more work to determine the correct base address */
 #define SPI_BASE(port)                  (port == 1 ? (APB2PERIPH_BASE + 0x3000) : (APB1PERIPH_BASE + 0x3800 + 0x400*(port-2))) /* SPI (1,2,3) base address */
 
-/* Timer 2 (TIM2) */
+/* Timer 1 (TIM1) */
+#define TIM1_CR1                        (volatile uint32_t *) (TIM1_BASE + 0x00)                /* TIM1 control register 1 */
+#define TIM1_CR2                        (volatile uint32_t *) (TIM1_BASE + 0x04)                /* TIM1 control register 2 */
+#define TIM1_SMCR                       (volatile uint32_t *) (TIM1_BASE + 0x08)                /* TIM1 slave mode control register */
+#define TIM1_DIER                       (volatile uint32_t *) (TIM1_BASE + 0x0C)                /* TIM1 DMA/Interrupt enable register */
+#define TIM1_SR                         (volatile uint32_t *) (TIM1_BASE + 0x10)                /* TIM1 status register */
+#define TIM1_EGR                        (volatile uint32_t *) (TIM1_BASE + 0x14)                /* TIM1 event generation register */
+#define TIM1_CCMR1                      (volatile uint32_t *) (TIM1_BASE + 0x18)                /* TIM1 capture/compare mode register 1 */
+#define TIM1_CCMR2                      (volatile uint32_t *) (TIM1_BASE + 0x1C)                /* TIM1 capture/compare mode register 2 */
+#define TIM1_CCER                       (volatile uint32_t *) (TIM1_BASE + 0x20)                /* TIM1 capture/compare enable register */
+#define TIM1_CNT                        (volatile uint32_t *) (TIM1_BASE + 0x24)                /* TIM1 counter */
+#define TIM1_PSC                        (volatile uint32_t *) (TIM1_BASE + 0x28)                /* TIM1 prescaler */
+#define TIM1_ARR                        (volatile uint32_t *) (TIM1_BASE + 0x2C)                /* TIM1 auto-reload register */
+#define TIM1_CCR1                       (volatile uint32_t *) (TIM1_BASE + 0x34)                /* TIM1 capture/compare register 1 */
+#define TIM1_CCR2                       (volatile uint32_t *) (TIM1_BASE + 0x38)                /* TIM1 capture/compare register 2 */
+#define TIM1_CCR3                       (volatile uint32_t *) (TIM1_BASE + 0x3C)                /* TIM1 capture/compare register 3 */
+#define TIM1_CCR4                       (volatile uint32_t *) (TIM1_BASE + 0x40)                /* TIM1 capture/compare register 4 */
+#define TIM1_DCR                        (volatile uint32_t *) (TIM1_BASE + 0x48)                /* TIM1 DMA control register */
+#define TIM1_DMAR                       (volatile uint32_t *) (TIM1_BASE + 0x4C)                /* TIM1 DMA address for full transfer */
+#define TIM1_OR                         (volatile uint32_t *) (TIM1_BASE + 0x50)                /* TIM1 option register */
+
 #define TIM2_CR1                        (volatile uint32_t *) (TIM2_BASE + 0x00)                /* TIM2 control register 1 */
 #define TIM2_CR2                        (volatile uint32_t *) (TIM2_BASE + 0x04)                /* TIM2 control register 2 */
 #define TIM2_SMCR                       (volatile uint32_t *) (TIM2_BASE + 0x08)                /* TIM2 slave mode control register */
@@ -54,7 +76,6 @@
 #define TIM2_DCR                        (volatile uint32_t *) (TIM2_BASE + 0x48)                /* TIM2 DMA control register */
 #define TIM2_DMAR                       (volatile uint32_t *) (TIM2_BASE + 0x4C)                /* TIM2 DMA address for full transfer */
 #define TIM2_OR                         (volatile uint32_t *) (TIM2_BASE + 0x50)                /* TIM2 option register */
-
 /* Power Control (PWR) */
 #define PWR_CR                          (volatile uint32_t *) (PWR_BASE + 0x00)                 /* Power Control Register */
 #define PWR_CSR                         (volatile uint32_t *) (PWR_BASE + 0x04)                 /* Power Control/Status Register */
@@ -386,44 +407,44 @@
 #define FLASH_ACR_LATENCY_M             (uint32_t) (7 << 0)                                     /* Latency mask */
 #define FLASH_ACR_LATENCY(n)            (uint32_t) (n << 0)                                     /* Latency - n wait states */
 
-/* TIM2 */
-#define TIM2_CR1_CEN                    (uint32_t) (1 << 0)                                     /* TIM2 counter enable */
-#define TIM2_CR1_UDIS                   (uint32_t) (1 << 1)                                     /* TIM2 update disable */
-#define TIM2_CR1_URS                    (uint32_t) (1 << 2)                                     /* TIM2 update request source */
-#define TIM2_CR1_OPM                    (uint32_t) (1 << 3)                                     /* TIM2 one-pulse mode */
-#define TIM2_CR1_DIR_DOWN               (uint32_t) (1 << 4)                                     /* TIM2 downcounter */
-#define TIM2_CR1_CMS_EDGE               (uint32_t) (0 << 5)                                     /* TIM2 center-aligned mode selection - counter up or down depending on DIR bit */
-#define TIM2_CR1_CMS_CM1                (uint32_t) (1 << 5)                                     /* TIM2 center-aligned mode selection - up and down, compare flags set down */
-#define TIM2_CR1_CMS_CM2                (uint32_t) (2 << 5)                                     /* TIM2 center-aligned mode selection - up and down, compare flags set up */
-#define TIM2_CR1_CMS_CM3                (uint32_t) (3 << 5)                                     /* TIM2 center-aligned mode selection - up and down, compare flags set up/down */
-#define TIM2_CR1_ARPE                   (uint32_t) (1 << 7)                                     /* TIM2 auto-reload preload enable */
-#define TIM2_CR1_CKD_1                  (uint32_t) (0 << 8)                                     /* TIM2 clock division 1 */
-#define TIM2_CR1_CKD_2                  (uint32_t) (1 << 8)                                     /* TIM2 clock division 2 */
-#define TIM2_CR1_CKD_4                  (uint32_t) (2 << 8)                                     /* TIM2 clock division 4 */
+/* TIMx */
+#define TIMx_CR1_CEN                    (uint32_t) (1 << 0)                                     /* TIMx counter enable */
+#define TIMx_CR1_UDIS                   (uint32_t) (1 << 1)                                     /* TIMx update disable */
+#define TIMx_CR1_URS                    (uint32_t) (1 << 2)                                     /* TIMx update request source */
+#define TIMx_CR1_OPM                    (uint32_t) (1 << 3)                                     /* TIMx one-pulse mode */
+#define TIMx_CR1_DIR_DOWN               (uint32_t) (1 << 4)                                     /* TIMx downcounter */
+#define TIMx_CR1_CMS_EDGE               (uint32_t) (0 << 5)                                     /* TIMx center-aligned mode selection - counter up or down depending on DIR bit */
+#define TIMx_CR1_CMS_CM1                (uint32_t) (1 << 5)                                     /* TIMx center-aligned mode selection - up and down, compare flags set down */
+#define TIMx_CR1_CMS_CM2                (uint32_t) (2 << 5)                                     /* TIMx center-aligned mode selection - up and down, compare flags set up */
+#define TIMx_CR1_CMS_CM3                (uint32_t) (3 << 5)                                     /* TIMx center-aligned mode selection - up and down, compare flags set up/down */
+#define TIMx_CR1_ARPE                   (uint32_t) (1 << 7)                                     /* TIMx auto-reload preload enable */
+#define TIMx_CR1_CKD_1                  (uint32_t) (0 << 8)                                     /* TIMx clock division 1 */
+#define TIMx_CR1_CKD_2                  (uint32_t) (1 << 8)                                     /* TIMx clock division 2 */
+#define TIMx_CR1_CKD_4                  (uint32_t) (2 << 8)                                     /* TIMx clock division 4 */
 
-#define TIM2_CR2_CCDS                   (uint32_t) (1 << 3)                                     /* TIM2 capture/compare DMA requests send when update event occurs */
-#define TIM2_CR2_MMS_RST                (uint32_t) (0 << 4)                                     /* TIM2 master mode - reset */
-#define TIM2_CR2_MMS_EN                 (uint32_t) (1 << 4)                                     /* TIM2 master mode - enable */
-#define TIM2_CR2_MMS_UP                 (uint32_t) (2 << 4)                                     /* TIM2 master mode - update */
-#define TIM2_CR2_MMS_CMP_PUL            (uint32_t) (3 << 4)                                     /* TIM2 master mode - compare pulse */
-#define TIM2_CR2_MMS_CMP_OC1            (uint32_t) (4 << 4)                                     /* TIM2 master mode - compare OC1 */
-#define TIM2_CR2_MMS_CMP_OC2            (uint32_t) (5 << 4)                                     /* TIM2 master mode - compare OC2 */
-#define TIM2_CR2_MMS_CMP_OC3            (uint32_t) (6 << 4)                                     /* TIM2 master mode - compare OC3 */
-#define TIM2_CR2_MMS_CMP_OC4            (uint32_t) (7 << 4)                                     /* TIM2 master mode - compare OC4 */
-#define TIM2_CR2_TI1_123                (uint32_t) (1 << 7)                                     /* TIM2 CH1, CH2, CH3 pins connected to TI1 */
+#define TIMx_CR2_CCDS                   (uint32_t) (1 << 3)                                     /* TIMx capture/compare DMA requests send when update event occurs */
+#define TIMx_CR2_MMS_RST                (uint32_t) (0 << 4)                                     /* TIMx master mode - reset */
+#define TIMx_CR2_MMS_EN                 (uint32_t) (1 << 4)                                     /* TIMx master mode - enable */
+#define TIMx_CR2_MMS_UP                 (uint32_t) (2 << 4)                                     /* TIMx master mode - update */
+#define TIMx_CR2_MMS_CMP_PUL            (uint32_t) (3 << 4)                                     /* TIMx master mode - compare pulse */
+#define TIMx_CR2_MMS_CMP_OC1            (uint32_t) (4 << 4)                                     /* TIMx master mode - compare OC1 */
+#define TIMx_CR2_MMS_CMP_OC2            (uint32_t) (5 << 4)                                     /* TIMx master mode - compare OC2 */
+#define TIMx_CR2_MMS_CMP_OC3            (uint32_t) (6 << 4)                                     /* TIMx master mode - compare OC3 */
+#define TIMx_CR2_MMS_CMP_OC4            (uint32_t) (7 << 4)                                     /* TIMx master mode - compare OC4 */
+#define TIMx_CR2_TI1_123                (uint32_t) (1 << 7)                                     /* TIMx CH1, CH2, CH3 pins connected to TI1 */
 
-#define TIM2_DIER_UIE                   (uint32_t) (1 << 0)                                     /* TIM2 update interrupt enable */
-#define TIM2_DIER_CC1IE                 (uint32_t) (1 << 1)                                     /* TIM2 CC1 interrupt enable */
-#define TIM2_DIER_CC2IE                 (uint32_t) (1 << 2)                                     /* TIM2 CC2 interrupt enable */
-#define TIM2_DIER_CC3IE                 (uint32_t) (1 << 3)                                     /* TIM2 CC3 interrupt enable */
-#define TIM2_DIER_CC4IE                 (uint32_t) (1 << 4)                                     /* TIM2 CC4 interrupt enable */
-#define TIM2_DIER_TIE                   (uint32_t) (1 << 6)                                     /* TIM2 trigger interrupt enable */
-#define TIM2_DIER_UDE                   (uint32_t) (1 << 8)                                     /* TIM2 update DMA request enable */
-#define TIM2_DIER_CC1DE                 (uint32_t) (1 << 9)                                     /* TIM2 CC1 DMA request enable */
-#define TIM2_DIER_CC2DE                 (uint32_t) (1 << 10)                                    /* TIM2 CC2 DMA request enable */
-#define TIM2_DIER_CC3DE                 (uint32_t) (1 << 11)                                    /* TIM2 CC3 DMA request enable */
-#define TIM2_DIER_CC4DE                 (uint32_t) (1 << 12)                                    /* TIM2 CC4 DMA request enable */
-#define TIM2_DIER_TDE                   (uint32_t) (1 << 14)                                    /* TIM2 trigger DMA request enable */
+#define TIMx_DIER_UIE                   (uint32_t) (1 << 0)                                     /* TIMx update interrupt enable */
+#define TIMx_DIER_CC1IE                 (uint32_t) (1 << 1)                                     /* TIMx CC1 interrupt enable */
+#define TIMx_DIER_CC2IE                 (uint32_t) (1 << 2)                                     /* TIMx CC2 interrupt enable */
+#define TIMx_DIER_CC3IE                 (uint32_t) (1 << 3)                                     /* TIMx CC3 interrupt enable */
+#define TIMx_DIER_CC4IE                 (uint32_t) (1 << 4)                                     /* TIMx CC4 interrupt enable */
+#define TIMx_DIER_TIE                   (uint32_t) (1 << 6)                                     /* TIMx trigger interrupt enable */
+#define TIMx_DIER_UDE                   (uint32_t) (1 << 8)                                     /* TIMx update DMA request enable */
+#define TIMx_DIER_CC1DE                 (uint32_t) (1 << 9)                                     /* TIMx CC1 DMA request enable */
+#define TIMx_DIER_CC2DE                 (uint32_t) (1 << 10)                                    /* TIMx CC2 DMA request enable */
+#define TIMx_DIER_CC3DE                 (uint32_t) (1 << 11)                                    /* TIMx CC3 DMA request enable */
+#define TIMx_DIER_CC4DE                 (uint32_t) (1 << 12)                                    /* TIMx CC4 DMA request enable */
+#define TIMx_DIER_TDE                   (uint32_t) (1 << 14)                                    /* TIMx trigger DMA request enable */
 
 /* SPI */
 #define SPI_CR1_CPHA                    (uint32_t) (1 << 0)                                     /* SPI clock phase */

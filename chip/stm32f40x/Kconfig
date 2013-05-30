@@ -29,6 +29,10 @@ config DISCOVERY_LED
     depends on HAVE_LED
     default y if STM32_BOARD_DISCOVERY
 
+config PERFCOUNTER
+    bool
+    default y
+
 config PX4_LED
     bool
     depends on HAVE_LED
