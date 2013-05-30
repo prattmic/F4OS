@@ -18,11 +18,7 @@ struct spi_port spi1 = {
     .init = &init_spi1
 };
 
-struct semaphore spi1_semaphore = {
-    .lock = 0,
-    .held_by = NULL,
-    .waiting = NULL
-};
+struct semaphore spi1_semaphore = INIT_SEMAPHORE;
 
 void init_spi1(void) {
     *RCC_APB2ENR |= RCC_APB2ENR_SPI1EN;     /* Enable SPI1 Clock */

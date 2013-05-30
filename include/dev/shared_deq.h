@@ -9,9 +9,7 @@ typedef struct shared_deq {
 #define DEFINE_SHARED_DEQ(name)         \
     struct shared_deq name = {          \
         ._list = INIT_LIST(name._list), \
-        .sem.lock = 0,                  \
-        .sem.waiting = NULL,            \
-        .sem.held_by = NULL             \
+        .sem = INIT_SEMAPHORE,          \
     };
 
 

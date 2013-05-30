@@ -16,17 +16,8 @@ static int usbdev_resource_swrite(char *s, void *env);
 static char usbdev_resource_read(void *env, int *error);
 static int usbdev_resource_close(struct resource *resource);
 
-struct semaphore usbdev_read_semaphore = {
-    .lock = 0,
-    .held_by = NULL,
-    .waiting = NULL
-};
-
-struct semaphore usbdev_write_semaphore = {
-    .lock = 0,
-    .held_by = NULL,
-    .waiting = NULL
-};
+struct semaphore usbdev_read_semaphore = INIT_SEMAPHORE;
+struct semaphore usbdev_write_semaphore = INIT_SEMAPHORE;
 
 resource usb_resource = {.writer     = &usbdev_resource_write,
                         .swriter    = &usbdev_resource_swrite,

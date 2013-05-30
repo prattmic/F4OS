@@ -13,23 +13,11 @@
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 
-struct semaphore abandoned_sem = {
-    .lock = 0,
-    .held_by = NULL,
-    .waiting = NULL
-};
+struct semaphore abandoned_sem = INIT_SEMAPHORE;
 
-struct semaphore deadlock_sem1 = {
-    .lock = 0,
-    .held_by = NULL,
-    .waiting = NULL
-};
+struct semaphore deadlock_sem1 = INIT_SEMAPHORE;
 
-struct semaphore deadlock_sem2 = {
-    .lock = 0,
-    .held_by = NULL,
-    .waiting = NULL
-};
+struct semaphore deadlock_sem2 = INIT_SEMAPHORE;
 
 void abandon(void);
 void attempt_acquire(void);

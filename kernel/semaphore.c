@@ -10,12 +10,6 @@ static void held_semaphores_insert(struct semaphore *list[], volatile struct sem
 void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
 static void deadlock_check(struct task_node *task) __attribute__((section(".kernel")));
 
-void init_semaphore(volatile struct semaphore *semaphore) {
-    semaphore->lock = 0;
-    semaphore->held_by = NULL;
-    semaphore->waiting = NULL;
-}
-
 void acquire(volatile struct semaphore *semaphore) {
     if (!task_switching) {
         semaphore->lock = 1;

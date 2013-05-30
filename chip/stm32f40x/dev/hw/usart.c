@@ -17,8 +17,8 @@
 
 #define USART_DMA_MSIZE     (512-MM_HEADER_SIZE)      /* Since malloc headers take up some space, we want to request the max space we can fit in one block */
 
-struct semaphore usart_read_semaphore;
-struct semaphore usart_write_semaphore;
+struct semaphore usart_read_semaphore = INIT_SEMAPHORE;
+struct semaphore usart_write_semaphore = INIT_SEMAPHORE;
 
 resource usart_resource = { .writer     = &usart_putc,
                             .swriter    = &usart_puts,
@@ -122,10 +122,6 @@ void init_usart(void) {
     /* Enable reciever and transmitter */
     *USART1_CR1 |= USART_CR1_RE;
     *USART1_CR1 |= USART_CR1_TE;
-
-    /* Reset semaphore */
-    init_semaphore(&usart_read_semaphore);
-    init_semaphore(&usart_write_semaphore);
 
     usart_ready = 1;
 }

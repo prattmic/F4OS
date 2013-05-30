@@ -21,11 +21,7 @@ struct i2c_dev i2c1 = {
     .init = &init_i2c1
 };
 
-struct semaphore i2c1_semaphore = {
-    .lock = 0,
-    .held_by = NULL,
-    .waiting = NULL
-};
+struct semaphore i2c1_semaphore = INIT_SEMAPHORE;
 
 struct i2c_dev i2c2 = {
     .ready = 0,
@@ -33,11 +29,7 @@ struct i2c_dev i2c2 = {
     .init = &init_i2c2
 };
 
-struct semaphore i2c2_semaphore = {
-    .lock = 0,
-    .held_by = NULL,
-    .waiting = NULL
-};
+struct semaphore i2c2_semaphore = INIT_SEMAPHORE;
 
 /* This has to be a function because GCC's optimizations suck
  * GCC's optimizations break read and write when using this line

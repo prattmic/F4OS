@@ -13,8 +13,8 @@
 
 #include <dev/hw/usart.h>
 
-struct semaphore usart_read_semaphore;
-struct semaphore usart_write_semaphore;
+struct semaphore usart_read_semaphore = INIT_SEMAPHORE;
+struct semaphore usart_write_semaphore = INIT_SEMAPHORE;
 
 resource usart_resource = { .writer     = &usart_putc,
                             .swriter    = &usart_puts,
@@ -62,10 +62,6 @@ void init_usart(void) {
 
     /* Enable UART */
     UART0_CTL_R |= UART_CTL_UARTEN | UART_CTL_RXE | UART_CTL_TXE;
-
-    /* Reset semaphore */
-    init_semaphore(&usart_read_semaphore);
-    init_semaphore(&usart_write_semaphore);
 
     usart_ready = 1;
 }
