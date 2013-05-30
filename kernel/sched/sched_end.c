@@ -56,7 +56,7 @@ void svc_end_task(void) {
 
     /* Periodic (but only if aborted) */
     if (curr_task->task->period && curr_task->task->abort) {
-        remove_task(&periodic_task_list, curr_task);
+        remove_task(&periodic_task_list, curr_task->task->periodic_node);
     }
 
     curr_task->prev = NULL;
