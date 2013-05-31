@@ -23,12 +23,18 @@ typedef struct list {
 
 #define list_empty(l) ((l) == (l)->next)
 
-/* Adds n to front of list l */
-static inline void list_add(struct list *n, struct list *l) {
-    l->next->prev = n;
-    n->next = l->next;
-    n->prev = l;
-    l->next = n;
+/* Insert new list element between two known elements */
+static inline void list_insert(struct list *new, struct list *before,
+        struct list *after) {
+    before->next = new;
+    new->prev = before;
+    new->next = after;
+    after->prev = new;
+}
+
+/* Adds n to front of list head */
+static inline void list_add(struct list *new, struct list *head) {
+    list_insert(new, head, head->next);
 }
 
 /* Removes from tail of list */
@@ -40,10 +46,18 @@ static inline list_t *list_pop(struct list *l) {
     return ret;
 }
 
-#define list_for_each(curr, start) for( curr=(head)->next; curr != (head); curr = curr->next)
+/* Iterate over each element in list
+ * curr - struct list * that is updated with each iteration
+ * head - struct list * to begin iteration at */
+#define list_for_each(curr, head) \
+    for (curr = (head)->next; curr != (head); curr = curr->next)
 
-#define for_each(curr, head, member)                            \
-for (curr = container_of((head)->next, typeof(*curr), member);  \
-     &curr->member != (head);                                   \
-     curr = container_of(curr->member.next, typeof(*curr), member))
+/* Iterate over each entry in list
+ * curr - entry type * that is updated with each iteration
+ * head - struct list * to begin iteration at
+ * member - name of struct list member in entry */
+#define list_for_each_entry(curr, head, member)                            \
+    for (curr = container_of((head)->next, typeof(*curr), member);  \
+        &curr->member != (head);                                   \
+        curr = container_of(curr->member.next, typeof(*curr), member))
 
