@@ -15,11 +15,6 @@ typedef struct list {
     .prev = &(list)         \
 }
 
-#define NULL_LIST(list) {   \
-    .next = NULL,           \
-    .prev = NULL            \
-}
-
 #define DEFINE_LIST(name) \
     struct list name = INIT_LIST(name);
 
