@@ -35,6 +35,12 @@ void list_test(int argc, char **argv) {
     struct message *m;
     list_for_each_entry(m, &list, list) {
         printf("Message = %d\r\n", m->num);
+    }
+
+    printf("Popping elements\r\n");
+    while ((curr = list_pop(&list))) {
+        struct message *m = container_of(curr, struct message, list);
+        printf("Message = %d\r\n", m->num);
         free(m);
     }
 }

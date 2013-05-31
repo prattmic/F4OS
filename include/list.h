@@ -1,5 +1,7 @@
 /* Simplified linux list implementation */
 
+#include <stddef.h>
+
 #define container_of(ptr, type, member) ({ \
     const typeof( ((type *)0)->member ) *__mptr = (ptr); \
     (type *)( (char *)__mptr - __builtin_offsetof(type,member) );})
@@ -23,6 +25,10 @@ typedef struct list {
 
 #define list_empty(l) ((l) == (l)->next)
 
+static inline struct list *list_tail(struct list *head) {
+    return head->prev;
+}
+
 /* Insert new list element between two known elements */
 static inline void list_insert(struct list *new, struct list *before,
         struct list *after) {
@@ -37,14 +43,39 @@ static inline void list_add(struct list *new, struct list *head) {
     list_insert(new, head, head->next);
 }
 
-/* Removes from tail of list */
-static inline list_t *list_pop(struct list *l) {
-    list_t *ret;
-    ret = l->prev;
-    l->prev = ret->prev;
-    ret->prev->next = l;
-    return ret;
+/* Remove element from list, by connecting elements before and after */
+static inline void list_remove(struct list *element) {
+    struct list *before = element->prev;
+    struct list *after = element->next;
+
+    before->next = after;
+    after->prev = before;
 }
+
+static inline struct list *list_pop_tail(struct list *head) {
+    if (list_empty(head)) {
+        return NULL;
+    }
+
+    struct list *tail = list_tail(head);
+    list_remove(tail);
+    return tail;
+}
+
+/* head is pointer to list head, which has the first element
+ * in the list as next */
+static inline struct list *list_pop_head(struct list *head) {
+    if (list_empty(head)) {
+        return NULL;
+    }
+
+    struct list *element = head->next;
+    list_remove(element);
+    return element;
+}
+
+/* Pop defaults to tail */
+#define list_pop(h) list_pop_tail(h)
 
 /* Iterate over each element in list
  * curr - struct list * that is updated with each iteration
