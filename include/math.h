@@ -1,3 +1,9 @@
+/*
+ * Portions of this file were derived from the Newlib open source project,
+ * and are subject to its copyright notices and licenses, which
+ * can be found in lib/math/newlib/LICENSE.
+ */
+
 #ifndef MATH_H_INCLUDED
 #define MATH_H_INCLUDED
 

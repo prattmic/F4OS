@@ -1,8 +1,8 @@
-/* This file was compiled from various components of the Newlib project.
- * Components released under various licenses and are copyright their respective authors.
- *
- * http://sourceware.org/cgi-bin/cvsweb.cgi/src/COPYING.NEWLIB?rev=1.31&content-type=text/x-cvsweb-markup&cvsroot=src
- * http://www.sourceware.org/newlib/   */
+/*
+ * This file was derived from the Newlib open source project,
+ * and is subject to its copyright notices and licenses, which
+ * can be found in lib/math/newlib/LICENSE.
+ */
 
 #include <stdint.h>
 #include <float.h>
