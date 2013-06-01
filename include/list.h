@@ -17,6 +17,11 @@ typedef struct list {
     .prev = &(list)         \
 }
 
+static inline void list_init(struct list *list) {
+    list->next = list;
+    list->prev = list;
+}
+
 #define DEFINE_LIST(name) \
     struct list name = INIT_LIST(name);
 
@@ -24,6 +29,8 @@ typedef struct list {
 #define LIST_ELEMENT struct list _list
 
 #define list_empty(l) ((l) == (l)->next)
+
+#define list_entry(ptr, type, member)   container_of(ptr, type, member)
 
 static inline struct list *list_tail(struct list *head) {
     return head->prev;
