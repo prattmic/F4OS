@@ -60,10 +60,6 @@ static inline void list_remove(struct list *element) {
 }
 
 static inline struct list *list_pop_tail(struct list *head) {
-    if (list_empty(head)) {
-        return NULL;
-    }
-
     struct list *tail = list_tail(head);
     list_remove(tail);
     return tail;
@@ -72,10 +68,6 @@ static inline struct list *list_pop_tail(struct list *head) {
 /* head is pointer to list head, which has the first element
  * in the list as next */
 static inline struct list *list_pop_head(struct list *head) {
-    if (list_empty(head)) {
-        return NULL;
-    }
-
     struct list *element = head->next;
     list_remove(element);
     return element;
