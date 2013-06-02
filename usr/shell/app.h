@@ -6,7 +6,7 @@ typedef struct command {
     void (*fptr)(int, char **);
 } command_t;
 
-#define DEFINE_APP(fn) command_t fn##_command __attribute__((section(".commands")))= {\
+#define DEFINE_APP(fn) command_t fn##_command __attribute__((section(".user")))= {\
         .name = #fn,        \
         .fptr = fn          \
     };

@@ -60,12 +60,14 @@ SECTIONS {
         _etext = .;
     } > FLASH
 
-    .commands :
+    /* Special user section reserved only for general
+     * use by user programs. */
+    .user :
     {
-        _valid_commands = .;
-        *(.commands*)
+        _user_start = .;
+        *(.user*)
         . = ALIGN(8);
-        _end_commands = .;
+        _user_end = .;
     } > FLASH
 
     _sidata = .;

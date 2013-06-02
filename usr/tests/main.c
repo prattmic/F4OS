@@ -2,12 +2,12 @@
 #include <kernel/sched.h>
 #include "test.h"
 
-extern struct test _valid_commands;
-extern struct test _end_commands;
+extern struct test _user_start;
+extern struct test _user_end;
 
-struct test *tests = (struct test *)&_valid_commands;
+struct test *tests = (struct test *)&_user_start;
 
-#define NUM_TESTS ((int)(&_end_commands - &_valid_commands))
+#define NUM_TESTS ((int)(&_user_end - &_user_start))
 
 void run_tests(void) {
     int failures = 0;

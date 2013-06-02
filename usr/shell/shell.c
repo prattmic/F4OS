@@ -7,12 +7,13 @@
 #include "shell.h"
 #include "app.h"
 
-extern command_t _valid_commands;
-extern command_t _end_commands;
+/* The reserved user section is used for storing commands */
+extern command_t _user_start;
+extern command_t _user_end;
 
-command_t *valid_commands = (command_t *)&_valid_commands;
+command_t *valid_commands = (command_t *)&_user_start;
 
-#define NUM_COMMANDS ((int)(&_end_commands - &_valid_commands))
+#define NUM_COMMANDS ((int)(&_user_end - &_user_start))
 
 static char *cmd_hist[SHELL_HISTORY]; // Command history buffer
 static int   cmd_index;               // Next buffer index to fill

@@ -47,15 +47,16 @@ SECTIONS {
 
         _etext = .;
     } > FLASH
-    
-    .commands :
-    {
-        _valid_commands = .;
-        *(.commands*)
-        . = ALIGN(8);
-        _end_commands = .;
-    } > FLASH
 
+    /* Special user section reserved only for general
+     * use by user programs. */
+    .user :
+    {
+        _user_start = .;
+        *(.user*)
+        . = ALIGN(8);
+        _user_end = .;
+    } > FLASH
 
     _sidata = .;
     .data : AT ( _sidata )

@@ -9,7 +9,7 @@ struct test {
 };
 
 /* Create a test with name nm using function f */
-#define DEFINE_TEST(nm, f) struct test f##_test __attribute__((section(".commands")))= {\
+#define DEFINE_TEST(nm, f) struct test f##_test __attribute__((section(".user")))= {\
         .name = nm,        \
         .func = f          \
     };
