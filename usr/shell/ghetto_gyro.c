@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <dev/hw/i2c.h>
 #include <dev/periph/9dof_gyro.h>
-
-#include "ghetto_gyro.h"
 #include "app.h"
 
 typedef struct gyro_data {

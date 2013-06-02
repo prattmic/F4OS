@@ -5,8 +5,6 @@
 #include <kernel/sched.h>
 #include <math.h>
 #include <dev/periph/discovery_accel.h>
-
-#include "lowpass.h"
 #include "app.h"
 
 /* INSANE defs to make it obvious where the magic numbers come from */
@@ -22,6 +20,8 @@ typedef struct accel_data {
     int8_t y;
     int8_t z;
 } accel_data;
+
+void ghetto_lp(void);
 
 accel_data asdf = {0,0,0};
 accel_data *data = &asdf;

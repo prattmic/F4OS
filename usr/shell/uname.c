@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
 #include "shell.h"
-#include "uname.h"
 #include "app.h"
 
 #if BUILD_DIRTY

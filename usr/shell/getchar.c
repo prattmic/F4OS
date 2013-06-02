@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-
-#include "getchar.h"
 #include "app.h"
 
 /* Get a number of characters */

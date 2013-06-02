@@ -4,8 +4,6 @@
 #include <dev/registers.h>
 #include <dev/hw/led.h>
 #include <kernel/sched.h>
-
-#include "blink.h"
 #include "app.h"
 
 void led1(void);

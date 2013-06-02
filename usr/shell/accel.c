@@ -4,8 +4,6 @@
 #include <dev/sensors.h>
 #include <dev/periph/discovery_accel.h>
 #include <math.h>
-
-#include "accel.h"
 #include "app.h"
 
 void accel(int argc, char **argv) {
