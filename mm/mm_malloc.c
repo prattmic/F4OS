@@ -13,7 +13,13 @@ void *malloc(uint32_t size) {
     void *address;
 
     acquire(&user_buddy.semaphore);
+#ifdef CONFIG_MM_PROFILING
+    begin_malloc_timestamp = getcount();
+#endif
     address = alloc(order, &user_buddy);
+#ifdef CONFIG_MM_PROFILING
+    end_malloc_timestamp = getcount();
+#endif
     release(&user_buddy.semaphore);
 
     return address;

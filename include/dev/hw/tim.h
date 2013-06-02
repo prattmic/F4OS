@@ -1,1 +1,1 @@
-void init_tim2(void) __attribute__((section(".kernel")));
+void init_perfcounter(void) __attribute__((section(".kernel")));

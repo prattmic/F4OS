@@ -36,7 +36,7 @@ void os_start(void) {
     init_cortex_m();
 
 #ifdef CONFIG_PERFCOUNTER
-    init_tim2();
+    init_perfcounter();
 #endif
 
 #ifdef CONFIG_HAVE_LED

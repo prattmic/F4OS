@@ -23,3 +23,11 @@ config MM_KERNEL_MIN_ORDER
     prompt "Kernel buddy heap min order"
     ---help---
         Minimum buddy block order to allocate for kernel buddy.
+
+config MM_PROFILING
+    bool
+    depends on PERFCOUNTER
+    prompt "Memory manager profiling"
+    default y
+    ---help---
+        Enables instrumenting mm functions and using mem_perf
