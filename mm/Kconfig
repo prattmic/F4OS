@@ -28,6 +28,6 @@ config MM_PROFILING
     bool
     depends on PERFCOUNTER
     prompt "Memory manager profiling"
-    default y
+    default n
     ---help---
         Enables instrumenting mm functions and using mem_perf
