@@ -52,14 +52,3 @@ void run_tests(void) {
 void main(void) {
     new_task(&run_tests, 1, 0);
 }
-
-int good_test(char *message, int len) {
-    return PASSED;
-}
-DEFINE_TEST("Good test", good_test);
-
-int bad_test(char *message, int len) {
-    strncpy(message, "Bad, bad things happened", len);
-    return FAILED;
-}
-DEFINE_TEST("Bad test", bad_test);
