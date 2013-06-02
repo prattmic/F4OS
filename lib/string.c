@@ -31,8 +31,11 @@ void memset(void *p, uint8_t value, uint32_t size) {
 }
 
 void memcpy(void *dst, void *src, int n) {
+    uint8_t *s = src;
+    uint8_t *d = dst;
+
     while(n--) {
-        *(uint8_t *)dst++ = *(uint8_t *)src++;
+        *d++ = *s++;
     }
 }
 
