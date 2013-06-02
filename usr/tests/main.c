@@ -1,4 +1,6 @@
+#include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 #include <kernel/sched.h>
 #include "test.h"
 
@@ -9,6 +11,8 @@ struct test *tests = (struct test *)&_user_start;
 
 #define NUM_TESTS ((int)(&_user_end - &_user_start))
 
+#define MESSAGE_LEN 40
+
 void run_tests(void) {
     int failures = 0;
 
@@ -17,13 +21,25 @@ void run_tests(void) {
 
     for (int i = 0; i < NUM_TESTS; i++) {
         struct test test = tests[i];
+        char message[MESSAGE_LEN] = {'\0'};
 
         printf("Test '%s'...", test.name);
-        int ret = test.func();
+
+        /* Call test, but don't allow the last byte in
+         * message to be set */
+        int ret = test.func(message, sizeof(message)-1);
 
         if (ret) {
-            printf("FAILED with return code %d\r\n", ret);
             failures++;
+
+            printf("FAILED");
+
+            if (message[0]) {
+                printf(" - '%s'\r\n", message);
+            }
+            else {
+                printf("\r\n");
+            }
         }
         else {
             printf("PASSED\r\n");
@@ -37,12 +53,13 @@ void main(void) {
     new_task(&run_tests, 1, 0);
 }
 
-int good_test(void) {
-    return 0;
+int good_test(char *message, int len) {
+    return PASSED;
 }
 DEFINE_TEST("Good test", good_test);
 
-int bad_test(void) {
-    return 1;
+int bad_test(char *message, int len) {
+    strncpy(message, "Bad, bad things happened", len);
+    return FAILED;
 }
 DEFINE_TEST("Bad test", bad_test);

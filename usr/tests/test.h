@@ -2,10 +2,12 @@
 #define USR_TEST_TEST_H_INCLUDED
 
 /* Tests return 0 on pass, else on error.
- * The error code will be displayed. */
+ * The first arguement is a buffer to copy
+ * an error message into, whose length is the
+ * second arguement */
 struct test {
     char *name;
-    int (*func)(void);
+    int (*func)(char *, int);
 };
 
 /* Create a test with name nm using function f */
@@ -13,5 +15,11 @@ struct test {
         .name = nm,        \
         .func = f          \
     };
+
+/* Standard test return codes */
+enum {
+    PASSED = 0,
+    FAILED,
+};
 
 #endif
