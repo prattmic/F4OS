@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include "test.h"
 
@@ -126,3 +127,83 @@ int memmove_src_last_overlap(char *message, int len) {
     return PASSED;
 }
 DEFINE_TEST("memmove with overlap, source last", memmove_src_last_overlap);
+
+int strlen_test(char *message, int len) {
+    struct {
+        char *str;
+        int len;
+    } strings[] = {
+        { .str = "", .len = 0 },
+        { .str = "four", .len = 4 },
+        { .str = "\r\t\n\b", .len = 4 },
+        { .str = "thisisareallylongstring", .len = 23 },
+    };
+
+    for (int i = 0; i < sizeof(strings)/sizeof(strings[0]); i++) {
+        int computed_len = strlen(strings[i].str);
+
+        if (computed_len != strings[i].len) {
+            sprintf(message, "strlen(\"%s\") != %d", strings[i].str, computed_len);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("strlen", strlen_test);
+
+int strnlen_test(char *message, int len) {
+    struct {
+        char *str;
+        int len;
+    } strings[] = {
+        { .str = "", .len = 0 },
+        { .str = "four", .len = 4 },
+        { .str = "\r\t\n\b", .len = 4 },
+        { .str = "thisisareallylongstring", .len = 4 }, // strnlen will stop counting
+    };
+
+    for (int i = 0; i < sizeof(strings)/sizeof(strings[0]); i++) {
+        int computed_len = strnlen(strings[i].str, 4);
+
+        if (computed_len != strings[i].len) {
+            sprintf(message, "strnlen(\"%s\", 4) != %d", strings[i].str, computed_len);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("strnlen", strnlen_test);
+
+int strreverse_test(char *message, int len) {
+    struct {
+        char *str;
+        char *rev;
+    } strings[] = {
+        { .str = "", .rev = "" },
+        { .str = "four", .rev = "ruof" },
+        { .str = "\r\t\n\b", .rev = "\b\n\t\r" },
+    };
+
+    for (int i = 0; i < sizeof(strings)/sizeof(strings[0]); i++) {
+        char *str = strndup(strings[i].str, 25);
+        if (!str) {
+            strncpy(message, "strndup failed", len);
+            return FAILED;
+        }
+
+        strreverse(str);
+
+        if (strncmp(str, strings[i].rev, 25)) {
+            free(str);
+            sprintf(message, "%s != %s", str, strings[i].rev);
+            return FAILED;
+        }
+
+        free(str);
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("strreverse", strreverse_test);
