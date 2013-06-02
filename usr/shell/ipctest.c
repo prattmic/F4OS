@@ -3,8 +3,6 @@
 #include <kernel/sched.h>
 #include <dev/resource.h>
 #include <dev/shared_mem.h>
-
-#include "ipctest.h"
 #include "app.h"
 
 void memreader(void);

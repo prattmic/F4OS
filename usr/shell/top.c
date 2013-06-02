@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <kernel/semaphore.h>
 #include <mm/mm.h>
-
-#include "top.h"
 #include "app.h"
 
 /* Display memory usage */
