@@ -212,6 +212,20 @@ int strncmp(char *s, char *p, uint32_t n) {
     }
 }
 
+char *strncpy(char *destination, char *source, int num) {
+    char *ret = destination;
+
+    while (*source && num-- > 0) {
+        *destination++ = *source++;
+    }
+
+    while (num-- > 0) {
+        *destination++ = '\0';
+    }
+
+    return ret;
+}
+
 // Find if a character is in a list
 int chrnlst(char c, char *l) {
     for (int i = 0; l[i] != '\0'; i++) {

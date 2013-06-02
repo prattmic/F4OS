@@ -17,6 +17,7 @@ void ftoa(float num, float tolerance, char buf[], uint32_t n);
 void strreverse(char *s);
 int strncmp(char *s, char *p, uint32_t n);
 int chrnlst(char c, char *l);
+char *strncpy(char *destination, char *source, int num);
 
 static inline int printable(char c) {
     return c >= 0x20 && c <= 0x7E;
