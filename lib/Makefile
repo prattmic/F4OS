@@ -1,4 +1,5 @@
 SRCS += stdio.c
+SRCS += stdlib.c
 SRCS += string.c
 SRCS += time.c
 
