@@ -1,7 +1,8 @@
-#include <stdint.h>
-#include <stddef.h>
-#include <string.h>
 #include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <dev/resource.h>
 #include <dev/buf_stream.h>
 
