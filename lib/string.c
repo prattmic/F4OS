@@ -65,6 +65,60 @@ size_t strnlen(char *s, int n) {
     return len;
 }
 
+void strreverse(char *s) {
+    char *begin = s;
+
+    while (*++s);
+    s--;
+
+    while (s > begin) {
+        char temp = *begin;
+        *begin++ = *s;
+        *s-- = temp;
+    }
+}
+
+int strncmp(char *s, char *p, uint32_t n) {
+    while (*s == *p && *s != '\0' && *p != '\0' && n) {
+        s++;
+        p++;
+        n--;
+    }
+
+    if (*s == *p) {
+        return 0;
+    }
+    else if (*s > *p) {
+        return 1;
+    }
+    else {
+        return -1;
+    }
+}
+
+char *strncpy(char *destination, char *source, int num) {
+    char *ret = destination;
+
+    while (*source && num-- > 0) {
+        *destination++ = *source++;
+    }
+
+    while (num-- > 0) {
+        *destination++ = '\0';
+    }
+
+    return ret;
+}
+
+// Find if a character is in a list
+int chrnlst(char c, char *l) {
+    for (int i = 0; l[i] != '\0'; i++) {
+        if (c == l[i])
+            return 1;
+    }
+    return 0;
+}
+
 void itoa(int n, char buf[]) {
     int i, sign;
 
@@ -182,58 +236,4 @@ void ftoa(float num, float tolerance, char buf[], uint32_t n) {
     }
 
     *(buf) = '\0';
-}
-
-void strreverse(char *s) {
-    char *begin = s;
-
-    while (*++s);
-    s--;
-
-    while (s > begin) {
-        char temp = *begin;
-        *begin++ = *s;
-        *s-- = temp;
-    }
-}
-
-int strncmp(char *s, char *p, uint32_t n) {
-    while (*s == *p && *s != '\0' && *p != '\0' && n) {
-        s++;
-        p++;
-        n--;
-    }
-
-    if (*s == *p) {
-        return 0;
-    }
-    else if (*s > *p) {
-        return 1;
-    }
-    else {
-        return -1;
-    }
-}
-
-char *strncpy(char *destination, char *source, int num) {
-    char *ret = destination;
-
-    while (*source && num-- > 0) {
-        *destination++ = *source++;
-    }
-
-    while (num-- > 0) {
-        *destination++ = '\0';
-    }
-
-    return ret;
-}
-
-// Find if a character is in a list
-int chrnlst(char c, char *l) {
-    for (int i = 0; l[i] != '\0'; i++) {
-        if (c == l[i])
-            return 1;
-    }
-    return 0;
 }
