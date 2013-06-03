@@ -62,21 +62,14 @@ static uint32_t int_abs(int n) {
 }
 
 void itoa(int n, char buf[]) {
-    int sign = n;
+    int i = 0;
     uint32_t num = int_abs(n);
 
-    int i = 0;
-    do {
-        buf[i++] = num % 10 + '0';
-    } while ((num /= 10) > 0);
-
-    if (sign < 0) {
+    if (n < 0) {
         buf[i++] = '-';
     }
 
-    buf[i] = '\0';
-
-    strreverse(buf);
+    uitoa(num, &buf[i]);
 }
 
 void uitoa(uint32_t n, char buf[]) {
