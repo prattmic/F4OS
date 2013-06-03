@@ -3,10 +3,10 @@
 
 #include "mm_internals.h"
 
-extern uint32_t _suserheap;
-extern uint32_t _euserheap;
-extern uint32_t _skernelheap;
-extern uint32_t _ekernelheap;
+extern void *_suserheap;
+extern void *_euserheap;
+extern void *_skernelheap;
+extern void *_ekernelheap;
 
 struct buddy user_buddy;
 struct heapnode *user_buddy_list[CONFIG_MM_USER_MAX_ORDER+1];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
@@ -14,7 +14,7 @@ struct heapnode *user_buddy_list[CONFIG_MM_USER_MAX_ORDER+1];       /* Top is bu
 struct buddy kernel_buddy;
 struct heapnode *kernel_buddy_list[CONFIG_MM_KERNEL_MAX_ORDER+1];
 
-static void init_buddy(struct buddy *buddy, uint32_t *address) __attribute__((section(".kernel")));
+static void init_buddy(struct buddy *buddy, void *address) __attribute__((section(".kernel")));
 
 void init_heap(void) {
     /* User buddy */
@@ -34,7 +34,7 @@ void init_heap(void) {
     init_buddy(&kernel_buddy, &_skernelheap);
 }
 
-static void init_buddy(struct buddy *buddy, uint32_t *address) {
+static void init_buddy(struct buddy *buddy, void *address) {
     for (int i = 0; i < buddy->max_order; i++) {
         buddy->list[i] = NULL;
     }
