@@ -11,7 +11,7 @@ struct test *tests = (struct test *)&_user_start;
 
 #define NUM_TESTS ((int)(&_user_end - &_user_start))
 
-#define MESSAGE_LEN 40
+#define MESSAGE_LEN 128
 
 void run_tests(void) {
     int failures = 0;
