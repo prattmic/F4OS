@@ -20,7 +20,13 @@ void mem_perf(int argc, char **argv) {
         printf("Basic alloc %d bytes\r\n", blocksize);
         for(int i = 0; i < ITERATIONS; i++) {
             void *stuff = malloc(blocksize);
-            free(stuff);
+            if (!stuff) {
+                printf("Warning: no memory available\r\n");
+            }
+            else {
+                free(stuff);
+            }
+
             times[i] = (uint32_t)(end_malloc_timestamp - begin_malloc_timestamp);
             avg += times[i];
             #ifdef VERBOSE
