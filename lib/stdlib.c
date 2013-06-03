@@ -25,15 +25,21 @@ int atoi(char buf[]) {
     int result = 0;
     int negate = 0;
     int i = 0;
-    // ignore trailing whitespace
+
+    // ignore leading whitespace
     while (chrnlst(buf[i]," \t\r\n")) {
         i++;
     }
+
     // check for negative
     if (buf[i] == '-') {
         negate = 1;
         i++;
     }
+    else if (buf[i] == '+') {
+        i++;
+    }
+
     // parse decimal number
     while (buf[i] >= '0' && buf[i] <= '9') {
         result *= 10;
