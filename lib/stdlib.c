@@ -61,27 +61,54 @@ static uint32_t int_abs(int n) {
     }
 }
 
-void itoa(int n, char buf[]) {
+char *itoa(int number, char *buf, uint32_t len, uint32_t base) {
     int i = 0;
-    uint32_t num = int_abs(n);
 
-    if (n < 0) {
-        buf[i++] = '-';
+    if (!len) {
+        return NULL;
     }
 
-    uitoa(num, &buf[i]);
+    if (base < 2 || base > 36) {
+        return NULL;
+    }
+
+    if (number < 0) {
+        buf[i++] = '-';
+        len--;
+    }
+
+    number = int_abs(number);
+
+    return uitoa(number, &buf[i], len, base);
 }
 
-void uitoa(uint32_t n, char buf[]) {
+/* Converts number to string, base 2 to 36.
+ * Returns NULL on invalid base or insufficient space */
+char *uitoa(uint32_t number, char *buf, uint32_t len, uint32_t base) {
+    char lookup[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXY";
     int i = 0;
 
+    if (!len) {
+        return NULL;
+    }
+
+    if (base < 2 || base > 36) {
+        return NULL;
+    }
+
     do {
-        buf[i++] = n % 10 + '0';
-    } while ((n /= 10) > 0);
+        buf[i++] = lookup[number % base];
+    } while (--len && (number /= base) > 0);
+
+    if (!len) {
+        return NULL;
+    }
 
     buf[i] = '\0';
 
     strreverse(buf);
+
+    return buf;
 }
 
 /* Based on http://stackoverflow.com/a/2303798/10817 by Sophy Pal */

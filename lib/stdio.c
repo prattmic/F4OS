@@ -155,7 +155,7 @@ int vfprintf(rd_t rd, char *fmt, va_list ap, int (*puts_fn)(rd_t,char*), int (*p
                     int num = va_arg(ap, int);
                     char buf[9];    /* 7 digits in INT_MAX + '-' and '\0' */
 
-                    itoa(num, buf);
+                    itoa(num, buf, 9, 10);
 
                     ret = holding_flush(holding, &hold_count, rd, puts_fn);
                     if (ret >= 0) {
@@ -178,7 +178,7 @@ int vfprintf(rd_t rd, char *fmt, va_list ap, int (*puts_fn)(rd_t,char*), int (*p
                     uint32_t num = va_arg(ap, uint32_t);
                     char buf[9];    /* 7 digits in INT_MAX + '-' and '\0' */
 
-                    uitoa(num, buf);
+                    uitoa(num, buf, 9, 10);
 
                     ret = holding_flush(holding, &hold_count, rd, puts_fn);
                     if (ret >= 0) {
