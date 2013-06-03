@@ -33,7 +33,7 @@ void mem_perf(int argc, char **argv) {
             printf("--Time Delta %d = %u\r\n", i, times[i]);
             #endif
         }
-        printf("--Average time %fus\r\n", (avg/((float)ITERATIONS))/168.0f);
+        printf("--Average time %fus\r\n", (avg/((float)ITERATIONS))/(CONFIG_SYS_CLOCK/1e6));
     }
 }
 DEFINE_APP(mem_perf)
