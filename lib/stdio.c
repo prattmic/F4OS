@@ -39,31 +39,6 @@ int sprintf(char *buf, char *fmt, ...) {
     return ret;
 }
 
-#define PS 256
-
-void printx(char *s, uint8_t *x, int n) {
-    char buf[PS];
-
-    for (int i = 0; i < PS; i++){
-        if(*s == '%'){
-            for(int j = n-1; j >= 0; j--){
-                buf[i++%128] = ((*(x+j)>>4)&0xf)[
-                    "0123456789ABCDEF"
-                ];
-                buf[i++%128] = (*(x+j)&0xf)[
-                    "0123456789ABCDEF"
-                ];
-            }
-            i--;
-        }
-        else{
-            buf[i] = *s;
-        }
-        s++;
-    }
-    puts(buf);
-}
-
 int fprintf(rd_t rd, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);

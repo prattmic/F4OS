@@ -28,6 +28,4 @@ int vfprintf(rd_t rd, char *fmt, va_list ap, int (*puts_fn)(rd_t,char*), int (*p
 #define getc() fgetc(stdin)
 #define printf(args...) fprintf(stdout, args)
 
-void printx(char *s, uint8_t *x, int n);
-
 #endif
