@@ -124,14 +124,8 @@ int vfprintf(rd_t rd, char *fmt, va_list ap, int (*puts_fn)(rd_t,char*), int (*p
                     /* Hex */
                     uint32_t hex = va_arg(ap, uint32_t);
                     char buf[9];
-                    buf[8] = '\0';
 
-                    uint8_t i = 0;
-                    for(int8_t j = 7; j >= 0; j--){
-                        buf[i++] = ((hex>>(4*j))&0xf)[
-                            "0123456789ABCDEF"
-                        ];
-                    }
+                    uitoa(hex, buf, 9, 16);
 
                     ret = holding_flush(holding, &hold_count, rd, puts_fn);
                     if (ret >= 0) {
