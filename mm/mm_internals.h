@@ -32,8 +32,4 @@ extern struct heapnode *user_buddy_list[];       /* Top is buddy_list[17], for l
 extern struct buddy kernel_buddy;
 extern struct heapnode *kernel_buddy_list[];
 
-#ifdef CONFIG_MM_PROFILING
-extern uint64_t begin_malloc_timestamp, end_malloc_timestamp;
-#endif
-
 #endif

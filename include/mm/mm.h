@@ -10,4 +10,8 @@ void kfree(void *address) __attribute__((section(".kernel")));
 uint32_t mm_space(void) __attribute__((section(".kernel")));
 uint32_t mm_kspace(void) __attribute__((section(".kernel")));
 
+#ifdef CONFIG_MM_PROFILING
+extern uint64_t begin_malloc_timestamp, end_malloc_timestamp;
+#endif
+
 #endif

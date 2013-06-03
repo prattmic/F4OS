@@ -6,6 +6,7 @@
 
 #ifdef CONFIG_MM_PROFILING
 #include <dev/hw/perfcounter.h>
+uint64_t begin_malloc_timestamp, end_malloc_timestamp;
 #endif
 
 static void *alloc(uint8_t order, struct buddy *buddy) __attribute__((section(".kernel")));

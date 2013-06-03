@@ -7,8 +7,6 @@
 
 #define ITERATIONS 10
 
-uint64_t begin_malloc_timestamp, end_malloc_timestamp;
-
 void mem_perf(int argc, char **argv) {
     uint32_t times[ITERATIONS];
     uint32_t total;
