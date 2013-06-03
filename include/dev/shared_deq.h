@@ -1,3 +1,6 @@
+#ifndef DEV_SHARED_DEQ_H_INCLUDED
+#define DEV_SHARED_DEQ_H_INCLUDED
+
 /* Needs list.h */
 
 typedef struct shared_deq {
@@ -37,3 +40,4 @@ static inline list_t *sdeq_pop(shared_deq_t *sdeq) {
 /* NOT INHERENTLY THREADSAFE */
 #define for_each_in_sdeq(curr, sdeq, member) for_each(curr, &sdeq._list, member)
 
+#endif

@@ -1,3 +1,6 @@
+#ifndef LIST_H_INCLUDED
+#define LIST_H_INCLUDED
+
 /* Simplified linux list implementation */
 
 #include <stddef.h>
@@ -91,3 +94,4 @@ static inline struct list *list_pop_head(struct list *head) {
         &curr->member != (head);                                   \
         curr = container_of(curr->member.next, typeof(*curr), member))
 
+#endif

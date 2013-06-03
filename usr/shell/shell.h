@@ -1,3 +1,6 @@
+#ifndef USR_SHELL_SHELL_H_INCLUDED
+#define USR_SHELL_SHELL_H_INCLUDED
+
 void shell(void);
 void help(int argc, char **argv);
 void history(int argc, char **argv);
@@ -11,3 +14,5 @@ void history(int argc, char **argv);
 #define CLEARLINE           "\e[K"
 #define RIGHT               "\e[C"
 #define LEFT                "\e[D"
+
+#endif

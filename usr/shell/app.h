@@ -1,3 +1,6 @@
+#ifndef USR_SHELL_APP_H_INCLUDED
+#define USR_SHELL_APP_H_INCLUDED
+
 typedef struct command {
     char *name;
     void (*fptr)(int, char **);
@@ -7,3 +10,5 @@ typedef struct command {
         .name = #fn,        \
         .fptr = fn          \
     };
+
+#endif
