@@ -7,13 +7,10 @@
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 
+#include <dev/hw/perfcounter.h>
 #include <dev/hw/led.h>
 #include <dev/hw/usart.h>
 #include <dev/hw/usbdev.h>
-
-#ifdef CONFIG_PERFCOUNTER
-#include <dev/hw/tim.h>
-#endif
 
 const char banner[] = "Welcome to...\r\n"
                 "\r\n"

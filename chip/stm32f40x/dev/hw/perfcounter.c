@@ -1,6 +1,6 @@
 #include <dev/registers.h>
 #include <dev/cortex_m.h>
-#include <dev/hw/tim.h>
+#include <dev/hw/perfcounter.h>
 
 static void init_tim1(void) {
     /* Enable timer clock */
@@ -37,4 +37,8 @@ static void init_tim2(void) {
 void init_perfcounter(void) {
     init_tim2();
     init_tim1();
+}
+
+inline uint64_t perfcounter_getcount(void) {
+    return (*TIM2_CNT << 16)|(*TIM1_CNT);
 }

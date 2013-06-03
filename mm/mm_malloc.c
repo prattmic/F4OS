@@ -4,6 +4,10 @@
 #include <mm/mm.h>
 #include "mm_internals.h"
 
+#ifdef CONFIG_MM_PROFILING
+#include <dev/hw/perfcounter.h>
+#endif
+
 static void *alloc(uint8_t order, struct buddy *buddy) __attribute__((section(".kernel")));
 static struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
 static uint8_t size_to_order(uint32_t size) __attribute__((section(".kernel")));
@@ -13,13 +17,17 @@ void *malloc(uint32_t size) {
     void *address;
 
     acquire(&user_buddy.semaphore);
+
 #ifdef CONFIG_MM_PROFILING
-    begin_malloc_timestamp = getcount();
+    begin_malloc_timestamp = perfcounter_getcount();
 #endif
+
     address = alloc(order, &user_buddy);
+
 #ifdef CONFIG_MM_PROFILING
-    end_malloc_timestamp = getcount();
+    end_malloc_timestamp = perfcounter_getcount();
 #endif
+
     release(&user_buddy.semaphore);
 
     return address;

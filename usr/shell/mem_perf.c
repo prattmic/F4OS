@@ -7,15 +7,16 @@
 
 #define ITERATIONS 10
 
+uint64_t begin_malloc_timestamp, end_malloc_timestamp;
+
 void mem_perf(int argc, char **argv) {
     uint32_t times[ITERATIONS];
-    uint32_t avg;
+    uint32_t total;
 
-    avg = 0;
     printf("ALLOCATOR BENCHMARKS\r\n");
 
-    for(int n = 3; n < 17; n++) {
-        avg = 0;
+    for(int n = CONFIG_MM_USER_MIN_ORDER; n < CONFIG_MM_USER_MAX_ORDER; n++) {
+        total = 0;
         uint32_t blocksize = pow(2, n);
         printf("Basic alloc %d bytes\r\n", blocksize);
         for(int i = 0; i < ITERATIONS; i++) {
@@ -28,12 +29,12 @@ void mem_perf(int argc, char **argv) {
             }
 
             times[i] = (uint32_t)(end_malloc_timestamp - begin_malloc_timestamp);
-            avg += times[i];
+            total += times[i];
             #ifdef VERBOSE
             printf("--Time Delta %d = %u\r\n", i, times[i]);
             #endif
         }
-        printf("--Average time %fus\r\n", (avg/((float)ITERATIONS))/(CONFIG_SYS_CLOCK/1e6));
+        printf("--Average time %fus\r\n", (total/((float)ITERATIONS))/(CONFIG_SYS_CLOCK/1e6));
     }
 }
 DEFINE_APP(mem_perf)
