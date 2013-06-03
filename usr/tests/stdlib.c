@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "test.h"
 
 int atoi_test(char *message, int len) {
@@ -32,3 +33,31 @@ int atoi_test(char *message, int len) {
     return PASSED;
 }
 DEFINE_TEST("atoi", atoi_test);
+
+int itoa_test(char *message, int len) {
+    struct {
+        int num;
+        char *str;
+    } cases[] = {
+        { .num = 0, .str = "0" },
+        { .num = -0, .str = "0" },
+        { .num = 1, .str = "1" },
+        { .num = -1, .str = "-1" },
+        { .num = 2147483647, .str = "2147483647" },
+        { .num = -2147483648, .str = "-2147483648" },
+    };
+
+    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+        char buf[20] = {'\0'};
+        itoa(cases[i].num, buf);
+
+        if (strncmp(cases[i].str, buf, 20)) {
+            sprintf(message, "itoa(%d) = \"%s\", should be \"%s\"",
+                    cases[i].num, buf, cases[i].str);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("itoa", itoa_test);
