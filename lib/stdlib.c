@@ -3,9 +3,10 @@
  * Creative Commons Attribution-ShareAlike 2.5 Generic
  * license.  http://creativecommons.org/licenses/by-sa/2.5/ */
 
+#include <limits.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 
 char *strndup(char *str, int n) {
     int len = strnlen(str, n);
@@ -49,17 +50,25 @@ int atoi(char buf[]) {
     return result * (negate ? -1 : 1);
 }
 
-void itoa(int n, char buf[]) {
-    int i, sign;
-
-    if ((sign = n) < 0) {
-        n = -n;
+/* Safely takes absolute value of an int,
+ * properly handling INT_MIN */
+static uint32_t int_abs(int n) {
+    if (n > 0) {
+        return n;
     }
+    else {
+        return UINT_MAX - (uint32_t) n + 1;
+    }
+}
 
-    i = 0;
+void itoa(int n, char buf[]) {
+    int sign = n;
+    uint32_t num = int_abs(n);
+
+    int i = 0;
     do {
-        buf[i++] = n % 10 + '0';
-    } while ((n /= 10) > 0);
+        buf[i++] = num % 10 + '0';
+    } while ((num /= 10) > 0);
 
     if (sign < 0) {
         buf[i++] = '-';
