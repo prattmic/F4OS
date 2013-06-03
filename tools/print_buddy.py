@@ -20,10 +20,10 @@ class Print_Buddy(gdb.Command):
                 print "Order %d: NULL" % i
 
     def print_heapnode(self, heapnode):
-        print heapnode, "(%d)" % heapnode['order'], "->",
+        print heapnode, "(%d)" % heapnode['header']['order'], "->",
         while heapnode['next']:
             heapnode = heapnode['next']
-            print heapnode, "(%d)" % heapnode['order'], "->",
+            print heapnode, "(%d)" % heapnode['header']['order'], "->",
         print "NULL"
 
 Print_Buddy()

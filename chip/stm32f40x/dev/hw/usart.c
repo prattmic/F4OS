@@ -15,7 +15,12 @@
 
 #include <dev/hw/usart.h>
 
-#define USART_DMA_MSIZE     (512-MM_HEADER_SIZE)      /* Since malloc headers take up some space, we want to request the max space we can fit in one block */
+/* Since malloc headers take up some space,
+ * we want to request a little less space,
+ * so we don't end up wasting a bunch of
+ * space when the header causes us to get
+ * 1KB allocated. */
+#define USART_DMA_MSIZE     (500)
 
 struct semaphore usart_read_semaphore = INIT_SEMAPHORE;
 struct semaphore usart_write_semaphore = INIT_SEMAPHORE;

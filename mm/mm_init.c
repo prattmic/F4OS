@@ -40,6 +40,7 @@ static void init_buddy(struct buddy *buddy, void *address) {
     }
 
     buddy->list[buddy->max_order] = (struct heapnode *) address;
-    buddy->list[buddy->max_order]->order = buddy->max_order;
+    buddy->list[buddy->max_order]->header.magic = MM_MAGIC;
+    buddy->list[buddy->max_order]->header.order = buddy->max_order;
     buddy->list[buddy->max_order]->next = NULL;
 }

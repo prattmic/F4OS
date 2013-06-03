@@ -3,10 +3,19 @@
 
 #include <kernel/semaphore.h>
 
-struct heapnode {
+#define MM_MAGIC    0xBEEF
+
+struct heapnode_header {
+    uint16_t magic;
     uint8_t order;
+    uint8_t padding;    /* Tasks won't take kindly to */
+                        /* getting unaligned addresses */
+} __attribute__((packed));
+
+struct heapnode {
+    struct heapnode_header header;
     struct heapnode *next;
-};
+} __attribute__((packed));
 
 struct buddy {
     uint8_t max_order;
@@ -14,6 +23,8 @@ struct buddy {
     struct semaphore semaphore;
     struct heapnode **list;
 };
+
+#define MM_HEADER_SIZE   sizeof(struct heapnode_header)
 
 extern struct buddy user_buddy;
 extern struct heapnode *user_buddy_list[];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
