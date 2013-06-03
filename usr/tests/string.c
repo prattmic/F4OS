@@ -235,3 +235,52 @@ int strncmp_test(char *message, int len) {
     return PASSED;
 }
 DEFINE_TEST("strncmp", strncmp_test);
+
+int strncpy_test(char *message, int len) {
+    char *str_src = "Hello World";
+    char str_dst[25];
+
+    memset(str_dst, MEM_MAGIC, 25);
+
+    strncpy(str_dst, str_src, 25);
+
+    if (strncmp(str_src, str_dst, 25) != 0) {
+        sprintf(message, "'%s' != '%s'", str_src, str_dst);
+        return FAILED;
+    }
+    else if (str_dst[20] != '\0') {
+        sprintf(message, "Destination not NULLed");
+        return FAILED;
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("strncpy", strncpy_test);
+
+int chrnlst_test(char *message, int len) {
+    struct {
+        char c;
+        char *list;
+        int ret;
+    } cases[] = {
+        { .c = '\0', .list = "", .ret = 0 },
+        { .c = '\0', .list = " \t\r\n", .ret = 0 },
+        { .c = '\t', .list = " \t\r\n", .ret = 1 },
+        { .c = 'a', .list = "ABC", .ret = 0 },
+        { .c = 'a', .list = "abc", .ret = 1 },
+        { .c = 'a', .list = "c\r\na", .ret = 1 },
+    };
+
+    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+        int ret = chrnlst(cases[i].c, cases[i].list);
+
+        if (ret != cases[i].ret) {
+            sprintf(message, "chrnlst(\"%c\", \"%s\") returned %d, not %d",
+                    cases[i].c, cases[i].list, ret, cases[i].ret);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("chrnlst", chrnlst_test);
