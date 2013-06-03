@@ -84,7 +84,7 @@ int strncmp(char *s, char *p, uint32_t n) {
         n--;
     }
 
-    if (*s == *p) {
+    if (!n || *s == *p) {
         return 0;
     }
     else if (*s > *p) {

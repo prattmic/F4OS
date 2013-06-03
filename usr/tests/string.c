@@ -207,3 +207,31 @@ int strreverse_test(char *message, int len) {
     return PASSED;
 }
 DEFINE_TEST("strreverse", strreverse_test);
+
+int strncmp_test(char *message, int len) {
+    struct {
+        char *str1;
+        char *str2;
+        int ret;
+    } cases[] = {
+        { .str1 = "test", .str2 = "test", .ret = 0 },
+        { .str1 = "test1", .str2 = "test2", .ret = -1 },
+        { .str1 = "test2", .str2 = "test1", .ret = 1 },
+        { .str1 = "012345678a", .str2 = "012345678b", .ret = -1 },
+        { .str1 = "01234567890a", .str2 = "01234567890b", .ret = 0 },
+        { .str1 = "0123456789a", .str2 = "0123456789b", .ret = 0 },
+    };
+
+    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+        int ret = strncmp(cases[i].str1, cases[i].str2, 10);
+
+        if (ret != cases[i].ret) {
+            sprintf(message, "strncmp(\"%s\", \"%s\", 10) returned %d, not %d",
+                    cases[i].str1, cases[i].str2, ret, cases[i].ret);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("strncmp", strncmp_test);
