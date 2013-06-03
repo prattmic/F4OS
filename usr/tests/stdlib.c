@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-<<<<<<< HEAD
-=======
 #include <string.h>
->>>>>>> new-tests
 #include "test.h"
 
 int atoi_test(char *message, int len) {
