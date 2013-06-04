@@ -15,23 +15,33 @@
 /* Peripheral Map */
 #define PERIPH_BASE                     (uint32_t) (0x40000000)                                 /* Peripheral base address */
 #define PRIV_PERIPH_BASE                (uint32_t) (0xED000000)                                 /* Private peripheral base address */
-#define APB1PERIPH_BASE                 (PERIPH_BASE)
-#define APB2PERIPH_BASE                 (PERIPH_BASE + 0x00010000)
-#define AHB1PERIPH_BASE                 (PERIPH_BASE + 0x00020000)
 #define AHB2PERIPH_BASE                 (PERIPH_BASE + 0x10000000)
-
-#define TIM1_BASE                       (APB2PERIPH_BASE + 0x0000)
-
-#define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
+#define AHB1PERIPH_BASE                 (PERIPH_BASE + 0x00020000)
+#define APB2PERIPH_BASE                 (PERIPH_BASE + 0x00010000)
+#define APB1PERIPH_BASE                 (PERIPH_BASE)
+#define INVALID_PERIPH_BASE             (uint32_t) (0x0)                                        /* Placeholder for illegal peripherals */
+/* AHB2 Peripherals */
+#define USB_FS_BASE                     (AHB2PERIPH_BASE + 0x0000)                              /* USB OTG FS base address */
+/* AHB1 Peripherals */
+#define DMA2_BASE                       (AHB1PERIPH_BASE + 0x6400)                              /* DMA2 base address */
+#define DMA1_BASE                       (AHB1PERIPH_BASE + 0x6000)                              /* DMA1 base address */
+#define FLASH_R_BASE                    (AHB1PERIPH_BASE + 0x3C00)                              /* Flash registers base address */
+#define RCC_BASE                        (AHB1PERIPH_BASE + 0x3800)                              /* Reset and Clock Control base address */
+#define GPIO_BASE(port)                 (AHB1PERIPH_BASE + (0x400*port))                        /* GPIO Port base address */
+/* APB1 Peripherals */
+#define UART8_BASE                      (APB1PERIPH_BASE + 0x7C00)                              /* UART8 Base Address */
+#define UART7_BASE                      (APB1PERIPH_BASE + 0x7800)                              /* UART7 Base Address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
 #define I2C_BASE(port)                  (APB1PERIPH_BASE + 0x5400 + (0x400*(port-1)))           /* I2C (1,2,3) base address */
+#define UART5_BASE                      (APB1PERIPH_BASE + 0x5000)                              /* UART5 Base Address */
+#define UART4_BASE                      (APB1PERIPH_BASE + 0x4C00)                              /* UART4 Base Address */
+#define USART3_BASE                     (APB2PERIPH_BASE + 0x4800)                              /* USART3 Base Address */
+#define USART2_BASE                     (APB2PERIPH_BASE + 0x4400)                              /* USART2 Base Address */
+#define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
+/* APB2 Peripherals */
+#define USART6_BASE                     (APB2PERIPH_BASE + 0x1400)                              /* USART6 Base Address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                              /* USART1 Base Address */
-#define GPIO_BASE(port)                 (AHB1PERIPH_BASE + (0x400*port))                        /* GPIO Port base address */
-#define RCC_BASE                        (AHB1PERIPH_BASE + 0x3800)                              /* Reset and Clock Control base address */
-#define FLASH_R_BASE                    (AHB1PERIPH_BASE + 0x3C00)                              /* Flash registers base address */
-#define DMA1_BASE                       (AHB1PERIPH_BASE + 0x6000)                              /* DMA1 base address */
-#define DMA2_BASE                       (AHB1PERIPH_BASE + 0x6400)                              /* DMA2 base address */
-#define USB_FS_BASE                     (AHB2PERIPH_BASE + 0x0000)                              /* USB OTG FS base address */
+#define TIM1_BASE                       (APB2PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 
 /* SPI 1 is on a different bus than SPI 2/3, so we have to do a little more work to determine the correct base address */
 #define SPI_BASE(port)                  (port == 1 ? (APB2PERIPH_BASE + 0x3000) : (APB1PERIPH_BASE + 0x3800 + 0x400*(port-2))) /* SPI (1,2,3) base address */
