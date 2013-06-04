@@ -333,7 +333,7 @@
 #define RCC_APB2RSTR_TIM1RST            (uint32_t) (1 << 0)                                     /* TIM1 reset */
 #define RCC_APB2RSTR_TIM8RST            (uint32_t) (1 << 1)                                     /* TIM8 reset */
 #define RCC_APB2RSTR_USART1RST          (uint32_t) (1 << 4)                                     /* USART1 reset */
-#define RCC_APB2RSTR_USART2RST          (uint32_t) (1 << 5)                                     /* USART2 reset */
+#define RCC_APB2RSTR_USART6RST          (uint32_t) (1 << 5)                                     /* USART6 reset */
 #define RCC_APB2RSTR_ADCRST             (uint32_t) (1 << 8)                                     /* ADC1 reset */
 #define RCC_APB2RSTR_SDIORST            (uint32_t) (1 << 11)                                    /* SDIO reset */
 #define RCC_APB2RSTR_SPI1RST            (uint32_t) (1 << 12)                                    /* SPI1 reset */
@@ -398,7 +398,7 @@
 #define RCC_APB2ENR_TIM1EN              (uint32_t) (1 << 0)                                     /* TIM1 clock enable */
 #define RCC_APB2ENR_TIM8EN              (uint32_t) (1 << 1)                                     /* TIM8 clock enable */
 #define RCC_APB2ENR_USART1EN            (uint32_t) (1 << 4)                                     /* USART1 clock enable */
-#define RCC_APB2ENR_USART2EN            (uint32_t) (1 << 5)                                     /* USART2 clock enable */
+#define RCC_APB2ENR_USART6EN            (uint32_t) (1 << 5)                                     /* USART6 clock enable */
 #define RCC_APB2ENR_ADC1EN              (uint32_t) (1 << 8)                                     /* ADC1 clock enable */
 #define RCC_APB2ENR_ADC2EN              (uint32_t) (1 << 9)                                     /* ADC2 clock enable */
 #define RCC_APB2ENR_ADC3EN              (uint32_t) (1 << 10)                                    /* ADC3 clock enable */
