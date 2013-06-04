@@ -112,15 +112,6 @@
 #define I2C_CCR(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x1C)           /* I2C clock control register */
 #define I2C_TRISE(port)                 (volatile uint32_t *) (I2C_BASE(port) + 0x20)           /* I2C TRISE register */
 
-/* USART 1 */
-#define USART1_SR                       (volatile uint32_t *) (USART1_BASE + 0x00)              /* USART1 status register */
-#define USART1_DR                       (volatile uint32_t *) (USART1_BASE + 0x04)              /* USART1 data register */
-#define USART1_BRR                      (volatile uint32_t *) (USART1_BASE + 0x08)              /* USART1 baud rate register */
-#define USART1_CR1                      (volatile uint32_t *) (USART1_BASE + 0x0C)              /* USART1 control register 1 */
-#define USART1_CR2                      (volatile uint32_t *) (USART1_BASE + 0x10)              /* USART1 control register 2 */
-#define USART1_CR3                      (volatile uint32_t *) (USART1_BASE + 0x14)              /* USART1 control register 3 */
-#define USART1_GTPR                     (volatile uint32_t *) (USART1_BASE + 0x18)              /* USART1 gaurd time and prescale register */
-
 /* GPIO Port (GPIO) */
 #define GPIO_MODER(port)                (volatile uint32_t *) (GPIO_BASE(port) + 0x00)          /* Port mode register */
 #define GPIO_OTYPER(port)               (volatile uint32_t *) (GPIO_BASE(port) + 0x04)          /* Port output type register */
@@ -542,14 +533,7 @@
 #define I2C_CCR_FS                      (uint32_t) (1 << 15)                                    /* I2C master mode selection */
 
 /* USART */
-#define USART_SR_TC                     (uint32_t) (1 << 6)                                     /* USART Transmission Complete */
-#define USART_SR_RXNE                   (uint32_t) (1 << 5)                                     /* USART Read data register not empty */
-#define USART_CR1_UE                    (uint32_t) (1 << 13)                                    /* USART Enable */
-#define USART_CR1_RXNEIE                (uint32_t) (1 << 5)                                     /* RXNE Interrupt Enable */
-#define USART_CR1_TE                    (uint32_t) (1 << 3)                                     /* USART Transmit Enable */
-#define USART_CR1_RE                    (uint32_t) (1 << 2)                                     /* USART Receive Enable */
-#define USART_CR3_DMAR_EN               (uint32_t) (1 << 6)                                     /* USART DMA Receive Enable */
-#define USART_CR3_DMAT_EN               (uint32_t) (1 << 7)                                     /* USART DMA Transmit Enable */
+#include "usart.h"
 
 /* GPIO */
 #define GPIOA                           (uint8_t)  (0)                                          /* GPIO Port A */
