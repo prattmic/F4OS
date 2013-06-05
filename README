@@ -8,10 +8,7 @@ Initial support has also been added for TI LM4F120H5 microcontrollers
 (TI Stellaris Launchpad).  Fewer peripherals have been developed, but
 the core OS works well.
 
-It should be possible to port to additional Cortex M4F cores simply
-by using the two chip/ folders as an example.  The core of what is
-needed is a clock initialization function, and drivers for desired
-peripherals.
+Requirements and building:
 
 Building requires an arm-none-eabi- toolchain with Cortex-M4 hardfloat
 support.  For known working toolchains, see
@@ -28,6 +25,8 @@ the first OS build.  It requires automake, libtoolize, gperf, flex, bison,
 and libncurses-dev to build.  See the README in tools/kconfig-frontends/
 for more details.
 
+Flashing:
+
 For flashing and debugging on the STM32F40x, texane's stlink is
 recommended: https://github.com/texane/stlink
 
@@ -41,6 +40,8 @@ https://github.com/utzig/lm4tools
 'make burn' calls flash.sh in the chip folder, so modify it to
 your heart's content.
 
+User programs:
+
 By default, the shell program in usr/shell/ is built and run at
 boot.  The main() function in main.c is called by the scheduler
 before task switching begins and should be used to create tasks
@@ -48,11 +49,20 @@ that run at boot.  The USR environmental variable selects the
 userspace program to build.  The Makefile in usr/$USR/ will be
 called at build time to create usr_$USR.o.
 
+I/O:
+
 On the STM32F40x, resource 0 (stdin/out) is the USB device, which
 should appear as a USB CDC ACM (Virtual Terminal) device on the host.
 Resource 1 (stderr) is the UART on PB6 (TX) and PB7 (RX).  The default
 resources can be changed in the chip.c file for each chip.
 
 On the LM4F120H5, resources 0 and 1 default to UART0 on PA0 and PA1.
+
+Porting:
+
+It should be possible to port to additional Cortex M4F cores simply
+by using the two chip/ folders as an example.  The core of what is
+needed is a clock initialization function, and drivers for desired
+peripherals.
 
 Michael Pratt
