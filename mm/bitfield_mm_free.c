@@ -2,8 +2,11 @@
 #include <stdint.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
+#include <mm/mm.h>
 
 #include "bitfield_mm_internals.h"
+
+PROF_DEFINE_COUNTER(free);
 
 static void free_mem(void *mem, mm_block_t *heap, void *base, struct semaphore *mutex) {
     alloc_header_t *header = (alloc_header_t *)((uintptr_t)mem - sizeof(alloc_header_t));
@@ -15,6 +18,8 @@ static void free_mem(void *mem, mm_block_t *heap, void *base, struct semaphore *
     uint32_t idx = addr_to_block((void *)header, base);
 
     acquire(mutex);
+    PROF_START_COUNTER(free);
+
     if(grains < MM_GRAINS_PER_BLOCK) {
         heap[idx].free_mask &= ~(MASK(grains) << addr_to_grain_offset((void *)header, base));
         heap[idx].free_grains += grains;
@@ -31,6 +36,8 @@ static void free_mem(void *mem, mm_block_t *heap, void *base, struct semaphore *
         heap[idx+blocks_to_free].free_mask &= ~MASK(grains);
         heap[idx+blocks_to_free].free_grains += grains;
     }
+
+    PROF_STOP_COUNTER(free);
     release(mutex);
 }
 

@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>
-
 #include <mm/mm.h>
+
 #include "buddy_mm_internals.h"
+
+PROF_DEFINE_COUNTER(free);
 
 static void buddy_merge(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
 
@@ -13,7 +15,9 @@ void free(void *address) {
     struct heapnode *node = (struct heapnode *) ((uint8_t *) address - MM_HEADER_SIZE);
 
     acquire(&user_buddy.semaphore);
+    PROF_START_COUNTER(free);
     buddy_merge(node, &user_buddy);
+    PROF_STOP_COUNTER(free);
     release(&user_buddy.semaphore);
 }
 

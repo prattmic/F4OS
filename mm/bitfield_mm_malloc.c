@@ -1,8 +1,11 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <kernel/semaphore.h>
+#include <mm/mm.h>
 
 #include "bitfield_mm_internals.h"
+
+PROF_DEFINE_COUNTER(malloc);
 
 static void *alloc(mm_block_t *heap, uint32_t hlen, uint16_t grains, void *base, struct semaphore *mutex) {
     void *ret = NULL;
@@ -12,6 +15,8 @@ static void *alloc(mm_block_t *heap, uint32_t hlen, uint16_t grains, void *base,
     alloc_header_t *header = NULL;
 
     acquire(mutex);
+    PROF_START_COUNTER(malloc);
+
     if(grains < MM_GRAINS_PER_BLOCK) {
         mask = MASK(grains);
 
@@ -67,7 +72,10 @@ static void *alloc(mm_block_t *heap, uint32_t hlen, uint16_t grains, void *base,
     }
 
 out:
+
+    PROF_STOP_COUNTER(malloc);
     release(mutex);
+
     if(!ret)
         return ret;
 

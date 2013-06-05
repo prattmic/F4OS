@@ -2,12 +2,10 @@
 #include <stdlib.h>
 #include <kernel/fault.h>
 #include <mm/mm.h>
+
 #include "buddy_mm_internals.h"
 
-#ifdef CONFIG_MM_PROFILING
-#include <dev/hw/perfcounter.h>
-uint64_t begin_malloc_timestamp, end_malloc_timestamp;
-#endif
+PROF_DEFINE_COUNTER(malloc);
 
 static void *alloc(uint8_t order, struct buddy *buddy) __attribute__((section(".kernel")));
 static struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
@@ -21,17 +19,9 @@ void *malloc(size_t size) {
     void *address;
 
     acquire(&user_buddy.semaphore);
-
-#ifdef CONFIG_MM_PROFILING
-    begin_malloc_timestamp = perfcounter_getcount();
-#endif
-
+    PROF_START_COUNTER(malloc);
     address = alloc(order, &user_buddy);
-
-#ifdef CONFIG_MM_PROFILING
-    end_malloc_timestamp = perfcounter_getcount();
-#endif
-
+    PROF_STOP_COUNTER(malloc);
     release(&user_buddy.semaphore);
 
     return address;
