@@ -8,14 +8,11 @@
 
 void remove_task(task_node_list *list, task_node *node) {
     /* Remove from end/middle/beginning of list */
-    if (node->next == NULL && node->prev) {
-        node->prev->next = NULL;
+    if (node->next) {
+        node->next->prev = node->prev;
     }
     if (node->prev) {
         node->prev->next = node->next;
-    }
-    else {
-        node->next->prev = NULL;
     }
 
     /* Remove from head/tail of list->*/
