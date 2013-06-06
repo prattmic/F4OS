@@ -26,8 +26,6 @@ SECTIONS {
         . = ALIGN(4);
     } > FLASH
 
-    /* .kernel comes before .text so .text can be aligned to its
-     * size and avoid any MPU effects */
     .kernel :
     {
         . = ALIGN(8);
