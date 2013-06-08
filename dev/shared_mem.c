@@ -56,7 +56,7 @@ rd_t open_shared_mem(void) {
     }
     new_r->write_sem = new_r->read_sem;
 
-    ret = add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task, new_r);
     if (ret < 0) {
         goto err_free_new_r;
     }

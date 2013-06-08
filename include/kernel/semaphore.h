@@ -8,8 +8,8 @@ struct task_node;
 
 struct semaphore {
         uint8_t             lock;
-        struct task_node   *held_by;
-        struct task_node   *waiting;
+        struct task_ctrl   *held_by;
+        struct task_ctrl   *waiting;
 };
 
 typedef struct semaphore semaphore;

@@ -25,7 +25,7 @@ static inline resource *get_resource(rd_t rd) {
     /* Before task switching begins, the default list of resources must be used.
      * Once it begins, we can get the resouece directly from the task. */
     if (task_switching) {
-        return curr_task->task->resources[rd];
+        return curr_task->resources[rd];
     }
     else {
         return default_resources[rd];
@@ -86,10 +86,10 @@ rd_t add_resource(task_ctrl* tcs, resource* r) {
 void resource_setup(task_ctrl* task) {
     if (task_switching) {
         for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
-            task->resources[i] = curr_task->task->resources[i];
+            task->resources[i] = curr_task->resources[i];
         }
 
-        task->top_rd = curr_task->task->top_rd;
+        task->top_rd = curr_task->top_rd;
     }
     else {
         int top_rd = 0;
@@ -174,7 +174,7 @@ int close(rd_t rd) {
         return -1;
     }
 
-    resource **resource = task_switching ? &curr_task->task->resources[rd] : &default_resources[rd];
+    resource **resource = task_switching ? &curr_task->resources[rd] : &default_resources[rd];
 
     if (!*resource) {
         return -1;
@@ -184,8 +184,8 @@ int close(rd_t rd) {
     if (!ret) {
         kfree(*resource);
         *resource = NULL;
-        if (task_switching && (rd == curr_task->task->top_rd - 1)) {
-            curr_task->task->top_rd--;
+        if (task_switching && (rd == curr_task->top_rd - 1)) {
+            curr_task->top_rd--;
         }
     }
 

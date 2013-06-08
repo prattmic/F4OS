@@ -67,7 +67,7 @@ rd_t open_sfe9dof_gyro(void) {
     new_r->read_sem = &i2c1_semaphore;
     new_r->write_sem = &i2c1_semaphore;
 
-    ret = add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task, new_r);
     if (ret < 0) {
         goto err_free_new_r;
     }
