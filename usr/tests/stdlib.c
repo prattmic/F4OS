@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -97,3 +98,36 @@ int itoa_test(char *message, int len) {
     return PASSED;
 }
 DEFINE_TEST("itoa", itoa_test);
+
+int ftoa_test(char *message, int len) {
+    struct {
+        float num;
+        char *str;
+        float tolerance;
+    } cases[] = {
+        { .num = 0.0f, .str = "0.0", .tolerance = 0.01 },
+        { .num = 0.1f, .str = "0.1", .tolerance = 0.01 },
+        { .num = 0.1f, .str = "0.1", .tolerance = 0.0001 },
+        { .num = -0.1f, .str = "-0.1", .tolerance = 0.0001 },
+        { .num = 1e-25f, .str = "0.0", .tolerance = 0.00001 },
+        /* ftoa needs a more formal definition of expected behavior */
+        { .num = 45.24452f, .str = "45.24451", .tolerance = 0.00001 },
+        { .num = uint_to_float(FLOAT_INF), .str = "inf", .tolerance = 0.00001 },
+        { .num = -uint_to_float(FLOAT_INF), .str = "-inf", .tolerance = 0.00001 },
+        { .num = uint_to_float(FLOAT_NAN), .str = "nan", .tolerance = 0.00001 },
+    };
+
+    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+        char buf[20] = {'\0'};
+        ftoa(cases[i].num, cases[i].tolerance, buf, 20);
+
+        if (strncmp(cases[i].str, buf, 20)) {
+            sprintf(message, "ftoa(%f) = \"%s\", should be \"%s\"",
+                    cases[i].num, buf, cases[i].str);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("ftoa", ftoa_test);
