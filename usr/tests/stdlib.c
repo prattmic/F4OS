@@ -4,6 +4,43 @@
 #include <string.h>
 #include "test.h"
 
+int strndup_test(char *message, int len) {
+    struct {
+        char *str;
+        int len;
+    } strings[] = {
+        { .str = "", .len = 0 },
+        { .str = "four", .len = 4 },
+        { .str = "\r\t\n\b", .len = 4 },
+        { .str = "thisisareallylongstring", .len = 4 },
+    };
+
+    for (int i = 0; i < ARRAY_LENGTH(strings); i++) {
+        char *dup = strndup(strings[i].str, strings[i].len);
+
+        /* Test length */
+        if (strnlen(dup, 20) != strings[i].len) {
+            sprintf(message, "strlen(strndup(\"%s\", %d)) != %d",
+                    strings[i].str, strings[i].len);
+            free(dup);
+            return FAILED;
+        }
+
+        /* ... and content */
+        if (strncmp(strings[i].str, dup, strings[i].len)) {
+            sprintf(message, "strndup(\"%s\", %d) != %s",
+                    strings[i].str, strings[i].len);
+            free(dup);
+            return FAILED;
+        }
+
+        free(dup);
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("strndup", strndup_test);
+
 int atoi_test(char *message, int len) {
     struct {
         char *str;
