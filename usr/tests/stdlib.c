@@ -21,7 +21,7 @@ int atoi_test(char *message, int len) {
         { .str = "-2147483648", .num = -2147483648 },
     };
 
-    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(cases); i++) {
         int result = atoi(cases[i].str);
 
         if (result != cases[i].num) {
@@ -52,7 +52,7 @@ int uitoa_test(char *message, int len) {
         { .num = 100000, .str = "255S", .base = 36 },
     };
 
-    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(cases); i++) {
         char buf[40] = {'\0'};
         uitoa(cases[i].num, buf, 40, cases[i].base);
 
@@ -84,7 +84,7 @@ int itoa_test(char *message, int len) {
         { .num = 02222, .str = "2222", .base = 8 },
     };
 
-    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(cases); i++) {
         char buf[20] = {'\0'};
         itoa(cases[i].num, buf, 20, cases[i].base);
 
@@ -117,7 +117,7 @@ int ftoa_test(char *message, int len) {
         { .num = uint_to_float(FLOAT_NAN), .str = "nan", .tolerance = 0.00001 },
     };
 
-    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(cases); i++) {
         char buf[20] = {'\0'};
         ftoa(cases[i].num, cases[i].tolerance, buf, 20);
 

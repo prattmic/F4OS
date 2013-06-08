@@ -139,7 +139,7 @@ int strlen_test(char *message, int len) {
         { .str = "thisisareallylongstring", .len = 23 },
     };
 
-    for (int i = 0; i < sizeof(strings)/sizeof(strings[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(strings); i++) {
         int computed_len = strlen(strings[i].str);
 
         if (computed_len != strings[i].len) {
@@ -163,7 +163,7 @@ int strnlen_test(char *message, int len) {
         { .str = "thisisareallylongstring", .len = 4 }, // strnlen will stop counting
     };
 
-    for (int i = 0; i < sizeof(strings)/sizeof(strings[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(strings); i++) {
         int computed_len = strnlen(strings[i].str, 4);
 
         if (computed_len != strings[i].len) {
@@ -186,7 +186,7 @@ int strreverse_test(char *message, int len) {
         { .str = "\r\t\n\b", .rev = "\b\n\t\r" },
     };
 
-    for (int i = 0; i < sizeof(strings)/sizeof(strings[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(strings); i++) {
         char *str = strndup(strings[i].str, 25);
         if (!str) {
             strncpy(message, "strndup failed", len);
@@ -222,7 +222,7 @@ int strncmp_test(char *message, int len) {
         { .str1 = "0123456789a", .str2 = "0123456789b", .ret = 0 },
     };
 
-    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(cases); i++) {
         int ret = strncmp(cases[i].str1, cases[i].str2, 10);
 
         if (ret != cases[i].ret) {
@@ -271,7 +271,7 @@ int chrnlst_test(char *message, int len) {
         { .c = 'a', .list = "c\r\na", .ret = 1 },
     };
 
-    for (int i = 0; i < sizeof(cases)/sizeof(cases[0]); i++) {
+    for (int i = 0; i < ARRAY_LENGTH(cases); i++) {
         int ret = chrnlst(cases[i].c, cases[i].list);
 
         if (ret != cases[i].ret) {
