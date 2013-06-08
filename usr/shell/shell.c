@@ -137,13 +137,16 @@ void free_argv(int argc, char ***argv) {
         free((*argv)[argc-1]);
         argc--;
     }
-    free(*argv);
+    if (*argv) {
+        free(*argv);
+    }
 }
 
 void parse_command(char *command, int *argc, char ***argv) {
     char *begin = command;
     uint32_t n = 0;
     *argc = 0;
+    *argv = NULL;
 
     /* skip leading whitespace */
     while (*command == ' ' || *command == '\t') {
@@ -172,6 +175,10 @@ void parse_command(char *command, int *argc, char ***argv) {
             }
             command++;
         }
+    }
+
+    if (!*argc) {
+        return;
     }
 
     *argv = malloc(sizeof(char*) * *argc);
