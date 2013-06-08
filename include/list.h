@@ -48,6 +48,16 @@ static inline void list_insert(struct list *new, struct list *before,
     after->prev = new;
 }
 
+/* Insert item before insert_point */
+static inline void list_insert_before(struct list *item, struct list *insert_point) {
+    list_insert(item, insert_point->prev, insert_point);
+}
+
+/* Insert item after insert_point */
+static inline void list_insert_after(struct list *item, struct list *insert_point) {
+    list_insert(item, insert_point, insert_point->next);
+}
+
 /* Adds n to front of list head */
 static inline void list_add(struct list *new, struct list *head) {
     list_insert(new, head, head->next);
