@@ -1,6 +1,7 @@
 #ifndef KERNEL_SCHED_H_INCLUDED
 #define KERNEL_SCHED_H_INCLUDED
 
+#include <list.h>
 #include <stdint.h>
 #include <dev/cortex_m.h>
 
@@ -64,17 +65,6 @@ enum service_calls {
     SVC_REGISTER_TASK,
 };
 
-typedef struct task_node {
-    struct task_node        *prev;
-    struct task_node        *next;
-    struct task_ctrl        *task;
-} task_node;
-
-typedef struct task_node_list {
-    task_node   *head;
-    task_node   *tail;
-} task_node_list;
-
 typedef struct task_ctrl {
     uint32_t    *stack_limit;
     uint32_t    *stack_top;
@@ -86,15 +76,16 @@ typedef struct task_ctrl {
     uint8_t     running;
     uint8_t     abort;
     uint32_t    pid;
-    task_node   *task_list_node;
-    task_node   *periodic_node;
     resource    *resources[RESOURCE_TABLE_SIZE];
     rd_t        top_rd;
     semaphore   *held_semaphores[HELD_SEMAPHORES_MAX];
     semaphore   *waiting;
+    struct list runnable_task_list;
+    struct list periodic_task_list;
+    struct list free_task_list;
 } task_ctrl;
 
-task_node * volatile curr_task;
+task_ctrl * volatile curr_task;
 extern uint8_t task_switching;
 extern volatile uint32_t total_tasks;
 

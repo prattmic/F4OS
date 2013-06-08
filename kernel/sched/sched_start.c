@@ -1,5 +1,6 @@
 #include <dev/registers.h>
 #include <dev/hw/systick.h>
+#include <kernel/fault.h>
 
 #include <kernel/sched.h>
 #include "sched_internals.h"
@@ -21,9 +22,15 @@ void start_sched(void) {
 }
 
 static void start_task_switching(void) {
-    task_ctrl *task = task_list.head->task;
+    if (list_empty(&runnable_task_list)) {
+        panic_print("No tasks to run!");
+    }
 
-    curr_task = task_list.head;
+    struct list *element = runnable_task_list.next;
+
+    task_ctrl *task = list_entry(element, task_ctrl, runnable_task_list);
+
+    curr_task = task;
 
     //mpu_stack_set(task->stack_base);
 

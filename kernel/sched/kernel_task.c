@@ -5,24 +5,23 @@
 #include <kernel/fault.h>
 #include "sched_internals.h"
 
-task_node * volatile task_to_free = NULL;
+struct list free_task_list = INIT_LIST(free_task_list);
 
 void kernel_task(void) {
     /* Does cleanup that can't be done from outside a task (ie. in an interrupt) */
 
-    while (task_to_free != NULL) {
-        task_node *node = task_to_free;
-
-        task_to_free = task_to_free->next;
+    while (!list_empty(&free_task_list)) {
+        struct list *element = list_pop(&free_task_list);
+        struct task_ctrl *task = list_entry(element, struct task_ctrl, free_task_list);
 
         /* Free abandoned semaphores */
         for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
-            if (node->task->held_semaphores[i]) {
-                release(node->task->held_semaphores[i]);
+            if (task->held_semaphores[i]) {
+                release(task->held_semaphores[i]);
             }
         }
 
-        free_task(node);
+        free_task(task);
     }
 }
 
