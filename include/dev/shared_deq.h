@@ -16,7 +16,7 @@ typedef struct shared_deq {
     };
 
 
-#define sdeq_empty(sdeq) (list_empty(&(sdeq)->_list))
+#define sdeq_empty(sdeq) (list_empty(&(sdeq->_list)))
 
 #define sdeq_add(sdeq, s) __sdeq_add(sdeq, &(s->_list))
 
@@ -29,9 +29,25 @@ static inline void __sdeq_add(shared_deq_t *sdeq, list_t *l) {
     release(&sdeq->sem);
 }
 
-static inline list_t *sdeq_pop(shared_deq_t *sdeq) {
+/*
+#define sdeq_pop(sdeq, type) ({                     \
+    struct list* __mptr = __sdeq_pop(sdeq);         \
+    type* __ret;                                    \
+    if (__mptr) {                                   \
+        __ret = container_of(__mptr, type, _list);  \
+    }                                               \
+    else                                            \
+        __ret = NULL;                               \
+    __ret;})
+*/
+
+static inline list_t *__sdeq_pop(shared_deq_t *sdeq) {
     list_t *ret;
     acquire(&sdeq->sem);
+    if(sdeq_empty(sdeq)) {
+        release(&sdeq->sem);
+        return NULL;
+    }
     ret = list_pop(&sdeq->_list);
     release(&sdeq->sem);
     return ret;

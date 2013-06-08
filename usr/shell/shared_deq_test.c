@@ -18,8 +18,9 @@ typedef struct message {
 } message_t;
 
 void t1(void) {
-    if(!sdeq_empty(&deque)) {
-        message_t *m = sdeq_entry(sdeq_pop(&deque), message_t);
+    list_t *l = __sdeq_pop(&deque);
+    if(l) {
+        message_t *m = container_of(l, message_t, _list);
         printf("T1 got: %s\r\n", m->m);
         free(m);
     }
@@ -36,8 +37,9 @@ void t1(void) {
 }
 
 void t2(void) {
-    if(!sdeq_empty(&deque)) {
-        message_t *m = sdeq_entry(sdeq_pop(&deque), message_t);
+    list_t *l = __sdeq_pop(&deque);
+    if(l) {
+        message_t *m = container_of(l, message_t, _list);
         printf("T2 got: %s\r\n", m->m);
         free(m);
     }
@@ -91,15 +93,12 @@ void deq_test(int argc, char **argv) {
     /* Make sure other tasks are done */
     usleep(1000000);
 
-    if(sdeq_empty(&deque)) {
-        printf("Nothing...\r\n");
-    }
-
-    message_t *curr;
-    while(!sdeq_empty(&deque)) {
-        curr = sdeq_entry(sdeq_pop(&deque), message_t);
-        printf("deq_test got: %s\r\n", curr->m);
-        free(curr);
+    list_t *l = __sdeq_pop(&deque);
+    while(l) {
+        message_t *m = container_of(l, message_t, _list);
+        printf("deq_test got: %s\r\n", m->m);
+        free(m);
+        l = __sdeq_pop(&deque);
     }
 }
 DEFINE_APP(deq_test)
