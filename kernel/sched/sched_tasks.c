@@ -5,14 +5,13 @@
 volatile uint32_t total_tasks = 0;
 
 /* Is task in task_list? */
-uint8_t task_exists(task_node *task) {
-    task_node *node = task_list.head;
+uint8_t task_exists(task_ctrl *task) {
+    task_ctrl *node;
 
-    while (node) {
+    list_for_each_entry(node, &runnable_task_list, runnable_task_list) {
         if (node == task) {
             return 1;
         }
-        node = node->next;
     }
 
     return 0;

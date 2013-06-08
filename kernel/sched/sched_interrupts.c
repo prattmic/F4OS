@@ -25,13 +25,13 @@ void pendsv_handler(void){
     /* Update periodic tasks */
     rtos_tick();
 
-    curr_task->task->stack_top = PSP();
+    curr_task->stack_top = PSP();
 
     switch_task(NULL);
 }
 
 static void svc_yield(void) {
-    curr_task->task->stack_top = PSP();
+    curr_task->stack_top = PSP();
     switch_task(NULL);
 }
 
@@ -47,8 +47,8 @@ static void svc_acquire(uint32_t *registers) {
         /* Failure */
         registers[0] = 0;
 
-        if (task_exists(semaphore->held_by) && semaphore->held_by->task->priority <= curr_task->task->priority) {
-            curr_task->task->stack_top = PSP();
+        if (task_exists(semaphore->held_by) && semaphore->held_by->priority <= curr_task->priority) {
+            curr_task->stack_top = PSP();
             switch_task(semaphore->held_by);
         }
         else {
@@ -68,29 +68,25 @@ void svc_release(uint32_t *registers) {
 
     semaphore->lock = 0;
     semaphore->held_by = NULL;
-    held_semaphores_remove(curr_task->task->held_semaphores, semaphore);
+    held_semaphores_remove(curr_task->held_semaphores, semaphore);
 
-    if (semaphore->waiting && semaphore->waiting->task->priority >= curr_task->task->priority) {
-        task_node *task = semaphore->waiting;
+    if (semaphore->waiting && semaphore->waiting->priority >= curr_task->priority) {
+        task_ctrl *task = semaphore->waiting;
         semaphore->waiting = NULL;
 
-        curr_task->task->stack_top = PSP();
+        curr_task->stack_top = PSP();
         switch_task(task);
     }
 }
 
 void svc_register_task(uint32_t *registers) {
-    /* R0 -> standard task_node
-     * R1 -> periodic task_node - NULL for non-periodic tasks */
+    /* R0 -> task_ctrl struct
+     * R1 -> Periodic bool */
 
-    task_node *standard = (task_node *) registers[0];
-    task_node *periodic = (task_node *) registers[1];
+    task_ctrl *task = (task_ctrl *) registers[0];
+    int periodic = (int) registers[1];
 
-    append_task(&task_list, standard);
-
-    if (periodic) {
-        append_task(&periodic_task_list, periodic);
-    }
+    _register_task(task, periodic);
 
     return;
 }

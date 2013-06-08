@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <list.h>
 #include <mm/mm.h>
 #include <dev/resource.h>
 #include <kernel/fault.h>
@@ -12,6 +13,12 @@
 
 static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) __attribute__((section(".kernel")));
 static int register_task(task_ctrl *task_ptr, int periodic) __attribute__((section(".kernel")));
+
+struct list runnable_task_list = INIT_LIST(runnable_task_list);
+struct list periodic_task_list = INIT_LIST(periodic_task_list);
+
+DEFINE_INSERT_TASK_FUNC(runnable_task_list);
+DEFINE_INSERT_TASK_FUNC(periodic_task_list);
 
 void new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task_ctrl *task = create_task(fptr, priority, period);
@@ -33,58 +40,6 @@ fail2:
     kfree(task);
 fail:
     panic_print("Could not allocate task with function pointer 0x%x", fptr);
-}
-
-/* Place task in task list based on priority */
-void append_task(task_node_list *list, task_node *task) {
-    /* append_task must not be called outside interrupt
-     * context while task switching, as the task list
-     * may change at any time. */
-    if (task_switching && !IPSR()) {
-        panic_print("append_task called outside of interrupt context while task switching.");
-    }
-
-    /* Check if head is set */
-    if (list->head == NULL) {
-        if (list->tail) {
-            /* WTF!?  Why is the tail set but not the head? */
-            panic_print("Task list (0x%x) tail set, but not head.", list);
-        }
-
-        list->head = task;
-        list->tail = task;
-        task->prev = NULL;
-        task->next = NULL;
-    }
-    else {
-        if (task->task->priority > list->head->task->priority) {
-            task->prev = NULL;
-            task->next = list->head;
-            task->next->prev = task;
-            list->head = task;
-            return;
-        }
-        else {
-            task_node *prev = list->head;
-            task_node *next = list->head->next;
-
-            while (next && next->task->priority >= task->task->priority) {
-                prev = next;
-                next = next->next;
-            }
-
-            if (next) {
-                task->next = next;
-                next->prev = task;
-            }
-            else {
-                task->next = NULL;
-                list->tail = task;
-            }
-            task->prev = prev;
-            prev->next = task;
-        }
-    }
 }
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {
@@ -172,10 +127,11 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
 
     task->period            = period;
     task->ticks_until_wake  = period;
-
-    task->task_list_node    = NULL;
-    task->periodic_node     = NULL;
     task->pid               = pid_source++;
+
+    list_init(&task->runnable_task_list);
+    list_init(&task->periodic_task_list);
+    list_init(&task->free_task_list);
 
     resource_setup(task);
     memset(task->held_semaphores, 0, sizeof(task->held_semaphores));
@@ -184,45 +140,23 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
     return task;
 }
 
-static int register_task(task_ctrl *task_ptr, int periodic) {
-    task_node *standard_node = kmalloc(sizeof(task_node));
-    if (standard_node == NULL) {
-        goto fail;
-    }
-
-    standard_node->task = task_ptr;
-
-    task_node *periodic_node = NULL;
-    if (periodic) {
-        periodic_node = kmalloc(sizeof(task_node));
-        if (periodic_node == NULL) {
-            goto fail2;
-        }
-
-        periodic_node->task = task_ptr;
-    }
-
+static int register_task(task_ctrl *task, int periodic) {
     /* When task switching, we cannot safely modify the task lists
      * ourselves, instead we must ask the OS to do so for us. */
     if (task_switching) {
-        SVC_ARG2(SVC_REGISTER_TASK, standard_node, periodic_node);
+        SVC_ARG2(SVC_REGISTER_TASK, task, periodic);
     }
     else {
-        append_task(&task_list, standard_node);
-
-        if (periodic) {
-            append_task(&periodic_task_list, periodic_node);
-        }
+        _register_task(task, periodic);
     }
 
-    /* Point to task nodes from task ctl */
-    task_ptr->task_list_node = standard_node;
-    task_ptr->periodic_node = periodic_node;
-
     return 0;
+}
 
-fail2:
-    kfree(standard_node);
-fail:
-    return 1;
+void _register_task(task_ctrl *task, int periodic) {
+    insert_task(runnable_task_list, task);
+
+    if (periodic) {
+        insert_task(periodic_task_list, task);
+    }
 }
