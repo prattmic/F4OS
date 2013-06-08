@@ -102,7 +102,7 @@ rd_t open_px4_mpu6000(void) {
     new_r->read_sem = &spi1_semaphore;
     new_r->write_sem = &spi1_semaphore;
 
-    ret = add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task, new_r);
     if (ret < 0) {
         acquire(&spi1_semaphore);
         goto err_sleep;

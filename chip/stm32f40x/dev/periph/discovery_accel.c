@@ -94,7 +94,7 @@ rd_t open_discovery_accel(void) {
     new_r->read_sem = &spi1_semaphore;
     new_r->write_sem = &spi1_semaphore;
 
-    ret = add_resource(curr_task->task, new_r);
+    ret = add_resource(curr_task, new_r);
     if (ret < -1) {
         goto err_free_new_r;
     }
