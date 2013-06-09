@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+struct task_t;
+typedef struct task_t task_t;
+
+#define RESOURCE_TABLE_SIZE         CONFIG_RESOURCE_TABLE_SIZE
+
 typedef int8_t rd_t;
 
 struct semaphore;
@@ -20,11 +25,14 @@ typedef struct resource {
     int                         (*closer)(struct resource*);
 } resource;
 
-struct task_ctrl;
+struct task_resource_data {
+    struct resource *resources[RESOURCE_TABLE_SIZE];
+    rd_t top_rd;
+};
 
 resource *create_new_resource(void) __attribute__((section(".kernel")));
-rd_t add_resource(struct task_ctrl* tcs, resource* r) __attribute__((section(".kernel")));
-void resource_setup(struct task_ctrl* tcs) __attribute__((section(".kernel")));
+rd_t add_resource(task_t *task, resource* r) __attribute__((section(".kernel")));
+void task_resource_setup(task_t *task) __attribute__((section(".kernel")));
 
 extern resource *default_resources[];
 

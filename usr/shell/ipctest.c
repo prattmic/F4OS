@@ -29,7 +29,7 @@ DEFINE_APP(ipctest)
 
 void memreader(void) {
     char buf[16];
-    rd_t memrd = curr_task->top_rd - 1;
+    rd_t memrd = curr_task->resource_data.top_rd - 1;
 
     read(memrd, buf, 10);
     buf[10] = 0x00;

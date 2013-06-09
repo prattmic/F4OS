@@ -25,13 +25,13 @@ void pendsv_handler(void){
     /* Update periodic tasks */
     rtos_tick();
 
-    curr_task->stack_top = PSP();
+    get_task_ctrl(curr_task)->stack_top = PSP();
 
     switch_task(NULL);
 }
 
 static void svc_yield(void) {
-    curr_task->stack_top = PSP();
+    get_task_ctrl(curr_task)->stack_top = PSP();
     switch_task(NULL);
 }
 
@@ -47,9 +47,10 @@ static void svc_acquire(uint32_t *registers) {
         /* Failure */
         registers[0] = 0;
 
-        if (task_exists(semaphore->held_by) && semaphore->held_by->priority <= curr_task->priority) {
-            curr_task->stack_top = PSP();
-            switch_task(semaphore->held_by);
+        if (task_exists(semaphore->held_by)
+                && (task_compare(semaphore->held_by, curr_task) <= 0)) {
+            get_task_ctrl(curr_task)->stack_top = PSP();
+            switch_task(get_task_ctrl(semaphore->held_by));
         }
         else {
             /* If held_by didn't exist in task list,
@@ -68,13 +69,14 @@ void svc_release(uint32_t *registers) {
 
     semaphore->lock = 0;
     semaphore->held_by = NULL;
-    held_semaphores_remove(curr_task->held_semaphores, semaphore);
+    held_semaphores_remove(curr_task->semaphore_data.held_semaphores, semaphore);
 
-    if (semaphore->waiting && semaphore->waiting->priority >= curr_task->priority) {
-        task_ctrl *task = semaphore->waiting;
+    if (semaphore->waiting
+            && (task_compare(semaphore->waiting, curr_task) >= 0)) {
+        task_ctrl *task = get_task_ctrl(semaphore->waiting);
         semaphore->waiting = NULL;
 
-        curr_task->stack_top = PSP();
+        get_task_ctrl(curr_task)->stack_top = PSP();
         switch_task(task);
     }
 }

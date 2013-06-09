@@ -25,7 +25,7 @@ static inline resource *get_resource(rd_t rd) {
     /* Before task switching begins, the default list of resources must be used.
      * Once it begins, we can get the resouece directly from the task. */
     if (task_switching) {
-        return curr_task->resources[rd];
+        return curr_task->resource_data.resources[rd];
     }
     else {
         return default_resources[rd];
@@ -41,18 +41,20 @@ resource *create_new_resource(void) {
 }
 
 /* Add new resource to task */
-rd_t add_resource(task_ctrl* tcs, resource* r) {
+rd_t add_resource(task_t *task, resource* r) {
     if (r == NULL) {
         printk("OOPS: NULL resource passed to add_resource.\r\n");
         return -1;
     }
 
-    /* There is room at the end of the resource table, so add there */
-    if (tcs->top_rd < RESOURCE_TABLE_SIZE) {
-        rd_t rd = tcs->top_rd;
+    struct task_resource_data *task_data = &task->resource_data;
 
-        tcs->resources[rd] = r;
-        tcs->top_rd++;
+    /* There is room at the end of the resource table, so add there */
+    if (task_data->top_rd < RESOURCE_TABLE_SIZE) {
+        rd_t rd = task_data->top_rd;
+
+        task_data->resources[rd] = r;
+        task_data->top_rd++;
 
         return rd;
     }
@@ -62,12 +64,12 @@ rd_t add_resource(task_ctrl* tcs, resource* r) {
          * should be the end of the list, but just to be safe, we want
          * to make sure we don't find a space after tcs->top_rd and then
          * fail to increment tcs->top_rd */
-        for (int i = 0; i < tcs->top_rd; i++) {
+        for (int i = 0; i < task_data->top_rd; i++) {
             /* Found an empty space! */
-            if (tcs->resources[i] == NULL) {
+            if (task_data->resources[i] == NULL) {
                 rd_t rd = i;
 
-                tcs->resources[rd] = r;
+                task_data->resources[rd] = r;
 
                 return rd;
             }
@@ -83,28 +85,32 @@ rd_t add_resource(task_ctrl* tcs, resource* r) {
  * This means copying the resources from the current task,
  * or the default resource list, if task switching has not
  * yet begun. */
-void resource_setup(task_ctrl* task) {
+void task_resource_setup(task_t *task) {
+    struct task_resource_data *task_data = &task->resource_data;
+
     if (task_switching) {
+        struct task_resource_data *curr_task_data = &curr_task->resource_data;
+
         for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
-            task->resources[i] = curr_task->resources[i];
+            task_data->resources[i] = curr_task_data->resources[i];
         }
 
-        task->top_rd = curr_task->top_rd;
+        task_data->top_rd = curr_task_data->top_rd;
     }
     else {
         int top_rd = 0;
 
         for (int i = 0; i < RESOURCE_TABLE_SIZE; i++) {
             if (default_resources[i]) {
-                task->resources[i] = default_resources[i];
+                task_data->resources[i] = default_resources[i];
                 top_rd++;
             }
             else {
-                task->resources[i] = NULL;
+                task_data->resources[i] = NULL;
             }
         }
 
-        task->top_rd = top_rd;
+        task_data->top_rd = top_rd;
     }
 }
 
@@ -174,7 +180,8 @@ int close(rd_t rd) {
         return -1;
     }
 
-    resource **resource = task_switching ? &curr_task->resources[rd] : &default_resources[rd];
+    resource **resource = task_switching ?
+        &curr_task->resource_data.resources[rd] : &default_resources[rd];
 
     if (!*resource) {
         return -1;
@@ -184,8 +191,8 @@ int close(rd_t rd) {
     if (!ret) {
         kfree(*resource);
         *resource = NULL;
-        if (task_switching && (rd == curr_task->top_rd - 1)) {
-            curr_task->top_rd--;
+        if (task_switching && (rd == curr_task->resource_data.top_rd - 1)) {
+            curr_task->resource_data.top_rd--;
         }
     }
 

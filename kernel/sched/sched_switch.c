@@ -22,7 +22,7 @@ void switch_task(task_ctrl *task) {
         struct list *element = list_pop_head(&runnable_task_list);
         task = list_entry(element, task_ctrl, runnable_task_list);
 
-        curr_task = task;
+        curr_task = get_task_t(task);
 
         /* As a workaround for lack of MPU support, check if the
          * stack of the task we are switching from has overflowed */
@@ -33,7 +33,7 @@ void switch_task(task_ctrl *task) {
         insert_task(runnable_task_list, task);
     }
     else {
-        curr_task = task;
+        curr_task = get_task_t(task);
     }
 
     /* mpu_stack_set(task->stack_base);   Sigh...maybe some day */

@@ -16,8 +16,10 @@ void kernel_task(void) {
 
         /* Free abandoned semaphores */
         for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
-            if (task->held_semaphores[i]) {
-                release(task->held_semaphores[i]);
+            struct task_semaphore_data *sem_data = &get_task_t(task)->semaphore_data;
+
+            if (sem_data->held_semaphores[i]) {
+                release(sem_data->held_semaphores[i]);
             }
         }
 

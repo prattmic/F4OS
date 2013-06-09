@@ -1,4 +1,6 @@
 SRCS += kernel_task.c
+SRCS += sched_generic.c
+SRCS += sched_api.c
 SRCS += sched_end.c
 SRCS += sched_interrupts.c
 SRCS += sched_new.c

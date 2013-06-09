@@ -5,7 +5,8 @@
 #include <kernel/sched.h>
 #include "sched_internals.h"
 
-uint8_t task_switching = 0;
+volatile uint8_t task_switching = 0;
+task_t * volatile curr_task;
 
 static void start_task_switching(void) __attribute__((section(".kernel")));
 
@@ -30,7 +31,7 @@ static void start_task_switching(void) {
 
     task_ctrl *task = list_entry(element, task_ctrl, runnable_task_list);
 
-    curr_task = task;
+    curr_task = get_task_t(task);
 
     //mpu_stack_set(task->stack_base);
 

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include <string.h>
 #include <dev/registers.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
@@ -8,12 +9,12 @@
 
 static void held_semaphores_insert(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
 void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
-static void deadlock_check(struct task_ctrl *task) __attribute__((section(".kernel")));
+static void deadlock_check(struct task_t *task) __attribute__((section(".kernel")));
 
 void acquire(volatile struct semaphore *semaphore) {
     if (!task_switching) {
         semaphore->lock = 1;
-        semaphore->held_by = (task_ctrl *) 0x0badf00d;
+        semaphore->held_by = (task_t *) 0x0badf00d;
         return;
     }
 
@@ -27,7 +28,7 @@ void acquire(volatile struct semaphore *semaphore) {
 /* Acquire semaphore, but remove from held semaphores list so that it can be freed. */
 void acquire_for_free(volatile struct semaphore *semaphore) {
     acquire(semaphore);
-    held_semaphores_remove(curr_task->held_semaphores, semaphore);
+    held_semaphores_remove(curr_task->semaphore_data.held_semaphores, semaphore);
 }
 
 int8_t try_lock(volatile uint8_t *l) {
@@ -53,10 +54,12 @@ int8_t try_lock(volatile uint8_t *l) {
 
 /* Called by svc_handler */
 int get_lock(volatile struct semaphore *semaphore) {
+    struct task_semaphore_data *curr_task_data = &curr_task->semaphore_data;
+
     if (try_lock(&semaphore->lock)) {
         semaphore->held_by = curr_task;
-        held_semaphores_insert(curr_task->held_semaphores, semaphore);
-        curr_task->waiting = NULL;
+        held_semaphores_insert(curr_task_data->held_semaphores, semaphore);
+        curr_task_data->waiting = NULL;
         return 1;
     }
     else {
@@ -65,14 +68,14 @@ int get_lock(volatile struct semaphore *semaphore) {
 
             /* Add to waitlist if higher priority */
             if (semaphore->waiting) {
-                if (semaphore->waiting->priority < curr_task->priority) {
+                if (task_compare(semaphore->waiting, curr_task) < 0) {
                     semaphore->waiting = curr_task;
-                    curr_task->waiting = (struct semaphore *) semaphore;
+                    curr_task_data->waiting = (struct semaphore *) semaphore;
                 }
             }
             else {
                 semaphore->waiting = curr_task;
-                curr_task->waiting = (struct semaphore *) semaphore;
+                curr_task_data->waiting = (struct semaphore *) semaphore;
             }
 
             return 0;
@@ -122,12 +125,24 @@ void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore 
     /* Not found, but this may be fine, as kernel_task frees semaphores on behalf of the deceased */
 }
 
-static void deadlock_check(struct task_ctrl *task) {
-    if (task->waiting) {
+static void deadlock_check(struct task_t *task) {
+    struct task_semaphore_data *task_data = &task->semaphore_data;
+
+    if (task_data->waiting) {
         for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
-            if (curr_task->held_semaphores[i] == task->waiting) {
-                panic_print("Deadlock!  Task (0x%x, fptr: 0x%x) is waiting on semaphore 0x%x, but curr_task (0x%x, fptr: 0x%x) holds it.", task, task->fptr, task->waiting, curr_task, curr_task->fptr);
+            struct task_semaphore_data *curr_task_data = &curr_task->semaphore_data;
+            if (curr_task_data->held_semaphores[i] == task_data->waiting) {
+                panic_print("Deadlock!  Task (0x%x) is waiting on semaphore 0x%x, "
+                            "but curr_task (0x%x) holds it.", task, task_data->waiting,
+                            curr_task);
             }
         }
     }
+}
+
+void task_semaphore_setup(task_t *task) {
+    struct task_semaphore_data *sem_data = &task->semaphore_data;
+
+    memset(sem_data->held_semaphores, 0, sizeof(sem_data->held_semaphores));
+    sem_data->waiting = NULL;
 }

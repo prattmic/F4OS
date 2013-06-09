@@ -136,9 +136,7 @@ static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t per
     list_init(&task->periodic_task_list);
     list_init(&task->free_task_list);
 
-    resource_setup(task);
-    memset(task->held_semaphores, 0, sizeof(task->held_semaphores));
-    task->waiting           = NULL;
+    generic_task_setup(get_task_t(task));
 
     return task;
 }
