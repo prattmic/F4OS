@@ -5,99 +5,6 @@
 .arch armv7e-m
 .fpu fpv4-sp-d16
 
-/* Vector table */
-.section    .isr_vector,"a"
-.word   _estack             /* stack top address */
-.word   _reset              /* 1 Reset */
-.word   hang                /* 2 NMI */
-.word   hardfault_handler   /* 3 HardFault */
-.word   memmanage_handler   /* 4 MemManage */
-.word   busfault_handler    /* 5 BusFault */
-.word   usagefault_handler  /* 6 UsageFault */
-.word   hang                /* 7 RESERVED */
-.word   hang                /* 8 RESERVED */
-.word   hang                /* 9 RESERVED*/
-.word   hang                /* 10 RESERVED */
-.word   _svc_asm            /* 11 SVCall */
-.word   hang                /* 12 Debug Monitor */
-.word   hang                /* 13 RESERVED */
-.word   _pendsv             /* 14 PendSV */
-.word   systick_handler     /* 15 SysTick */
-/* NVIC */
-.word   hang                /* 0 ... */
-.word   hang                /* 1 ... */
-.word   hang                /* 2 ... */
-.word   hang                /* 3 ... */
-.word   hang                /* 4 ... */
-.word   hang                /* 5 ... */
-.word   hang                /* 6 ... */
-.word   hang                /* 7 ... */
-.word   hang                /* 8 ... */
-.word   hang                /* 9 ... */
-.word   hang                /* 10 ... */
-.word   hang                /* 11 ... */
-.word   hang                /* 12 ... */
-.word   hang                /* 13 ... */
-.word   hang                /* 14 ... */
-.word   hang                /* 15 ... */
-.word   hang                /* 16 ... */
-.word   hang                /* 17 ... */
-.word   hang                /* 18 ... */
-.word   hang                /* 19 ... */
-.word   hang                /* 20 ... */
-.word   hang                /* 21 ... */
-.word   hang                /* 22 ... */
-.word   hang                /* 23 ... */
-.word   hang                /* 24 ... */
-.word   hang                /* 25 ... */
-.word   hang                /* 26 ... */
-.word   hang                /* 27 ... */
-.word   hang                /* 28 TIM2 Global Interrupt */
-.word   hang                /* 29 ... */
-.word   hang                /* 30 ... */
-.word   hang                /* 31 ... */
-.word   hang                /* 32 ... */
-.word   hang                /* 33 ... */
-.word   hang                /* 34 ... */
-.word   hang                /* 35 ... */
-.word   hang                /* 36 ... */
-.word   hang                /* 37 USART1 Global Interrupt */
-.word   hang                /* 38 ... */
-.word   hang                /* 39 ... */
-.word   hang                /* 40 ... */
-.word   hang                /* 41 ... */
-.word   hang                /* 42 ... */
-.word   hang                /* 43 ... */
-.word   hang                /* 44 ... */
-.word   hang                /* 45 ... */
-.word   hang                /* 46 ... */
-.word   hang                /* 47 ... */
-.word   hang                /* 48 ... */
-.word   hang                /* 49 ... */
-.word   hang                /* 50 ... */
-.word   hang                /* 51 ... */
-.word   hang                /* 52 ... */
-.word   hang                /* 53 ... */
-.word   hang                /* 54 ... */
-.word   hang                /* 55 ... */
-.word   hang                /* 56 ... */
-.word   hang                /* 57 ... */
-.word   hang                /* 58 ... */
-.word   hang                /* 59 ... */
-.word   hang                /* 60 ... */
-.word   hang                /* 61 ... */
-.word   hang                /* 62 ... */
-.word   hang                /* 63 ... */
-.word   hang                /* 64 ... */
-.word   hang                /* 65 ... */
-.word   hang                /* 66 ... */
-#ifdef CONFIG_HAVE_USBDEV
-.word   usbdev_handler      /* 67 USB OTG FS Global Interrupt */
-#else
-.word   hang                /* 67 ... */
-#endif
-.word   hang                /* 68 ... */
-
 /* Bootloader */
 .section    .kernel, "ax"
 
@@ -122,10 +29,12 @@ panic:
     b       panic
 
 .thumb_func
+.global hang
 hang:
     b       .
 
 .thumb_func
+.global _reset
 _reset:
     /* Copy the data segment initializers from flash to CCM RAM */
     movs    r1, #0
@@ -173,6 +82,7 @@ _svc_asm:
     bx      lr
 
 .thumb_func
+.global _pendsv
 _pendsv:
     push    {lr}
     bl      save_context

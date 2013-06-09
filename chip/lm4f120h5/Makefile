@@ -1,3 +1,4 @@
+SRCS += vector.S
 SRCS += clock.c
 
 DIRS += dev/
