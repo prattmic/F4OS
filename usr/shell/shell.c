@@ -21,6 +21,8 @@ static int   cmd_index;               // Next buffer index to fill
 static void free_argv(int argc, char ***argv);
 static void parse_command(char *command, int *argc, char ***argv);
 static void run_command(char *command, int argc, char **argv);
+static int start_match(char *buf, char *cmd, int n);
+static int fill_next_match(char *buf, int n);
 
 void shell(void) {
     int n;
@@ -95,6 +97,10 @@ void shell(void) {
                     }
                 }
                 break;
+            case '\t':
+                n = fill_next_match(command, n);
+                printf("\r" CLEARLINE "%s%s", SHELL_PROMPT, command);
+                break;
             default:
                 if (printable(c)) {
                     putc(c);
@@ -140,6 +146,25 @@ void free_argv(int argc, char ***argv) {
     if (*argv) {
         free(*argv);
     }
+}
+
+static int start_match(char *buf, char *cmd, int n) {
+    for(int i = 0; i < n; i++) {
+        if(buf[i] != cmd[i])
+            return 0;
+    }
+    return n;
+}
+
+static int fill_next_match(char *buf, int n) {
+    for (uint32_t i = 0; i < NUM_COMMANDS; i++) {
+        int index = start_match(buf, valid_commands[i].name, n);
+        if(index) {
+           strncpy(&buf[index], &valid_commands[i].name[index], valid_commands[i].len - index);
+           return valid_commands[i].len;
+        }
+    }
+    return n;
 }
 
 void parse_command(char *command, int *argc, char ***argv) {
