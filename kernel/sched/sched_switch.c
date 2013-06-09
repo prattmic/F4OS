@@ -52,6 +52,18 @@ void switch_task(task_ctrl *task) {
     }
 }
 
+/* Switch to task if it exists.
+ * Return 0 on success */
+int coop_task_switch(task_ctrl *task) {
+    if (!task_exists(get_task_t(task))) {
+        return -1;
+    }
+
+    get_task_ctrl(curr_task)->stack_top = PSP();
+    switch_task(task);
+    return 0;
+}
+
 /* Updates ticks in all periodic tasks */
 void rtos_tick(void) {
     task_ctrl *task;

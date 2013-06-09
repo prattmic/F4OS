@@ -1,3 +1,4 @@
+#include <kernel/svc.h>
 #include <kernel/sched.h>
 #include "sched_internals.h"
 
@@ -24,4 +25,20 @@ int task_compare(task_t *task1, task_t *task2) {
     }
 
     return 0;
+}
+
+int task_switch(task_t *task) {
+    int ret;
+    task_ctrl *t = get_task_ctrl(task);
+
+    /* If already in interrupt space, switch directly */
+    if (IPSR()) {
+        ret = coop_task_switch(t);
+    }
+    /* Otherwise, make a service call */
+    else {
+        ret = SVC_ARG(SVC_TASK_SWITCH, t);
+    }
+
+    return ret;
 }

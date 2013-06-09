@@ -48,6 +48,7 @@ enum service_calls {
     SVC_ACQUIRE,
     SVC_RELEASE,
     SVC_REGISTER_TASK,
+    SVC_TASK_SWITCH,
 };
 
 #endif

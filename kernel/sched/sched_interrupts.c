@@ -4,6 +4,7 @@
 #include <dev/cortex_m.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
+#include <kernel/svc.h>
 #include <kernel/fault.h>
 #include "sched_internals.h"
 
@@ -102,6 +103,9 @@ void svc_handler(uint32_t *registers) {
             break;
         case SVC_REGISTER_TASK:
             _register_task((task_ctrl *) registers[0], (int) registers[1]);
+            break;
+        case SVC_TASK_SWITCH:
+            registers[0] = coop_task_switch((task_ctrl *) registers[0]);
             break;
         default:
             panic_print("Unknown SVC: %d", svc_number);
