@@ -43,62 +43,65 @@ fail:
 }
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {
-    asm volatile("mov     r5, #0                                                              \n\
-                  stmdb   %[stack]!, {r5}   /* Empty */                                       \n\
-                  stmdb   %[stack]!, {r5}   /* FPSCR */                                       \n\
-                  stmdb   %[stack]!, {r5}   /* S15 */                                         \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}   /* S0 */                                          \n\
-                  ldr.w   r5, =0x01000000 /* Thumb state bit must be set */                   \n\
-                  stmdb   %[stack]!, {r5}   /* xPSR */                                        \n\
-                  mov     r5, #0                                                              \n\
-                  stmdb   %[stack]!, {%[pc]}/* PC */                                          \n\
-                  stmdb   %[stack]!, {%[lr]}/* LR */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* R12 */                                         \n\
-                  stmdb   %[stack]!, {r5}   /* R3 */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* R2 */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* R1 */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* R0 */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* R11 */                                         \n\
-                  stmdb   %[stack]!, {r5}   /* R10 */                                         \n\
-                  stmdb   %[stack]!, {r5}   /* R9 */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* R8 */                                          \n\
-                  stmdb   %[stack]!, {%[frame]}   /* R7 - Frame Pointer*/                     \n\
-                  stmdb   %[stack]!, {r5}   /* R6 */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* R5 */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* R4 */                                          \n\
-                  stmdb   %[stack]!, {r5}   /* S31 */                                         \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
-                  stmdb   %[stack]!, {r5}                                                     \n\
+    asm volatile("mov     r5, #0                                           \n\
+                  stmdb   %[stack]!, {r5}   /* Empty */                    \n\
+                  stmdb   %[stack]!, {r5}   /* FPSCR */                    \n\
+                  stmdb   %[stack]!, {r5}   /* S15 */                      \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}   /* S0 */                       \n\
+                  ldr.w   r5, =0x01000000 /* Thumb state bit must be set */\n\
+                  stmdb   %[stack]!, {r5}   /* xPSR */                     \n\
+                  mov     r5, #0                                           \n\
+                  stmdb   %[stack]!, {%[pc]}/* PC */                       \n\
+                  stmdb   %[stack]!, {%[lr]}/* LR */                       \n\
+                  stmdb   %[stack]!, {r5}   /* R12 */                      \n\
+                  stmdb   %[stack]!, {r5}   /* R3 */                       \n\
+                  stmdb   %[stack]!, {r5}   /* R2 */                       \n\
+                  stmdb   %[stack]!, {r5}   /* R1 */                       \n\
+                  stmdb   %[stack]!, {r5}   /* R0 */                       \n\
+                  stmdb   %[stack]!, {r5}   /* R11 */                      \n\
+                  stmdb   %[stack]!, {r5}   /* R10 */                      \n\
+                  stmdb   %[stack]!, {r5}   /* R9 */                       \n\
+                  stmdb   %[stack]!, {r5}   /* R8 */                       \n\
+                  stmdb   %[stack]!, {%[frame]}   /* R7 - Frame Pointer*/  \n\
+                  stmdb   %[stack]!, {r5}   /* R6 */                       \n\
+                  stmdb   %[stack]!, {r5}   /* R5 */                       \n\
+                  stmdb   %[stack]!, {r5}   /* R4 */                       \n\
+                  stmdb   %[stack]!, {r5}   /* S31 */                      \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
+                  stmdb   %[stack]!, {r5}                                  \n\
                   stmdb   %[stack]!, {r5}   /* S16 */"
-                  :[stack] "+r" (task->stack_top) /* Output */
-                  :[pc] "r" (task->fptr), [lr] "r" (lptr), [frame] "r" (task->stack_limit)   /* Input */
-                  :"r5"   /* Clobber */);
+                  /* Output */
+                  :[stack] "+r" (task->stack_top)
+                  /* Input */
+                  :[pc] "r" (task->fptr), [lr] "r" (lptr), [frame] "r" (task->stack_limit)
+                  /* Clobber */
+                  :"r5");
 
 }
 
