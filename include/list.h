@@ -58,10 +58,17 @@ static inline void list_insert_after(struct list *item, struct list *insert_poin
     list_insert(item, insert_point, insert_point->next);
 }
 
-/* Adds n to front of list head */
-static inline void list_add(struct list *new, struct list *head) {
+/* Adds new to front of list head */
+static inline void list_add_head(struct list *new, struct list *head) {
     list_insert(new, head, head->next);
 }
+
+/* Adds new to end of list head */
+static inline void list_add_tail(struct list *new, struct list *head) {
+    list_insert(new, head->prev, head);
+}
+
+#define list_add    list_add_head
 
 /* Remove element from list, by connecting elements before and after */
 static inline void list_remove(struct list *element) {
