@@ -37,17 +37,42 @@ extern uint32_t *restore_full_context() __attribute__((section(".kernel"), naked
 
 #define DEFINE_INSERT_TASK_FUNC(task_list_name)                                     \
     void _insert_task_##task_list_name(struct task_ctrl *new_task) {                \
+        /* First task in list */                                                    \
+        struct task_ctrl *task = list_entry(task_list_name.next,                    \
+                struct task_ctrl, task_list_name);                                  \
+                                                                                    \
+        /* New task is the highest priority, add to front */                        \
+        if (list_empty(&task_list_name) || (new_task->priority > task->priority)) { \
+            list_add_head(&new_task->task_list_name, &task_list_name);              \
+            return;                                                                 \
+        }                                                                           \
+                                                                                    \
+        /* Last task in list */                                                     \
+        task = list_entry(list_tail(&task_list_name), struct task_ctrl,             \
+                task_list_name);                                                    \
+                                                                                    \
+        /* New task is the lowest priority, add to end */                           \
+        if (new_task->priority <= task->priority) {                                 \
+            list_add_tail(&new_task->task_list_name, &task_list_name);              \
+            return;                                                                 \
+        }                                                                           \
+                                                                                    \
+        /* New task is in the middle, add after last equal priority task */         \
         struct list *element;                                                       \
-        struct list *insert_point = &task_list_name;                                \
+        struct list *insert_point = NULL;                                           \
                                                                                     \
         list_for_each(element, &task_list_name) {                                   \
-            struct task_ctrl *task = list_entry(element, struct task_ctrl, task_list_name); \
+            struct task_ctrl *task = list_entry(element, struct task_ctrl,          \
+                    task_list_name);                                                \
                                                                                     \
-            if (task->priority > new_task->priority) {                              \
-                break;                                                              \
+            if (new_task->priority > task->priority) {                              \
+                insert_point = element;                                             \
             }                                                                       \
+        }                                                                           \
                                                                                     \
-            insert_point = element;                                                 \
+        if (!insert_point) {                                                        \
+            panic_print("Unable to place priority %d task in %s",                   \
+                    new_task->priority, #task_list_name);                           \
         }                                                                           \
                                                                                     \
         list_insert_before(&new_task->task_list_name, insert_point);                \
