@@ -52,8 +52,8 @@ SECTIONS {
     {
         _user_start = .;
         *(.user*)
-        . = ALIGN(8);
         _user_end = .;
+        . = ALIGN(8);
     } > FLASH
 
     _sidata = .;
