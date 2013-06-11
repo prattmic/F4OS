@@ -37,8 +37,8 @@ void start_sched(void);
  * of a function pointer, a priority, and a period.
  * Non-periodic tasks use a period of zero.
  * Depending on the scheduler, priority and period may
- * have no effect. */
-void new_task(void (*fptr)(void), uint8_t priority, uint32_t period);
+ * have no effect. Returns task_t reference to new task. */
+task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period);
 
 /* End-users set up boot tasks here.
  * This function will be run before scheduling starts, and
