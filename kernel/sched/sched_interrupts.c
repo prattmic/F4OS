@@ -35,17 +35,16 @@ static void svc_yield(void) {
     switch_task(NULL);
 }
 
-static void svc_acquire(uint32_t *registers) {
-    /* R0 -> semaphore to acquire */
-    struct semaphore *semaphore = (struct semaphore *) registers[0];
+static int svc_acquire(struct semaphore *semaphore) {
+    int ret;
 
     if (get_lock(semaphore)) {
         /* Success */
-        registers[0] = 1;
+        ret = 1;
     }
     else {
         /* Failure */
-        registers[0] = 0;
+        ret = 0;
 
         if (task_exists(semaphore->held_by)
                 && (task_compare(semaphore->held_by, curr_task) <= 0)) {
@@ -61,12 +60,11 @@ static void svc_acquire(uint32_t *registers) {
             svc_yield();
         }
     }
+
+    return ret;
 }
 
-void svc_release(uint32_t *registers) {
-    /* R0 -> semaphore to release */
-    struct semaphore *semaphore = (struct semaphore *) registers[0];
-
+void svc_release(struct semaphore *semaphore) {
     semaphore->lock = 0;
     semaphore->held_by = NULL;
     held_semaphores_remove(curr_task->semaphore_data.held_semaphores, semaphore);
@@ -79,18 +77,6 @@ void svc_release(uint32_t *registers) {
         get_task_ctrl(curr_task)->stack_top = PSP();
         switch_task(task);
     }
-}
-
-void svc_register_task(uint32_t *registers) {
-    /* R0 -> task_ctrl struct
-     * R1 -> Periodic bool */
-
-    task_ctrl *task = (task_ctrl *) registers[0];
-    int periodic = (int) registers[1];
-
-    _register_task(task, periodic);
-
-    return;
 }
 
 void svc_handler(uint32_t *registers) {
@@ -109,13 +95,13 @@ void svc_handler(uint32_t *registers) {
             svc_end_task();
             break;
         case SVC_ACQUIRE:
-            svc_acquire(registers);
+            registers[0] = svc_acquire((struct semaphore *) registers[0]);
             break;
         case SVC_RELEASE:
-            svc_release(registers);
+            svc_release((struct semaphore *) registers[0]);
             break;
         case SVC_REGISTER_TASK:
-            svc_register_task(registers);
+            _register_task((task_ctrl *) registers[0], (int) registers[1]);
             break;
         default:
             panic_print("Unknown SVC: %d", svc_number);
