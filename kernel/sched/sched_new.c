@@ -20,6 +20,8 @@ struct list periodic_task_list = INIT_LIST(periodic_task_list);
 DEFINE_INSERT_TASK_FUNC(runnable_task_list);
 DEFINE_INSERT_TASK_FUNC(periodic_task_list);
 
+volatile uint32_t total_tasks = 0;
+
 task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task_ctrl *task = create_task(fptr, priority, period);
     if (task == NULL) {

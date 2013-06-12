@@ -55,7 +55,7 @@ void switch_task(task_ctrl *task) {
 /* Switch to task if it exists.
  * Return 0 on success */
 int coop_task_switch(task_ctrl *task) {
-    if (!task_exists(get_task_t(task))) {
+    if (!task_runnable(get_task_t(task))) {
         return -1;
     }
 

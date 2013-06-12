@@ -64,6 +64,13 @@ void generic_task_setup(task_t *task);
  * Returns 0 for equality, >0 if task1 is greater, <0 if task2 is greater */
 int task_compare(task_t *task1, task_t *task2);
 
+/* Determine if a task is runnable.
+ * Returns >0 if task is runnable, 0 if not.
+ * A task may not be runnable because it doesn't exist,
+ * or because it is in an unrunnable state (such as a periodic
+ * task between runs). */
+uint8_t task_runnable(task_t *task);
+
 /* Switch to task
  * Immediately switches to task, as long as it is running
  * Returns zero on success, non-zero on error (generally because task is

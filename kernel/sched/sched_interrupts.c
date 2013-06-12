@@ -47,17 +47,16 @@ static int svc_acquire(struct semaphore *semaphore) {
         /* Failure */
         ret = 0;
 
-        if (task_exists(semaphore->held_by)
+        if (task_runnable(semaphore->held_by)
                 && (task_compare(semaphore->held_by, curr_task) <= 0)) {
             get_task_ctrl(curr_task)->stack_top = PSP();
             switch_task(get_task_ctrl(semaphore->held_by));
         }
         else {
-            /* If held_by didn't exist in task list,
-             * it most likely just ended without releasing
-             * the semaphore.  kernel_task should release
-             * the semaphore on its behalf soon. */
-            /* TODO: switch directly to kernel_task in this case */
+            /* If task was not runnable, it was either a period task
+             * between runs, or it recently ended without releasing
+             * the semaphore.  In that case, the kernel task will
+             * release the semaphore on its next run. */
             svc_yield();
         }
     }
