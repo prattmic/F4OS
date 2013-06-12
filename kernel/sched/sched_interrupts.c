@@ -8,12 +8,8 @@
 #include <kernel/fault.h>
 #include "sched_internals.h"
 
-extern int get_lock(volatile struct semaphore *semaphore);
-extern void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore);
-
 void systick_handler(void) __attribute__((section(".kernel")));
 void pendsv_handler(void) __attribute__((section(".kernel")));
-void svc_handler(uint32_t*) __attribute__((section(".kernel")));
 
 void systick_handler(void) {
     system_ticks++;
@@ -36,56 +32,10 @@ static void svc_yield(void) {
     switch_task(NULL);
 }
 
-static int svc_acquire(struct semaphore *semaphore) {
-    int ret;
-
-    if (get_lock(semaphore)) {
-        /* Success */
-        ret = 1;
+void svc_sched(uint32_t svc_number, uint32_t *registers) {
+    if (!IPSR()) {
+        panic_print("Attempted to call service call from user space");
     }
-    else {
-        /* Failure */
-        ret = 0;
-
-        if (task_runnable(semaphore->held_by)
-                && (task_compare(semaphore->held_by, curr_task) <= 0)) {
-            get_task_ctrl(curr_task)->stack_top = PSP();
-            switch_task(get_task_ctrl(semaphore->held_by));
-        }
-        else {
-            /* If task was not runnable, it was either a period task
-             * between runs, or it recently ended without releasing
-             * the semaphore.  In that case, the kernel task will
-             * release the semaphore on its next run. */
-            svc_yield();
-        }
-    }
-
-    return ret;
-}
-
-void svc_release(struct semaphore *semaphore) {
-    semaphore->lock = 0;
-    semaphore->held_by = NULL;
-    held_semaphores_remove(curr_task->semaphore_data.held_semaphores, semaphore);
-
-    if (semaphore->waiting
-            && (task_compare(semaphore->waiting, curr_task) >= 0)) {
-        task_ctrl *task = get_task_ctrl(semaphore->waiting);
-        semaphore->waiting = NULL;
-
-        get_task_ctrl(curr_task)->stack_top = PSP();
-        switch_task(task);
-    }
-}
-
-void svc_handler(uint32_t *registers) {
-    uint32_t svc_number;
-
-    /* Stack contains:
-     * r0, r1, r2, r3, r12, r14, the return address and xPSR
-     * First argument and return value (r0) is registers[0] */
-    svc_number = ((char *)registers[6])[-2];
 
     switch (svc_number) {
         case SVC_YIELD:
@@ -93,12 +43,6 @@ void svc_handler(uint32_t *registers) {
             break;
         case SVC_END_TASK:
             svc_end_task();
-            break;
-        case SVC_ACQUIRE:
-            registers[0] = svc_acquire((struct semaphore *) registers[0]);
-            break;
-        case SVC_RELEASE:
-            svc_release((struct semaphore *) registers[0]);
             break;
         case SVC_REGISTER_TASK:
             _register_task((task_ctrl *) registers[0], (int) registers[1]);

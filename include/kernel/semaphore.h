@@ -41,4 +41,8 @@ static inline void init_semaphore(volatile struct semaphore *semaphore) {
 /* Setup semaphore data structure for a new task */
 void task_semaphore_setup(task_t *task);
 
+/* Semaphore SVC handler
+ * Should only be called by global SVC handler. */
+void svc_semaphore(uint32_t svc_number, uint32_t *registers);
+
 #endif

@@ -78,4 +78,8 @@ uint8_t task_runnable(task_t *task);
  * not runnable) */
 int task_switch(task_t *task);
 
+/* Scheduler SVC handler
+ * Should only be called by global SVC handler. */
+void svc_sched(uint32_t svc_number, uint32_t *registers);
+
 #endif

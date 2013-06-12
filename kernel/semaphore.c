@@ -31,7 +31,7 @@ void acquire_for_free(volatile struct semaphore *semaphore) {
     held_semaphores_remove(curr_task->semaphore_data.held_semaphores, semaphore);
 }
 
-int8_t try_lock(volatile uint8_t *l) {
+static int8_t try_lock(volatile uint8_t *l) {
     uint8_t taken = 1;
     uint8_t ret;
     uint8_t tmp = 0;
@@ -52,8 +52,7 @@ int8_t try_lock(volatile uint8_t *l) {
 }
 
 
-/* Called by svc_handler */
-int get_lock(volatile struct semaphore *semaphore) {
+static int get_lock(volatile struct semaphore *semaphore) {
     struct task_semaphore_data *curr_task_data = &curr_task->semaphore_data;
 
     if (try_lock(&semaphore->lock)) {
@@ -145,4 +144,63 @@ void task_semaphore_setup(task_t *task) {
 
     memset(sem_data->held_semaphores, 0, sizeof(sem_data->held_semaphores));
     sem_data->waiting = NULL;
+}
+
+static int svc_acquire(struct semaphore *semaphore) {
+    int ret;
+
+    if (get_lock(semaphore)) {
+        /* Success */
+        ret = 1;
+    }
+    else {
+        /* Failure */
+        ret = 0;
+
+        if (task_runnable(semaphore->held_by)
+                && (task_compare(semaphore->held_by, curr_task) <= 0)) {
+            task_switch(semaphore->held_by);
+        }
+        else {
+            /* If task was not runnable, it was either a period task
+             * between runs, or it recently ended without releasing
+             * the semaphore.  In that case, the kernel task will
+             * release the semaphore on its next run. */
+            task_switch(NULL);
+        }
+    }
+
+    return ret;
+}
+
+static void svc_release(struct semaphore *semaphore) {
+    semaphore->lock = 0;
+    semaphore->held_by = NULL;
+    held_semaphores_remove(curr_task->semaphore_data.held_semaphores, semaphore);
+
+    if (semaphore->waiting
+            && (task_compare(semaphore->waiting, curr_task) >= 0)) {
+        task_t *task = semaphore->waiting;
+        semaphore->waiting = NULL;
+
+        task_switch(task);
+    }
+}
+
+void svc_semaphore(uint32_t svc_number, uint32_t *registers) {
+    if (!IPSR()) {
+        panic_print("Attempted to call service call from user space");
+    }
+
+    switch (svc_number) {
+        case SVC_ACQUIRE:
+            registers[0] = svc_acquire((struct semaphore *) registers[0]);
+            break;
+        case SVC_RELEASE:
+            svc_release((struct semaphore *) registers[0]);
+            break;
+        default:
+            panic_print("Unknown SVC: %d", svc_number);
+            break;
+    }
 }
