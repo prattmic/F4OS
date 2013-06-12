@@ -42,7 +42,7 @@ uint8_t task_runnable(task_t *task) {
 
 int task_switch(task_t *task) {
     int ret;
-    task_ctrl *t = get_task_ctrl(task);
+    task_ctrl *t = task ? get_task_ctrl(task) : NULL;
 
     /* If already in interrupt space, switch directly */
     if (IPSR()) {

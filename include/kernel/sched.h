@@ -72,7 +72,8 @@ int task_compare(task_t *task1, task_t *task2);
 uint8_t task_runnable(task_t *task);
 
 /* Switch to task
- * Immediately switches to task, as long as it is running
+ * Immediately switches to task, as long as it is running.
+ * Passing the NULL task is equivalent to yielding.
  * Returns zero on success, non-zero on error (generally because task is
  * not runnable) */
 int task_switch(task_t *task);

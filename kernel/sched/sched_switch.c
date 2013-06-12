@@ -53,9 +53,10 @@ void switch_task(task_ctrl *task) {
 }
 
 /* Switch to task if it exists.
+ * NULL task is equivalent to yield.
  * Return 0 on success */
 int coop_task_switch(task_ctrl *task) {
-    if (!task_runnable(get_task_t(task))) {
+    if (task && !task_runnable(get_task_t(task))) {
         return -1;
     }
 
