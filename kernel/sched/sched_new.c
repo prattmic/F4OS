@@ -102,63 +102,61 @@ void svc_register_task(task_ctrl *task, int periodic) {
 }
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {
-    asm volatile("mov     r5, #0                                           \n\
-                  stmdb   %[stack]!, {r5}   /* Empty */                    \n\
-                  stmdb   %[stack]!, {r5}   /* FPSCR */                    \n\
-                  stmdb   %[stack]!, {r5}   /* S15 */                      \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}   /* S0 */                       \n\
-                  ldr.w   r5, =0x01000000 /* Thumb state bit must be set */\n\
-                  stmdb   %[stack]!, {r5}   /* xPSR */                     \n\
-                  mov     r5, #0                                           \n\
-                  stmdb   %[stack]!, {%[pc]}/* PC */                       \n\
-                  stmdb   %[stack]!, {%[lr]}/* LR */                       \n\
-                  stmdb   %[stack]!, {r5}   /* R12 */                      \n\
-                  stmdb   %[stack]!, {r5}   /* R3 */                       \n\
-                  stmdb   %[stack]!, {r5}   /* R2 */                       \n\
-                  stmdb   %[stack]!, {r5}   /* R1 */                       \n\
-                  stmdb   %[stack]!, {r5}   /* R0 */                       \n\
-                  stmdb   %[stack]!, {r5}   /* R11 */                      \n\
-                  stmdb   %[stack]!, {r5}   /* R10 */                      \n\
-                  stmdb   %[stack]!, {r5}   /* R9 */                       \n\
-                  stmdb   %[stack]!, {r5}   /* R8 */                       \n\
-                  stmdb   %[stack]!, {%[frame]}   /* R7 - Frame Pointer*/  \n\
-                  stmdb   %[stack]!, {r5}   /* R6 */                       \n\
-                  stmdb   %[stack]!, {r5}   /* R5 */                       \n\
-                  stmdb   %[stack]!, {r5}   /* R4 */                       \n\
-                  stmdb   %[stack]!, {r5}   /* S31 */                      \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}                                  \n\
-                  stmdb   %[stack]!, {r5}   /* S16 */"
+    asm volatile("stmdb   %[stack]!, {%[zero]}  /* Empty */                     \n\
+                  stmdb   %[stack]!, {%[zero]}  /* FPSCR */                     \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S15 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S14 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S13 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S12 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S11 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S10 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S9 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S8 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S7 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S6 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S5 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S4 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S3 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S2 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S1 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S0 */                        \n\
+                  stmdb   %[stack]!, {%[psr]}   /* xPSR */                      \n\
+                  stmdb   %[stack]!, {%[pc]}    /* PC */                        \n\
+                  stmdb   %[stack]!, {%[lr]}    /* LR */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R12 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R3 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R2 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R1 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R0 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R11 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R10 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R9 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R8 */                        \n\
+                  stmdb   %[stack]!, {%[frame]} /* R7 - Frame Pointer*/         \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R6 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R5 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R4 */                        \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S31 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S30 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S29 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S28 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S27 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S26 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S25 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S24 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S23 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S22 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S21 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S20 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S19 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S18 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S17 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S16 */"
                   /* Output */
                   :[stack] "+r" (task->stack_top)
                   /* Input */
-                  :[pc] "r" (task->fptr), [lr] "r" (lptr), [frame] "r" (task->stack_limit)
+                  :[pc] "r" (task->fptr), [lr] "r" (lptr), [frame] "r" (task->stack_limit),
+                   [zero] "r" (0), [psr] "r" (0x01000000) /* Set the Thumb bit */
                   /* Clobber */
-                  :"r5");
+                  :);
 }
