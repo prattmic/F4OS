@@ -18,9 +18,8 @@ raise_privilege:
     isb
     bx      lr
 
-/* Sets and enables the PSP for user mode processes
- * The stack address is given as an argument and is
- * at r0. */
+/* Sets and enables the PSP for user mode processes.
+ * r0 - Stack address for PSP */
 .thumb_func
 .section    .kernel
 .global     enable_psp
@@ -47,7 +46,9 @@ disable_psp:
     isb
     bx      lr
 
-/* Saves context */
+/* Saves additional context not
+ * saved by hardware on exception
+ * entry. */
 .thumb_func
 .section    .kernel
 .global     save_context

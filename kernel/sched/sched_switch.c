@@ -27,7 +27,9 @@ void switch_task(task_ctrl *task) {
         /* As a workaround for lack of MPU support, check if the
          * stack of the task we are switching from has overflowed */
         if (task->stack_limit > task->stack_top) {
-            panic_print("Task (0x%x, fptr: 0x%x) has overflowed its stack. stack_top: 0x%x stack_limit: 0x%x", task, task->fptr, task->stack_top, task->stack_limit);
+            panic_print("Task (0x%x, fptr: 0x%x) has overflowed its stack. "
+                        "stack_top: 0x%x stack_limit: 0x%x", task, task->fptr,
+                        task->stack_top, task->stack_limit);
         }
 
         insert_task(runnable_task_list, task);

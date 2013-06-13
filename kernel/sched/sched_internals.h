@@ -43,6 +43,7 @@ uint8_t task_exists(task_t *task) __attribute__((section(".kernel")));
 void kernel_task(void) __attribute__((section(".kernel")));
 void sleep_task(void) __attribute__((section(".kernel")));
 
+/* ASM functions */
 extern void enable_psp(uint32_t *);
 extern void disable_psp();
 extern uint32_t *save_context(void) __attribute__((section(".kernel"), naked));
