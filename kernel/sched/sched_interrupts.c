@@ -45,7 +45,7 @@ void svc_sched(uint32_t svc_number, uint32_t *registers) {
             svc_end_task();
             break;
         case SVC_REGISTER_TASK:
-            _register_task((task_ctrl *) registers[0], (int) registers[1]);
+            svc_register_task((task_ctrl *) registers[0], (int) registers[1]);
             break;
         case SVC_TASK_SWITCH:
             registers[0] = svc_task_switch((task_ctrl *) registers[0]);

@@ -28,7 +28,7 @@ struct list periodic_task_list;
 struct list free_task_list;
 
 void create_context(task_ctrl *task, void (*lptr)(void)) __attribute__((section(".kernel")));
-void _register_task(task_ctrl *task, int periodic) __attribute__((section(".kernel")));
+void svc_register_task(task_ctrl *task, int periodic) __attribute__((section(".kernel")));
 
 void switch_task(task_ctrl *task) __attribute__((section(".kernel")));
 int svc_task_switch(task_ctrl *task) __attribute__((section(".kernel")));

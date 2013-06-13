@@ -104,8 +104,8 @@ void create_context(task_ctrl* task, void (*lptr)(void)) {
                   :[pc] "r" (task->fptr), [lr] "r" (lptr), [frame] "r" (task->stack_limit)
                   /* Clobber */
                   :"r5");
-
 }
+
 
 static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
     task_ctrl *task;
@@ -150,13 +150,13 @@ static int register_task(task_ctrl *task, int periodic) {
         SVC_ARG2(SVC_REGISTER_TASK, task, periodic);
     }
     else {
-        _register_task(task, periodic);
+        svc_register_task(task, periodic);
     }
 
     return 0;
 }
 
-void _register_task(task_ctrl *task, int periodic) {
+void svc_register_task(task_ctrl *task, int periodic) {
     insert_task(runnable_task_list, task);
 
     if (periodic) {
