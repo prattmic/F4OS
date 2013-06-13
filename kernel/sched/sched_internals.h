@@ -31,7 +31,7 @@ void create_context(task_ctrl *task, void (*lptr)(void)) __attribute__((section(
 void _register_task(task_ctrl *task, int periodic) __attribute__((section(".kernel")));
 
 void switch_task(task_ctrl *task) __attribute__((section(".kernel")));
-int coop_task_switch(task_ctrl *task) __attribute__((section(".kernel")));
+int svc_task_switch(task_ctrl *task) __attribute__((section(".kernel")));
 void rtos_tick(void) __attribute__((section(".kernel")));
 
 void end_task(void) __attribute__((section(".kernel"),naked));

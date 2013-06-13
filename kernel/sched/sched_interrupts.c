@@ -48,7 +48,7 @@ void svc_sched(uint32_t svc_number, uint32_t *registers) {
             _register_task((task_ctrl *) registers[0], (int) registers[1]);
             break;
         case SVC_TASK_SWITCH:
-            registers[0] = coop_task_switch((task_ctrl *) registers[0]);
+            registers[0] = svc_task_switch((task_ctrl *) registers[0]);
             break;
         default:
             panic_print("Unknown SVC: %d", svc_number);

@@ -46,7 +46,7 @@ int task_switch(task_t *task) {
 
     /* If already in interrupt space, switch directly */
     if (IPSR()) {
-        ret = coop_task_switch(t);
+        ret = svc_task_switch(t);
     }
     /* Otherwise, make a service call */
     else {
