@@ -104,10 +104,6 @@ restore_full_context:
 
     ldr     r1, [r0, #-76]  /* Load in old PC value */
 
-    mov     r2, #0x8100000
-    cmp     r1, r2
-    bgt     panic           /* Panic if PC is > 0x8100000 */
-
     orr     r1, r1, #1      /* bit[0] of PC must be set to 1 for thumb mode */
     str     r1, [r0, #4]    /* Stack PC */
 
