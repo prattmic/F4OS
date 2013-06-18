@@ -5,10 +5,10 @@
 obj_prefix ?= $(PREFIX)/
 
 $(obj_prefix)%.o : %.S $(BASE)/include/config/autoconf.h
-	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
+	$(VERBOSE)echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
 
 $(obj_prefix)%.o : %.c $(BASE)/include/config/autoconf.h
-	@echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
+	$(VERBOSE)echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
 
 -include $(addprefix $(obj_prefix), $(SRCS:.S=.d))
 -include $(addprefix $(obj_prefix), $(SRCS:.c=.d))

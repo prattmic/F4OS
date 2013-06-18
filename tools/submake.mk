@@ -45,6 +45,6 @@ DIR_OBJS := $(foreach DIR, $(DIRS), $(call dir_obj, $(DIR)))
 # Actual directory obj rule
 # Links all source and subdirectory objects
 $(obj): $(OBJS) $(DIR_OBJS)
-	@echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) -r $^ -o $@
+	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) -r $^ -o $@
 
 include $(BASE)/tools/build.mk

@@ -32,6 +32,12 @@ LFLAGS=
 
 KCONFIG_DIR = $(BASE)/tools/kconfig-frontends/frontends/
 
+# Command verbosity
+# Unless V=1, surpress output with @
+ifneq ($(V), 1)
+	VERBOSE:=@
+endif
+
 # Pass variables to submake
 export
 
@@ -71,7 +77,7 @@ menuconfig: $(KCONFIG_DIR)/conf/conf
 $(BASE)/.config: ;
 
 include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KCONFIG_DIR)/conf/conf $(deps_config)
-	@if ! test -e $(BASE)/.config;	\
+	$(VERBOSE)if ! test -e $(BASE)/.config;	\
 	then	\
 		echo;	\
 		echo "ERROR: F4OS not configured.";	\
@@ -79,8 +85,8 @@ include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KC
 		echo;	\
 		exit 1;	\
 	fi;
-	@mkdir -p $(BASE)/include/config
-	KCONFIG_AUTOHEADER=$(BASE)/include/config/autoconf.h $(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
+	$(VERBOSE)mkdir -p $(BASE)/include/config
+	$(VERBOSE)KCONFIG_AUTOHEADER=$(BASE)/include/config/autoconf.h $(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
 
 proj: 	$(PREFIX)/$(PROJ_NAME).elf
 
@@ -91,9 +97,9 @@ $(PREFIX)/$(PROJ_NAME).o: $(BASE)/include/config/autoconf.h .FORCE
 	$(MAKE) -f f4os.mk obj=$@
 
 $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o
-	@echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
-	@echo "OBJCOPY $(PROJ_NAME).hex" && $(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
-	@echo "OBJCOPY $(PROJ_NAME).bin" && $(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
+	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
+	$(VERBOSE)echo "OBJCOPY $(PROJ_NAME).hex" && $(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
+	$(VERBOSE)echo "OBJCOPY $(PROJ_NAME).bin" && $(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
 
 clean:
 	-rm -rf $(PREFIX)
@@ -130,3 +136,4 @@ help:
 	@echo	'	burn        - burn to configured board'
 	@echo	'	ctags       - generate ctags file'
 	@echo	'	cscope      - generate cscope file'
+	@echo	'	V=1         - Verbose.  Print build commands.'
