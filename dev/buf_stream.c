@@ -13,10 +13,27 @@ struct buf_stream {
 };
 
 /* Warning! Buffer streams use the buffer you pass them, they do not copy them! */
-rd_t open_buf_stream(char *buf);
-char buf_stream_read(void *env, int *error);
-int buf_stream_write(char c, void *env);
-int buf_stream_close(resource *resource);
+
+static char buf_stream_read(void *env, int *error) {
+    if (error != NULL) {
+        *error = 0;
+    }
+
+    return *((struct buf_stream *) env)->buf == '\0' ? '\0' : *((struct buf_stream *) env)->buf++;
+}
+
+static int buf_stream_write(char c, void *env) {
+    *((struct buf_stream *) env)->buf++ = c;
+    *((struct buf_stream *) env)->buf = '\0';
+    return 1;
+}
+
+static int buf_stream_close(resource *resource) {
+    acquire_for_free(resource->read_sem);
+    free(resource->env);
+    free((void*) resource->read_sem);
+    return 0;
+}
 
 rd_t open_buf_stream(char *buf) {
     rd_t ret;
@@ -64,25 +81,4 @@ err_free_env:
 err:
     printk("OOPS: Unable to open buffer stream.\r\n");
     return ret;
-}
-
-char buf_stream_read(void *env, int *error) {
-    if (error != NULL) {
-        *error = 0;
-    }
-
-    return *((struct buf_stream *) env)->buf == '\0' ? '\0' : *((struct buf_stream *) env)->buf++;
-}
-
-int buf_stream_write(char c, void *env) {
-    *((struct buf_stream *) env)->buf++ = c;
-    *((struct buf_stream *) env)->buf = '\0';
-    return 1;
-}
-
-int buf_stream_close(resource *resource) {
-    acquire_for_free(resource->read_sem);
-    free(resource->env);
-    free((void*) resource->read_sem);
-    return 0;
 }
