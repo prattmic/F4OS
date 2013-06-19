@@ -10,21 +10,34 @@
 
 struct buf_stream {
     char *buf;
+    uint32_t i;
+    uint32_t len;
 };
-
-/* Warning! Buffer streams use the buffer you pass them, they do not copy them! */
 
 static char buf_stream_read(void *env, int *error) {
     if (error != NULL) {
         *error = 0;
     }
 
-    return *((struct buf_stream *) env)->buf == '\0' ? '\0' : *((struct buf_stream *) env)->buf++;
+    struct buf_stream *stream = (struct buf_stream *) env;
+
+    if ((stream->i >= stream->len) || (stream->buf[stream->i] == '\0')) {
+        return '\0';
+    }
+
+    return stream->buf[stream->i++];
 }
 
 static int buf_stream_write(char c, void *env) {
-    *((struct buf_stream *) env)->buf++ = c;
-    *((struct buf_stream *) env)->buf = '\0';
+    struct buf_stream *stream = (struct buf_stream *) env;
+
+    /* Always leave room for NULL byte at end of buffer */
+    if (stream->i >= stream->len - 1) {
+        return 0;
+    }
+
+    stream->buf[stream->i++] = c;
+    stream->buf[stream->i] = '\0';
     return 1;
 }
 
@@ -35,7 +48,7 @@ static int buf_stream_close(resource *resource) {
     return 0;
 }
 
-rd_t open_buf_stream(char *buf) {
+rd_t open_buf_stream(char *buf, uint32_t len) {
     rd_t ret;
 
     struct buf_stream *env = kmalloc(sizeof(struct buf_stream));
@@ -51,6 +64,8 @@ rd_t open_buf_stream(char *buf) {
     }
 
     env->buf = buf;
+    env->i = 0;
+    env->len = len;
 
     new_r->env    = env;
     new_r->writer = &buf_stream_write;
