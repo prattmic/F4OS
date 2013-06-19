@@ -15,7 +15,9 @@ int close(rd_t rd) __attribute__((section(".kernel")));
 int read(rd_t rd, char *buf, int n) __attribute__((section(".kernel")));
 int swrite(rd_t rd, char *s) __attribute__((section(".kernel")));
 
-int sprintf(char *buf, char *fmt, ...);
+/* Print fmt into buf, writing at most n bytes.
+ * Returns number of characters written to buffer. */
+int scnprintf(char *buf, uint32_t n, char *fmt, ...);
 
 int fputs(rd_t rd, char *s);
 int fputc(rd_t rd, char letter);

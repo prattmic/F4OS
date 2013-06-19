@@ -26,11 +26,11 @@ int fgetc(rd_t rd) {
     }
 }
 
-int sprintf(char *buf, char *fmt, ...) {
+int scnprintf(char *buf, uint32_t n, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
 
-    rd_t stream = open_buf_stream(buf);
+    rd_t stream = open_buf_stream(buf, n);
     int ret = vfprintf(stream, fmt, ap, &fputs, &fputc);
     close(stream);
 

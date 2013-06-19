@@ -16,7 +16,7 @@ int memset_test(char *message, int len) {
 
     for (int i = 0; i < MEM_SIZE; i++) {
         if (memory[i] != MEM_MAGIC) {
-            sprintf(message, "memory[%d] = %u", i, memory[i]);
+            scnprintf(message, len, "memory[%d] = %u", i, memory[i]);
             return FAILED;
         }
     }
@@ -35,7 +35,7 @@ int memcpy_test(char *message, int len) {
 
     for (int i = 0; i < MEM_SIZE; i++) {
         if (memory_dst[i] != MEM_MAGIC) {
-            sprintf(message, "memory_dst[%d] = %u", i, memory_dst[i]);
+            scnprintf(message, len, "memory_dst[%d] = %u", i, memory_dst[i]);
             return FAILED;
         }
     }
@@ -55,7 +55,7 @@ int memmove_src_first_no_overlap(char *message, int len) {
 
     for (int i = 0; i < MEM_SIZE; i++) {
         if (memory[i] != MEM_MAGIC) {
-            sprintf(message, "memory[%d] = %u", i, memory[i]);
+            scnprintf(message, len, "memory[%d] = %u", i, memory[i]);
             return FAILED;
         }
     }
@@ -75,7 +75,7 @@ int memmove_src_last_no_overlap(char *message, int len) {
 
     for (int i = 0; i < MEM_SIZE; i++) {
         if (memory[MEM_SIZE + i] != MEM_MAGIC) {
-            sprintf(message, "memory[%d] = %u", MEM_SIZE + i, memory[MEM_SIZE + i]);
+            scnprintf(message, len, "memory[%d] = %u", MEM_SIZE + i, memory[MEM_SIZE + i]);
             return FAILED;
         }
     }
@@ -97,7 +97,7 @@ int memmove_src_first_overlap(char *message, int len) {
 
     for (int i = 0; i < 8; i++) {
         if (memory[3+i] != i) {
-            sprintf(message, "memory[%d] = %u", 3+i, memory[3+i]);
+            scnprintf(message, len, "memory[%d] = %u", 3+i, memory[3+i]);
             return FAILED;
         }
     }
@@ -119,7 +119,7 @@ int memmove_src_last_overlap(char *message, int len) {
 
     for (int i = 0; i < 8; i++) {
         if (memory[i] != i) {
-            sprintf(message, "memory[%d] = %u", i, memory[i]);
+            scnprintf(message, len, "memory[%d] = %u", i, memory[i]);
             return FAILED;
         }
     }
@@ -143,7 +143,7 @@ int strlen_test(char *message, int len) {
         int computed_len = strlen(strings[i].str);
 
         if (computed_len != strings[i].len) {
-            sprintf(message, "strlen(\"%s\") != %d", strings[i].str, computed_len);
+            scnprintf(message, len, "strlen(\"%s\") != %d", strings[i].str, computed_len);
             return FAILED;
         }
     }
@@ -167,7 +167,7 @@ int strnlen_test(char *message, int len) {
         int computed_len = strnlen(strings[i].str, 4);
 
         if (computed_len != strings[i].len) {
-            sprintf(message, "strnlen(\"%s\", 4) != %d", strings[i].str, computed_len);
+            scnprintf(message, len, "strnlen(\"%s\", 4) != %d", strings[i].str, computed_len);
             return FAILED;
         }
     }
@@ -197,7 +197,7 @@ int strreverse_test(char *message, int len) {
 
         if (strncmp(str, strings[i].rev, 25)) {
             free(str);
-            sprintf(message, "%s != %s", str, strings[i].rev);
+            scnprintf(message, len, "%s != %s", str, strings[i].rev);
             return FAILED;
         }
 
@@ -226,7 +226,7 @@ int strncmp_test(char *message, int len) {
         int ret = strncmp(cases[i].str1, cases[i].str2, 10);
 
         if (ret != cases[i].ret) {
-            sprintf(message, "strncmp(\"%s\", \"%s\", 10) returned %d, not %d",
+            scnprintf(message, len, "strncmp(\"%s\", \"%s\", 10) returned %d, not %d",
                     cases[i].str1, cases[i].str2, ret, cases[i].ret);
             return FAILED;
         }
@@ -245,11 +245,11 @@ int strncpy_test(char *message, int len) {
     strncpy(str_dst, str_src, 25);
 
     if (strncmp(str_src, str_dst, 25) != 0) {
-        sprintf(message, "'%s' != '%s'", str_src, str_dst);
+        scnprintf(message, len, "'%s' != '%s'", str_src, str_dst);
         return FAILED;
     }
     else if (str_dst[20] != '\0') {
-        sprintf(message, "Destination not NULLed");
+        scnprintf(message, len, "Destination not NULLed");
         return FAILED;
     }
 
@@ -275,7 +275,7 @@ int chrnlst_test(char *message, int len) {
         int ret = chrnlst(cases[i].c, cases[i].list);
 
         if (ret != cases[i].ret) {
-            sprintf(message, "chrnlst(\"%c\", \"%s\") returned %d, not %d",
+            scnprintf(message, len, "chrnlst(\"%c\", \"%s\") returned %d, not %d",
                     cases[i].c, cases[i].list, ret, cases[i].ret);
             return FAILED;
         }

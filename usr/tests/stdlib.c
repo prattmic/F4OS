@@ -20,7 +20,7 @@ int strndup_test(char *message, int len) {
 
         /* Test length */
         if (strnlen(dup, 20) != strings[i].len) {
-            sprintf(message, "strlen(strndup(\"%s\", %d)) != %d",
+            scnprintf(message, len, "strlen(strndup(\"%s\", %d)) != %d",
                     strings[i].str, strings[i].len);
             free(dup);
             return FAILED;
@@ -28,7 +28,7 @@ int strndup_test(char *message, int len) {
 
         /* ... and content */
         if (strncmp(strings[i].str, dup, strings[i].len)) {
-            sprintf(message, "strndup(\"%s\", %d) != %s",
+            scnprintf(message, len, "strndup(\"%s\", %d) != %s",
                     strings[i].str, strings[i].len);
             free(dup);
             return FAILED;
@@ -62,7 +62,7 @@ int atoi_test(char *message, int len) {
         int result = atoi(cases[i].str);
 
         if (result != cases[i].num) {
-            sprintf(message, "atoi(\"%s\") = %d, should be %d",
+            scnprintf(message, len, "atoi(\"%s\") = %d, should be %d",
                     cases[i].str, result, cases[i].num);
             return FAILED;
         }
@@ -94,7 +94,7 @@ int uitoa_test(char *message, int len) {
         uitoa(cases[i].num, buf, 40, cases[i].base);
 
         if (strncmp(cases[i].str, buf, 40)) {
-            sprintf(message, "uitoa(%d, base %d) = \"%s\", should be \"%s\"",
+            scnprintf(message, len, "uitoa(%d, base %d) = \"%s\", should be \"%s\"",
                     cases[i].num, cases[i].base, buf, cases[i].str);
             return FAILED;
         }
@@ -126,7 +126,7 @@ int itoa_test(char *message, int len) {
         itoa(cases[i].num, buf, 20, cases[i].base);
 
         if (strncmp(cases[i].str, buf, 20)) {
-            sprintf(message, "itoa(%d, base %d) = \"%s\", should be \"%s\"",
+            scnprintf(message, len, "itoa(%d, base %d) = \"%s\", should be \"%s\"",
                     cases[i].num, cases[i].base, buf, cases[i].str);
             return FAILED;
         }
@@ -159,7 +159,7 @@ int ftoa_test(char *message, int len) {
         ftoa(cases[i].num, cases[i].tolerance, buf, 20);
 
         if (strncmp(cases[i].str, buf, 20)) {
-            sprintf(message, "ftoa(%f) = \"%s\", should be \"%s\"",
+            scnprintf(message, len, "ftoa(%f) = \"%s\", should be \"%s\"",
                     cases[i].num, buf, cases[i].str);
             return FAILED;
         }
