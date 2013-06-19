@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdio.h>
-#include <string.h>
 #include <kernel/sched.h>
 #include "test.h"
 
