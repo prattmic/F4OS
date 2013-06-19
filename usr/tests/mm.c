@@ -34,7 +34,7 @@ int malloc_range(char *message, int len) {
     for (int i = 0; i < ARRAY_LENGTH(sizes); i++) {
         void *mem = malloc(sizes[i]);
         if (!mem) {
-            printf("Allocation of %d bytes failed", sizes[i]);
+            scnprintf(message, len, "Allocation of %d bytes failed", sizes[i]);
             return FAILED;
         }
 
@@ -53,7 +53,7 @@ int kmalloc_range(char *message, int len) {
     for (int i = 0; i < ARRAY_LENGTH(sizes); i++) {
         void *mem = kmalloc(sizes[i]);
         if (!mem) {
-            printf("Allocation of %d bytes failed", sizes[i]);
+            scnprintf(message, len, "Allocation of %d bytes failed", sizes[i]);
             return FAILED;
         }
 
