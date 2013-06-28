@@ -5,7 +5,7 @@
 #include <kernel/fault.h>
 
 #include <mm/mm.h>
-#include "mm_internals.h"
+#include "buddy_mm_internals.h"
 
 static void buddy_merge(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
 

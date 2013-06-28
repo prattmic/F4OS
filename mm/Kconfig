@@ -1,5 +1,55 @@
+choice
+    prompt "Allocator type"
+    default MM_ALLOCATOR_BUDDY
+
+config MM_ALLOCATOR_BUDDY
+    bool "Buddy allocator"
+    ---help---
+        Buddy allocator. Only power of two allocations are made,
+        leading to esay merging of blocks. Internal fragmentation
+        is high, but external fragmentation is low.
+
+config MM_ALLOCATOR_BITFIELD
+    bool "Bitfield allocator"
+    ---help---
+        Bitfield allocator. Allocation granularity down configurable.
+        Harder to "merge" after smaller allocations, leading to small
+        internal fragmentation but high external fragmentation.
+
+endchoice
+
+config SUSERHEAP
+    hex
+    default 0x20000000 if CHIP_STM32F40X
+    default 0x20004000 if CHIP_LM4F120H5
+
+config SKERNELHEAP
+    hex
+    default 0x10008000 if CHIP_STM32F40X
+    default 0x20002000 if CHIP_LM4F120H5
+
+config EUSERHEAP
+    hex
+    default 0x2001FFFC if CHIP_STM32F40X
+    default 0x20008000 if CHIP_LM4F120H5
+
+config EKERNELHEAP
+    hex
+    default 0x1000FFFC if CHIP_STM32F40X
+    default 0x20004000 if CHIP_LM4F120H5
+
+config MM_GRAIN_SHIFT
+    int
+    default 4
+    depends on MM_ALLOCATOR_BITFIELD
+    prompt "Bitfield allocator grain shift"
+    ---help---
+        Power of 2 for the bitfield allocator granularity.
+        2**this is what it rounds up to when allocating space.
+
 config MM_USER_MAX_ORDER
     int
+    depends on MM_ALLOCATOR_BUDDY
     prompt "User buddy heap max order"
     ---help---
         Maximum buddy block order for user buddy heap.
@@ -7,12 +57,14 @@ config MM_USER_MAX_ORDER
 
 config MM_USER_MIN_ORDER
     int
+    depends on MM_ALLOCATOR_BUDDY
     prompt "User buddy heap min order"
     ---help---
         Minimum buddy block order to allocate for user buddy.
 
 config MM_KERNEL_MAX_ORDER
     int
+    depends on MM_ALLOCATOR_BUDDY
     prompt "Kernel buddy heap max order"
     ---help---
         Maximum buddy block order for kernel buddy heap.
@@ -20,6 +72,7 @@ config MM_KERNEL_MAX_ORDER
 
 config MM_KERNEL_MIN_ORDER
     int
+    depends on MM_ALLOCATOR_BUDDY
     prompt "Kernel buddy heap min order"
     ---help---
         Minimum buddy block order to allocate for kernel buddy.

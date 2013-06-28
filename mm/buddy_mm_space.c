@@ -2,7 +2,7 @@
 #include <math.h>
 
 #include <mm/mm.h>
-#include "mm_internals.h"
+#include "buddy_mm_internals.h"
 
 static uint32_t free_memory(struct buddy *buddy);
 

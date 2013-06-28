@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <kernel/fault.h>
 #include <mm/mm.h>
-#include "mm_internals.h"
+#include "buddy_mm_internals.h"
 
 #ifdef CONFIG_MM_PROFILING
 #include <dev/hw/perfcounter.h>

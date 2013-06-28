@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "mm_internals.h"
+#include "buddy_mm_internals.h"
 
 extern void *_suserheap;
 extern void *_euserheap;
