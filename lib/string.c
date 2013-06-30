@@ -67,6 +67,10 @@ size_t strnlen(char *s, int n) {
 void strreverse(char *s) {
     char *begin = s;
 
+    if (!s || !*s) {
+        return;
+    }
+
     while (*++s);
     s--;
 
