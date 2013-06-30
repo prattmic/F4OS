@@ -92,7 +92,14 @@ void init_usart(void) {
     *DMA2_PAR_S(2) = (uint32_t) USART1_DR;    /* RX */
     *DMA2_PAR_S(7) = (uint32_t) USART1_DR;    /* TX */
 
-    /* Allocate buffer memory */
+    /*
+     * Allocate buffer memory.
+     * This must be allocated because static data goes into
+     * CCMRAM on STM32F4 implementation, and the bus matrix
+     * does not connect CCMRAM to the DMA engine. Thus, it
+     * is allocated from user heap to ensure it is accessible
+     * by DMA
+     */
     usart_rx_buf = (char *) malloc(USART_DMA_MSIZE);
     usart_tx_buf = (char *) malloc(USART_DMA_MSIZE);
     if ((usart_rx_buf == NULL) || (usart_tx_buf == NULL)) {
