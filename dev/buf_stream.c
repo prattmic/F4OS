@@ -51,7 +51,7 @@ static int buf_stream_close(resource *resource) {
 rd_t open_buf_stream(char *buf, uint32_t len) {
     rd_t ret;
 
-    struct buf_stream *env = kmalloc(sizeof(struct buf_stream));
+    struct buf_stream *env = malloc(sizeof(struct buf_stream));
     if (!env) {
         ret = -1;
         goto err;
