@@ -6,5 +6,6 @@ SRCS += mm.c
 SRCS += cooperate.c
 SRCS += shared_mem.c
 SRCS += buf_stream.c
+SRCS += regression.c
 
 include $(BASE)/tools/submake.mk
