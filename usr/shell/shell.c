@@ -38,6 +38,7 @@ void shell(void) {
                     "your own. Goodbye.\r\n", i);
             return;
         }
+        memset(cmd_hist[i], 0, SHELL_BUF_MAX);
     }
     cmd_index = 0;
 
