@@ -87,7 +87,7 @@ void *malloc(uint32_t size) {
 
     size += sizeof(alloc_header_t);
 
-    if(size > __UINT16_MAX__*MM_GRAINS_PER_BLOCK)
+    if(size > UINT16_MAX*MM_GRAINS_PER_BLOCK)
         return NULL;
 
     grains = size + MM_GRAIN_SIZE - 1;
@@ -106,7 +106,7 @@ void *kmalloc(uint32_t size) {
 
     size += sizeof(alloc_header_t);
 
-    if(size > __UINT16_MAX__*MM_GRAINS_PER_BLOCK)
+    if(size > UINT16_MAX*MM_GRAINS_PER_BLOCK)
         return NULL;
 
     grains = size + MM_GRAIN_SIZE - 1;
