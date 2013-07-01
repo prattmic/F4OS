@@ -238,6 +238,7 @@
 #define RCC_CR_PLLI2SON                 (uint32_t) (1 << 26)                                    /* PLLI2S enable */
 #define RCC_CR_PLLI2SRDY                (uint32_t) (1 << 27)                                    /* PLLI2S clock ready */
 
+#define RCC_PLLCFGR_RESET               (uint32_t) (0x24003010)                                 /* PLLCFGR register reset value */
 #define RCC_PLLCFGR_PLLSRC_HSE          (uint32_t) (1 << 22)                                    /* HSE oscillator selected as clock entry */
 
 #define RCC_CFGR_SW_M                   (uint32_t) (3 << 0)                                     /* System clock switch mask */

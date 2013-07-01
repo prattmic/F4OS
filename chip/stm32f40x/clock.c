@@ -3,7 +3,7 @@
 #include <dev/cortex_m.h>
 #include <kernel/fault.h>
 
-#define HSE_STARTUP_TIMEOUT     (uint16_t) (0x0500)         /* Time out for HSE start up */
+#define HSE_STARTUP_TIMEOUT (0x0500)         /* Time out for HSE start up */
 /* PLL Options - See RM0090 Reference Manual pg. 95 */
 /* We set PLL_M to the board's defined oscillator frequency */
 #define PLL_M      CONFIG_STM32_OSC_FREQ   /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */
@@ -14,19 +14,19 @@
 void clock(void) {
     /********* Reset clock registers ************/
     /* Set HSION bit */
-    *RCC_CR |= (uint32_t)0x00000001;
+    *RCC_CR |= RCC_CR_HSION;
 
     /* Reset CFGR register */
     *RCC_CFGR = 0x00000000;
 
     /* Reset HSEON, CSSON and PLLON bits */
-    *RCC_CR &= (uint32_t)0xFEF6FFFF;
+    *RCC_CR &= ~(RCC_CR_HSEON | RCC_CR_CSSON | RCC_CR_PLLON);
 
     /* Reset PLLCFGR register */
-    *RCC_PLLCFGR = 0x24003010;
+    *RCC_PLLCFGR = RCC_PLLCFGR_RESET;
 
     /* Reset HSEBYP bit */
-    *RCC_CR &= (uint32_t)0xFFFBFFFF;
+    *RCC_CR &= ~(RCC_CR_HSEBYP);
 
     /* Disable all interrupts */
     *RCC_CIR = 0x00000000;
@@ -45,13 +45,13 @@ void clock(void) {
     } while((HSE_status == 0) && (startup_count != HSE_STARTUP_TIMEOUT));
 
     if ((*RCC_CR & RCC_CR_HSERDY) != 0) {
-        HSE_status = (uint32_t)0x01;
+        HSE_status = 0x01;
     }
     else {
-        HSE_status = (uint32_t)0x00;
+        HSE_status = 0x00;
     }
 
-    if (HSE_status == (uint32_t)0x01) {
+    if (HSE_status == 0x01) {
         /* Enable high performance mode, System frequency up to 168 MHz */
         *RCC_APB1ENR |= RCC_APB1ENR_PWREN;
         *PWR_CR |= PWR_CR_VOS;
@@ -74,8 +74,7 @@ void clock(void) {
         *RCC_CR |= RCC_CR_PLLON;
 
         /* Wait till the main PLL is ready */
-        while((*RCC_CR & RCC_CR_PLLRDY) == 0) {
-        }
+        while((*RCC_CR & RCC_CR_PLLRDY) == 0);
 
         /* Configure Flash prefetch, Instruction cache, Data cache and wait state */
         //*FLASH_ACR = FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_LATENCY_5WS;
