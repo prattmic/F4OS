@@ -11,9 +11,9 @@ uint64_t begin_malloc_timestamp, end_malloc_timestamp;
 
 static void *alloc(uint8_t order, struct buddy *buddy) __attribute__((section(".kernel")));
 static struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) __attribute__((section(".kernel")));
-static uint8_t size_to_order(uint32_t size) __attribute__((section(".kernel")));
+static uint8_t size_to_order(size_t size) __attribute__((section(".kernel")));
 
-void *malloc(uint32_t size) {
+void *malloc(size_t size) {
     if(size > MM_MAX_USER_SIZE)
         return NULL;
 
@@ -37,7 +37,7 @@ void *malloc(uint32_t size) {
     return address;
 }
 
-void *kmalloc(uint32_t size) {
+void *kmalloc(size_t size) {
     if(size > MM_MAX_KERNEL_SIZE)
         return NULL;
 
@@ -125,7 +125,7 @@ static struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) 
     return node;
 }
 
-static uint8_t size_to_order(uint32_t size) {
+static uint8_t size_to_order(size_t size) {
     uint8_t order = 0;
 
     /* If size isn't a power of two, round up */

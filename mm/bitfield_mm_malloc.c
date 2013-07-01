@@ -78,7 +78,7 @@ out:
     return ret;
 }
 
-void *malloc(uint32_t size) {
+void *malloc(size_t size) {
     uint16_t grains;
     void *mem;
 
@@ -97,7 +97,7 @@ void *malloc(uint32_t size) {
     return mem;
 }
 
-void *kmalloc(uint32_t size) {
+void *kmalloc(size_t size) {
     uint16_t grains;
     void *mem;
 
