@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <mm/mm.h>
 #include "test.h"
+#include <limits.h>
 
 int malloc_simple(char *message, int len) {
     void *mem = malloc(1024);
@@ -63,3 +64,27 @@ int kmalloc_range(char *message, int len) {
     return PASSED;
 }
 DEFINE_TEST("kmalloc range", kmalloc_range);
+
+int malloc_toobig(char *message, int len) {
+    void *mem = malloc(UINT_MAX);
+    if(mem) {
+        scnprintf(message, len, "Malloc of too much memory did not return NULL");
+        free(mem);  /* wat */
+        return FAILED;
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("malloc too big", malloc_toobig);
+
+int kmalloc_toobig(char *message, int len) {
+    void *mem = kmalloc(UINT_MAX);
+    if(mem) {
+        scnprintf(message, len, "Malloc of too much memory did not return NULL");
+        kfree(mem);  /* wat */
+        return FAILED;
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("kmalloc too big", kmalloc_toobig);
