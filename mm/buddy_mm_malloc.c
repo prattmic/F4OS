@@ -14,6 +14,9 @@ static struct heapnode *buddy_split(struct heapnode *node, struct buddy *buddy) 
 static uint8_t size_to_order(uint32_t size) __attribute__((section(".kernel")));
 
 void *malloc(uint32_t size) {
+    if(size > MM_MAX_USER_SIZE)
+        return NULL;
+
     uint8_t order = size_to_order(size + MM_HEADER_SIZE);
     void *address;
 
@@ -35,6 +38,9 @@ void *malloc(uint32_t size) {
 }
 
 void *kmalloc(uint32_t size) {
+    if(size > MM_MAX_KERNEL_SIZE)
+        return NULL;
+
     uint8_t order = size_to_order(size + MM_HEADER_SIZE);
     void *address;
 

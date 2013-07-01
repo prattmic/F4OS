@@ -82,6 +82,9 @@ void *malloc(uint32_t size) {
     uint16_t grains;
     void *mem;
 
+    if(size > MM_MAX_USER_SIZE)
+        return NULL;
+
     size += sizeof(alloc_header_t);
 
     if(size > __UINT16_MAX__*MM_GRAINS_PER_BLOCK)
@@ -97,6 +100,9 @@ void *malloc(uint32_t size) {
 void *kmalloc(uint32_t size) {
     uint16_t grains;
     void *mem;
+
+    if(size > MM_MAX_KERNEL_SIZE)
+        return NULL;
 
     size += sizeof(alloc_header_t);
 

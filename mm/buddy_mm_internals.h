@@ -24,7 +24,9 @@ struct buddy {
     struct heapnode **list;
 };
 
-#define MM_HEADER_SIZE   sizeof(struct heapnode_header)
+#define MM_HEADER_SIZE      sizeof(struct heapnode_header)
+#define MM_MAX_USER_SIZE    (CONFIG_EUSERHEAP - CONFIG_SUSERHEAP)
+#define MM_MAX_KERNEL_SIZE  (CONFIG_EKERNELHEAP - CONFIG_SKERNELHEAP)
 
 extern struct buddy user_buddy;
 extern struct heapnode *user_buddy_list[];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
