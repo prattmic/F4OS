@@ -43,7 +43,7 @@ void buddy_merge(struct heapnode *node, struct buddy *buddy) {
     /* Our buddy node covers the other half of this order of memory,
      * thus it will have the order bit in the opposite state of ours.
      * Note: this is not necessarily free */
-    struct heapnode *buddy_node = (struct heapnode *) ((uint32_t) node ^ (1 << order));
+    struct heapnode *buddy_node = (struct heapnode *) ((uintptr_t) node ^ (1 << order));
     struct heapnode *curr_node = buddy->list[order];
     struct heapnode *prev_node = NULL;
 

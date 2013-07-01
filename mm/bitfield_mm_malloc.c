@@ -74,7 +74,7 @@ out:
     header = (alloc_header_t *)ret;
     header->magic = MM_MAGIC;
     header->grains = grains + MM_GRAINS_PER_BLOCK*blocks_needed;
-    ret = (void *)((uint32_t)ret + sizeof(alloc_header_t)); /* No arithmetic on void pointer... */
+    ret = (void *)((uintptr_t)ret + sizeof(alloc_header_t)); /* No arithmetic on void pointer... */
     return ret;
 }
 

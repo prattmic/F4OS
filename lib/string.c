@@ -6,10 +6,10 @@
 
 /* Set size bytes to value from p */
 void memset32(void *p, int32_t value, uint32_t size) {
-    uint32_t *end = (uint32_t *) ((uint32_t) p + size);
+    uint32_t *end = (uint32_t *) ((uintptr_t) p + size);
 
     /* Disallowed unaligned addresses */
-    if ( (uint32_t) p % 4 ) {
+    if ( (uintptr_t) p % 4 ) {
         panic_print("Attempt to memset unaligned address (0x%x).", p);
     }
 
@@ -21,7 +21,7 @@ void memset32(void *p, int32_t value, uint32_t size) {
 
 /* Set size bytes to value from p */
 void memset(void *p, uint8_t value, uint32_t size) {
-    uint8_t *end = (uint8_t *) ((uint32_t) p + size);
+    uint8_t *end = (uint8_t *) ((uintptr_t) p + size);
 
     while ( (uint8_t*) p < end ) {
         *((uint8_t*)p) = value;

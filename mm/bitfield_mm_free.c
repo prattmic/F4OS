@@ -6,7 +6,7 @@
 #include "bitfield_mm_internals.h"
 
 static void free_mem(void *mem, mm_block_t *heap, void *base, struct semaphore *mutex) {
-    alloc_header_t *header = (alloc_header_t *)((uint32_t)mem - sizeof(alloc_header_t));
+    alloc_header_t *header = (alloc_header_t *)((uintptr_t)mem - sizeof(alloc_header_t));
 
     if(header->magic != MM_MAGIC)
         panic_print("Attempt to free corrupted or invalid heap object");

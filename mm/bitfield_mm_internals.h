@@ -32,7 +32,7 @@ extern struct semaphore kernelheap_mutex;
 
 /* Returns value to left shift mask by to look at freemask */
 static inline uint32_t addr_to_grain_offset(void *addr, void *base) {
-    return (((uint32_t)addr - (uint32_t)base)%MM_BLOCK_SIZE)/MM_GRAIN_SIZE;
+    return (((uintptr_t)addr - (uintptr_t)base)%MM_BLOCK_SIZE)/MM_GRAIN_SIZE;
 }
 
 /* Returns whether or not space for mask is free in a freemask */
@@ -42,10 +42,10 @@ static inline int is_free(uint32_t field, uint32_t mask) {
 
 /* Returns block index given address */
 static inline uint32_t addr_to_block(void *addr, void *base) {
-    return ((uint32_t)addr - (uint32_t)base)/MM_BLOCK_SIZE;
+    return ((uintptr_t)addr - (uintptr_t)base)/MM_BLOCK_SIZE;
 }
 
 /* Returns address of allocation to return */
 static inline void *to_addr(uint32_t idx, uint32_t grain_offset, void *base) {
-    return (void *)((uint32_t)base + idx*MM_BLOCK_SIZE + grain_offset*MM_GRAIN_SIZE);
+    return (void *)((uintptr_t)base + idx*MM_BLOCK_SIZE + grain_offset*MM_GRAIN_SIZE);
 }
