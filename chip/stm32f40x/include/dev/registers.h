@@ -15,23 +15,33 @@
 /* Peripheral Map */
 #define PERIPH_BASE                     (uint32_t) (0x40000000)                                 /* Peripheral base address */
 #define PRIV_PERIPH_BASE                (uint32_t) (0xED000000)                                 /* Private peripheral base address */
-#define APB1PERIPH_BASE                 (PERIPH_BASE)
-#define APB2PERIPH_BASE                 (PERIPH_BASE + 0x00010000)
-#define AHB1PERIPH_BASE                 (PERIPH_BASE + 0x00020000)
 #define AHB2PERIPH_BASE                 (PERIPH_BASE + 0x10000000)
-
-#define TIM1_BASE                       (APB2PERIPH_BASE + 0x0000)
-
-#define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
+#define AHB1PERIPH_BASE                 (PERIPH_BASE + 0x00020000)
+#define APB2PERIPH_BASE                 (PERIPH_BASE + 0x00010000)
+#define APB1PERIPH_BASE                 (PERIPH_BASE)
+#define INVALID_PERIPH_BASE             (uint32_t) (0x0)                                        /* Placeholder for illegal peripherals */
+/* AHB2 Peripherals */
+#define USB_FS_BASE                     (AHB2PERIPH_BASE + 0x0000)                              /* USB OTG FS base address */
+/* AHB1 Peripherals */
+#define DMA2_BASE                       (AHB1PERIPH_BASE + 0x6400)                              /* DMA2 base address */
+#define DMA1_BASE                       (AHB1PERIPH_BASE + 0x6000)                              /* DMA1 base address */
+#define FLASH_R_BASE                    (AHB1PERIPH_BASE + 0x3C00)                              /* Flash registers base address */
+#define RCC_BASE                        (AHB1PERIPH_BASE + 0x3800)                              /* Reset and Clock Control base address */
+#define GPIO_BASE(port)                 (AHB1PERIPH_BASE + (0x400*port))                        /* GPIO Port base address */
+/* APB1 Peripherals */
+#define UART8_BASE                      (APB1PERIPH_BASE + 0x7C00)                              /* UART8 Base Address */
+#define UART7_BASE                      (APB1PERIPH_BASE + 0x7800)                              /* UART7 Base Address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
 #define I2C_BASE(port)                  (APB1PERIPH_BASE + 0x5400 + (0x400*(port-1)))           /* I2C (1,2,3) base address */
+#define UART5_BASE                      (APB1PERIPH_BASE + 0x5000)                              /* UART5 Base Address */
+#define UART4_BASE                      (APB1PERIPH_BASE + 0x4C00)                              /* UART4 Base Address */
+#define USART3_BASE                     (APB2PERIPH_BASE + 0x4800)                              /* USART3 Base Address */
+#define USART2_BASE                     (APB2PERIPH_BASE + 0x4400)                              /* USART2 Base Address */
+#define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
+/* APB2 Peripherals */
+#define USART6_BASE                     (APB2PERIPH_BASE + 0x1400)                              /* USART6 Base Address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                              /* USART1 Base Address */
-#define GPIO_BASE(port)                 (AHB1PERIPH_BASE + (0x400*port))                        /* GPIO Port base address */
-#define RCC_BASE                        (AHB1PERIPH_BASE + 0x3800)                              /* Reset and Clock Control base address */
-#define FLASH_R_BASE                    (AHB1PERIPH_BASE + 0x3C00)                              /* Flash registers base address */
-#define DMA1_BASE                       (AHB1PERIPH_BASE + 0x6000)                              /* DMA1 base address */
-#define DMA2_BASE                       (AHB1PERIPH_BASE + 0x6400)                              /* DMA2 base address */
-#define USB_FS_BASE                     (AHB2PERIPH_BASE + 0x0000)                              /* USB OTG FS base address */
+#define TIM1_BASE                       (APB2PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 
 /* SPI 1 is on a different bus than SPI 2/3, so we have to do a little more work to determine the correct base address */
 #define SPI_BASE(port)                  (port == 1 ? (APB2PERIPH_BASE + 0x3000) : (APB1PERIPH_BASE + 0x3800 + 0x400*(port-2))) /* SPI (1,2,3) base address */
@@ -101,15 +111,6 @@
 #define I2C_SR2(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x18)           /* I2C status register 2 */
 #define I2C_CCR(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x1C)           /* I2C clock control register */
 #define I2C_TRISE(port)                 (volatile uint32_t *) (I2C_BASE(port) + 0x20)           /* I2C TRISE register */
-
-/* USART 1 */
-#define USART1_SR                       (volatile uint32_t *) (USART1_BASE + 0x00)              /* USART1 status register */
-#define USART1_DR                       (volatile uint32_t *) (USART1_BASE + 0x04)              /* USART1 data register */
-#define USART1_BRR                      (volatile uint32_t *) (USART1_BASE + 0x08)              /* USART1 baud rate register */
-#define USART1_CR1                      (volatile uint32_t *) (USART1_BASE + 0x0C)              /* USART1 control register 1 */
-#define USART1_CR2                      (volatile uint32_t *) (USART1_BASE + 0x10)              /* USART1 control register 2 */
-#define USART1_CR3                      (volatile uint32_t *) (USART1_BASE + 0x14)              /* USART1 control register 3 */
-#define USART1_GTPR                     (volatile uint32_t *) (USART1_BASE + 0x18)              /* USART1 gaurd time and prescale register */
 
 /* GPIO Port (GPIO) */
 #define GPIO_MODER(port)                (volatile uint32_t *) (GPIO_BASE(port) + 0x00)          /* Port mode register */
@@ -324,7 +325,7 @@
 #define RCC_APB2RSTR_TIM1RST            (uint32_t) (1 << 0)                                     /* TIM1 reset */
 #define RCC_APB2RSTR_TIM8RST            (uint32_t) (1 << 1)                                     /* TIM8 reset */
 #define RCC_APB2RSTR_USART1RST          (uint32_t) (1 << 4)                                     /* USART1 reset */
-#define RCC_APB2RSTR_USART2RST          (uint32_t) (1 << 5)                                     /* USART2 reset */
+#define RCC_APB2RSTR_USART6RST          (uint32_t) (1 << 5)                                     /* USART6 reset */
 #define RCC_APB2RSTR_ADCRST             (uint32_t) (1 << 8)                                     /* ADC1 reset */
 #define RCC_APB2RSTR_SDIORST            (uint32_t) (1 << 11)                                    /* SDIO reset */
 #define RCC_APB2RSTR_SPI1RST            (uint32_t) (1 << 12)                                    /* SPI1 reset */
@@ -389,7 +390,7 @@
 #define RCC_APB2ENR_TIM1EN              (uint32_t) (1 << 0)                                     /* TIM1 clock enable */
 #define RCC_APB2ENR_TIM8EN              (uint32_t) (1 << 1)                                     /* TIM8 clock enable */
 #define RCC_APB2ENR_USART1EN            (uint32_t) (1 << 4)                                     /* USART1 clock enable */
-#define RCC_APB2ENR_USART2EN            (uint32_t) (1 << 5)                                     /* USART2 clock enable */
+#define RCC_APB2ENR_USART6EN            (uint32_t) (1 << 5)                                     /* USART6 clock enable */
 #define RCC_APB2ENR_ADC1EN              (uint32_t) (1 << 8)                                     /* ADC1 clock enable */
 #define RCC_APB2ENR_ADC2EN              (uint32_t) (1 << 9)                                     /* ADC2 clock enable */
 #define RCC_APB2ENR_ADC3EN              (uint32_t) (1 << 10)                                    /* ADC3 clock enable */
@@ -533,14 +534,7 @@
 #define I2C_CCR_FS                      (uint32_t) (1 << 15)                                    /* I2C master mode selection */
 
 /* USART */
-#define USART_SR_TC                     (uint32_t) (1 << 6)                                     /* USART Transmission Complete */
-#define USART_SR_RXNE                   (uint32_t) (1 << 5)                                     /* USART Read data register not empty */
-#define USART_CR1_UE                    (uint32_t) (1 << 13)                                    /* USART Enable */
-#define USART_CR1_RXNEIE                (uint32_t) (1 << 5)                                     /* RXNE Interrupt Enable */
-#define USART_CR1_TE                    (uint32_t) (1 << 3)                                     /* USART Transmit Enable */
-#define USART_CR1_RE                    (uint32_t) (1 << 2)                                     /* USART Receive Enable */
-#define USART_CR3_DMAR_EN               (uint32_t) (1 << 6)                                     /* USART DMA Receive Enable */
-#define USART_CR3_DMAT_EN               (uint32_t) (1 << 7)                                     /* USART DMA Transmit Enable */
+#include "usart.h"
 
 /* GPIO */
 #define GPIOA                           (uint8_t)  (0)                                          /* GPIO Port A */

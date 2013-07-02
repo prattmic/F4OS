@@ -41,6 +41,8 @@ char *usart_tx_buf;
 uint8_t usart_ready = 0;
 
 void init_usart(void) {
+    usart_t *usart1 = get_usart(1);
+
     *RCC_APB2ENR |= RCC_APB2ENR_USART1EN;  /* Enable USART1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;   /* Enable GPIOB Clock */
 
@@ -62,18 +64,18 @@ void init_usart(void) {
     gpio_ospeedr(GPIOB, 7, GPIO_OSPEEDR_50M);
 
     /* Enable USART1 */
-    *USART1_CR1 |= USART_CR1_UE;
+    usart1->CR1 |= USART_CR1_UE;
 
     /* 8 data bits */
-    *USART1_CR1 &= ~(1 << 12);
+    usart1->CR1 &= ~(1 << 12);
 
     /* 1 stop bit */
-    *USART1_CR2 &= ~(3 << 12);
+    usart1->CR2 &= ~(3 << 12);
 
     /** DMA set up **/
     /* DMA2, Stream 2, Channel 4 is USART1_RX
      * DMA2, Stream 7, Channel 4 is USART1_TX */
-    *USART1_CR3 |= USART_CR3_DMAR_EN | USART_CR3_DMAT_EN;
+    usart1->CR3 |= USART_CR3_DMAR | USART_CR3_DMAT;
 
     /* Enable DMA2 clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_DMA2EN;
@@ -89,8 +91,8 @@ void init_usart(void) {
     *DMA2_CR_S(7) |= DMA_SxCR_CHSEL(4);
 
     /* Peripheral address - Both use USART data register */
-    *DMA2_PAR_S(2) = (uint32_t) USART1_DR;    /* RX */
-    *DMA2_PAR_S(7) = (uint32_t) USART1_DR;    /* TX */
+    *DMA2_PAR_S(2) = (uint32_t) &usart1->DR;    /* RX */
+    *DMA2_PAR_S(7) = (uint32_t) &usart1->DR;    /* TX */
 
     /*
      * Allocate buffer memory.
@@ -129,11 +131,11 @@ void init_usart(void) {
     /** DMA End **/
 
     /* Set baud rate */
-    *USART1_BRR = usart_baud(115200);
+    usart1->BRR = usart_baud(115200);
 
     /* Enable reciever and transmitter */
-    *USART1_CR1 |= USART_CR1_RE;
-    *USART1_CR1 |= USART_CR1_TE;
+    usart1->CR1 |= USART_CR1_RE;
+    usart1->CR1 |= USART_CR1_TE;
 
     usart_ready = 1;
 }
