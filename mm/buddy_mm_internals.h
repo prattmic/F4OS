@@ -29,7 +29,7 @@ struct buddy {
 #define MM_MAX_KERNEL_SIZE  (CONFIG_EKERNELHEAP - CONFIG_SKERNELHEAP)
 
 extern struct buddy user_buddy;
-extern struct heapnode *user_buddy_list[];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
+extern struct heapnode *user_buddy_list[];
 
 extern struct buddy kernel_buddy;
 extern struct heapnode *kernel_buddy_list[];

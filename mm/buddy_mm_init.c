@@ -9,7 +9,8 @@ extern void *_skernelheap;
 extern void *_ekernelheap;
 
 struct buddy user_buddy;
-struct heapnode *user_buddy_list[CONFIG_MM_USER_MAX_ORDER+1];       /* Top is buddy_list[17], for locations 2^17 (128kb) in size */
+/* Use one extra word so that we index with order directly, instead of order-1 */
+struct heapnode *user_buddy_list[CONFIG_MM_USER_MAX_ORDER+1];
 
 struct buddy kernel_buddy;
 struct heapnode *kernel_buddy_list[CONFIG_MM_KERNEL_MAX_ORDER+1];
