@@ -1,5 +1,5 @@
-#ifndef MM_INTERNALS_INCLUDED
-#define MM_INTERNALS_INCLUDED
+#ifndef MM_BUDDY_MM_INTERNALS_INCLUDED
+#define MM_BUDDY_MM_INTERNALS_INCLUDED
 
 #include <kernel/semaphore.h>
 
