@@ -1,3 +1,6 @@
+#ifndef MM_BITFIELD_MM_INTERNALS_H_INCLUDED
+#define MM_BITFIELD_MM_INTERNALS_H_INCLUDED
+
 extern uint32_t _suserheap;
 extern uint32_t _euserheap;
 extern uint32_t _skernelheap;
@@ -49,3 +52,5 @@ static inline uint32_t addr_to_block(void *addr, void *base) {
 static inline void *to_addr(uint32_t idx, uint32_t grain_offset, void *base) {
     return (void *)((uintptr_t)base + idx*MM_BLOCK_SIZE + grain_offset*MM_GRAIN_SIZE);
 }
+
+#endif
