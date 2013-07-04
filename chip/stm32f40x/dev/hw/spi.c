@@ -14,13 +14,15 @@ static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive
 
 struct spi_port spi1 = {
     .ready = 0,
-    .port = 1,
+    .regs = NULL,
     .init = &init_spi1
 };
 
 struct semaphore spi1_semaphore = INIT_SEMAPHORE;
 
 void init_spi1(void) {
+    spi1.regs = get_spi(1);
+
     *RCC_APB2ENR |= RCC_APB2ENR_SPI1EN;     /* Enable SPI1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOAEN;    /* Enable GPIOA Clock */
 
@@ -49,9 +51,9 @@ void init_spi1(void) {
     gpio_ospeedr(GPIOA, 7, GPIO_OSPEEDR_50M);
 
     /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
-    *SPI_CR1(1) |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
+    spi1.regs->CR1 |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
 
-    *SPI_CR1(1) |= SPI_CR1_SPE;
+    spi1.regs->CR1 |= SPI_CR1_SPE;
 
     init_semaphore(&spi1_semaphore);
 
@@ -77,30 +79,30 @@ static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive
 
     /* Transmit data */
     count = 10000;
-    while (!(*SPI_SR(spi->port) & SPI_SR_TXNE)) {
+    while (!(spi->regs->SR & SPI_SR_TXNE)) {
         if (!count--) {
             return -1;
         }
     }
-    *SPI_DR(spi->port) = send;
+    spi->regs->DR = send;
 
     /* Wait for response
      * Note: this "response" was transmitted while we were
      * transmitting the data above, it is not the device's response to that request. */
     count = 10000;
-    while (!(*SPI_SR(spi->port) & SPI_SR_RXNE)) {
+    while (!(spi->regs->SR & SPI_SR_RXNE)) {
         if (!count--) {
             return -1;
         }
     }
-    *data = *SPI_DR(spi->port);
+    *data = spi->regs->DR;
 
     return 0;
 }
 
 int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) {
-    /* Verify valid SPI port */
-    if (!spi || !spi->ready || spi->port < 1 || spi->port > 3) {
+    /* Verify valid SPI */
+    if (!spi || !spi->ready) {
         return -1;
     }
 
@@ -122,9 +124,9 @@ int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *
     /* Data MUST be read after each TX */
 
     /* Clear overrun by reading old data */
-    if (*SPI_SR(spi->port) & SPI_SR_OVR) {
-        READ_AND_DISCARD(SPI_DR(spi->port));
-        READ_AND_DISCARD(SPI_SR(spi->port));
+    if (spi->regs->SR & SPI_SR_OVR) {
+        READ_AND_DISCARD(&spi->regs->DR);
+        READ_AND_DISCARD(&spi->regs->SR);
     }
 
     dev->cs_low();
@@ -154,7 +156,7 @@ fail:
 
 int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) {
     /* Verify valid SPI port */
-    if (!spi || !spi->ready || spi->port < 1 || spi->port > 3) {
+    if (!spi || !spi->ready) {
         return -1;
     }
 
@@ -176,9 +178,9 @@ int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *d
     /* Data MUST be read after each TX */
 
     /* Clear overrun by reading old data */
-    if (*SPI_SR(spi->port) & SPI_SR_OVR) {
-        READ_AND_DISCARD(SPI_DR(spi->port));
-        READ_AND_DISCARD(SPI_SR(spi->port));
+    if (spi->regs->SR & SPI_SR_OVR) {
+        READ_AND_DISCARD(&spi->regs->DR);
+        READ_AND_DISCARD(&spi->regs->SR);
     }
 
     dev->cs_low();

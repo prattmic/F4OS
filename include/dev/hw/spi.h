@@ -5,10 +5,12 @@ struct semaphore;
 
 extern struct semaphore spi1_semaphore;
 
+struct spi;
+
 struct spi_port {
-    uint8_t ready;
-    uint8_t port;
-    void    (*init)(void);
+    uint8_t     ready;
+    struct spi  *regs;
+    void        (*init)(void);
 } spi_port;
 
 struct spi_dev {

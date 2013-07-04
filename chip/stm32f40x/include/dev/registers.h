@@ -37,8 +37,14 @@
 #define UART4_BASE                      (APB1PERIPH_BASE + 0x4C00)                              /* UART4 Base Address */
 #define USART3_BASE                     (APB1PERIPH_BASE + 0x4800)                              /* USART3 Base Address */
 #define USART2_BASE                     (APB1PERIPH_BASE + 0x4400)                              /* USART2 Base Address */
+#define SPI3_BASE                       (APB1PERIPH_BASE + 0x3C00)                              /* SPI3 Base Address */
+#define SPI2_BASE                       (APB1PERIPH_BASE + 0x3800)                              /* SPI2 Base Address */
 #define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 /* APB2 Peripherals */
+#define SPI6_BASE                       (APB2PERIPH_BASE + 0x5400)                              /* SPI6 Base Address */
+#define SPI5_BASE                       (APB2PERIPH_BASE + 0x5000)                              /* SPI5 Base Address */
+#define SPI4_BASE                       (APB2PERIPH_BASE + 0x3400)                              /* SPI4 Base Address */
+#define SPI1_BASE                       (APB2PERIPH_BASE + 0x3000)                              /* SPI1 Base Address */
 #define USART6_BASE                     (APB2PERIPH_BASE + 0x1400)                              /* USART6 Base Address */
 #define USART1_BASE                     (APB2PERIPH_BASE + 0x1000)                              /* USART1 Base Address */
 #define TIM1_BASE                       (APB2PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
@@ -449,31 +455,7 @@
 #define TIMx_DIER_TDE                   (uint32_t) (1 << 14)                                    /* TIMx trigger DMA request enable */
 
 /* SPI */
-#define SPI_CR1_CPHA                    (uint32_t) (1 << 0)                                     /* SPI clock phase */
-#define SPI_CR1_CPOL                    (uint32_t) (1 << 1)                                     /* SPI clock polarity */
-#define SPI_CR1_MSTR                    (uint32_t) (1 << 2)                                     /* SPI master selection */
-#define SPI_CR1_BR_2                    (uint32_t) (0 << 3)                                     /* SPI baud rate = fPCLK/2 */
-#define SPI_CR1_BR_4                    (uint32_t) (1 << 3)                                     /* SPI baud rate = fPCLK/4 */
-#define SPI_CR1_BR_8                    (uint32_t) (2 << 3)                                     /* SPI baud rate = fPCLK/8 */
-#define SPI_CR1_BR_16                   (uint32_t) (3 << 3)                                     /* SPI baud rate = fPCLK/16 */
-#define SPI_CR1_BR_32                   (uint32_t) (4 << 3)                                     /* SPI baud rate = fPCLK/32 */
-#define SPI_CR1_BR_64                   (uint32_t) (5 << 3)                                     /* SPI baud rate = fPCLK/64 */
-#define SPI_CR1_BR_128                  (uint32_t) (6 << 3)                                     /* SPI baud rate = fPCLK/128 */
-#define SPI_CR1_BR_256                  (uint32_t) (7 << 3)                                     /* SPI baud rate = fPCLK/256 */
-#define SPI_CR1_SPE                     (uint32_t) (1 << 6)                                     /* SPI enable */
-#define SPI_CR1_LSBFIRST                (uint32_t) (1 << 7)                                     /* SPI LSB transmitted first */
-#define SPI_CR1_SSI                     (uint32_t) (1 << 8)                                     /* SPI internal slave select */
-#define SPI_CR1_SSM                     (uint32_t) (1 << 9)                                     /* SPI software slave management */
-#define SPI_CR1_DFF                     (uint32_t) (1 << 11)                                    /* SPI data frame format (0 = 8bit, 1 = 16bit) */
-#define SPI_SR_RXNE                     (uint32_t) (1 << 0)                                     /* SPI receive not empty */
-#define SPI_SR_TXNE                     (uint32_t) (1 << 1)                                     /* SPI transmit not empty */
-#define SPI_SR_CHSIDE                   (uint32_t) (1 << 2)                                     /* SPI channel side */
-#define SPI_SR_UDR                      (uint32_t) (1 << 3)                                     /* SPI underrun flag */
-#define SPI_SR_CRCERR                   (uint32_t) (1 << 4)                                     /* SPI CRC error flag */
-#define SPI_SR_MODF                     (uint32_t) (1 << 5)                                     /* SPI mode fault */
-#define SPI_SR_OVR                      (uint32_t) (1 << 6)                                     /* SPI overrun flag */
-#define SPI_SR_BSY                      (uint32_t) (1 << 7)                                     /* SPI busy flag */
-#define SPI_SR_TIRFE                    (uint32_t) (1 << 8)                                     /* SPI TI frame format error */
+#include <dev/hw/spi_regs.h>
 
 /* I2C */
 #define I2C_CR1_PE                      (uint32_t) (1 << 0)                                     /* I2C peripheral enable */
