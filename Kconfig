@@ -1,6 +1,6 @@
 mainmenu "F4OS Configuration"
 
-source chip/Kconfig
+source arch/Kconfig
 
 menu "Drivers"
 source dev/Kconfig

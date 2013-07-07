@@ -12,16 +12,18 @@ USR ?= shell
 -include $(BASE)/.config
 
 # The quotes from Kconfig are annoying
+CONFIG_ARCH := $(shell echo $(CONFIG_ARCH))
 CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
 
-LINK_SCRIPT = chip/$(CONFIG_CHIP)/link.ld
+LINK_SCRIPT = arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/link.ld
 
 CROSS_COMPILE ?= arm-none-eabi-
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 
-CFLAGS += -g3 -Wall --std=gnu99 -isystem $(BASE)/include/ -isystem $(BASE)/chip/$(CONFIG_CHIP)/include/ -include $(BASE)/include/config/autoconf.h
+CFLAGS += -g3 -Wall --std=gnu99 -include $(BASE)/include/config/autoconf.h
+CFLAGS += -isystem $(BASE)/include/ -isystem $(BASE)/arch/$(CONFIG_ARCH)/include/ -isystem $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/include/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
@@ -55,7 +57,7 @@ again: clean all
 
 # Flash the board
 burn:
-	$(MAKE) -C chip/$(CONFIG_CHIP)/ burn
+	$(MAKE) -C arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/ burn
 
 # Create tags
 ctags:

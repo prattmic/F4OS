@@ -39,10 +39,10 @@ config SYS_CLOCK
         Note: This must be set to the value configured by the chip clock function
 
 if CHIP_STM32F40X
-source chip/stm32f40x/Kconfig
+source arch/armv7m/chip/stm32f40x/Kconfig
 endif
 
 if CHIP_LM4F120H5
-source chip/lm4f120h5/Kconfig
+source arch/armv7m/chip/lm4f120h5/Kconfig
 endif
 endmenu

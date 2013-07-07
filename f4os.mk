@@ -1,5 +1,5 @@
 DIRS += boot/
-DIRS += chip/
+DIRS += arch/
 DIRS += dev/
 DIRS += kernel/
 DIRS += lib/

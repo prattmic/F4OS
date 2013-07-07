@@ -1,0 +1,18 @@
+choice
+    prompt "Architecture"
+    default ARCH_ARMV7M
+
+config ARCH_ARMV7M
+    bool "armv7"
+    ---help---
+        ARMv7-M microcontroller profile
+
+endchoice
+
+config ARCH
+    string
+    default "armv7m" if ARCH_ARMV7M
+
+if ARCH_ARMV7M
+source arch/armv7m/Kconfig
+endif
