@@ -22,9 +22,32 @@ struct spi_dev {
 extern struct spi_port spi1;
 
 /**
+ * Read and write data to and from SPI device.
+ *
+ * Read and write num bytes of data to SPI device dev on port spi,
+ * setting the device chip select automatically.
+ *
+ * Either read_data to write_data may be NULL, but if non-NULL, each
+ * must be able to store at least num bytes.
+ *
+ * read_data[i] will contain data read in the same clock that
+ * write_data[i] was written.
+ *
+ * @param spi           SPI port the device is connected to
+ * @param dev           SPI device to write to
+ * @param read_data     Buffer to write data read to
+ * @param write_data    Data to write
+ * @param num           Number of bytes of data to read/write
+ *
+ * @returns bytes read/written successfully, negative on error
+ */
+int spi_read_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *read_data, uint8_t *write_data, uint32_t num);
+
+/**
  * Write data to SPI device.
  *
- * Write num bytes of data to SPI device dev on port spi
+ * Write num bytes of data to SPI device dev on port spi, setting
+ * the device chip select automatically.
  *
  * @param spi   SPI port the device is connected to
  * @param dev   SPI device to write to
@@ -33,12 +56,15 @@ extern struct spi_port spi1;
  *
  * @returns bytes written successfully, negative on error
  */
-int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num);
+static inline int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num) {
+    return spi_read_write(spi, dev, NULL, data, num);
+}
 
 /**
  * Read data from SPI device.
  *
- * Read num bytes of data from SPI device dev on port spi
+ * Read num bytes of data from SPI device dev on port spi, setting
+ * the device chip select automatically.
  *
  * @param spi   SPI port the device is connected to
  * @param dev   SPI device to read from
@@ -47,7 +73,9 @@ int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t
  *
  * @returns bytes read into buffer, negative on error
  */
-int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num);
+static inline int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num) {
+    return spi_read_write(spi, dev, data, NULL, num);
+}
 
 /**
  * Begin extended SPI transaction

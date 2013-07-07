@@ -98,7 +98,7 @@ static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive
     return 0;
 }
 
-int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num) {
+int spi_read_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *read_data, uint8_t *write_data, uint32_t num) {
     /* Verify valid SPI */
     if (!spi || !spi->ready) {
         return -1;
@@ -113,11 +113,8 @@ int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t
         return 0;
     }
 
-    if (!data) {
-        return -1;
-    }
-
     uint32_t total = 0;
+    int ret;
 
     /* Data MUST be read after each TX */
 
@@ -132,73 +129,27 @@ int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t
     }
 
     while (num--) {
+        /* Handle NULL read_data and write_data */
+        uint8_t send = write_data ? *write_data++ : 0;
+        uint8_t *receive = read_data ? read_data++ : NULL;
+
         /* Transmit data */
-        if (spi_send_receive(spi, *data++, NULL)) {
-            goto fail;
+        if (spi_send_receive(spi, send, receive)) {
+            ret = -1;
+            goto out;
         }
 
         total += 1;
     }
 
+    ret = total;
+
+out:
     if (!dev->extended_transaction) {
         dev->cs_high();
     }
 
-    return total;
-
-fail:
-    return -1;
-}
-
-int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num) {
-    /* Verify valid SPI port */
-    if (!spi || !spi->ready) {
-        return -1;
-    }
-
-    /* Verify valid SPI device */
-    if (!dev || !dev->cs_high || !dev->cs_low) {
-        return -1;
-    }
-
-    if (num == 0) {
-        return 0;
-    }
-
-    if (!data) {
-        return -1;
-    }
-
-    uint32_t total = 0;
-
-    /* Data MUST be read after each TX */
-
-    /* Clear overrun by reading old data */
-    if (spi->regs->SR & SPI_SR_OVR) {
-        READ_AND_DISCARD(&spi->regs->DR);
-        READ_AND_DISCARD(&spi->regs->SR);
-    }
-
-    if (!dev->extended_transaction) {
-        dev->cs_low();
-    }
-
-    while (num--) {
-        if (spi_send_receive(spi, 0x00, data++)) {
-            goto fail;
-        }
-
-        total += 1;
-    }
-
-    if (!dev->extended_transaction) {
-        dev->cs_high();
-    }
-
-    return total;
-
-fail:
-    return -1;
+    return ret;
 }
 
 void spi_start_transaction(struct spi_port *spi, struct spi_dev *dev) {
