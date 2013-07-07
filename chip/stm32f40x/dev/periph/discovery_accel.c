@@ -17,6 +17,10 @@
  * will automatically increment for multi-byte reads/writes */
 #define ADDR_INC (1 << 6)
 
+/* When set in register addres, perform a read instead of write */
+#define SPI_READ    ((uint8_t) (1 << 7))
+
+
 typedef struct discovery_accel {
         struct spi_port *spi_port;
         struct spi_dev spi_dev;
@@ -72,12 +76,13 @@ rd_t open_discovery_accel(void) {
 
     accel->spi_dev.cs_high = &discovery_accel_cs_high;
     accel->spi_dev.cs_low = &discovery_accel_cs_low;
+    accel->spi_dev.extended_transaction = 0;
 
     acquire(&spi1_semaphore);
 
     /* Active mode, XYZ enable */
-    uint8_t data = 0x47;
-    if (spi_write(accel->spi_port, &accel->spi_dev, 0x20, &data, 1) != 1) {
+    uint8_t data[2] = {0x20, 0x47};
+    if (spi_write(accel->spi_port, &accel->spi_dev, data, 2) != 2) {
         /* Unable to activate :( */
         ret = -1;
         goto err_release_sem;
@@ -127,13 +132,21 @@ char discovery_accel_read(void *env, int *error) {
     discovery_accel *accel = (discovery_accel *)env;
 
     if (accel->read_ctr == 0) {
+        uint8_t addr = 0x29 | ADDR_INC | SPI_READ;
         uint8_t data[5];
-        if (spi_read(accel->spi_port, &accel->spi_dev, 0x29 | ADDR_INC, data, 5) != 5) {
-            if (error != NULL) {
-                *error = -1;
-            }
-            return 0;
+
+        spi_start_transaction(accel->spi_port, &accel->spi_dev);
+
+        /* Write start address */
+        if (spi_write(accel->spi_port, &accel->spi_dev, &addr, 1) != 1) {
+            goto spi_err;
         }
+        /* Read data */
+        if (spi_read(accel->spi_port, &accel->spi_dev, data, 5) != 5) {
+            goto spi_err;
+        }
+
+        spi_end_transaction(accel->spi_port, &accel->spi_dev);
 
         accel->data[0] = data[0];
         accel->data[1] = data[2];
@@ -147,6 +160,13 @@ char discovery_accel_read(void *env, int *error) {
     }
 
     return ret;
+
+spi_err:
+    spi_end_transaction(accel->spi_port, &accel->spi_dev);
+    if (error != NULL) {
+        *error = -1;
+    }
+    return 0;
 }
 
 int discovery_accel_write(char d, void *env) {

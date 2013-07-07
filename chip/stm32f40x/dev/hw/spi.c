@@ -7,8 +7,6 @@
 
 #include <dev/hw/spi.h>
 
-#define SPI_READ    (uint8_t) (1 << 7)
-
 void init_spi1(void) __attribute__((section(".kernel")));
 static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive) __attribute__((section(".kernel")));
 
@@ -100,7 +98,7 @@ static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive
     return 0;
 }
 
-int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) {
+int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num) {
     /* Verify valid SPI */
     if (!spi || !spi->ready) {
         return -1;
@@ -129,11 +127,8 @@ int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *
         READ_AND_DISCARD(&spi->regs->SR);
     }
 
-    dev->cs_low();
-
-    /* Transmit address */
-    if (spi_send_receive(spi, addr, NULL)) {
-        goto fail;
+    if (!dev->extended_transaction) {
+        dev->cs_low();
     }
 
     while (num--) {
@@ -145,16 +140,17 @@ int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *
         total += 1;
     }
 
-    dev->cs_high();
+    if (!dev->extended_transaction) {
+        dev->cs_high();
+    }
 
     return total;
 
 fail:
-    dev->cs_high();
     return -1;
 }
 
-int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *data, uint32_t num) {
+int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num) {
     /* Verify valid SPI port */
     if (!spi || !spi->ready) {
         return -1;
@@ -183,11 +179,8 @@ int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *d
         READ_AND_DISCARD(&spi->regs->SR);
     }
 
-    dev->cs_low();
-
-    /* Transmit address */
-    if (spi_send_receive(spi, addr | SPI_READ, NULL)) {
-        goto fail;
+    if (!dev->extended_transaction) {
+        dev->cs_low();
     }
 
     while (num--) {
@@ -198,11 +191,22 @@ int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t addr, uint8_t *d
         total += 1;
     }
 
-    dev->cs_high();
+    if (!dev->extended_transaction) {
+        dev->cs_high();
+    }
 
     return total;
 
 fail:
-    dev->cs_high();
     return -1;
+}
+
+void spi_start_transaction(struct spi_port *spi, struct spi_dev *dev) {
+    dev->cs_low();
+    dev->extended_transaction = 1;
+}
+
+void spi_end_transaction(struct spi_port *spi, struct spi_dev *dev) {
+    dev->cs_high();
+    dev->extended_transaction = 0;
 }

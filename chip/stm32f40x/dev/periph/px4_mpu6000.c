@@ -14,6 +14,9 @@
 
 #include <dev/periph/px4_mpu6000.h>
 
+/* When set in register addres, perform a read instead of write */
+#define SPI_READ    ((uint8_t) (1 << 7))
+
 struct mpu6000 {
     struct spi_port *spi_port;
     struct spi_dev spi_dev;
@@ -67,13 +70,14 @@ rd_t open_px4_mpu6000(void) {
 
     env->spi_dev.cs_high = &cs_high;
     env->spi_dev.cs_low = &cs_low;
+    env->spi_dev.extended_transaction = 0;
     env->read_ctr = 0;
 
     acquire(&spi1_semaphore);
 
-    /* Active mode, clock with gyro X reference */
-    uint8_t data = MPU6000_PWR_MGMT_1_CLK_PLLGYROX;
-    if (spi_write(env->spi_port, &env->spi_dev, MPU6000_PWR_MGMT_1, &data, 1) != 1) {
+    /* Power management register 1 - Active mode, clock with gyro X reference */
+    uint8_t power[2] = {MPU6000_PWR_MGMT_1, MPU6000_PWR_MGMT_1_CLK_PLLGYROX};
+    if (spi_write(env->spi_port, &env->spi_dev, power, 2) != 2) {
         /* Unable to activate :( */
         ret = -1;
         goto err_release_sem;
@@ -86,9 +90,15 @@ rd_t open_px4_mpu6000(void) {
 
     acquire(&spi1_semaphore);
 
-    /* 100Hz LPF, Gyro range +- 500deg/s, Accel range +-4g */
-    uint8_t config[3] = {MPU6000_CONFIG_LPF_100HZ, MPU6000_GYRO_CONFIG_500DPS, MPU6000_ACCEL_CONFIG_4G};
-    if (spi_write(env->spi_port, &env->spi_dev, MPU6000_CONFIG, config, 3) != 3) {
+    /* Starting at config register;
+     * 100Hz LPF,
+     * Gyro range +- 500deg/s,
+     * Accel range +-4g */
+    uint8_t config[4] = {MPU6000_CONFIG,
+        MPU6000_CONFIG_LPF_100HZ,
+        MPU6000_GYRO_CONFIG_500DPS,
+        MPU6000_ACCEL_CONFIG_4G};
+    if (spi_write(env->spi_port, &env->spi_dev, config, 4) != 4) {
         ret = -1;
         goto err_sleep;
     }
@@ -111,8 +121,8 @@ rd_t open_px4_mpu6000(void) {
     return ret;
 
 err_sleep:
-    data = MPU6000_PWR_MGMT_1_SLEEP;    /* Sleep mode */
-    spi_write(env->spi_port, &env->spi_dev, MPU6000_PWR_MGMT_1, &data, 1);
+    power[1] = MPU6000_PWR_MGMT_1_SLEEP;    /* Sleep mode */
+    spi_write(env->spi_port, &env->spi_dev, power, 2);
 err_release_sem:
     release(&spi1_semaphore);
     kfree(env);
@@ -138,12 +148,17 @@ static char px4_mpu6000_read(void *env, int *error) {
     struct mpu6000 *mpu = (struct mpu6000 *) env;
 
     if (mpu->read_ctr == 0) {
-        if (spi_read(mpu->spi_port, &mpu->spi_dev, MPU6000_ACCEL_XOUT_H, mpu->data, 14) != 14) {
-            if (error != NULL) {
-                *error = -1;
-            }
-            return 0;
+        spi_start_transaction(mpu->spi_port, &mpu->spi_dev);
+        /* Write start address */
+        uint8_t addr = MPU6000_ACCEL_XOUT_H | SPI_READ;
+        if (spi_write(mpu->spi_port, &mpu->spi_dev, &addr, 1) != 1) {
+            goto spi_err;
         }
+        /* Read 14 bytes */
+        if (spi_read(mpu->spi_port, &mpu->spi_dev, mpu->data, 14) != 14) {
+            goto spi_err;
+        }
+        spi_end_transaction(mpu->spi_port, &mpu->spi_dev);
     }
 
     char ret = (char) mpu->data[mpu->read_ctr++];
@@ -153,6 +168,13 @@ static char px4_mpu6000_read(void *env, int *error) {
     }
 
     return ret;
+
+spi_err:
+    spi_end_transaction(mpu->spi_port, &mpu->spi_dev);
+    if (error != NULL) {
+        *error = -1;
+    }
+    return 0;
 }
 
 static int px4_mpu6000_write(char c, void *env) {
@@ -163,8 +185,9 @@ static int px4_mpu6000_write(char c, void *env) {
 static int px4_mpu6000_close(resource *res) {
     struct mpu6000 *mpu = (struct mpu6000 *) res->env;
 
-    uint8_t data = MPU6000_PWR_MGMT_1_SLEEP;    /* Sleep mode */
-    spi_write(mpu->spi_port, &mpu->spi_dev, MPU6000_PWR_MGMT_1, &data, 1);
+    /* Sleep mode */
+    uint8_t power[2] = {MPU6000_PWR_MGMT_1, MPU6000_PWR_MGMT_1_SLEEP};
+    spi_write(mpu->spi_port, &mpu->spi_dev, power, 2);
 
     kfree(res->env);
     return 0;
