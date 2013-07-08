@@ -1,8 +1,8 @@
-discovery_defconfig: $(KCONFIG_DIR)/conf/conf
+discovery_defconfig: $(KCONFIG_DIR)/conf/conf clean
 	$(KCONFIG_DIR)/conf/conf $(BASE)/Kconfig --defconfig=$(BASE)/configs/discovery_defconfig
 
-px4_defconfig: $(KCONFIG_DIR)/conf/conf
+px4_defconfig: $(KCONFIG_DIR)/conf/conf clean
 	$(KCONFIG_DIR)/conf/conf $(BASE)/Kconfig --defconfig=$(BASE)/configs/px4_defconfig
 
-stellaris_launchpad_defconfig: $(KCONFIG_DIR)/conf/conf
+stellaris_launchpad_defconfig: $(KCONFIG_DIR)/conf/conf clean
 	$(KCONFIG_DIR)/conf/conf $(BASE)/Kconfig --defconfig=$(BASE)/configs/stellaris_launchpad_defconfig
