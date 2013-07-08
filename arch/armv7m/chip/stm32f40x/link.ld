@@ -37,6 +37,23 @@ SECTIONS {
         _ekernel = .;
     } > FLASH
 
+    .initializers :
+    {
+        . = ALIGN(4);
+        __begin_early_initializer = .;
+        KEEP(*(.initializers.early))
+        __end_early_initializer = .;
+        . = ALIGN(4);                   /* Although function pointers should always be */
+        __begin_core_initializer = .;   /* word aligned, someone could erroneously add */
+        KEEP(*(.initializers.core))     /* something not word sized to .initcall.* */
+        __end_core_initializer = .;     /* and these otherwise useless aligns would save */
+        . = ALIGN(4);                   /* you from a fault! */
+        __begin_late_initializer = .;
+        KEEP(*(.initializers.late))
+        __end_late_initializer = .;
+        . = ALIGN(4);
+    } > FLASH
+
     .text :
     {
         . = ALIGN(8);
