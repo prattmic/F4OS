@@ -1,8 +1,8 @@
-#include <stdint.h>
 #include <stddef.h>
-#include <arch/chip/dev/registers.h>
+#include <stdint.h>
+#include <arch/chip/gpio.h>
+#include <arch/chip/registers.h>
 #include <dev/resource.h>
-#include <arch/chip/dev/hw/gpio.h>
 #include <kernel/fault.h>
 #include <kernel/semaphore.h>
 

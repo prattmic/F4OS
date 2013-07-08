@@ -37,8 +37,8 @@
 //
 //*****************************************************************************
 
-#ifndef __ROM_H__
-#define __ROM_H__
+#ifndef ARCH_CHIP_ROM_H
+#define ARCH_CHIP_ROM_H
 
 /* LM4F120s are all Blizzard */
 #define TARGET_IS_BLIZZARD_RA2

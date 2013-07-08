@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <time.h>
-#include <dev/cortex_m.h>
+#include <arch/system.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
 #include <kernel/svc.h>

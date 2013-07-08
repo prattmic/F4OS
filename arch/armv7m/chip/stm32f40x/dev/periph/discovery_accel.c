@@ -1,14 +1,14 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <arch/chip/gpio.h>
+#include <arch/chip/registers.h>
 #include <mm/mm.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <dev/resource.h>
 #include <dev/sensors.h>
-#include <arch/chip/dev/registers.h>
-#include <arch/chip/dev/hw/gpio.h>
 
 #include <dev/hw/spi.h>
 #include <arch/chip/dev/periph/discovery_accel.h>

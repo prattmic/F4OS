@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <dev/cortex_m.h>
+#include <arch/system.h>
 #include <dev/hw/systick.h>
 
 void init_systick(void) {

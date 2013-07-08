@@ -1,6 +1,6 @@
 #include <stdint.h>
+#include <arch/chip/registers.h>
 #include <kernel/fault.h>
-#include <arch/chip/dev/registers.h>
 
 #include "usbdev_internals.h"
 #include "usbdev_desc.h"

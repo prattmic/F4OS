@@ -1,10 +1,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <arch/chip/dev/registers.h>
+#include <arch/chip/registers.h>
+#include <arch/chip/dev/periph/discovery_accel.h>
 #include <kernel/sched.h>
 #include <math.h>
-#include <arch/chip/dev/periph/discovery_accel.h>
 #include "app.h"
 
 /* INSANE defs to make it obvious where the magic numbers come from */

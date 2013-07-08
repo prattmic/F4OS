@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include <arch/chip/dev/registers.h>
-#include <arch/chip/chip/rom.h>
+#include <arch/chip/registers.h>
+#include <arch/chip/rom.h>
 
 #include <dev/hw/led.h>
 

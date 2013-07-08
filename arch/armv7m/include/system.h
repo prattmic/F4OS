@@ -1,5 +1,5 @@
-#ifndef DEV_CORTEX_M_H_INCLUDED
-#define DEV_CORTEX_M_H_INCLUDED
+#ifndef ARCH_SYSTEM_H_INCLUDED
+#define ARCH_SYSTEM_H_INCLUDED
 
 #include <stdint.h>
 

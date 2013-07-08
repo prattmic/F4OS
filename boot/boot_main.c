@@ -7,6 +7,7 @@
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 
+#include <dev/arch.h>
 #include <dev/hw/perfcounter.h>
 #include <dev/hw/led.h>
 #include <dev/hw/usart.h>
@@ -30,7 +31,7 @@ void init_cortex_m(void);
 
 void os_start(void) {
     clock();
-    init_cortex_m();
+    init_arch();
 
 #ifdef CONFIG_PERFCOUNTER
     init_perfcounter();

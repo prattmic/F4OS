@@ -1,8 +1,8 @@
 #include <stddef.h>
 #include <stdlib.h>
-#include <arch/chip/dev/registers.h>
-#include <dev/cortex_m.h>
-#include <arch/chip/dev/hw/gpio.h>
+#include <arch/system.h>
+#include <arch/chip/gpio.h>
+#include <arch/chip/registers.h>
 #include <kernel/fault.h>
 
 #include "usbdev_internals.h"

@@ -1,5 +1,7 @@
-#ifndef CHIP_STM32F40X_INCLUDE_DEV_HW_SPI_REGS_H
-#define CHIP_STM32F40X_INCLUDE_DEV_HW_SPI_REGS_H
+#ifndef ARCH_CHIP_INCLUDE_SPI_H
+#define ARCH_CHIP_INCLUDE_SPI_H
+
+#include <arch/chip/registers.h>
 
 typedef struct spi {
     volatile uint32_t CR1;      /* SPIx Control Register 1 */

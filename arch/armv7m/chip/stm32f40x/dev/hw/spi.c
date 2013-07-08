@@ -1,8 +1,8 @@
-#include <stdint.h>
 #include <stddef.h>
-#include <dev/cortex_m.h>
-#include <arch/chip/dev/registers.h>
-#include <arch/chip/dev/hw/gpio.h>
+#include <stdint.h>
+#include <arch/system.h>
+#include <arch/chip/gpio.h>
+#include <arch/chip/registers.h>
 #include <kernel/semaphore.h>
 
 #include <dev/hw/spi.h>

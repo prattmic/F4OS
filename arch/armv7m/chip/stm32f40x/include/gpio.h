@@ -1,7 +1,7 @@
-#ifndef CHIP_STM32F04X_DEV_HW_GPIO_H_INCLUDED
-#define CHIP_STM32F04X_DEV_HW_GPIO_H_INCLUDED
+#ifndef ARCH_CHIP_GPIO_H_INCLUDED
+#define ARCH_CHIP_GPIO_H_INCLUDED
 
-#include <arch/chip/dev/registers.h>
+#include <arch/chip/registers.h>
 
 inline static void gpio_moder(uint8_t port, uint8_t pin, uint8_t mode) {
     uint32_t reg = *GPIO_MODER(port);

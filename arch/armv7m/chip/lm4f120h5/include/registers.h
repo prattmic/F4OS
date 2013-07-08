@@ -37,8 +37,8 @@
 //
 //*****************************************************************************
 
-#ifndef DEV_REGISTERS_H_INCLUDED
-#define DEV_REGISTERS_H_INCLUDED
+#ifndef ARCH_CHIP_REGISTERS_H_INCLUDED
+#define ARCH_CHIP_REGISTERS_H_INCLUDED
 
 //*****************************************************************************
 //

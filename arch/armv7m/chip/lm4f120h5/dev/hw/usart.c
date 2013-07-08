@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <arch/chip/dev/registers.h>
-#include <dev/cortex_m.h>
+#include <arch/system.h>
+#include <arch/chip/registers.h>
+#include <arch/chip/rom.h>
 #include <dev/resource.h>
-#include <arch/chip/chip/rom.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <kernel/fault.h>

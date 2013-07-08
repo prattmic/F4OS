@@ -2,7 +2,7 @@
 #define KERNEL_SCHED_H_INCLUDED
 
 #include <stdint.h>
-#include <dev/cortex_m.h>
+#include <arch/system.h>
 #include <dev/resource.h>
 #include <kernel/semaphore.h>
 #include <kernel/svc.h>

@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include <dev/cortex_m.h>
-#include <arch/chip/dev/registers.h>
+#include <arch/system.h>
+#include <arch/chip/registers.h>
 #include <kernel/fault.h>
 
 #define HSE_STARTUP_TIMEOUT (0x0500)         /* Time out for HSE start up */

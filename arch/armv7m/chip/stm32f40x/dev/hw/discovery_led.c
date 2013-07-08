@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include <arch/chip/dev/registers.h>
-#include <arch/chip/dev/hw/gpio.h>
+#include <arch/chip/gpio.h>
+#include <arch/chip/registers.h>
 
 #include <dev/hw/led.h>
 

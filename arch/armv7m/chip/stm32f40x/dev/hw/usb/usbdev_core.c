@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>
-#include <arch/chip/dev/registers.h>
-#include <dev/cortex_m.h>
+#include <arch/system.h>
+#include <arch/chip/registers.h>
 
 #include "usbdev_internals.h"
 #include "usbdev_desc.h"

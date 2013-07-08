@@ -1,7 +1,7 @@
-#include <dev/cortex_m.h>
+#include <arch/system.h>
 
 /* Set up universal Cortex M perihperals/system settings */
-void init_cortex_m(void) {
+void init_arch(void) {
     /* Send event on pending interrupt */
     *SCB_SCR |= SCB_SCR_SEVONPEND;
 

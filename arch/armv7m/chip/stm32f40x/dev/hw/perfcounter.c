@@ -1,5 +1,4 @@
-#include <arch/chip/dev/registers.h>
-#include <dev/cortex_m.h>
+#include <arch/chip/registers.h>
 #include <dev/hw/perfcounter.h>
 
 static void init_tim1(void) {
@@ -12,7 +11,6 @@ static void init_tim1(void) {
 
     /* TIM1 set update event as output in master control reg */
     *TIM1_CR2 |= (1 << 5);
-
 
     /* Enable timers */
     *TIM1_CR1 |= TIMx_CR1_CEN;
@@ -28,7 +26,6 @@ static void init_tim2(void) {
 
     /* External clock mode in TIM2 */
     *TIM2_SMCR |= 0x7;
-
 
     /* Enable timers */
     *TIM2_CR1 |= TIMx_CR1_CEN;
