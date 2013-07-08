@@ -60,10 +60,10 @@ burn:
 
 # Create tags
 ctags:
-	ctags -R .
+	find $(BASE) -name "*.[chS]" -not -path "$(PREFIX)/*" -not -path "$(BASE)/tools/*" -print | xargs ctags
 
 cscope:
-	find . -name "*.[chS]" -print | xargs cscope -b -q -k
+	find $(BASE) -name "*.[chS]" -not -path "$(PREFIX)/*" -not -path "$(BASE)/tools/*" -print | xargs cscope -b -q -k
 
 # defconfigs
 include $(BASE)/configs/Makefile.in
