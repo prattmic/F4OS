@@ -1,8 +1,12 @@
-discovery_defconfig: $(KCONFIG_DIR)/conf/conf clean
-	$(KCONFIG_DIR)/conf/conf $(BASE)/Kconfig --defconfig=$(BASE)/configs/discovery_defconfig
+# Create a rule for applying a defconfig
+# $(1) = Path to defconfig
+define define_defconfig_rule
+$(notdir $(1)): $(KCONFIG_DIR)/conf/conf clean
+	$(KCONFIG_DIR)/conf/conf $(BASE)/Kconfig --defconfig=$(1)
+endef
 
-px4_defconfig: $(KCONFIG_DIR)/conf/conf clean
-	$(KCONFIG_DIR)/conf/conf $(BASE)/Kconfig --defconfig=$(BASE)/configs/px4_defconfig
+DEFCONFIG_PATHS := $(wildcard $(BASE)/configs/*_defconfig)
+DEFCONFIGS := $(notdir $(DEFCONFIG_PATHS))
 
-stellaris_launchpad_defconfig: $(KCONFIG_DIR)/conf/conf clean
-	$(KCONFIG_DIR)/conf/conf $(BASE)/Kconfig --defconfig=$(BASE)/configs/stellaris_launchpad_defconfig
+# Define a rule for each config in configs/
+$(foreach DEFCONFIG, $(DEFCONFIG_PATHS), $(eval $(call define_defconfig_rule,$(DEFCONFIG))))

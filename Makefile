@@ -65,7 +65,7 @@ ctags:
 cscope:
 	find $(BASE) -name "*.[chS]" -not -path "$(PREFIX)/*" -not -path "$(BASE)/tools/*" -print | xargs cscope -b -q -k
 
-# defconfigs
+# defconfig rules and DEFCONFIGS list
 include $(BASE)/configs/Makefile.in
 -include $(BASE)/include/config/auto.conf.cmd
 
@@ -128,9 +128,6 @@ distclean: clean
 	-rm -rf $(BASE)/include/config/
 
 .FORCE:
-
-DEFCONFIGS := $(wildcard $(BASE)/configs/*_defconfig)
-DEFCONFIGS := $(notdir $(DEFCONFIGS))
 
 help:
 	@echo	'Cleaning:'
