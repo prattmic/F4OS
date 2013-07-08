@@ -12,10 +12,10 @@ MEMORY
 _estack = 0x20001FFC;       /* quarter of 32K SRAM */
 
 /* Heap */
-_suserheap = 0x20004000;    /* middle of 32K SRAM */
-_euserheap = 0x20008000;    /* end of 32K SRAM */
-_skernelheap = 0x20002000;  /* quarter of 32K SRAM */
-_ekernelheap = 0x20004000;  /* middle of 32K SRAM */
+_suserheap = CONFIG_SUSERHEAP;
+_euserheap = CONFIG_EUSERHEAP;
+_skernelheap = CONFIG_SKERNELHEAP;
+_ekernelheap = CONFIG_EKERNELHEAP;
 
 SECTIONS {
     /* Vectors first - Always permitted by MPU */

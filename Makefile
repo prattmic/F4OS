@@ -15,14 +15,16 @@ USR ?= shell
 CONFIG_ARCH := $(shell echo $(CONFIG_ARCH))
 CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
 
-LINK_SCRIPT = arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/link.ld
+LINK_SCRIPT = $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/link.ld
 
 CROSS_COMPILE ?= arm-none-eabi-
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 
-CFLAGS += -g3 -Wall --std=gnu99 -include $(BASE)/include/config/autoconf.h -isystem $(PREFIX)/include/
+INCLUDE_FLAGS := -isystem $(PREFIX)/include/ -include $(BASE)/include/config/autoconf.h
+
+CFLAGS += -g3 -Wall --std=gnu99 $(INCLUDE_FLAGS)
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
@@ -30,6 +32,8 @@ CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
 #CFLAGS += -save-temps --verbose -Xlinker --verbose
 
 LFLAGS=
+
+CPPFLAGS := -P $(INCLUDE_FLAGS)
 
 KCONFIG_DIR = $(BASE)/tools/kconfig-frontends/frontends/
 
@@ -115,10 +119,17 @@ $(PREFIX)/include: $(PREFIX) .FORCE
 $(PREFIX)/$(PROJ_NAME).o: $(BASE)/include/config/autoconf.h $(PREFIX)/include .FORCE
 	$(MAKE) -f f4os.mk obj=$@
 
-$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o
-	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) $^ -o $@ $(LFLAGS) -T $(LINK_SCRIPT)
+$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/link.ld
+	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) $< -o $@ $(LFLAGS) -T $(PREFIX)/link.ld
 	$(VERBOSE)echo "OBJCOPY $(PROJ_NAME).hex" && $(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	$(VERBOSE)echo "OBJCOPY $(PROJ_NAME).bin" && $(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
+
+# Preprocess the linker script
+$(PREFIX)/link.ld : $(LINK_SCRIPT)
+	$(VERBOSE)echo "CPP $(subst $(BASE)/,,$<)" && cpp -MD -MT $@ $(CPPFLAGS) $< -o $@
+
+# Include linker script dependencies
+-include $(PREFIX)/link.d
 
 clean:
 	-rm -rf $(PREFIX)

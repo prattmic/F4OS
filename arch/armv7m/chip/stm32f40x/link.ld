@@ -14,10 +14,10 @@ MEMORY
 _estack = 0x10008000;    /* middle of 64K CCM RAM */
 
 /* Heap */
-_suserheap = 0x20000000;    /* beginning of 112K SRAM */
-_euserheap = 0x2001FFFC;    /* end of 16K ETHRAM */
-_skernelheap = 0x10008000;  /* Middle of 64K CCM RAM */
-_ekernelheap = 0x1000FFFC;  /* End of 64K CCM RAM */
+_suserheap = CONFIG_SUSERHEAP;
+_euserheap = CONFIG_EUSERHEAP;
+_skernelheap = CONFIG_SKERNELHEAP;
+_ekernelheap = CONFIG_EKERNELHEAP;
 
 SECTIONS {
     /* Vectors first - Always permitted by MPU */
