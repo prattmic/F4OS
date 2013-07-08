@@ -1,3 +1,4 @@
+/* Exception Handlers */
 .syntax unified
 .thumb
 
@@ -5,17 +6,8 @@
 .arch armv7e-m
 .fpu fpv4-sp-d16
 
-/* Bootloader */
 .section    .kernel, "ax"
 
-.thumb_func
-.global     _start
-_start:
-    /* main should never return */
-    bl      os_start
-    b       hang
-
-/* Exception Handlers */
 .thumb_func
 .global     panic
 .type       panic, %function
@@ -65,7 +57,8 @@ loop_zero_bss:
     cmp     r2, r3
     bcc     zero_bss
 
-    b       _start
+    /* To the OS! */
+    b       os_start
 
 .thumb_func
 .global     _svc_asm

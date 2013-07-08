@@ -1,4 +1,3 @@
-DIRS += boot/
 DIRS += arch/
 DIRS += dev/
 DIRS += kernel/

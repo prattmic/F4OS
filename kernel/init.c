@@ -1,5 +1,3 @@
-/* Handles the rest of the boot process from where boot.S left off */
-
 #include <stdint.h>
 #include <stdio.h>
 #include <mm/mm.h>

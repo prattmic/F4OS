@@ -1,3 +1,4 @@
+SRCS += handlers.S
 SRCS += arch.c
 
 DIRS += chip/
