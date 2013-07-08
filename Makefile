@@ -43,7 +43,7 @@ export
 
 ###################################################
 
-.PHONY: proj unoptimized ctags cscopse .FORCE
+.PHONY: proj unoptimized ctags cscope .FORCE
 
 all: CFLAGS += -O2
 all: $(PREFIX) proj
