@@ -26,11 +26,8 @@ const char banner[] = "Welcome to...\r\n"
                 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n";
 
 void os_start(void) __attribute__((section(".kernel")));
-void clock(void);
-void init_cortex_m(void);
 
 void os_start(void) {
-    clock();
     init_arch();
 
 #ifdef CONFIG_PERFCOUNTER

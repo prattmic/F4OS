@@ -1,7 +1,11 @@
+#include <arch/chip.h>
 #include <arch/system.h>
 
 /* Set up universal Cortex M perihperals/system settings */
 void init_arch(void) {
+    /* Setup chip clocks */
+    init_clock();
+
     /* Send event on pending interrupt */
     *SCB_SCR |= SCB_SCR_SEVONPEND;
 

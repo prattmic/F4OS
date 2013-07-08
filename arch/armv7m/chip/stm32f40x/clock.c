@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <arch/chip.h>
 #include <arch/system.h>
 #include <arch/chip/registers.h>
 #include <kernel/fault.h>
@@ -11,7 +12,7 @@
 #define PLL_P      2            /* SYSCLK = PLL_VCO / PLL_P */
 #define PLL_Q      7            /* USB OTG FS, SDIO and RNG Clock =  PLL_VCO / PLLQ */
 
-void clock(void) {
+void init_clock(void) {
     /********* Reset clock registers ************/
     /* Set HSION bit */
     *RCC_CR |= RCC_CR_HSION;
