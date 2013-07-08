@@ -1,7 +1,7 @@
-#include <dev/chip.h>
+#include <arch/chip/dev/chip.h>
 #include <dev/cortex_m.h>
-#include <dev/hw/gpio.h>
-#include <dev/registers.h>
+#include <arch/chip/dev/hw/gpio.h>
+#include <arch/chip/dev/registers.h>
 #include <dev/resource.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>

@@ -5,7 +5,7 @@
 #ifndef DEV_HW_USART_REGS_H_INCLUDED
 #define DEV_HW_USART_REGS_H_INCLUDED
 
-#include <dev/registers.h>
+#include <arch/chip/dev/registers.h>
 
 typedef struct usart {
     volatile uint32_t SR;   // USARTx Status Register

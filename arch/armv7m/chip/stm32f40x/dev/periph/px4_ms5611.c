@@ -10,7 +10,7 @@
 #include <dev/resource.h>
 #include <dev/sensors.h>
 #include <dev/hw/i2c.h>
-#include <dev/periph/px4_ms5611.h>
+#include <arch/chip/dev/periph/px4_ms5611.h>
 
 struct ms5611 {
     uint16_t c[7];

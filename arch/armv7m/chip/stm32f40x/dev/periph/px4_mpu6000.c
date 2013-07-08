@@ -6,13 +6,13 @@
 #include <kernel/fault.h>
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
-#include <dev/registers.h>
+#include <arch/chip/dev/registers.h>
 #include <dev/resource.h>
 #include <dev/sensors.h>
-#include <dev/hw/gpio.h>
+#include <arch/chip/dev/hw/gpio.h>
 #include <dev/hw/spi.h>
 
-#include <dev/periph/px4_mpu6000.h>
+#include <arch/chip/dev/periph/px4_mpu6000.h>
 
 /* When set in register addres, perform a read instead of write */
 #define SPI_READ    ((uint8_t) (1 << 7))

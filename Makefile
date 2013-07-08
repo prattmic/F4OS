@@ -22,8 +22,7 @@ CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 
-CFLAGS += -g3 -Wall --std=gnu99 -include $(BASE)/include/config/autoconf.h
-CFLAGS += -isystem $(BASE)/include/ -isystem $(BASE)/arch/$(CONFIG_ARCH)/include/ -isystem $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/include/
+CFLAGS += -g3 -Wall --std=gnu99 -include $(BASE)/include/config/autoconf.h -isystem $(PREFIX)/include/
 CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
 CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
@@ -95,7 +94,25 @@ proj: 	$(PREFIX)/$(PROJ_NAME).elf
 $(PREFIX):
 	mkdir -p $(PREFIX)
 
-$(PREFIX)/$(PROJ_NAME).o: $(BASE)/include/config/autoconf.h .FORCE
+# Build include/ directory in $(PREFIX)/ to provide all headers for the source files.
+# Place the arch and chip headers in arch/ and arch/chip/, respectively.
+# This way arch and chip-specific headers are included under those directories, rather
+# than globally.
+#
+# Copy the files from each configured include directory, preserving all attributes,
+# so that source files aren't rebuilt every time the headers "change" as this diretory
+# is recreated.
+#
+# Rerun this rule at every build in order to pick up any new headers.
+$(PREFIX)/include: $(PREFIX) .FORCE
+	$(VERBOSE)echo "GEN	$@"
+	$(VERBOSE)rm -rf $(PREFIX)/include/
+	$(VERBOSE)mkdir -p $(PREFIX)/include/arch/chip/
+	$(VERBOSE)cp -a $(BASE)/include/. $(PREFIX)/include/
+	$(VERBOSE)cp -a $(BASE)/arch/$(CONFIG_ARCH)/include/. $(PREFIX)/include/arch/
+	$(VERBOSE)cp -a $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/include/. $(PREFIX)/include/arch/chip/
+
+$(PREFIX)/$(PROJ_NAME).o: $(BASE)/include/config/autoconf.h $(PREFIX)/include .FORCE
 	$(MAKE) -f f4os.mk obj=$@
 
 $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o

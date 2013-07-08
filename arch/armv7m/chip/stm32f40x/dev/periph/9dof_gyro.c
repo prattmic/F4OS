@@ -8,7 +8,7 @@
 #include <dev/resource.h>
 
 #include <dev/hw/i2c.h>
-#include <dev/periph/9dof_gyro.h>
+#include <arch/chip/dev/periph/9dof_gyro.h>
 
 char sfe9dof_gyro_read(void *env, int *error) __attribute__((section(".kernel")));
 int sfe9dof_gyro_write(char d, void *env) __attribute__((section(".kernel")));

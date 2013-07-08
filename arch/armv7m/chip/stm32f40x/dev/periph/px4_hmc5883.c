@@ -8,7 +8,7 @@
 #include <dev/resource.h>
 #include <dev/sensors.h>
 #include <dev/hw/i2c.h>
-#include <dev/periph/px4_hmc5883.h>
+#include <arch/chip/dev/periph/px4_hmc5883.h>
 
 #define HMC5883_ADDR    0x1E
 

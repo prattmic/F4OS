@@ -1,4 +1,4 @@
-#include <dev/registers.h>
+#include <arch/chip/dev/registers.h>
 #include <dev/cortex_m.h>
 #include <dev/hw/perfcounter.h>
 

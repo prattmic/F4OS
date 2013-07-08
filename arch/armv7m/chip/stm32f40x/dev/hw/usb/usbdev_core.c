@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>
-#include <dev/registers.h>
+#include <arch/chip/dev/registers.h>
 #include <dev/cortex_m.h>
 
 #include "usbdev_internals.h"

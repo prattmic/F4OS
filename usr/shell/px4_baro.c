@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <dev/resource.h>
 #include <dev/sensors.h>
-#include <dev/periph/px4_ms5611.h>
+#include <arch/chip/dev/periph/px4_ms5611.h>
 
 #include "app.h"
 

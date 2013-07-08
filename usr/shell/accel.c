@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <dev/hw/spi.h>
 #include <dev/sensors.h>
-#include <dev/periph/discovery_accel.h>
+#include <arch/chip/dev/periph/discovery_accel.h>
 #include <math.h>
 #include "app.h"
 

@@ -1,5 +1,5 @@
 #include <stddef.h>
-#include <dev/registers.h>
+#include <arch/chip/dev/registers.h>
 #include <kernel/fault.h>
 
 #include "usbdev_internals.h"

@@ -7,11 +7,11 @@
 #include <kernel/fault.h>
 #include <dev/resource.h>
 #include <dev/sensors.h>
-#include <dev/registers.h>
-#include <dev/hw/gpio.h>
+#include <arch/chip/dev/registers.h>
+#include <arch/chip/dev/hw/gpio.h>
 
 #include <dev/hw/spi.h>
-#include <dev/periph/discovery_accel.h>
+#include <arch/chip/dev/periph/discovery_accel.h>
 
 /* When this bit is set, the register address on the accelerometer
  * will automatically increment for multi-byte reads/writes */

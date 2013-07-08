@@ -1,4 +1,4 @@
-#include <dev/registers.h>
+#include <arch/chip/dev/registers.h>
 #include <dev/hw/systick.h>
 #include <kernel/fault.h>
 

@@ -455,7 +455,7 @@
 #define TIMx_DIER_TDE                   (uint32_t) (1 << 14)                                    /* TIMx trigger DMA request enable */
 
 /* SPI */
-#include <dev/hw/spi_regs.h>
+#include <arch/chip/dev/hw/spi_regs.h>
 
 /* I2C */
 #define I2C_CR1_PE                      (uint32_t) (1 << 0)                                     /* I2C peripheral enable */
@@ -516,7 +516,7 @@
 #define I2C_CCR_FS                      (uint32_t) (1 << 15)                                    /* I2C master mode selection */
 
 /* USART */
-#include <dev/hw/usart_regs.h>
+#include <arch/chip/dev/hw/usart_regs.h>
 
 /* GPIO */
 #define GPIOA                           (uint8_t)  (0)                                          /* GPIO Port A */
