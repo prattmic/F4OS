@@ -1,25 +1,26 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <arch/system.h>
 #include <arch/chip/gpio.h>
+#include <arch/chip/spi.h>
 #include <arch/chip/registers.h>
 #include <kernel/semaphore.h>
+#include <kernel/class.h>
+#include <kernel/init.h>
+#include <mm/mm.h>
 
 #include <dev/hw/spi.h>
 
-void init_spi1(void) __attribute__((section(".kernel")));
-static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive) __attribute__((section(".kernel")));
-
-struct spi_port spi1 = {
-    .ready = 0,
-    .regs = NULL,
-    .init = &init_spi1
+struct stm32f4_spi {
+    uint8_t                 ready;
+    struct stm32f4_spi_regs *regs;
 };
 
-struct semaphore spi1_semaphore = INIT_SEMAPHORE;
+static int init_spi1(struct spi *s) {
+    struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
 
-void init_spi1(void) {
-    spi1.regs = get_spi(1);
+    port->regs = get_spi(1);
 
     *RCC_APB2ENR |= RCC_APB2ENR_SPI1EN;     /* Enable SPI1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOAEN;    /* Enable GPIOA Clock */
@@ -49,23 +50,63 @@ void init_spi1(void) {
     gpio_ospeedr(GPIOA, 7, GPIO_OSPEEDR_50M);
 
     /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
-    spi1.regs->CR1 |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
+    port->regs->CR1 |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
 
-    spi1.regs->CR1 |= SPI_CR1_SPE;
+    port->regs->CR1 |= SPI_CR1_SPE;
 
-    init_semaphore(&spi1_semaphore);
-
-    spi1.ready = 1;
+    return 0;
 }
 
-static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive) {
+static int stm32f4_spi_init(struct spi *s) {
+    int ret;
+    struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
+
+    /* Already initialized? */
+    if (port && port->ready) {
+        return 0;
+    }
+    else if (!port) {
+        s->priv = kmalloc(sizeof(struct stm32f4_spi));
+        port = s->priv;
+        if (!port) {
+            return -1;
+        }
+    }
+
+    port->ready = 0;
+
+    init_semaphore(&s->lock);
+
+    switch (s->num) {
+    case 1:
+        ret = init_spi1(s);
+        break;
+    default:
+        ret = -1;
+    }
+
+    if (ret == 0) {
+        port->ready = 1;
+    }
+    else {
+        kfree(port);
+    }
+
+    return ret;
+}
+
+static int stm32f4_spi_deinit(struct spi *s) {
+    /* Turn off clocks? */
+
+    return 0;
+}
+
+static int stm32f4_spi_send_receive(struct spi *spi, uint8_t send,
+                                    uint8_t *receive) {
     uint8_t *data;
     uint8_t null;
     int count;
-
-    if (!spi) {
-        return -1;
-    }
+    struct stm32f4_spi *port = (struct stm32f4_spi *) spi->priv;
 
     /* Provide a black hole to write to if receive is NULL */
     if (receive) {
@@ -77,31 +118,41 @@ static int spi_send_receive(struct spi_port *spi, uint8_t send, uint8_t *receive
 
     /* Transmit data */
     count = 10000;
-    while (!(spi->regs->SR & SPI_SR_TXNE)) {
+    while (!(port->regs->SR & SPI_SR_TXNE)) {
         if (!count--) {
             return -1;
         }
     }
-    spi->regs->DR = send;
+    port->regs->DR = send;
 
     /* Wait for response
      * Note: this "response" was transmitted while we were
      * transmitting the data above, it is not the device's response to that request. */
     count = 10000;
-    while (!(spi->regs->SR & SPI_SR_RXNE)) {
+    while (!(port->regs->SR & SPI_SR_RXNE)) {
         if (!count--) {
             return -1;
         }
     }
-    *data = spi->regs->DR;
+    *data = port->regs->DR;
 
     return 0;
 }
 
-int spi_read_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *read_data, uint8_t *write_data, uint32_t num) {
+static int stm32f4_spi_read_write(struct spi *spi, struct spi_dev *dev,
+                                  uint8_t *read_data, uint8_t *write_data,
+                                  uint32_t num) {
     /* Verify valid SPI */
-    if (!spi || !spi->ready) {
+    if (!spi) {
         return -1;
+    }
+
+    struct stm32f4_spi *port = (struct stm32f4_spi *) spi->priv;
+
+    /* Initialized? */
+    if (!port || !port->ready) {
+        struct spi_ops *ops = (struct spi_ops *) spi->obj.ops;
+        ops->init(spi);
     }
 
     /* Verify valid SPI device */
@@ -116,16 +167,17 @@ int spi_read_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *read_data
     uint32_t total = 0;
     int ret;
 
+    if (!dev->extended_transaction) {
+        acquire(&spi->lock);
+        dev->cs_low();
+    }
+
     /* Data MUST be read after each TX */
 
     /* Clear overrun by reading old data */
-    if (spi->regs->SR & SPI_SR_OVR) {
-        READ_AND_DISCARD(&spi->regs->DR);
-        READ_AND_DISCARD(&spi->regs->SR);
-    }
-
-    if (!dev->extended_transaction) {
-        dev->cs_low();
+    if (port->regs->SR & SPI_SR_OVR) {
+        READ_AND_DISCARD(&port->regs->DR);
+        READ_AND_DISCARD(&port->regs->SR);
     }
 
     while (num--) {
@@ -134,7 +186,7 @@ int spi_read_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *read_data
         uint8_t *receive = read_data ? read_data++ : NULL;
 
         /* Transmit data */
-        if (spi_send_receive(spi, send, receive)) {
+        if (stm32f4_spi_send_receive(spi, send, receive)) {
             ret = -1;
             goto out;
         }
@@ -147,17 +199,71 @@ int spi_read_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *read_data
 out:
     if (!dev->extended_transaction) {
         dev->cs_high();
+        release(&spi->lock);
     }
 
     return ret;
 }
 
-void spi_start_transaction(struct spi_port *spi, struct spi_dev *dev) {
+static int stm32f4_spi_write(struct spi *spi, struct spi_dev *dev,
+                             uint8_t *data, uint32_t num) {
+    return stm32f4_spi_read_write(spi, dev, NULL, data, num);
+}
+
+static int stm32f4_spi_read(struct spi *spi, struct spi_dev *dev,
+                            uint8_t *data, uint32_t num) {
+    return stm32f4_spi_read_write(spi, dev, data, NULL, num);
+}
+
+static void stm32f4_spi_start_transaction(struct spi *spi, struct spi_dev *dev) {
+    acquire(&spi->lock);
     dev->cs_low();
     dev->extended_transaction = 1;
 }
 
-void spi_end_transaction(struct spi_port *spi, struct spi_dev *dev) {
+static void stm32f4_spi_end_transaction(struct spi *spi, struct spi_dev *dev) {
     dev->cs_high();
     dev->extended_transaction = 0;
+    release(&spi->lock);
 }
+
+struct spi_ops stm32f4_spi_ops = {
+    .init = stm32f4_spi_init,
+    .deinit = stm32f4_spi_deinit,
+    .read_write = stm32f4_spi_read_write,
+    .read = stm32f4_spi_read,
+    .write = stm32f4_spi_write,
+    .start_transaction = stm32f4_spi_start_transaction,
+    .end_transaction = stm32f4_spi_end_transaction,
+};
+
+struct stm32f4_spi_ports {
+    char *name;
+    int index;
+} stm32f4_spi_ports[] = {
+    { .name = "spi1", .index = 1 },
+};
+
+#define NUM_SPI_PORTS   (sizeof(stm32f4_spi_ports)/sizeof(stm32f4_spi_ports[0]))
+
+/* Probe may be the wrong word */
+static int stm32f4_spi_probe(void) {
+    for (int i = 0; i < NUM_SPI_PORTS; i++) {
+        struct obj *o = instantiate(stm32f4_spi_ports[i].name, &spi_class,
+                                    &stm32f4_spi_ops, struct spi);
+        if (!o) {
+            return -1;
+        }
+
+        struct spi *s = (struct spi *) to_spi(o);
+
+        s->num = stm32f4_spi_ports[i].index;
+        s->priv = NULL;
+
+        /* Export to the OS */
+        class_export_member(o);
+    }
+
+    return 0;
+}
+CORE_INITIALIZER(stm32f4_spi_probe)
