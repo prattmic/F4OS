@@ -1,114 +1,134 @@
 #ifndef DEV_HW_SPI_H_INCLUDED
 #define DEV_HW_SPI_H_INCLUDED
 
-struct semaphore;
+#include <kernel/obj.h>
+#include <kernel/semaphore.h>
 
-extern struct semaphore spi1_semaphore;
-
-struct spi;
-
-struct spi_port {
-    uint8_t     ready;
-    struct spi  *regs;
-    void        (*init)(void);
-} spi_port;
+struct spi {
+    /* Unique identifier
+     * Maybe there is a way to avoid this?  It is only needed for initialization */
+    uint8_t             num;
+    struct semaphore    lock;
+    void                *priv;
+    struct obj          obj;
+};
 
 struct spi_dev {
     void    (*cs_high)(void);
     void    (*cs_low)(void);
     uint8_t extended_transaction;
-} spi_dev;
+};
 
-extern struct spi_port spi1;
-
-/**
- * Read and write data to and from SPI device.
- *
- * Read and write num bytes of data to SPI device dev on port spi,
- * setting the device chip select automatically.
- *
- * Either read_data to write_data may be NULL, but if non-NULL, each
- * must be able to store at least num bytes.
- *
- * read_data[i] will contain data read in the same clock that
- * write_data[i] was written.
- *
- * @param spi           SPI port the device is connected to
- * @param dev           SPI device to write to
- * @param read_data     Buffer to write data read to
- * @param write_data    Data to write
- * @param num           Number of bytes of data to read/write
- *
- * @returns bytes read/written successfully, negative on error
- */
-int spi_read_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *read_data, uint8_t *write_data, uint32_t num);
-
-/**
- * Write data to SPI device.
- *
- * Write num bytes of data to SPI device dev on port spi, setting
- * the device chip select automatically.
- *
- * @param spi   SPI port the device is connected to
- * @param dev   SPI device to write to
- * @param data  Data to write
- * @param num   Number of bytes of data to write
- *
- * @returns bytes written successfully, negative on error
- */
-static inline int spi_write(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num) {
-    return spi_read_write(spi, dev, NULL, data, num);
+/* Takes obj and returns containing struct spi */
+static inline struct spi *to_spi(struct obj *o) {
+    return (struct spi *) container_of(o, struct spi, obj);
 }
 
-/**
- * Read data from SPI device.
- *
- * Read num bytes of data from SPI device dev on port spi, setting
- * the device chip select automatically.
- *
- * @param spi   SPI port the device is connected to
- * @param dev   SPI device to read from
- * @param data  Buffer to read data into
- * @param num   Number of bytes of data to read
- *
- * @returns bytes read into buffer, negative on error
- */
-static inline int spi_read(struct spi_port *spi, struct spi_dev *dev, uint8_t *data, uint32_t num) {
-    return spi_read_write(spi, dev, data, NULL, num);
-}
 
-/**
- * Begin extended SPI transaction
- *
- * spi_read and spi_write typically handle asserting the chip select
- * line themselves, however occasionally it is necessary to perform
- * multiple reads or writes with chip select asserted continuously.
- *
- * This function will assert the chip select line low, and mark an
- * extended transaction in progress.  During the extended transaction
- * spi_read and spi_write will not modify the state of the chip select
- * line.  Call spi_end_transaction when the extended transaction is complete.
- *
- * The SPI port should be held throughout an entire extended transaction,
- * meaning the application must not release control of the SPI port until
- * the extended transaction has completed.
- *
- * @param spi   SPI port the device is connected to
- * @param dev   SPI device to begin transaction with
- */
-void spi_start_transaction(struct spi_port *spi, struct spi_dev *dev);
+struct spi_ops {
+    /**
+     * Initialize SPI peripheral
+     *
+     * Initialize SPI peripheral to be ready for communication.  Sets
+     * up SPI hardware registers or software emulation, and prepares
+     * any internal data structures.  Returns success if peripheral
+     * is already initialized.
+     *
+     * Calling this function is not required.  The peripheral will be
+     * lazily initialized on first use.
+     *
+     * @param spi   SPI peripheral to initialize
+     *
+     * @returns zero on success, negative on error
+     */
+    int         (*init)(struct spi *);
+    /**
+     * Deinitialize SPI peripheral
+     *
+     * Frees any internal data structures and optionally powers down
+     * hardware peripherals.
+     *
+     * Calling this function on a non-initialized peripheral has no effect.
+     *
+     * @param spi   SPI peripheral to deinitialize
+     *
+     * @returns zero on success, negative on error
+     */
+    int         (*deinit)(struct spi *);
+    /**
+     * Read and write data to and from SPI device.
+     *
+     * Read and write num bytes of data to SPI device dev on port spi,
+     * setting the device chip select automatically.
+     *
+     * Either read_data to write_data may be NULL, but if non-NULL, each
+     * must be able to store at least num bytes.
+     *
+     * read_data[i] will contain data read in the same clock that
+     * write_data[i] was written.
+     *
+     * @param spi           SPI port the device is connected to
+     * @param dev           SPI device to write to
+     * @param read_data     Buffer to write data read to
+     * @param write_data    Data to write
+     * @param num           Number of bytes of data to read/write
+     *
+     * @returns bytes read/written successfully, negative on error
+     */
+    int         (*read_write)(struct spi *, struct spi_dev *, uint8_t *, uint8_t *, uint32_t);
+    /**
+     * Write data to SPI device.
+     *
+     * Write num bytes of data to SPI device dev on port spi, setting
+     * the device chip select automatically.
+     *
+     * @param spi   SPI port the device is connected to
+     * @param dev   SPI device to write to
+     * @param data  Data to write
+     * @param num   Number of bytes of data to write
+     *
+     * @returns bytes written successfully, negative on error
+     */
+    int         (*write)(struct spi *, struct spi_dev *, uint8_t *, uint32_t);
+    /**
+     * Read data from SPI device.
+     *
+     * Read num bytes of data from SPI device dev on port spi, setting
+     * the device chip select automatically.
+     *
+     * @param spi   SPI port the device is connected to
+     * @param dev   SPI device to read from
+     * @param data  Buffer to read data into
+     * @param num   Number of bytes of data to read
+     *
+     * @returns bytes read into buffer, negative on error
+     */
+    int         (*read)(struct spi *, struct spi_dev *, uint8_t *, uint32_t);
+    /**
+     * Begin extended SPI transaction
+     *
+     * Begin a transaction that lasts for multiple calls.  Until end_transaction
+     * is called, the chip select line will be held low, and any peripheral
+     * specific locks will be held.
+     *
+     * end_transaction must be called when the transaction is complete.
+     *
+     * @param spi   SPI port the device is connected to
+     * @param dev   SPI device to begin transaction with
+     */
+    void        (*start_transaction)(struct spi *, struct spi_dev *);
+    /**
+     * End extended SPI transaction
+     *
+     * Release any peripheral locks and set the chip select line high.
+     *
+     * This must only be called after start_transaction.
+     *
+     * @param spi   SPI port the device is connected to
+     * @param dev   SPI device to begin transaction with
+     */
+    void        (*end_transaction)(struct spi *, struct spi_dev *);
+};
 
-/**
- * End extended SPI transaction
- *
- * Set the device chip select line high and mark extended transaction as complete.
- * spi_read and spi_write will control the chip select line as normal.
- *
- * It is now safe to release control of the SPI port.
- *
- * @param spi   SPI port the device is connected to
- * @param dev   SPI device to begin transaction with
- */
-void spi_end_transaction(struct spi_port *spi, struct spi_dev *dev);
-
+extern struct class spi_class;
 #endif
