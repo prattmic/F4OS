@@ -43,7 +43,7 @@ CONFIG_9DOF_GYRO=y
 #
 # SPI Devices
 #
-CONFIG_DISCOVERY_ACCEL=y
+CONFIG_STM_LIS302DL=y
 
 #
 # Memory management
