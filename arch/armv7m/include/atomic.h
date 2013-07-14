@@ -114,4 +114,29 @@ static inline uint32_t atomic_and(uint32_t *ptr, uint32_t val) {
     return ret;
 }
 
+static __always_inline uint32_t load_link(volatile uint32_t *address) {
+    uint32_t val;
+
+    asm volatile (
+        "ldrex  %[val], [%[ptr]]\n\t"
+        : [val] "=r" (val)
+        : [ptr] "r" (address)
+    );
+
+    return val;
+}
+
+static __always_inline uint8_t store_conditional(volatile uint32_t *address, uint32_t value) {
+    uint32_t failed;
+
+    asm volatile (
+        "strex  %[failed], %[val], [%[ptr]]\n\t"
+        : [failed] "=r" (failed)
+        : [ptr] "r" (address), [val] "r" (value)
+        : "memory"
+    );
+
+    return failed;
+}
+
 #endif /* ARCH_ATOMIC_H_INCLUDED */
