@@ -1,9 +1,11 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <arch/chip/registers.h>
 #include <dev/hw/led.h>
 #include <kernel/sched.h>
+#include <kernel/obj.h>
 #include "app.h"
 
 void led1(void);
@@ -54,13 +56,40 @@ void blink(int argc, char **argv) {
 DEFINE_APP(blink)
 
 void led1(void) {
-    led_toggle(1);
+    static struct obj *led = NULL;
+    if (!led) {
+        led = led_get(1);
+        if (!led) {
+            printf("Failed to get LED 1, aborting\r\n");
+            abort();
+        }
+    }
+
+    led_toggle(led);
 }
 
 void led2(void) {
-    led_toggle(2);
+    static struct obj *led = NULL;
+    if (!led) {
+        led = led_get(2);
+        if (!led) {
+            printf("Failed to get LED 2, aborting\r\n");
+            abort();
+        }
+    }
+
+    led_toggle(led);
 }
 
 void led3(void) {
-    led_toggle(3);
+    static struct obj *led = NULL;
+    if (!led) {
+        led = led_get(3);
+        if (!led) {
+            printf("Failed to get LED 3, aborting\r\n");
+            abort();
+        }
+    }
+
+    led_toggle(led);
 }
