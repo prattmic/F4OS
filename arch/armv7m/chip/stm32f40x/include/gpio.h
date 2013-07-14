@@ -1,7 +1,8 @@
 #ifndef ARCH_CHIP_GPIO_H_INCLUDED
 #define ARCH_CHIP_GPIO_H_INCLUDED
 
-#include <arch/atomic.h>
+#include <stdint.h>
+#include <atomic.h>
 #include <arch/chip/registers.h>
 
 inline static void gpio_moder(uint8_t port, uint8_t pin, uint8_t mode) {
@@ -66,6 +67,63 @@ inline static void gpio_afr(uint8_t port, uint8_t pin, uint8_t mode) {
         } while (store_conditional(GPIO_AFRH(port), reg));
     }
 }
+
+/* Valid flags for set_flags */
+enum stm32f4_gpio_flags {
+    STM32F4_GPIO_ALT_FUNC,
+    STM32F4_GPIO_PULL,
+    STM32F4_GPIO_SPEED,
+    STM32F4_GPIO_CLOCK_ENABLE,
+};
+
+/* GPIO alternative functions */
+enum stm32f4_gpio_alt_funcs {
+    STM32F4_GPIO_AF_SYSTEM      = 0,
+    STM32F4_GPIO_AF_TIM1        = 1,
+    STM32F4_GPIO_AF_TIM2        = 1,
+    STM32F4_GPIO_AF_TIM3        = 2,
+    STM32F4_GPIO_AF_TIM4        = 2,
+    STM32F4_GPIO_AF_TIM5        = 2,
+    STM32F4_GPIO_AF_TIM8        = 3,
+    STM32F4_GPIO_AF_TIM9        = 3,
+    STM32F4_GPIO_AF_TIM10       = 3,
+    STM32F4_GPIO_AF_TIM11       = 3,
+    STM32F4_GPIO_AF_I2C         = 4,
+    STM32F4_GPIO_AF_SPI1        = 5,
+    STM32F4_GPIO_AF_SPI2        = 5,
+    STM32F4_GPIO_AF_SPI3        = 6,
+    STM32F4_GPIO_AF_USART1      = 7,
+    STM32F4_GPIO_AF_USART2      = 7,
+    STM32F4_GPIO_AF_USART3      = 7,
+    STM32F4_GPIO_AF_USART4      = 8,
+    STM32F4_GPIO_AF_USART5      = 8,
+    STM32F4_GPIO_AF_USART6      = 8,
+    STM32F4_GPIO_AF_CAN         = 9,
+    STM32F4_GPIO_AF_TIM12       = 9,
+    STM32F4_GPIO_AF_TIM13       = 9,
+    STM32F4_GPIO_AF_TIM14       = 9,
+    STM32F4_GPIO_AF_OTG_FS      = 10,
+    STM32F4_GPIO_AF_OTG_HS      = 10,
+    STM32F4_GPIO_AF_ETH         = 11,
+    STM32F4_GPIO_AF_FSMC        = 12,
+    STM32F4_GPIO_AF_SDIO        = 12,
+    STM32F4_GPIO_AF_OTG_HS_FS   = 12,   /* USB OTG HS configured as FS */
+    STM32F4_GPIO_AF_DCMI        = 13,
+    STM32F4_GPIO_AF_EVENTOUT    = 15,
+};
+
+enum stm32f4_gpio_pull {
+    STM32F4_GPIO_PULL_NONE  = GPIO_PUPDR_NONE,
+    STM32F4_GPIO_PULL_UP    = GPIO_PUPDR_UP,
+    STM32F4_GPIO_PULL_DOWN  = GPIO_PUPDR_DOWN,
+};
+
+enum stm32f4_gpio_speed {
+    STM32F4_GPIO_SPEED_2MHZ     = GPIO_OSPEEDR_2M,
+    STM32F4_GPIO_SPEED_25MHZ    = GPIO_OSPEEDR_25M,
+    STM32F4_GPIO_SPEED_50MHZ    = GPIO_OSPEEDR_50M,
+    STM32F4_GPIO_SPEED_100MHZ   = GPIO_OSPEEDR_100M,
+};
 
 /* Enumerate all of the GPIOs */
 enum stm32f4_gpios {
