@@ -34,11 +34,11 @@ void os_start(void) {
     init_perfcounter();
 #endif
 
-#ifdef CONFIG_HAVE_LED
-    init_led();
-#endif
-
     init_heap();
+
+#ifdef CONFIG_HAVE_LED
+    init_power_led();
+#endif
 
 #ifdef CONFIG_HAVE_USART
     init_usart();
