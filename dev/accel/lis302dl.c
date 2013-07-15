@@ -13,6 +13,7 @@
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <mm/mm.h>
+#include <board_config.h>
 
 #include "lis302dl.h"
 
@@ -25,36 +26,10 @@ struct lis302dl {
     int ready;
 };
 
-/* XXX: Currently hard-coded for STM32 Discovery */
-static void lis302dl_cs_high(void) {
-    *GPIO_ODR(GPIOE) |= GPIO_ODR_PIN(3);
-}
-
-static void lis302dl_cs_low(void) {
-    *GPIO_ODR(GPIOE) &= ~(GPIO_ODR_PIN(3));
-}
-
-/* XXX: Currently hard-coded for STM32 Discovery */
 static int lis302dl_init(struct accel *a) {
     struct spi *spi = (struct spi *) to_spi(a->device.parent);
     struct spi_ops *spi_ops = (struct spi_ops *)spi->obj.ops;
     struct lis302dl *lis_accel = (struct lis302dl *) a->priv;
-
-    /* Set up CS pin and set high */
-    *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOEEN;
-
-    /* PE3 */
-    gpio_moder(GPIOE, 3, GPIO_MODER_OUT);
-    gpio_otyper(GPIOE, 3, GPIO_OTYPER_PP);
-    gpio_pupdr(GPIOE, 3, GPIO_PUPDR_NONE);
-    gpio_ospeedr(GPIOE, 3, GPIO_OSPEEDR_50M);
-
-    /* Properly idle CS */
-    lis302dl_cs_high();
-
-    lis_accel->spi_dev.cs_high = lis302dl_cs_high;
-    lis_accel->spi_dev.cs_low = lis302dl_cs_low;
-    lis_accel->spi_dev.extended_transaction = 0;
 
     /* Active mode, XYZ enable */
     uint8_t data[2] = {
@@ -83,6 +58,8 @@ static int lis302dl_deinit(struct accel *a) {
             0x00,
         };
         ret = spi_ops->write(spi, &lis_accel->spi_dev, data, 2);
+
+        lis_accel->ready = 0;
     }
 
     return ret;
@@ -151,30 +128,72 @@ struct accel_ops lis302dl_ops = {
     .get_raw_data = lis302dl_get_raw_data,
 };
 
-/* XXX: Currently hard-coded for STM32 Discovery (spi1) */
 int create_lis302dl(void) {
-    /* Instantiate an accel with lis302dl ops */
-    struct obj *o = instantiate("lis302dl", &accel_class, &lis302dl_ops, struct accel);
-    if (!o) {
-        return -1;
+    struct obj *accel_obj;
+    struct accel *accel;
+    struct lis302dl *lis_accel;
+    struct obj *cs_obj;
+    struct gpio_ops *cs_ops;
+    int ret = 0;
+
+    /* Check if the board has a valid config for the accelerometer */
+    if (lis302dl_accel_config.valid != BOARD_CONFIG_VALID_MAGIC) {
+        ret = -1;
+        goto err;
     }
 
-    struct accel *a = container_of(o, struct accel, obj);
-
-    a->device.parent = get_by_name("spi1", &spi_class.instances);
-
-    a->priv = kmalloc(sizeof(struct lis302dl));
-    if (!a->priv) {
-        /* TODO: Uninstantiate */
-        return -1;
+    /* Instantiate an accel obj with lis302dl ops */
+    accel_obj = instantiate("lis302dl", &accel_class, &lis302dl_ops, struct accel);
+    if (!accel_obj) {
+        ret = -1;
+        goto err;
     }
 
-    struct lis302dl *lis_accel = (struct lis302dl *) a->priv;
+    /* Connect accel to its parent SPI device */
+    accel = to_accel(accel_obj);
+    accel->device.parent = get_by_name(lis302dl_accel_config.parent_name,
+                                       &spi_class.instances);
+    if (!accel->device.parent) {
+        ret = -1;
+        goto err_free_obj;
+    }
+
+    /* Set up private data */
+    accel->priv = kmalloc(sizeof(struct lis302dl));
+    if (!accel->priv) {
+        ret = -1;
+        goto err_free_obj;
+    }
+
+    lis_accel = (struct lis302dl *) accel->priv;
     lis_accel->ready = 0;
+    lis_accel->spi_dev.extended_transaction = 0;
+
+    /* Get chip select GPIO */
+    cs_obj = gpio_get(lis302dl_accel_config.cs_gpio);
+    if (!cs_obj) {
+        ret = -1;
+        goto err_free_priv;
+    }
+
+    lis_accel->spi_dev.cs = to_gpio(cs_obj);
+
+    /* Initialize chip select */
+    cs_ops = (struct gpio_ops *) cs_obj->ops;
+    cs_ops->active_low(lis_accel->spi_dev.cs, lis302dl_accel_config.cs_active_low);
+    cs_ops->direction(lis_accel->spi_dev.cs, GPIO_OUTPUT);
+    cs_ops->set_output_value(lis_accel->spi_dev.cs, 1);
 
     /* Export to the OS */
-    class_export_member(o);
+    class_export_member(accel_obj);
 
-    return 0;
+    return ret;
+
+err_free_priv:
+    kfree(accel->priv);
+err_free_obj:
+    kfree(accel_obj);
+err:
+    return ret;
 }
 LATE_INITIALIZER(create_lis302dl)
