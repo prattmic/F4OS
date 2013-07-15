@@ -5,6 +5,7 @@
 #include <arch/chip/gpio.h>
 #include <arch/chip/spi.h>
 #include <arch/chip/registers.h>
+#include <dev/hw/gpio.h>
 #include <kernel/semaphore.h>
 #include <kernel/class.h>
 #include <kernel/init.h>
@@ -156,7 +157,7 @@ static int stm32f4_spi_read_write(struct spi *spi, struct spi_dev *dev,
     }
 
     /* Verify valid SPI device */
-    if (!dev || !dev->cs_high || !dev->cs_low) {
+    if (!dev || !dev->cs) {
         return -1;
     }
 
@@ -164,12 +165,13 @@ static int stm32f4_spi_read_write(struct spi *spi, struct spi_dev *dev,
         return 0;
     }
 
+    struct gpio_ops *cs_ops = (struct gpio_ops *) dev->cs->obj.ops;
     uint32_t total = 0;
     int ret;
 
     if (!dev->extended_transaction) {
         acquire(&spi->lock);
-        dev->cs_low();
+        cs_ops->set_output_value(dev->cs, 0);
     }
 
     /* Data MUST be read after each TX */
@@ -198,7 +200,7 @@ static int stm32f4_spi_read_write(struct spi *spi, struct spi_dev *dev,
 
 out:
     if (!dev->extended_transaction) {
-        dev->cs_high();
+        cs_ops->set_output_value(dev->cs, 1);
         release(&spi->lock);
     }
 
@@ -216,14 +218,18 @@ static int stm32f4_spi_read(struct spi *spi, struct spi_dev *dev,
 }
 
 static void stm32f4_spi_start_transaction(struct spi *spi, struct spi_dev *dev) {
+    struct gpio_ops *cs_ops = (struct gpio_ops *) dev->cs->obj.ops;
+
     acquire(&spi->lock);
-    dev->cs_low();
+    cs_ops->set_output_value(dev->cs, 0);
     dev->extended_transaction = 1;
 }
 
 static void stm32f4_spi_end_transaction(struct spi *spi, struct spi_dev *dev) {
-    dev->cs_high();
+    struct gpio_ops *cs_ops = (struct gpio_ops *) dev->cs->obj.ops;
+
     dev->extended_transaction = 0;
+    cs_ops->set_output_value(dev->cs, 1);
     release(&spi->lock);
 }
 

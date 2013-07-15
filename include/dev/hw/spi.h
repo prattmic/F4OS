@@ -1,6 +1,7 @@
 #ifndef DEV_HW_SPI_H_INCLUDED
 #define DEV_HW_SPI_H_INCLUDED
 
+#include <dev/hw/gpio.h>
 #include <kernel/obj.h>
 #include <kernel/semaphore.h>
 
@@ -14,8 +15,11 @@ struct spi {
 };
 
 struct spi_dev {
-    void    (*cs_high)(void);
-    void    (*cs_low)(void);
+    /*
+     * Should be configure by child driver such that setting the GPIO to 0
+     * activates the chip select.
+     * */
+    struct gpio *cs;
     uint8_t extended_transaction;
 };
 
