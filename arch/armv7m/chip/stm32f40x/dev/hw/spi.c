@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <arch/system.h>
 #include <arch/chip/gpio.h>
 #include <arch/chip/spi.h>
@@ -15,6 +16,7 @@
 
 struct stm32f4_spi {
     uint8_t                 ready;
+    struct gpio             *gpio[3];    /* Each SPI port uses 3 GPIOs */
     struct stm32f4_spi_regs *regs;
 };
 
@@ -24,31 +26,6 @@ static int init_spi1(struct spi *s) {
     port->regs = get_spi(1);
 
     *RCC_APB2ENR |= RCC_APB2ENR_SPI1EN;     /* Enable SPI1 Clock */
-    *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOAEN;    /* Enable GPIOA Clock */
-
-    /* Set PA5, PA6, and PA7 to alternative function SPI1
-     * See stm32f4_ref.pdf pg 141 and stm32f407.pdf pg 51 */
-
-    /* PA5 */
-    gpio_moder(GPIOA, 5, GPIO_MODER_ALT);
-    gpio_afr(GPIOA, 5, GPIO_AF_SPI12);
-    gpio_otyper(GPIOA, 5, GPIO_OTYPER_PP);
-    gpio_pupdr(GPIOA, 5, GPIO_PUPDR_NONE);
-    gpio_ospeedr(GPIOA, 5, GPIO_OSPEEDR_50M);
-
-    /* PA6 */
-    gpio_moder(GPIOA, 6, GPIO_MODER_ALT);
-    gpio_afr(GPIOA, 6, GPIO_AF_SPI12);
-    gpio_otyper(GPIOA, 6, GPIO_OTYPER_PP);
-    gpio_pupdr(GPIOA, 6, GPIO_PUPDR_NONE);
-    gpio_ospeedr(GPIOA, 6, GPIO_OSPEEDR_50M);
-
-    /* PA7 */
-    gpio_moder(GPIOA, 7, GPIO_MODER_ALT);
-    gpio_afr(GPIOA, 7, GPIO_AF_SPI12);
-    gpio_otyper(GPIOA, 7, GPIO_OTYPER_PP);
-    gpio_pupdr(GPIOA, 7, GPIO_PUPDR_NONE);
-    gpio_ospeedr(GPIOA, 7, GPIO_OSPEEDR_50M);
 
     /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
     port->regs->CR1 |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
@@ -63,20 +40,9 @@ static int stm32f4_spi_init(struct spi *s) {
     struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
 
     /* Already initialized? */
-    if (port && port->ready) {
+    if (port->ready) {
         return 0;
     }
-    else if (!port) {
-        s->priv = kmalloc(sizeof(struct stm32f4_spi));
-        port = s->priv;
-        if (!port) {
-            return -1;
-        }
-    }
-
-    port->ready = 0;
-
-    init_semaphore(&s->lock);
 
     switch (s->num) {
     case 1:
@@ -88,9 +54,6 @@ static int stm32f4_spi_init(struct spi *s) {
 
     if (ret == 0) {
         port->ready = 1;
-    }
-    else {
-        kfree(port);
     }
 
     return ret;
@@ -243,33 +206,93 @@ struct spi_ops stm32f4_spi_ops = {
     .end_transaction = stm32f4_spi_end_transaction,
 };
 
-struct stm32f4_spi_ports {
+struct stm32f4_spi_port {
     char *name;
     int index;
+    int function;
+    uint32_t gpio[3];
 } stm32f4_spi_ports[] = {
-    { .name = "spi1", .index = 1 },
+    { .name = "spi1", .index = 1, .function = STM32F4_GPIO_AF_SPI1,
+        .gpio = {STM32F4_GPIO_PA5, STM32F4_GPIO_PA6, STM32F4_GPIO_PA7} },
 };
 
 #define NUM_SPI_PORTS   (sizeof(stm32f4_spi_ports)/sizeof(stm32f4_spi_ports[0]))
 
-/* Probe may be the wrong word */
-static int stm32f4_spi_probe(void) {
-    for (int i = 0; i < NUM_SPI_PORTS; i++) {
-        struct obj *o = instantiate(stm32f4_spi_ports[i].name, &spi_class,
-                                    &stm32f4_spi_ops, struct spi);
-        if (!o) {
-            return -1;
-        }
+static int stm32f4_spi_ctor(struct stm32f4_spi_port *config) {
+    struct obj *obj;
+    struct spi *spi;
+    struct stm32f4_spi *port;
 
-        struct spi *s = (struct spi *) to_spi(o);
-
-        s->num = stm32f4_spi_ports[i].index;
-        s->priv = NULL;
-
-        /* Export to the OS */
-        class_export_member(o);
+    obj = instantiate(config->name, &spi_class, &stm32f4_spi_ops, struct spi);
+    if (!obj) {
+        return -1;
     }
 
+    spi = to_spi(obj);
+
+    init_semaphore(&spi->lock);
+
+    /* May be unnecessary */
+    spi->num = config->index;
+
+    spi->priv = kmalloc(sizeof(struct stm32f4_spi));
+    if (!spi->priv) {
+        return -1;
+    }
+
+    port = spi->priv;
+    memset(port, 0, sizeof(*port));
+
+    port->ready = 0;
+
+    /* Setup GPIOs */
+    for (int i = 0; i < 3; i++) {
+        struct obj *gpio_obj;
+        struct gpio *gpio;
+        struct gpio_ops *ops;
+
+        gpio_obj = gpio_get(config->gpio[i]);
+        if (!gpio_obj) {
+            goto err_gpio;
+        }
+
+        gpio = to_gpio(gpio_obj);
+
+        ops = gpio_obj->ops;
+
+        ops->set_flags(gpio, STM32F4_GPIO_SPEED,
+                       STM32F4_GPIO_SPEED_50MHZ);
+        ops->set_flags(gpio, STM32F4_GPIO_ALT_FUNC,
+                       config->function);
+
+        port->gpio[i] = gpio;
+    }
+
+    /* Export to the OS */
+    class_export_member(obj);
+
     return 0;
+
+err_gpio:
+    for (int i = 0; i < 3; i++) {
+        if (port->gpio[i]) {
+            gpio_put(&port->gpio[i]->obj);
+        }
+    }
+
+    kfree(port);
+
+    return -1;
+}
+
+/* Probe may be the wrong word */
+static int stm32f4_spi_probe(void) {
+    int ret = 0;
+
+    for (int i = 0; i < NUM_SPI_PORTS; i++) {
+        ret += stm32f4_spi_ctor(&stm32f4_spi_ports[i]);
+    }
+
+    return ret;
 }
 CORE_INITIALIZER(stm32f4_spi_probe)
