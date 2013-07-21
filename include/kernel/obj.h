@@ -60,8 +60,8 @@ typedef struct obj {
 } obj_t;
 
 typedef struct obj_type {
-    void (*dtor)(struct obj *);
-    uintptr_t offset;
+    void        (*dtor)(struct obj *);
+    uintptr_t   offset;
 } obj_type_t;
 
 #define INIT_OBJ(symbol, obj_name, obj_type, obj_ops, obj_parent) { \

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <arch/chip/gpio.h>
 #include <arch/chip/registers.h>
+#include <dev/device.h>
 #include <dev/accel.h>
 #include <dev/hw/spi.h>
 #include <dev/resource.h>
@@ -128,40 +129,40 @@ struct accel_ops lis302dl_ops = {
     .get_raw_data = lis302dl_get_raw_data,
 };
 
-int create_lis302dl(void) {
+static int lis302dl_probe(const char *name) {
+    /* Check if the board has a valid config for the accelerometer. */
+    return lis302dl_accel_config.valid == BOARD_CONFIG_VALID_MAGIC;
+}
+
+static struct obj *lis302dl_ctor(const char *name) {
     struct obj *accel_obj;
     struct accel *accel;
     struct lis302dl *lis_accel;
     struct obj *cs_obj;
     struct gpio_ops *cs_ops;
-    int ret = 0;
 
-    /* Check if the board has a valid config for the accelerometer */
+    /* Check if the board has a valid config for the accelerometer.
+     * There should be, this was checked in probe. */
     if (lis302dl_accel_config.valid != BOARD_CONFIG_VALID_MAGIC) {
-        ret = -1;
-        goto err;
+        return NULL;
     }
 
     /* Instantiate an accel obj with lis302dl ops */
-    accel_obj = instantiate("lis302dl", &accel_class, &lis302dl_ops, struct accel);
+    accel_obj = instantiate((char *)name, &accel_class, &lis302dl_ops, struct accel);
     if (!accel_obj) {
-        ret = -1;
-        goto err;
+        return NULL;
     }
 
     /* Connect accel to its parent SPI device */
     accel = to_accel(accel_obj);
-    accel->device.parent = get_by_name(lis302dl_accel_config.parent_name,
-                                       &spi_class.instances);
+    accel->device.parent = device_get(lis302dl_accel_config.parent_name);
     if (!accel->device.parent) {
-        ret = -1;
         goto err_free_obj;
     }
 
     /* Set up private data */
     accel->priv = kmalloc(sizeof(struct lis302dl));
     if (!accel->priv) {
-        ret = -1;
         goto err_free_obj;
     }
 
@@ -172,7 +173,6 @@ int create_lis302dl(void) {
     /* Get chip select GPIO */
     cs_obj = gpio_get(lis302dl_accel_config.cs_gpio);
     if (!cs_obj) {
-        ret = -1;
         goto err_free_priv;
     }
 
@@ -187,13 +187,29 @@ int create_lis302dl(void) {
     /* Export to the OS */
     class_export_member(accel_obj);
 
-    return ret;
+    return accel_obj;
 
 err_free_priv:
     kfree(accel->priv);
 err_free_obj:
     kfree(accel_obj);
-err:
-    return ret;
+    return NULL;
 }
-LATE_INITIALIZER(create_lis302dl)
+
+/* Protects the constructor from reentrance */
+static struct semaphore lis302dl_driver_sem = INIT_SEMAPHORE;
+
+static struct device_driver lis320dl_driver = {
+    .name = "lis302dl",
+    .probe = lis302dl_probe,
+    .ctor = lis302dl_ctor,
+    .class = &accel_class,
+    .sem = &lis302dl_driver_sem,
+};
+
+static int lis302dl_register(void) {
+    device_driver_register(&lis320dl_driver);
+
+    return 0;
+}
+CORE_INITIALIZER(lis302dl_register)

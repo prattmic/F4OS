@@ -6,6 +6,7 @@
 #include <arch/chip/gpio.h>
 #include <arch/chip/spi.h>
 #include <arch/chip/registers.h>
+#include <dev/device.h>
 #include <dev/hw/gpio.h>
 #include <kernel/semaphore.h>
 #include <kernel/class.h>
@@ -218,14 +219,33 @@ struct stm32f4_spi_port {
 
 #define NUM_SPI_PORTS   (sizeof(stm32f4_spi_ports)/sizeof(stm32f4_spi_ports[0]))
 
-static int stm32f4_spi_ctor(struct stm32f4_spi_port *config) {
+static struct stm32f4_spi_port *stm32f4_get_config(const char *name) {
+    for (int i = 0; i < NUM_SPI_PORTS; i++) {
+        if (strncmp((char *)name, stm32f4_spi_ports[i].name, 5) == 0) {
+            return &stm32f4_spi_ports[i];
+        }
+    }
+
+    return NULL;
+}
+
+static int stm32f4_spi_probe(const char *name) {
+    return !!stm32f4_get_config(name);
+}
+
+static struct obj *stm32f4_spi_ctor(const char *name) {
+    struct stm32f4_spi_port *config = stm32f4_get_config(name);
     struct obj *obj;
     struct spi *spi;
     struct stm32f4_spi *port;
 
+    if (!config) {
+        return NULL;
+    }
+
     obj = instantiate(config->name, &spi_class, &stm32f4_spi_ops, struct spi);
     if (!obj) {
-        return -1;
+        return NULL;
     }
 
     spi = to_spi(obj);
@@ -237,7 +257,7 @@ static int stm32f4_spi_ctor(struct stm32f4_spi_port *config) {
 
     spi->priv = kmalloc(sizeof(struct stm32f4_spi));
     if (!spi->priv) {
-        return -1;
+        goto err_free_obj;
     }
 
     port = spi->priv;
@@ -253,7 +273,7 @@ static int stm32f4_spi_ctor(struct stm32f4_spi_port *config) {
 
         gpio_obj = gpio_get(config->gpio[i]);
         if (!gpio_obj) {
-            goto err_gpio;
+            goto err_free_gpio;
         }
 
         gpio = to_gpio(gpio_obj);
@@ -271,9 +291,9 @@ static int stm32f4_spi_ctor(struct stm32f4_spi_port *config) {
     /* Export to the OS */
     class_export_member(obj);
 
-    return 0;
+    return obj;
 
-err_gpio:
+err_free_gpio:
     for (int i = 0; i < 3; i++) {
         if (port->gpio[i]) {
             gpio_put(&port->gpio[i]->obj);
@@ -282,17 +302,36 @@ err_gpio:
 
     kfree(port);
 
-    return -1;
+err_free_obj:
+    kfree(obj);
+
+    return NULL;
 }
 
-/* Probe may be the wrong word */
-static int stm32f4_spi_probe(void) {
-    int ret = 0;
-
+static int stm32f4_spi_register(void) {
     for (int i = 0; i < NUM_SPI_PORTS; i++) {
-        ret += stm32f4_spi_ctor(&stm32f4_spi_ports[i]);
+        struct device_driver *drv = kmalloc(sizeof(*drv));
+        if (!drv) {
+            return -1;
+        }
+
+        struct semaphore *sem = kmalloc(sizeof(*sem));
+        if (!sem) {
+            kfree(drv);
+            return -1;
+        }
+
+        init_semaphore(sem);
+
+        drv->name = stm32f4_spi_ports[i].name;
+        drv->probe = stm32f4_spi_probe;
+        drv->ctor = stm32f4_spi_ctor;
+        drv->class = &spi_class;
+        drv->sem = sem;
+
+        device_driver_register(drv);
     }
 
-    return ret;
+    return 0;
 }
-CORE_INITIALIZER(stm32f4_spi_probe)
+CORE_INITIALIZER(stm32f4_spi_register)

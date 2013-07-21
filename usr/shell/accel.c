@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <dev/device.h>
 #include <dev/accel.h>
-#include <kernel/collection.h>
+#include <kernel/obj.h>
 #include <math.h>
 #include "app.h"
 
@@ -11,7 +12,7 @@ void accel(int argc, char **argv) {
         return;
     }
 
-    struct obj *o = get_by_name("lis302dl", &accel_class.instances);
+    struct obj *o = device_get("lis302dl");
     if (!o) {
         printf("Error: unable to find accelerometer.\r\n");
         return;
