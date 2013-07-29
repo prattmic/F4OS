@@ -4,6 +4,7 @@
 #include <kernel/fault.h>
 
 #include <kernel/sched.h>
+#include <kernel/sched_internals.h>
 #include "sched_internals.h"
 
 void free_task(task_ctrl *task) {
@@ -25,7 +26,7 @@ void end_task(void) {
 }
 
 /* Called by svc_handler */
-void svc_end_task(void) {
+void sched_svc_end_task(void) {
     struct task_ctrl *task = get_task_ctrl(curr_task);
 
     if (task->stack_limit > task->stack_top) {

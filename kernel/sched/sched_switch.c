@@ -2,6 +2,7 @@
 #include <kernel/fault.h>
 
 #include <kernel/sched.h>
+#include <kernel/sched_internals.h>
 #include "sched_internals.h"
 
 void switch_task(task_ctrl *task) {
@@ -41,7 +42,7 @@ void switch_task(task_ctrl *task) {
     /* mpu_stack_set(task->stack_base);   Sigh...maybe some day */
 
     if (task->running) {
-        enable_psp(task->stack_top);
+        enable_stack(task->stack_top);
         return;
     }
     else {
@@ -49,7 +50,7 @@ void switch_task(task_ctrl *task) {
 
         create_context(task, &end_task);
 
-        enable_psp(task->stack_top);
+        enable_stack(task->stack_top);
         return;
     }
 }

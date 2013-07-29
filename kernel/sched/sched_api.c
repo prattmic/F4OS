@@ -1,5 +1,6 @@
 #include <kernel/svc.h>
 #include <kernel/sched.h>
+#include <kernel/sched_internals.h>
 #include "sched_internals.h"
 
 /* Implements general scheduler API functions */

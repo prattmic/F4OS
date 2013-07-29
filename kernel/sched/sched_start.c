@@ -3,6 +3,7 @@
 #include <kernel/fault.h>
 
 #include <kernel/sched.h>
+#include <kernel/sched_internals.h>
 #include "sched_internals.h"
 
 volatile uint8_t task_switching = 0;
@@ -40,7 +41,7 @@ static void start_task_switching(void) {
 
     create_context(task, &end_task);
 
-    enable_psp(task->stack_top);
+    enable_stack(task->stack_top);
     restore_full_context();
     __asm__("nop");
 }

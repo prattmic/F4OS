@@ -6,59 +6,22 @@
 
 #define STKSIZE     CONFIG_TASK_STACK_SIZE      /* This is in words */
 
-typedef struct task_ctrl {
-    uint32_t    *stack_limit;
-    uint32_t    *stack_top;
-    uint32_t    *stack_base;
-    void        (*fptr)(void);
-    uint32_t    period;
-    uint32_t    ticks_until_wake;
-    uint8_t     priority;
-    uint8_t     running;
-    uint8_t     abort;
-    uint32_t    pid;
-    struct list runnable_task_list;
-    struct list periodic_task_list;
-    struct list free_task_list;
-    task_t      exported;
-} task_ctrl;
-
 struct list runnable_task_list;
 struct list periodic_task_list;
 struct list free_task_list;
 
-void create_context(task_ctrl *task, void (*lptr)(void)) __attribute__((section(".kernel")));
 void svc_register_task(task_ctrl *task, int periodic) __attribute__((section(".kernel")));
 
-void switch_task(task_ctrl *task) __attribute__((section(".kernel")));
 int svc_task_switch(task_ctrl *task) __attribute__((section(".kernel")));
-void rtos_tick(void) __attribute__((section(".kernel")));
 
 void end_task(void) __attribute__((section(".kernel"),naked));
-void svc_end_task(void) __attribute__((section(".kernel")));
+void sched_svc_end_task(void) __attribute__((section(".kernel")));
 void free_task(task_ctrl *task) __attribute__((section(".kernel")));
 
 uint8_t task_exists(task_t *task) __attribute__((section(".kernel")));
 
 void kernel_task(void) __attribute__((section(".kernel")));
 void sleep_task(void) __attribute__((section(".kernel")));
-
-/* ASM functions */
-extern void enable_psp(uint32_t *);
-extern void disable_psp();
-extern uint32_t *save_context(void) __attribute__((section(".kernel"), naked));
-extern uint32_t *restore_context() __attribute__((section(".kernel"), naked));
-extern uint32_t *restore_full_context() __attribute__((section(".kernel"), naked));
-
-/* Return task_ctrl struct given exported task_t address */
-static inline __attribute__((always_inline)) struct task_ctrl *get_task_ctrl(task_t *task) {
-    return container_of(task, struct task_ctrl, exported);
-}
-
-/* Return exportable task_t given task_ctrl address */
-static inline __attribute__((always_inline)) task_t *get_task_t(task_ctrl *task) {
-    return &task->exported;
-}
 
 /* Place task in task list based on priority
  * Struct member and global task list have same name */
