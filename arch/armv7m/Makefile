@@ -1,4 +1,5 @@
 SRCS += arch.c
+SRCS += fault.c
 SRCS += handlers.S
 SRCS += power.c
 
