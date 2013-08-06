@@ -60,7 +60,8 @@ int printk(char *fmt, ...) {
  * Accepts standard printf format strings. */
 void panic_print(char *fmt, ...) {
     /* Disable interrupts, as the system is going down. */
-    __asm__("cpsid  i");
+    disable_interrupts();
+
 #ifdef CONFIG_HAVE_LED
     /* Toggle red LED so there is some indication that something
      * bad has happened if this hangs */
@@ -331,3 +332,9 @@ void usagefault_handler(void) {
 
     panic();
 }
+
+/*
+ * Provide a weak version that does nothing in case
+ * the arch doesn't provide one
+ */
+void __attribute__((weak)) disable_interrupts(void) {}

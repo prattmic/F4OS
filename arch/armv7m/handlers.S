@@ -21,6 +21,13 @@ panic:
     b       panic
 
 .thumb_func
+.global     disable_interrupts
+.type       disable_interrupts, %function
+disable_interrupts:
+    cpsid   i
+    bx      lr
+
+.thumb_func
 .global hang
 hang:
     b       .
