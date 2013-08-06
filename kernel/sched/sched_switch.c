@@ -41,18 +41,12 @@ void switch_task(task_ctrl *task) {
 
     /* mpu_stack_set(task->stack_base);   Sigh...maybe some day */
 
-    if (task->running) {
-        enable_stack(task->stack_top);
-        return;
-    }
-    else {
+    if (!task->running) {
         task->running = 1;
-
         create_context(task, &end_task);
-
-        enable_stack(task->stack_top);
-        return;
     }
+
+    set_user_stack_pointer(task->stack_top);
 }
 
 /* Switch to task if it exists.

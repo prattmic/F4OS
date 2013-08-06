@@ -41,8 +41,7 @@ static void start_task_switching(void) {
 
     create_context(task, &end_task);
 
-    enable_stack(task->stack_top);
+    set_user_stack_pointer(task->stack_top);
     restore_full_context();
-    __asm__("nop");
 }
 

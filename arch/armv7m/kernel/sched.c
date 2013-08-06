@@ -22,8 +22,8 @@ void pendsv_handler(void){
     switch_task(NULL);
 }
 
-void enable_stack(uint32_t *stack_addr) {
-    enable_psp(stack_addr);
+void set_user_stack_pointer(uint32_t *stack_addr) {
+    SET_PSP(stack_addr);
 }
 
 void sched_svc_yield(void) {

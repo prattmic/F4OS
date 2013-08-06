@@ -95,13 +95,14 @@ void restore_context(void);
 void restore_full_context(void);
 
 /**
- * Enable task stack
+ * Set userspace stack pointer
  *
- * Enable the task's stack before switching contexts to the task
+ * Set the userspace stack pointer before switching contexts to the task.
+ * This stack will not become active until the actual context switch.
  *
- * @param stack  Stack address to enable
+ * @param stack  Stack address to set
  */
-void enable_stack(uint32_t *stack);
+void set_user_stack_pointer(uint32_t *stack_addr);
 
 /**
  * Create task context on the stack
