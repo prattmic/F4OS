@@ -25,23 +25,27 @@ KCONFIG_MAKE_DEFS := $(BASE)/include/config/auto.conf
 CONFIG_ARCH := $(shell echo $(CONFIG_ARCH))
 CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
 
+# Include all arch-specific configs
+# CROSS_COMPILE, CFLAGS, etc
+-include $(BASE)/arch/$(CONFIG_ARCH)/config.mk
+
 LINK_SCRIPT = $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/link.ld
 
-CROSS_COMPILE ?= arm-none-eabi-
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 
+# Establish system includes directory, auto-include config
 INCLUDE_FLAGS := -isystem $(PREFIX)/include/ -include $(BASE)/include/config/autoconf.h
 
-CFLAGS += -g3 -Wall --std=gnu99 $(INCLUDE_FLAGS)
-CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
-CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
-CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
+CFLAGS += --std=gnu99	# Use C99 with GNU extensions
+CFLAGS += -Wall			# Enable "all" warnings
+CFLAGS += -g3			# Lots of debugging info
+CFLAGS += -nostdlib		# Do not use standard system libraries
+CFLAGS += -ffreestanding# Do not assume any standard library exists
+CFLAGS += $(INCLUDE_FLAGS)
 
-#CFLAGS += -save-temps --verbose -Xlinker --verbose
-
-LFLAGS=
+LFLAGS +=
 
 CPPFLAGS := -P $(INCLUDE_FLAGS)
 
