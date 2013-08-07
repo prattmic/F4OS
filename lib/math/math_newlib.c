@@ -358,3 +358,56 @@ float expf(float x) {
     N++;
     return ldexpf(R, N);
 }
+
+#define __SQRT_HALF 0.70710678118654752440
+
+/* Allow the arch to define their own version */
+float __attribute__((weak)) sqrtf(float x) {
+    float f, y;
+    int exp, i, odd;
+
+    /* Check for special values. */
+    switch (numtestf(x))
+    {
+        case NAN:
+            return (x);
+        case INF:
+            if (ispos(x)) {
+                return (FLOAT_NAN);
+            }
+            else {
+                return (FLOAT_INF);
+            }
+    }
+
+    /* Initial checks are performed here. */
+    if (x == 0.0) {
+        return (0.0);
+    }
+    if (x < 0) {
+        return (FLOAT_NAN);
+    }
+
+    /* Find the exponent and mantissa for the form x = f * 2^exp. */
+    f = frexpf(x, &exp);
+    odd = exp & 1;
+
+    /* Get the initial approximation. */
+    y = 0.41731 + 0.59016 * f;
+
+    f *= 0.5;
+    /* Calculate the remaining iterations. */
+    for (i = 0; i < 2; ++i) {
+        y = y * 0.5 + f / y;
+    }
+
+    /* Calculate the final value. */
+    if (odd) {
+        y *= __SQRT_HALF;
+        exp++;
+    }
+    exp >>= 1;
+    y = ldexpf(y, exp);
+
+    return (y);
+}

@@ -5,21 +5,9 @@
 
 uint32_t pow(uint32_t base, uint32_t exp);
 
-inline float fabsf(float num) __attribute__((always_inline));
-inline float fabsf(float num) {
-    __asm__("vabs.f32   %[num], %[num]  \r\n"
-            :[num] "+w" (num)::"cc");
+float fabsf(float num);
 
-    return num;
-}
-
-inline float sqrtf(float num) __attribute__((always_inline));
-inline float sqrtf(float num) {
-    __asm__("vsqrt.f32   %[num], %[num]  \r\n"
-            :[num] "+w" (num)::"cc");
-
-    return num;
-}
+float sqrtf(float num);
 #define sqrt(x) sqrtf(x)
 
 float logarithm(float x, int ten);

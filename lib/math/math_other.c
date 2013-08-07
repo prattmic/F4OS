@@ -6,3 +6,7 @@ float lowpass(float acc, float new, float gain) {
 
     return acc + new * gain;
 }
+
+float __attribute__((weak)) fabsf(float num) {
+    return num > 0 ? num : -num;
+}
