@@ -44,6 +44,16 @@ float atangentf(float x, float v, float u, int arctan2);
 float atanf(float x);
 #define atan(x) atanf(x)
 
+/*
+ * First-order lowpass filter
+ *
+ * Performs a single iteration of a first-order low-pass filter
+ *
+ * @param acc   Accumulated value
+ * @param new   New input
+ * @param gain  Gain of low-pass filter
+ * @returns New accumulated value
+ */
 float lowpass(float acc, float new, float gain);
 
 #define FLOAT_INF           0x7f800000
