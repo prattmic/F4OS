@@ -2,6 +2,7 @@
 #define ARCH_SVC_H_INCLUDED
 
 #include <stdint.h>
+#include <arch/system.h>
 
 /* We need to make sure that we get the return value
  * without screwing up r0, since GCC doesn't understand that
@@ -38,5 +39,9 @@
                   :"r0", "r1");               \
     ret;    \
 })
+
+static inline int arch_svc_legal(void) {
+    return !IPSR();
+}
 
 #endif

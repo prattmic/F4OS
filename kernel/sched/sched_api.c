@@ -45,13 +45,13 @@ int task_switch(task_t *task) {
     int ret;
     task_ctrl *t = task ? get_task_ctrl(task) : NULL;
 
-    /* If already in interrupt space, switch directly */
-    if (IPSR()) {
-        ret = svc_task_switch(t);
-    }
-    /* Otherwise, make a service call */
-    else {
+    /* If possible, make a service call */
+    if (arch_svc_legal()) {
         ret = SVC_ARG(SVC_TASK_SWITCH, t);
+    }
+    /* Otherwise, switch directly */
+    else {
+        ret = svc_task_switch(t);
     }
 
     return ret;

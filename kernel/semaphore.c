@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
-#include <arch/chip/registers.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 
@@ -169,10 +168,6 @@ static void svc_release(struct semaphore *semaphore) {
 }
 
 int semaphore_service_call(uint32_t svc_number, ...) {
-    if (!IPSR()) {
-        panic_print("Attempted to call service call from user space");
-    }
-
     int ret = 0;
     va_list ap;
     va_start(ap, svc_number);

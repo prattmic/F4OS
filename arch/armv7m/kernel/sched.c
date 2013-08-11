@@ -22,6 +22,10 @@ void pendsv_handler(void){
     switch_task(NULL);
 }
 
+uint32_t *get_user_stack_pointer(void) {
+    return PSP();
+}
+
 void set_user_stack_pointer(uint32_t *stack_addr) {
     SET_PSP(stack_addr);
 }

@@ -2,7 +2,6 @@
 #define KERNEL_SCHED_H_INCLUDED
 
 #include <stdint.h>
-#include <arch/system.h>
 #include <dev/resource.h>
 #include <kernel/semaphore.h>
 #include <kernel/svc.h>
@@ -48,9 +47,9 @@ void main(void);
 
 /* Only perform a yield if task switching is active, and we are
  * not in an interrupt context */
-static inline yield_if_possible(void) __attribute__((always_inline));
-static inline yield_if_possible(void) {
-    if (task_switching && !IPSR()) {
+static inline void yield_if_possible(void) __attribute__((always_inline));
+static inline void yield_if_possible(void) {
+    if (task_switching && arch_svc_legal()) {
         SVC(SVC_YIELD);
     }
 }

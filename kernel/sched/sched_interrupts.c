@@ -6,10 +6,6 @@
 #include "sched_internals.h"
 
 int sched_service_call(uint32_t svc_number, ...) {
-    if (!IPSR()) {
-        panic_print("Attempted to call service call from user space");
-    }
-
     int ret = 0;
     va_list ap;
     va_start(ap, svc_number);

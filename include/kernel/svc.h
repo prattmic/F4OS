@@ -35,6 +35,17 @@
  * int SVC_ARG(int call, void *arg1, void *arg2);
  */
 
+/*
+ * Determine if a service call is allowed
+ *
+ * On many architectures, there a cases when a service call cannot be made,
+ * such as in interrupt space.  This function determines if a service call
+ * can be made.
+ *
+ * @returns non-zero if a service call can be made
+ * int arch_svc_legal(void);
+ */
+
 /* Available service calls */
 enum service_calls {
     SVC_YIELD,

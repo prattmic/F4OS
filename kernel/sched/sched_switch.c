@@ -57,7 +57,7 @@ int svc_task_switch(task_ctrl *task) {
         return -1;
     }
 
-    get_task_ctrl(curr_task)->stack_top = PSP();
+    get_task_ctrl(curr_task)->stack_top = get_user_stack_pointer();
     switch_task(task);
     return 0;
 }
