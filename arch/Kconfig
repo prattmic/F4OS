@@ -5,18 +5,28 @@ choice
     default ARCH_ARMV7M
 
 config ARCH_ARMV7M
-    bool "armv7"
+    bool "armv7m"
     ---help---
         ARMv7-M microcontroller profile
+
+config ARCH_ARMV7A
+    bool "armv7a"
+    ---help---
+        ARMv7-A profile
 
 endchoice
 
 config ARCH
     string
     default "armv7m" if ARCH_ARMV7M
+    default "armv7a" if ARCH_ARMV7A
 
 if ARCH_ARMV7M
 source arch/armv7m/Kconfig
+endif
+
+if ARCH_ARMV7A
+source arch/armv7a/Kconfig
 endif
 
 endmenu

@@ -1,0 +1,17 @@
+config INIT_STACK_POINTER
+    hex
+    prompt "Initial Stack Pointer"
+    ---help---
+        The stack pointer is initialized to this value
+
+config COPY_DATA
+    bool
+    prompt "Copy .data section"
+    default n if CHIP_AM335X
+    ---help---
+        If the .data section is not already in memory at system startup,
+        it must be copied as part of the C runtime startup.
+
+menu "Chip"
+source arch/armv7a/chip/Kconfig
+endmenu

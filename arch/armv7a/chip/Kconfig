@@ -1,0 +1,20 @@
+# Chip selection configuration
+
+choice
+    prompt "Chip to target"
+    default CHIP_AM335X
+
+config CHIP_AM335X
+    bool "am335x"
+    ---help---
+        TI Sitara series AM335x Cortex-A8
+
+endchoice
+
+config CHIP
+    string
+    default "am335x" if CHIP_AM335X
+
+if CHIP_AM335X
+source arch/armv7a/chip/am335x/Kconfig
+endif
