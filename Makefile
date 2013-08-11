@@ -100,17 +100,13 @@ $(KCONFIG_DIR)/conf/conf:
 menuconfig: $(KCONFIG_DIR)/conf/conf
 	$(KCONFIG_DIR)/nconf/nconf $(BASE)/Kconfig
 
-$(BASE)/.config: ;
+# Dummy rule to tell the user to run configuration
+$(BASE)/.config:
+	$(VERBOSE)echo "\nERROR: F4OS not configured.";
+	$(VERBOSE)echo "Please run 'make menuconfig' or one of the 'make *_defconfig' before continuing.\n";
+	$(VERBOSE)exit 1;
 
-$(KCONFIG_HEADER): $(KCONFIG_DIR)/conf/conf $(deps_config)
-	$(VERBOSE)if ! test -e $(BASE)/.config;	\
-	then	\
-		echo;	\
-		echo "ERROR: F4OS not configured.";	\
-		echo "Please run 'make menuconfig' or one of the 'make *_defconfig' before continuing.";	\
-		echo;	\
-		exit 1;	\
-	fi;
+$(KCONFIG_HEADER): $(KCONFIG_DIR)/conf/conf $(BASE)/.config $(deps_config)
 	$(VERBOSE)mkdir -p $(BASE)/include/config
 	$(VERBOSE)KCONFIG_AUTOHEADER=$(KCONFIG_HEADER) KCONFIG_AUTOCONFIG=$(KCONFIG_MAKE_DEFS) \
 		$(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
