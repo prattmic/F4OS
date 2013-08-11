@@ -142,7 +142,7 @@ $(PREFIX)/$(PROJ_NAME).o: $(KCONFIG_HEADER) $(PREFIX)/include .FORCE
 	$(MAKE) -f f4os.mk obj=$@
 
 $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/link.ld
-	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) $< -o $@ $(LFLAGS) -T $(PREFIX)/link.ld
+	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(CC) $< -o $@ $(CFLAGS) -T $(PREFIX)/link.ld $(patsubst %,-Xlinker %,$(LFLAGS))
 	$(VERBOSE)echo "OBJCOPY $(PROJ_NAME).hex" && $(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	$(VERBOSE)echo "OBJCOPY $(PROJ_NAME).bin" && $(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
 
