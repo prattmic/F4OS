@@ -21,8 +21,8 @@
  */
 
 #include <arch/chip.h>
-#include <dev/arch.h>
+#include "clocks.h"
 
-void init_arch(void) {
-    init_chip();
+void init_chip(void) {
+    am335x_clock_config();
 }

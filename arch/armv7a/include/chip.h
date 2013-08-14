@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-#include <arch/chip.h>
-#include <dev/arch.h>
+#ifndef ARCH_CHIP_H_INCLUDED
+#define ARCH_CHIP_H_INCLUDED
 
-void init_arch(void) {
-    init_chip();
-}
+void init_chip(void) __attribute__((section(".kernel")));
+
+#endif

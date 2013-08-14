@@ -1,3 +1,4 @@
+SRCS += chip.c
 SRCS += clocks.c
 SRCS += timer.c
 
