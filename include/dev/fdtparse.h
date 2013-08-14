@@ -124,4 +124,24 @@ int fdtparse_get_gpio(const void *fdt, int offset, const char *name,
  */
 char *fdtparse_get_path(const void *fdt, int offset);
 
+/**
+ * Find the interrupt-parent node
+ *
+ * Uses the "interrupt-parent" property to find the offset of the interrupt
+ * parent of a given node.  If the property is not found, parent nodes
+ * will be searched for the propery.
+ *
+ * @param fdt   pointer to the device tree blob
+ * @param nodeoffset    node to find interrupt parent of
+ * @returns,
+ *    structure block offset of the located node (>= 0), on success
+ *    -FDT_ERR_NOTFOUND, no interrupt-parent property found,
+ *    -FDT_ERR_BADPHANDLE, interrupt-parent property does not contain a phandle,
+ *    -FDT_ERR_BADMAGIC,
+ *    -FDT_ERR_BADVERSION,
+ *    -FDT_ERR_BADSTATE,
+ *    -FDT_ERR_BADSTRUCTURE, standard meanings
+ */
+int fdtparse_get_interrupt_parent(const void *fdt, int nodeoffset);
+
 #endif

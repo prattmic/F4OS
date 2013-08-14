@@ -1,6 +1,13 @@
 / {
     compatible = "ti,am33xx";
-
     #address-cells = <1>;
     #size-cells = <1>;
+    interrupt-parent = <&intc>;
+
+    intc: interrupt-controller@48200000 {
+        compatible = "ti,am33xx-intc";
+        regs = <0x48200000 0x300>;
+        interrupt-controller;
+        #interrupt-cells = <1>;
+    };
 };

@@ -87,10 +87,36 @@ _hypervisor_mode:
     b       .
 
 _irq:
-    b       .
+    /* Save all non-banked registers, lr, and spsr */
+    stmfd   sp!, {r0-r12, lr}
+    mrs     r0, spsr
+    stmfd   sp!, {r0}
+
+    bl      irq_handler
+
+    /* Restore registers */
+    ldmfd   sp!, {r0}
+    msr     spsr, r0
+    ldmfd   sp!, {r0-r12, lr}
+
+    /* Return */
+    subs    pc, lr, #4
 
 _fiq:
-    b       .
+    /* Save all non-banked registers, lr, and spsr */
+    stmfd   sp!, {r0-r7, lr}
+    mrs     r0, spsr
+    stmfd   sp!, {r0}
+
+    bl      fiq_handler
+
+    /* Restore registers */
+    ldmfd   sp!, {r0}
+    msr     spsr, r0
+    ldmfd   sp!, {r0-r7, lr}
+
+    /* Return */
+    subs    pc, lr, #4
 
 .global     panic
 .type       panic, %function

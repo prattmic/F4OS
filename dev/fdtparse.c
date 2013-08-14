@@ -139,3 +139,36 @@ char *fdtparse_get_path(const void *fdt, int offset) {
 
     return path;
 }
+
+int fdtparse_get_interrupt_parent(const void *fdt, int nodeoffset) {
+    int len;
+    const struct fdt_property *interrupt_parent;
+    fdt32_t *cell;
+    uint32_t parent_phandle;
+    int parent_offset;
+
+    /* Use "interrupt-parent" from node, or node's parent */
+    do {
+        interrupt_parent = fdt_get_property(fdt, nodeoffset,
+                                            "interrupt-parent", &len);
+    } while ((len < 0) &&
+             (nodeoffset = fdt_parent_offset(fdt, nodeoffset)) >= 0);
+
+    if (len < 0) {
+        return len;
+    }
+
+    /* Cell must be big enough to hold phandle */
+    if (len < sizeof(fdt32_t)) {
+        return -FDT_ERR_BADPHANDLE;
+    }
+
+    cell = (fdt32_t *) interrupt_parent->data;
+    parent_phandle = fdt32_to_cpu(cell[0]);
+    parent_offset = fdt_node_offset_by_phandle(fdt, parent_phandle);
+    if (parent_offset < 0) {
+        return parent_offset;
+    }
+
+    return parent_offset;
+}
