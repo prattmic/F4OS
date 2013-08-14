@@ -1,0 +1,19 @@
+menu "Clocks"
+
+config AM335X_REFERENCE_CLOCK
+    int
+    prompt "Reference clock speed (Hz)"
+    default 24000000
+    ---help---
+        This is the reference clock (crystal) on the board.
+        All clocks in the system are referenced from this clock.
+
+config AM335X_DEFAULT_SYSTEM_CLOCK
+    int
+    prompt "Default system clock speed (MHz)"
+    default 200
+    ---help---
+        This is the default clock speed of the core.  It may be
+        modified by power management.
+
+endmenu
