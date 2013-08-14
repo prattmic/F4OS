@@ -1,3 +1,5 @@
+menu "Arch"
+
 choice
     prompt "Architecture"
     default ARCH_ARMV7M
@@ -16,3 +18,5 @@ config ARCH
 if ARCH_ARMV7M
 source arch/armv7m/Kconfig
 endif
+
+endmenu

@@ -21,8 +21,6 @@ config CHIP
     default "stm32f40x" if CHIP_STM32F40X
     default "lm4f120h5" if CHIP_LM4F120H5
 
-menu "Chip"
-
 config HAVE_FPU
     bool
     prompt "FPU Support"
@@ -45,4 +43,3 @@ endif
 if CHIP_LM4F120H5
 source arch/armv7m/chip/lm4f120h5/Kconfig
 endif
-endmenu
