@@ -153,6 +153,15 @@
                         regs = <0x44e01200 0x100>;
                     };
                 };
+
+                timer1: dmtimer1ms0@44e31000 {
+                    compatible = "ti,am33xx-dmtimer-1ms";
+                    regs = <0x44e31000 0x1000>;
+                    clocks = <&cmwkup 0xc4>;
+                    ti,clock-select = <&cmdpll 0x28>;
+                    clock-names = "wkup_timer1_gclk";
+                    interrupts = <67>;
+                };
             };
         };
     };
