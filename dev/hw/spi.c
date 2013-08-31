@@ -1,8 +1,5 @@
-#include <list.h>
 #include <dev/hw/spi.h>
 #include <kernel/class.h>
-#include <kernel/fault.h>
-#include <kernel/system.h>
 #include <mm/mm.h>
 
 static void spi_dtor(struct obj *o);

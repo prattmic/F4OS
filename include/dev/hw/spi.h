@@ -28,7 +28,6 @@ static inline struct spi *to_spi(struct obj *o) {
     return (struct spi *) container_of(o, struct spi, obj);
 }
 
-
 struct spi_ops {
     /**
      * Initialize SPI peripheral
