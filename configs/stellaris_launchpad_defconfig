@@ -2,15 +2,19 @@
 # Automatically generated file; DO NOT EDIT.
 # F4OS Configuration
 #
+
+#
+# Arch
+#
 CONFIG_ARCH_ARMV7M=y
 CONFIG_ARCH="armv7m"
-# CONFIG_CHIP_STM32F40X is not set
-CONFIG_CHIP_LM4F120H5=y
-CONFIG_CHIP="lm4f120h5"
 
 #
 # Chip
 #
+# CONFIG_CHIP_STM32F40X is not set
+CONFIG_CHIP_LM4F120H5=y
+CONFIG_CHIP="lm4f120h5"
 CONFIG_HAVE_FPU=y
 CONFIG_SYS_CLOCK=84000000
 

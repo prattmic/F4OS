@@ -10,6 +10,7 @@
 #define DEBUG_PRINT(...)    do { if (DEBUG_ON) printk(__VA_ARGS__); } while(0)
 
 extern void panic(void) __attribute__((noreturn));
+extern void disable_interrupts(void);
 
 int printk(char *fmt, ...) __attribute__((section(".kernel")));
 void panic_print(char *fmt, ...) __attribute__((noreturn));

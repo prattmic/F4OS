@@ -9,33 +9,45 @@ PREFIX := $(BASE)/out
 # Userspace program to build (folder in usr/)
 USR ?= shell
 
--include $(BASE)/.config
+# Kconfig source directory
+KCONFIG_DIR := $(BASE)/tools/kconfig-frontends/frontends/
+# Config header for source files
+KCONFIG_HEADER := $(BASE)/include/config/autoconf.h
+# Config defines for Make
+# Do not depend on this! It has a dummy rule to prevent make from trying
+# to make it on include.  Depend on KCONFIG_HEADER, its rule will build this.
+KCONFIG_MAKE_DEFS := $(BASE)/include/config/auto.conf
+
+# Include configuration
+-include $(KCONFIG_MAKE_DEFS)
 
 # The quotes from Kconfig are annoying
 CONFIG_ARCH := $(shell echo $(CONFIG_ARCH))
 CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
 
+# Include all arch-specific configs
+# CROSS_COMPILE, CFLAGS, etc
+-include $(BASE)/arch/$(CONFIG_ARCH)/config.mk
+
 LINK_SCRIPT = $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/link.ld
 
-CROSS_COMPILE ?= arm-none-eabi-
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 
+# Establish system includes directory, auto-include config
 INCLUDE_FLAGS := -isystem $(PREFIX)/include/ -include $(BASE)/include/config/autoconf.h
 
-CFLAGS += -g3 -Wall --std=gnu99 $(INCLUDE_FLAGS)
-CFLAGS += -mlittle-endian -mthumb -mcpu=cortex-m4 -mthumb-interwork -Xassembler -mimplicit-it=thumb
-CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostdlib -ffreestanding
-CFLAGS += -Wdouble-promotion -fsingle-precision-constant -fshort-double
+CFLAGS += --std=gnu99	# Use C99 with GNU extensions
+CFLAGS += -Wall			# Enable "all" warnings
+CFLAGS += -g3			# Lots of debugging info
+CFLAGS += -nostdlib		# Do not use standard system libraries
+CFLAGS += -ffreestanding# Do not assume any standard library exists
+CFLAGS += $(INCLUDE_FLAGS)
 
-#CFLAGS += -save-temps --verbose -Xlinker --verbose
-
-LFLAGS=
+LFLAGS +=
 
 CPPFLAGS := -P $(INCLUDE_FLAGS)
-
-KCONFIG_DIR = $(BASE)/tools/kconfig-frontends/frontends/
 
 # Command verbosity
 # Unless V=1, surpress output with @
@@ -50,16 +62,23 @@ export
 
 .PHONY: proj unoptimized ctags cscope .FORCE
 
+# Don't build if applying a defconfig
+# This way `make -j4 defconfig all` will only do the config,
+# and not try to build.
+ifeq ($(findstring defconfig,$(MAKECMDGOALS)),)
 all: CFLAGS += -O2
 all: $(PREFIX) proj
 
 unoptimized: CFLAGS += -O0
 unoptimized: $(PREFIX) proj
-
-again: clean all
+else
+# Running defconfig, so don't build
+all: ;
+unoptimized: ;
+endif
 
 # Flash the board
-burn:
+burn: $(KCONFIG_HEADER)
 	$(MAKE) -C arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/ burn
 
 # Create tags
@@ -71,7 +90,9 @@ cscope:
 
 # defconfig rules and DEFCONFIGS list
 include $(BASE)/configs/Makefile.in
--include $(BASE)/include/config/auto.conf.cmd
+
+# Kconfig file dependencies
+-include $(KCONFIG_MAKE_DEFS).cmd
 
 $(KCONFIG_DIR)/conf/conf:
 	env - PATH=$(PATH) $(BASE)/tools/build_kconfig.sh $(BASE)
@@ -79,19 +100,20 @@ $(KCONFIG_DIR)/conf/conf:
 menuconfig: $(KCONFIG_DIR)/conf/conf
 	$(KCONFIG_DIR)/nconf/nconf $(BASE)/Kconfig
 
-$(BASE)/.config: ;
+# Dummy rule to tell the user to run configuration
+$(BASE)/.config:
+	$(VERBOSE)echo "\nERROR: F4OS not configured.";
+	$(VERBOSE)echo "Please run 'make menuconfig' or one of the 'make *_defconfig' before continuing.\n";
+	$(VERBOSE)exit 1;
 
-include/config/auto.conf $(BASE)/include/config/autoconf.h: $(BASE)/.config $(KCONFIG_DIR)/conf/conf $(deps_config)
-	$(VERBOSE)if ! test -e $(BASE)/.config;	\
-	then	\
-		echo;	\
-		echo "ERROR: F4OS not configured.";	\
-		echo "Please run 'make menuconfig' or one of the 'make *_defconfig' before continuing.";	\
-		echo;	\
-		exit 1;	\
-	fi;
+$(KCONFIG_HEADER): $(KCONFIG_DIR)/conf/conf $(BASE)/.config $(deps_config)
 	$(VERBOSE)mkdir -p $(BASE)/include/config
-	$(VERBOSE)KCONFIG_AUTOHEADER=$(BASE)/include/config/autoconf.h $(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
+	$(VERBOSE)KCONFIG_AUTOHEADER=$(KCONFIG_HEADER) KCONFIG_AUTOCONFIG=$(KCONFIG_MAKE_DEFS) \
+		$(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
+
+# Don't attempt to build this at include time.
+# It will be build by the KCONFIG_HEADER rule
+$(KCONFIG_MAKE_DEFS): ;
 
 proj: 	$(PREFIX)/$(PROJ_NAME).elf
 
@@ -108,7 +130,7 @@ $(PREFIX):
 # is recreated.
 #
 # Rerun this rule at every build in order to pick up any new headers.
-$(PREFIX)/include: $(PREFIX) .FORCE
+$(PREFIX)/include: $(PREFIX) $(KCONFIG_HEADER) .FORCE
 	$(VERBOSE)echo "GEN	$@"
 	$(VERBOSE)rm -rf $(PREFIX)/include/
 	$(VERBOSE)mkdir -p $(PREFIX)/include/arch/chip/
@@ -116,17 +138,20 @@ $(PREFIX)/include: $(PREFIX) .FORCE
 	$(VERBOSE)cp -a $(BASE)/arch/$(CONFIG_ARCH)/include/. $(PREFIX)/include/arch/
 	$(VERBOSE)cp -a $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/include/. $(PREFIX)/include/arch/chip/
 
-$(PREFIX)/$(PROJ_NAME).o: $(BASE)/include/config/autoconf.h $(PREFIX)/include .FORCE
+$(PREFIX)/$(PROJ_NAME).o: $(KCONFIG_HEADER) $(PREFIX)/include .FORCE
 	$(MAKE) -f f4os.mk obj=$@
 
 $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/link.ld
-	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) $< -o $@ $(LFLAGS) -T $(PREFIX)/link.ld
+	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(CC) $< -o $@ $(CFLAGS) -T $(PREFIX)/link.ld $(patsubst %,-Xlinker %,$(LFLAGS))
 	$(VERBOSE)echo "OBJCOPY $(PROJ_NAME).hex" && $(OBJCOPY) -O ihex $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).hex
 	$(VERBOSE)echo "OBJCOPY $(PROJ_NAME).bin" && $(OBJCOPY) -O binary $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
 
 # Preprocess the linker script
 $(PREFIX)/link.ld : $(LINK_SCRIPT)
 	$(VERBOSE)echo "CPP $(subst $(BASE)/,,$<)" && cpp -MD -MT $@ $(CPPFLAGS) $< -o $@
+
+# LINK_SCRIPT expansion depends on the config defines
+$(LINK_SCRIPT): $(KCONFIG_HEADER)
 
 # Include linker script dependencies
 -include $(PREFIX)/link.d
@@ -137,6 +162,11 @@ clean:
 distclean: clean
 	-rm -rf .config
 	-rm -rf $(BASE)/include/config/
+
+# Parallel safe make again
+again:
+	$(MAKE) clean
+	$(MAKE) all
 
 .FORCE:
 

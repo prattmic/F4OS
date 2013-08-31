@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>
+#include <kernel/sched_internals.h>
 #include <kernel/semaphore.h>
 
 void svc_handler(uint32_t*) __attribute__((section(".kernel")));
@@ -18,11 +19,12 @@ void svc_handler(uint32_t *registers) {
         case SVC_END_TASK:
         case SVC_REGISTER_TASK:
         case SVC_TASK_SWITCH:
-            svc_sched(svc_number, registers);
+            registers[0] = sched_service_call(svc_number, registers[0],
+                                              registers[1]);
             break;
         case SVC_ACQUIRE:
         case SVC_RELEASE:
-            svc_semaphore(svc_number, registers);
+            registers[0] = semaphore_service_call(svc_number, registers[0]);
             break;
         default:
             panic_print("Unknown SVC: %d", svc_number);

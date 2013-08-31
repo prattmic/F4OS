@@ -46,6 +46,13 @@ inline uint32_t *PSP(void) {
     return val;
 }
 
+inline void *SET_PSP(void *addr) __attribute__((always_inline));
+inline void *SET_PSP(void *addr) {
+    asm volatile ("msr    psp, %[addr]"
+        ::[addr] "r" (addr)
+        :);
+}
+
 inline uint32_t *MSP(void) __attribute__((always_inline));
 inline uint32_t *MSP(void) {
     uint32_t *val;

@@ -1,47 +1,52 @@
 #ifndef KERNEL_SVC_H_INCLUDED
 #define KERNEL_SVC_H_INCLUDED
 
-#include <stdint.h>
+/*
+ * Arch specific implementation for making service calls
+ *
+ * Provides static inline functions or macros that behave as follows:
+ */
+#include <arch/svc.h>
 
-/* Make a SVC call */
+/*
+ * Performs a service call with no arguments
+ *
+ * @param call  Service call number
+ * @returns Return value for service call
+ * int SVC(int call);
+ */
 
-/* We need to make sure that we get the return value
- * without screwing up r0, since GCC doesn't understand that
- * SVC has a return value */
-#define SVC(call)  ({ \
-    uint32_t ret = 0;   \
-    asm volatile ("svc  %[code]  \n"    \
-                  "mov  %[ret], r0  \n" \
-                  :[ret] "+r" (ret)     \
-                  :[code] "I" (call)    \
-                  :"r0");               \
-    ret;    \
-})
+/*
+ * Performs a service call with 1 argument
+ *
+ * @param call  Service call number
+ * @param arg   Arguement to service call
+ * @returns Return value for service call
+ * int SVC_ARG(int call, void *arg);
+ */
 
-#define SVC_ARG(call, arg)  ({ \
-    uint32_t ret = 0;   \
-    asm volatile ("mov  r0, %[ar]  \n"  \
-                  "svc  %[code]  \n"    \
-                  "mov  %[ret], r0  \n" \
-                  :[ret] "+r" (ret)     \
-                  :[code] "I" (call), [ar] "r" (arg)     \
-                  :"r0");               \
-    ret;    \
-})
+/*
+ * Performs a service call with 2 argument
+ *
+ * @param call  Service call number
+ * @param arg1  Arguement 1 to service call
+ * @param arg2  Arguement 2 to service call
+ * @returns Return value for service call
+ * int SVC_ARG(int call, void *arg1, void *arg2);
+ */
 
-#define SVC_ARG2(call, arg1, arg2)  ({ \
-    uint32_t ret = 0;   \
-    asm volatile ("mov  r0, %[ar1]  \n"  \
-                  "mov  r1, %[ar2]  \n"  \
-                  "svc  %[code]  \n"    \
-                  "mov  %[ret], r0  \n" \
-                  :[ret] "+r" (ret)     \
-                  :[code] "I" (call), [ar1] "r" (arg1), [ar2] "r" (arg2)     \
-                  :"r0", "r1");               \
-    ret;    \
-})
+/*
+ * Determine if a service call is allowed
+ *
+ * On many architectures, there a cases when a service call cannot be made,
+ * such as in interrupt space.  This function determines if a service call
+ * can be made.
+ *
+ * @returns non-zero if a service call can be made
+ * int arch_svc_legal(void);
+ */
 
-/* SVC case names */
+/* Available service calls */
 enum service_calls {
     SVC_YIELD,
     SVC_END_TASK,

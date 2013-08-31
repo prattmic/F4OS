@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <time.h>
-#include <arch/system.h>
 #include <kernel/sched.h>
 
 volatile uint32_t system_ticks = 0;

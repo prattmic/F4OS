@@ -1,8 +1,9 @@
 #include <stddef.h>
-
+#include <kernel/power.h>
+#include <kernel/fault.h>
 #include <kernel/semaphore.h>
 #include <kernel/sched.h>
-#include <kernel/fault.h>
+#include <kernel/sched_internals.h>
 #include "sched_internals.h"
 
 struct list free_task_list = INIT_LIST(free_task_list);
@@ -30,6 +31,6 @@ void kernel_task(void) {
 void sleep_task(void) {
     /* Run when there is nothing else to run */
     while (1) {
-        asm("wfe\n");
+        arch_wait_for_interrupt();
     }
 }

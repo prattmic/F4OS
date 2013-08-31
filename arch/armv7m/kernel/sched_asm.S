@@ -18,14 +18,12 @@ raise_privilege:
     isb
     bx      lr
 
-/* Sets and enables the PSP for user mode processes.
- * r0 - Stack address for PSP */
+/* Enables the PSP for user mode processes. */
 .thumb_func
 .section    .kernel
 .global     enable_psp
 .type       enable_psp, %function
 enable_psp:
-    msr     psp, r0
     mrs     r1, control
     orr     r1, r1, #2
     msr     control, r1
@@ -70,7 +68,7 @@ restore_context:
     vldmia  r0!, {s16-s31}  /* Restore FPU registers */
     ldmfd   r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
     msr     psp, r0
-    bx      lr
+    b       enable_psp      /* User process uses the PSP */
 
 /* For save_full_context, see f3f5b61 kernel/sched/sched_swap.c */
 
@@ -80,6 +78,8 @@ restore_context:
 .global     restore_full_context
 .type       restore_full_context, %function
 restore_full_context:
+    bl      enable_psp      /* User process uses the PSP */
+
     mrs     r0, psp
 
     vldmia  r0!, {s16-s31}  /* Restore FPU registers */

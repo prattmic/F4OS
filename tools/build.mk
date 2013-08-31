@@ -4,10 +4,10 @@
 # so the normal prefix will be used
 obj_prefix ?= $(PREFIX)/
 
-$(obj_prefix)%.o : %.S $(BASE)/include/config/autoconf.h
+$(obj_prefix)%.o : %.S $(KCONFIG_HEADER)
 	$(VERBOSE)echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
 
-$(obj_prefix)%.o : %.c $(BASE)/include/config/autoconf.h
+$(obj_prefix)%.o : %.c $(KCONFIG_HEADER)
 	$(VERBOSE)echo "CC $<" && $(CC) -MD -c $(CFLAGS) $< -o $@
 
 -include $(addprefix $(obj_prefix), $(SRCS:.S=.d))

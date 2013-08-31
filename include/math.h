@@ -5,21 +5,9 @@
 
 uint32_t pow(uint32_t base, uint32_t exp);
 
-inline float fabsf(float num) __attribute__((always_inline));
-inline float fabsf(float num) {
-    __asm__("vabs.f32   %[num], %[num]  \r\n"
-            :[num] "+w" (num)::"cc");
+float fabsf(float num);
 
-    return num;
-}
-
-inline float sqrtf(float num) __attribute__((always_inline));
-inline float sqrtf(float num) {
-    __asm__("vsqrt.f32   %[num], %[num]  \r\n"
-            :[num] "+w" (num)::"cc");
-
-    return num;
-}
+float sqrtf(float num);
 #define sqrt(x) sqrtf(x)
 
 float logarithm(float x, int ten);
@@ -44,6 +32,16 @@ float atangentf(float x, float v, float u, int arctan2);
 float atanf(float x);
 #define atan(x) atanf(x)
 
+/*
+ * First-order lowpass filter
+ *
+ * Performs a single iteration of a first-order low-pass filter
+ *
+ * @param acc   Accumulated value
+ * @param new   New input
+ * @param gain  Gain of low-pass filter
+ * @returns New accumulated value
+ */
 float lowpass(float acc, float new, float gain);
 
 #define FLOAT_INF           0x7f800000

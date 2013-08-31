@@ -1,57 +1,39 @@
-#include <stddef.h>
+#include <stdarg.h>
 #include <stdint.h>
-#include <time.h>
-#include <arch/system.h>
-#include <kernel/semaphore.h>
-#include <kernel/sched.h>
-#include <kernel/svc.h>
 #include <kernel/fault.h>
+#include <kernel/sched.h>
+#include <kernel/sched_internals.h>
 #include "sched_internals.h"
 
-void systick_handler(void) __attribute__((section(".kernel")));
-void pendsv_handler(void) __attribute__((section(".kernel")));
-
-void systick_handler(void) {
-    system_ticks++;
-
-    /* Call PendSV to do switching */
-    *SCB_ICSR |= SCB_ICSR_PENDSVSET;
-}
-
-void pendsv_handler(void){
-    /* Update periodic tasks */
-    rtos_tick();
-
-    get_task_ctrl(curr_task)->stack_top = PSP();
-
-    switch_task(NULL);
-}
-
-static void svc_yield(void) {
-    get_task_ctrl(curr_task)->stack_top = PSP();
-    switch_task(NULL);
-}
-
-void svc_sched(uint32_t svc_number, uint32_t *registers) {
-    if (!IPSR()) {
-        panic_print("Attempted to call service call from user space");
-    }
+int sched_service_call(uint32_t svc_number, ...) {
+    int ret = 0;
+    va_list ap;
+    va_start(ap, svc_number);
 
     switch (svc_number) {
         case SVC_YIELD:
-            svc_yield();
+            sched_svc_yield();
             break;
         case SVC_END_TASK:
-            svc_end_task();
+            sched_svc_end_task();
             break;
-        case SVC_REGISTER_TASK:
-            svc_register_task((task_ctrl *) registers[0], (int) registers[1]);
+        case SVC_REGISTER_TASK: {
+            task_ctrl *task = va_arg(ap, task_ctrl *);
+            int periodic = va_arg(ap, int);
+            svc_register_task(task, periodic);
             break;
-        case SVC_TASK_SWITCH:
-            registers[0] = svc_task_switch((task_ctrl *) registers[0]);
+        }
+        case SVC_TASK_SWITCH: {
+            task_ctrl *task = va_arg(ap, task_ctrl *);
+            ret = svc_task_switch(task);
             break;
+        }
         default:
             panic_print("Unknown SVC: %d", svc_number);
             break;
     }
+
+    va_end(ap);
+
+    return ret;
 }

@@ -1,7 +1,7 @@
+#include <stdarg.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <string.h>
-#include <arch/chip/registers.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 
@@ -31,31 +31,11 @@ void acquire_for_free(volatile struct semaphore *semaphore) {
     held_semaphores_remove(curr_task->semaphore_data.held_semaphores, semaphore);
 }
 
-static int8_t try_lock(volatile uint8_t *l) {
-    uint8_t taken = 1;
-    uint8_t ret;
-    uint8_t tmp = 0;
-    __asm__("\
-        ldrexb      %[tmp], [%[addr]]             \r\n\
-        cmp         %[tmp], #0                    \r\n\
-        ITT         EQ                            \r\n\
-        strexbeq    %[tmp], %[taken], [%[addr]]   \r\n\
-        cmpeq       %[tmp], #0                    \r\n\
-        ITE         EQ                            \r\n\
-        moveq       %[ret], #1                    \r\n\
-        movne       %[ret], #0\
-        "
-        :[ret] "=l" (ret)
-        :[addr] "l" (l), [tmp] "l" (tmp), [taken] "l" (taken)
-        :"cc", "memory");
-    return ret;
-}
-
-
 static int get_lock(volatile struct semaphore *semaphore) {
     struct task_semaphore_data *curr_task_data = &curr_task->semaphore_data;
 
-    if (try_lock(&semaphore->lock)) {
+    /* TODO: Use a nicer name than this builtin */
+    if (__sync_bool_compare_and_swap(&semaphore->lock, 0, 1)) {
         semaphore->held_by = curr_task;
         held_semaphores_insert(curr_task_data->held_semaphores, semaphore);
         curr_task_data->waiting = NULL;
@@ -187,20 +167,28 @@ static void svc_release(struct semaphore *semaphore) {
     }
 }
 
-void svc_semaphore(uint32_t svc_number, uint32_t *registers) {
-    if (!IPSR()) {
-        panic_print("Attempted to call service call from user space");
-    }
+int semaphore_service_call(uint32_t svc_number, ...) {
+    int ret = 0;
+    va_list ap;
+    va_start(ap, svc_number);
 
     switch (svc_number) {
-        case SVC_ACQUIRE:
-            registers[0] = svc_acquire((struct semaphore *) registers[0]);
+        case SVC_ACQUIRE: {
+            struct semaphore *sem = va_arg(ap, struct semaphore *);
+            ret = svc_acquire(sem);
             break;
-        case SVC_RELEASE:
-            svc_release((struct semaphore *) registers[0]);
+        }
+        case SVC_RELEASE: {
+            struct semaphore *sem = va_arg(ap, struct semaphore *);
+            svc_release(sem);
             break;
+        }
         default:
             panic_print("Unknown SVC: %d", svc_number);
             break;
     }
+
+    va_end(ap);
+
+    return ret;
 }
