@@ -1,7 +1,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <arch/chip/gpio.h>
+#include <arch/chip/i2c.h>
 #include <arch/chip/registers.h>
+#include <dev/raw_mem.h>
 #include <dev/resource.h>
 #include <kernel/fault.h>
 #include <kernel/semaphore.h>
@@ -12,8 +14,6 @@ static void init_i2c1(void) __attribute__((section(".kernel")));
 static void init_i2c2(void) __attribute__((section(".kernel")));
 static int i2c_reset(struct i2c_dev *i2c);
 static int i2c_force_clear_busy(struct i2c_dev *i2c);
-
-void i2c_stop(uint8_t port) __attribute__((section(".kernel")));
 
 struct i2c_dev i2c1 = {
     .ready = 0,
@@ -31,14 +31,6 @@ struct i2c_dev i2c2 = {
 
 struct semaphore i2c2_semaphore = INIT_SEMAPHORE;
 
-/* This has to be a function because GCC's optimizations suck
- * GCC's optimizations break read and write when using this line
- * on their own or with an inline function, despite the fact that
- * GCC inlines this function anyway. */
-void i2c_stop(uint8_t port) {
-    *I2C_CR1(port) |= I2C_CR1_STOP;
-}
-
 #define I2C1_SCL    8
 #define I2C1_SDA    9
 
@@ -46,6 +38,8 @@ void i2c_stop(uint8_t port) {
 #define I2C2_SDA    11
 
 static void init_i2c1(void) {
+    struct stm32f4_i2c_regs *regs = i2c_get_regs(1);
+
     *RCC_APB1ENR |= RCC_APB1ENR_I2C1EN;     /* Enable I2C1 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;    /* Enable GPIOB Clock */
 
@@ -67,14 +61,14 @@ static void init_i2c1(void) {
     gpio_ospeedr(GPIOB, I2C1_SDA, GPIO_OSPEEDR_50M);
 
     /* Configure peripheral */
-    *I2C_CR2(1) |= I2C_CR2_FREQ(42);
+    raw_mem_set_mask(&regs->CR2, I2C_CR2_FREQ_MASK, I2C_CR2_FREQ(42));
 
     /* Set I2C to 300kHz */
-    *I2C_CCR(1) |= I2C_CCR_CCR(140);
-    *I2C_TRISE(1) = 43;
+    raw_mem_set_mask(&regs->CCR, I2C_CCR_CCR_MASK, I2C_CCR_CCR(140));
+    raw_mem_write(&regs->TRISE, 43);
 
     /* Enable */
-    *I2C_CR1(1) |= I2C_CR1_PE;
+    raw_mem_set_bits(&regs->CR1, I2C_CR1_PE);
 
     /* Pre-initialized */
     //init_semaphore(&i2c1_semaphore);
@@ -83,6 +77,8 @@ static void init_i2c1(void) {
 }
 
 static void init_i2c2(void) {
+    struct stm32f4_i2c_regs *regs = i2c_get_regs(2);
+
     *RCC_APB1ENR |= RCC_APB1ENR_I2C2EN;     /* Enable I2C2 Clock */
     *RCC_AHB1ENR |= RCC_AHB1ENR_GPIOBEN;    /* Enable GPIOB Clock */
 
@@ -104,14 +100,14 @@ static void init_i2c2(void) {
     gpio_ospeedr(GPIOB, I2C2_SDA, GPIO_OSPEEDR_50M);
 
     /* Configure peripheral */
-    *I2C_CR2(2) |= I2C_CR2_FREQ(42);
+    raw_mem_set_mask(&regs->CR2, I2C_CR2_FREQ_MASK, I2C_CR2_FREQ(42));
 
     /* Set I2C to 300kHz */
-    *I2C_CCR(2) |= I2C_CCR_CCR(140);
-    *I2C_TRISE(2) = 43;
+    raw_mem_set_mask(&regs->CCR, I2C_CCR_CCR_MASK, I2C_CCR_CCR(140));
+    raw_mem_write(&regs->TRISE, 43);
 
     /* Enable */
-    *I2C_CR1(2) |= I2C_CR1_PE;
+    raw_mem_set_bits(&regs->CR1, I2C_CR1_PE);
 
     /* Pre-initialized */
     //init_semaphore(&i2c2_semaphore);
@@ -128,16 +124,18 @@ static int i2c_reset(struct i2c_dev *i2c) {
         return -1;
     }
 
+    struct stm32f4_i2c_regs *regs = i2c_get_regs(i2c->port);
+
     i2c->ready = 0;
 
     /* Software reset */
-    *I2C_CR1(i2c->port) |= I2C_CR1_SWRST;
+    raw_mem_set_bits(&regs->CR1, I2C_CR1_SWRST);
 
     /* Wait until peripheral is disabled */
-    while (*I2C_CR1(i2c->port) & I2C_CR1_PE);
+    while (raw_mem_read(&regs->CR1) & I2C_CR1_PE);
 
     /* Re-enable */
-    *I2C_CR1(i2c->port) &= ~(I2C_CR1_SWRST);
+    raw_mem_clear_bits(&regs->CR1, I2C_CR1_SWRST);
 
     /* Re-initialize */
     i2c->init();
@@ -155,6 +153,8 @@ static int i2c_force_clear_busy(struct i2c_dev *i2c) {
     if (!i2c) {
         return -1;
     }
+
+    struct stm32f4_i2c_regs *regs = i2c_get_regs(i2c->port);
 
     int count = 10000;
 
@@ -208,9 +208,9 @@ static int i2c_force_clear_busy(struct i2c_dev *i2c) {
     }
 
     /* Make sure the peripheral recognizes that the bus is now free */
-    if (*I2C_SR2(i2c->port) & I2C_SR2_BUSY) {
+    if (raw_mem_read(&regs->SR2) & I2C_SR2_BUSY) {
         /* Last ditch effort */
-        if (i2c_reset(i2c) || (*I2C_SR2(i2c->port) & I2C_SR2_BUSY)) {
+        if (i2c_reset(i2c) || (raw_mem_read(&regs->SR2) & I2C_SR2_BUSY)) {
             /* Failed to reset */
             printk("I2C: BUSY flag failed to clear.\r\nI2C: I have tried everything I know :(. At this point, reset is your best option.\r\n");
             return -1;
@@ -221,15 +221,19 @@ static int i2c_force_clear_busy(struct i2c_dev *i2c) {
 }
 
 int8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
+    int ret;
+
     if (!i2c || !i2c->ready || i2c->port < 1 || i2c->port > 3 || !data || !num) {
         return -1;
     }
 
+    struct stm32f4_i2c_regs *regs = i2c_get_regs(i2c->port);
+
     /* Check for bus error */
-    if (*I2C_SR1(i2c->port) & I2C_SR1_BERR) {
+    if (raw_mem_read(&regs->SR1) & I2C_SR1_BERR) {
         printk("I2C: Bus error, reseting.\r\n");
         /* Clear the error and reset I2C */
-        *I2C_SR1(i2c->port) &= ~(I2C_SR1_BERR);
+        raw_mem_clear_bits(&regs->SR1, I2C_SR1_BERR);
 
         if (i2c_reset(i2c)) {
             /* Failed to reset */
@@ -239,7 +243,8 @@ int8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num)
 
     /* Wait until BUSY is reset and previous transaction STOP is complete */
     int count = 10000;
-    while ((*I2C_SR2(i2c->port) & I2C_SR2_BUSY) || (*I2C_CR1(i2c->port) & I2C_CR1_STOP)) {
+    while ((raw_mem_read(&regs->SR2) & I2C_SR2_BUSY) ||
+            (raw_mem_read(&regs->CR1) & I2C_CR1_STOP)) {
         if (--count == 0) {
             printk("I2C: Stalled, reseting.\r\n");
 
@@ -258,31 +263,31 @@ int8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num)
         }
     }
 
-    *I2C_CR1(i2c->port) |= I2C_CR1_START;
+    raw_mem_set_bits(&regs->CR1, I2C_CR1_START);
 
     count = 10000;
-    while (!(*I2C_SR1(i2c->port) & I2C_SR1_SB)) {
+    while (!(raw_mem_read(&regs->SR1) & I2C_SR1_SB)) {
         if (!count--) {
-            i2c_stop(i2c->port);
-            return -1;
+            ret = -1;
+            goto out;
         }
     }
 
-    *I2C_DR(i2c->port) = addr << 1;
+    raw_mem_write(&regs->DR, addr << 1);
 
     count = 10000;
-    while (!(*I2C_SR1(i2c->port) & I2C_SR1_ADDR)) {
-        if ((*I2C_SR1(i2c->port) & I2C_SR1_AF) || !count--) {
-            i2c_stop(i2c->port);
-            return -1;
+    while (!(raw_mem_read(&regs->SR1) & I2C_SR1_ADDR)) {
+        if ((raw_mem_read(&regs->SR1) & I2C_SR1_AF) || !count--) {
+            ret = -1;
+            goto out;
         }
     }
 
     count = 10000;
-    while (!(*I2C_SR2(i2c->port) & I2C_SR2_MSL)) {
+    while (!(raw_mem_read(&regs->SR2) & I2C_SR2_MSL)) {
         if (!count--) {
-            i2c_stop(i2c->port);
-            return -1;
+            ret = -1;
+            goto out;
         }
     }
 
@@ -291,29 +296,33 @@ int8_t i2c_write(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num)
     while (num--) {
         /* Make sure shift register is empty */
         count = 10000;
-        while (!(*I2C_SR1(i2c->port) & I2C_SR1_TXE)) {
+        while (!(raw_mem_read(&regs->SR1) & I2C_SR1_TXE)) {
             if (!count--) {
-                i2c_stop(i2c->port);
-                return -1;
+                ret = -1;
+                goto out;
             }
         }
 
-        *I2C_DR(i2c->port) = *data++;
+        raw_mem_write(&regs->DR, *data++);
 
         count = 10000;
-        while (!(*I2C_SR1(i2c->port) & I2C_SR1_TXE)) {
+        while (!(raw_mem_read(&regs->SR1) & I2C_SR1_TXE)) {
             if (!count--) {
-                i2c_stop(i2c->port);
-                return -1;
+                ret = -1;
+                goto out;
             }
         }
 
         total += 1;
     }
 
-    i2c_stop(i2c->port);
+    ret = total;
 
-    return total;
+
+out:
+    raw_mem_set_bits(&regs->CR1, I2C_CR1_STOP);
+
+    return ret;
 }
 
 int i2c_read(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
@@ -321,11 +330,13 @@ int i2c_read(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
         return -1;
     }
 
+    struct stm32f4_i2c_regs *regs = i2c_get_regs(i2c->port);
+
     /* Check for bus error */
-    if (*I2C_SR1(i2c->port) & I2C_SR1_BERR) {
+    if (raw_mem_read(&regs->SR1) & I2C_SR1_BERR) {
         printk("I2C: Bus error, reseting.\r\n");
         /* Clear the error and reset I2C */
-        *I2C_SR1(i2c->port) &= ~(I2C_SR1_BERR);
+        raw_mem_clear_bits(&regs->SR1, I2C_SR1_BERR);
 
         if (i2c_reset(i2c)) {
             /* Failed to reset */
@@ -335,7 +346,8 @@ int i2c_read(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
 
     /* Wait until BUSY is reset and previous transaction STOP is complete */
     int count = 10000;
-    while ((*I2C_SR2(i2c->port) & I2C_SR2_BUSY) || (*I2C_CR1(i2c->port) & I2C_CR1_STOP)) {
+    while ((raw_mem_read(&regs->SR2) & I2C_SR2_BUSY) ||
+            (raw_mem_read(&regs->CR1) & I2C_CR1_STOP)) {
         if (--count == 0) {
             printk("I2C: Stalled, reseting.\r\n");
 
@@ -356,66 +368,66 @@ int i2c_read(struct i2c_dev *i2c, uint8_t addr, uint8_t *data, uint32_t num) {
 
     int total = 0;
 
-    *I2C_CR1(i2c->port) |= I2C_CR1_START;
+    raw_mem_set_bits(&regs->CR1, I2C_CR1_START);
 
     count = 10000;
-    while (!(*I2C_SR1(i2c->port) & I2C_SR1_SB)) {
+    while (!(raw_mem_read(&regs->SR1) & I2C_SR1_SB)) {
         if (!count--) {
-            i2c_stop(i2c->port);
-            return -1;
+            goto out_err;
         }
     }
 
-    *I2C_DR(i2c->port) = (addr << 1) | 1;
+    raw_mem_write(&regs->DR, (addr << 1) | 1);
 
     count = 10000;
-    while (!(*I2C_SR1(i2c->port) & I2C_SR1_ADDR)) {
-        if (*I2C_SR1(i2c->port) & I2C_SR1_AF || !count--) {
-            i2c_stop(i2c->port);
-            return -1;
+    while (!(raw_mem_read(&regs->SR1) & I2C_SR1_ADDR)) {
+        if ((raw_mem_read(&regs->SR1) & I2C_SR1_AF) || !count--) {
+            goto out_err;
         }
     }
 
     uint8_t single_byte = num == 1;
 
     if (!single_byte) {
-        *I2C_CR1(i2c->port) |= I2C_CR1_ACK;
+        raw_mem_set_bits(&regs->CR1, I2C_CR1_ACK);
     }
     else {  /* In single byte receive, never ACK */
-        *I2C_CR1(i2c->port) &= ~(I2C_CR1_ACK);
+        raw_mem_clear_bits(&regs->CR1, I2C_CR1_ACK);
     }
 
     while (num--) {
         count = 10000;
-        while (!(*I2C_SR2(i2c->port) & I2C_SR2_MSL)) {
+        while (!(raw_mem_read(&regs->SR2) & I2C_SR2_MSL)) {
             if (!count--) {
-                i2c_stop(i2c->port);
-                return -1;
+                goto out_err;
             }
         }
 
         /* In single byte receive, stop after ADDR clear (SR1 and SR2 read) */
         if (single_byte) {
-            i2c_stop(i2c->port);
+            raw_mem_set_bits(&regs->CR1, I2C_CR1_STOP);
         }
 
         count = 10000;
-        while (!(*I2C_SR1(i2c->port) & I2C_SR1_RXNE)) {
+        while (!(raw_mem_read(&regs->SR1) & I2C_SR1_RXNE)) {
             if (!count--) {
-                i2c_stop(i2c->port);
-                return -1;
+                goto out_err;
             }
         }
 
-        *data++ = *I2C_DR(i2c->port);
+        *data++ = raw_mem_read(&regs->DR);
         total++;
 
         /* NACK and STOP after second last receive */
         if (num == 1) {
-            *I2C_CR1(i2c->port) &= ~(I2C_CR1_ACK);
-            i2c_stop(i2c->port);
+            raw_mem_clear_bits(&regs->CR1, I2C_CR1_ACK);
+            raw_mem_set_bits(&regs->CR1, I2C_CR1_STOP);
         }
     }
 
     return total;
+
+out_err:
+    raw_mem_set_bits(&regs->CR1, I2C_CR1_STOP);
+    return -1;
 }
