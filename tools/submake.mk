@@ -42,9 +42,15 @@ $(foreach DIR, $(DIRS), $(eval $(call define_compile_rules,$(DIR),$(call dir_obj
 # All of the directory object files
 DIR_OBJS := $(foreach DIR, $(DIRS), $(call dir_obj, $(DIR)))
 
+ifeq ($(strip $(OBJS)$(DIR_OBJS)),)
+# Nothing to build!  Generate an empty object
+$(obj):
+	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && echo "" | $(CC) -c -xc $(CFLAGS) -o $@ -
+else
 # Actual directory obj rule
 # Links all source and subdirectory objects
 $(obj): $(OBJS) $(DIR_OBJS)
 	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) -r $^ -o $@
+endif
 
 include $(BASE)/tools/build.mk
