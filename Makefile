@@ -31,6 +31,12 @@ CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
 
 LINK_SCRIPT = $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/link.ld
 
+# Command verbosity
+# Unless V=1, surpress output with @
+ifneq ($(V), 1)
+	VERBOSE:=@
+endif
+
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
@@ -49,10 +55,11 @@ LFLAGS +=
 
 CPPFLAGS := -P $(INCLUDE_FLAGS)
 
-# Command verbosity
-# Unless V=1, surpress output with @
-ifneq ($(V), 1)
-	VERBOSE:=@
+# Surpress Make directory printing unless verbose
+ifneq ($(VERBOSE),)
+MAKEFLAGS += --no-print-directory
+else
+MAKEFLAGS += --print-directory
 endif
 
 # Pass variables to submake
@@ -79,14 +86,14 @@ endif
 
 # Flash the board
 burn: $(KCONFIG_HEADER)
-	$(MAKE) -C arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/ burn
+	$(VERBOSE)$(MAKE) -C arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/ burn
 
 # Create tags
 ctags:
-	find $(BASE) -name "*.[chS]" -not -path "$(PREFIX)/*" -not -path "$(BASE)/tools/*" -print | xargs ctags
+	$(VERBOSE)find $(BASE) -name "*.[chS]" -not -path "$(PREFIX)/*" -not -path "$(BASE)/tools/*" -print | xargs ctags
 
 cscope:
-	find $(BASE) -name "*.[chS]" -not -path "$(PREFIX)/*" -not -path "$(BASE)/tools/*" -print | xargs cscope -b -q -k
+	$(VERBOSE)find $(BASE) -name "*.[chS]" -not -path "$(PREFIX)/*" -not -path "$(BASE)/tools/*" -print | xargs cscope -b -q -k
 
 # defconfig rules and DEFCONFIGS list
 include $(BASE)/configs/Makefile.in
@@ -118,7 +125,7 @@ $(KCONFIG_MAKE_DEFS): ;
 proj: 	$(PREFIX)/$(PROJ_NAME).elf
 
 $(PREFIX):
-	mkdir -p $(PREFIX)
+	$(VERBOSE)mkdir -p $(PREFIX)
 
 # Build include/ directory in $(PREFIX)/ to provide all headers for the source files.
 # Place the arch and chip headers in arch/ and arch/chip/, respectively.
@@ -131,7 +138,7 @@ $(PREFIX):
 #
 # Rerun this rule at every build in order to pick up any new headers.
 $(PREFIX)/include: $(PREFIX) $(KCONFIG_HEADER) .FORCE
-	$(VERBOSE)echo "GEN	$@"
+	$(VERBOSE)echo "GEN $(subst $(PREFIX)/,,$@)"
 	$(VERBOSE)rm -rf $(PREFIX)/include/
 	$(VERBOSE)mkdir -p $(PREFIX)/include/arch/chip/
 	$(VERBOSE)cp -a $(BASE)/include/. $(PREFIX)/include/
@@ -139,7 +146,8 @@ $(PREFIX)/include: $(PREFIX) $(KCONFIG_HEADER) .FORCE
 	$(VERBOSE)cp -a $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/include/. $(PREFIX)/include/arch/chip/
 
 $(PREFIX)/$(PROJ_NAME).o: $(KCONFIG_HEADER) $(PREFIX)/include .FORCE
-	$(MAKE) -f f4os.mk obj=$@
+	$(VERBOSE)echo "MAKE $(subst $(PREFIX)/,,$@)"
+	$(VERBOSE)$(MAKE) -f f4os.mk obj=$@
 
 $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/link.ld
 	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(CC) $< -o $@ $(CFLAGS) -T $(PREFIX)/link.ld $(patsubst %,-Xlinker %,$(LFLAGS))
@@ -157,16 +165,18 @@ $(LINK_SCRIPT): $(KCONFIG_HEADER)
 -include $(PREFIX)/link.d
 
 clean:
-	-rm -rf $(PREFIX)
+	$(VERBOSE)-rm -rf $(PREFIX)
 
 distclean: clean
-	-rm -rf .config
-	-rm -rf $(BASE)/include/config/
+	$(VERBOSE)-rm -rf .config
+	$(VERBOSE)-rm -rf $(BASE)/include/config/
 
 # Parallel safe make again
 again:
-	$(MAKE) clean
-	$(MAKE) all
+	$(VERBOSE)echo "MAKE clean"
+	$(VERBOSE)$(MAKE) clean
+	$(VERBOSE)echo "MAKE all"
+	$(VERBOSE)$(MAKE) all
 
 .FORCE:
 

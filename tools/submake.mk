@@ -33,7 +33,8 @@ $(subst /,,$(1))))
 # $(2) = Directory obj to create
 define define_compile_rules
 $(2): .FORCE
-	+$(MAKE) -C $(1) obj=$(2)
+	$(VERBOSE)echo "MAKE $(subst $(PREFIX)/,,$(2))"
+	$(VERBOSE)+$(MAKE) -C $(1) obj=$(2)
 endef
 
 # Create rule for each directory
