@@ -40,6 +40,8 @@ static int stm32f4_spi_init(struct spi *s) {
     int ret;
     struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
 
+    acquire(&s->lock);
+
     /* Already initialized? */
     if (port->ready) {
         return 0;
@@ -57,11 +59,14 @@ static int stm32f4_spi_init(struct spi *s) {
         port->ready = 1;
     }
 
+    release(&s->lock);
+
     return ret;
 }
 
 static int stm32f4_spi_deinit(struct spi *s) {
     /* Turn off clocks? */
+    /* Release GPIOs? */
 
     return 0;
 }
@@ -210,8 +215,8 @@ struct spi_ops stm32f4_spi_ops = {
 struct stm32f4_spi_port {
     char *name;
     int index;
-    int function;
-    uint32_t gpio[3];
+    int function;       /* GPIO AF */
+    uint32_t gpio[3];   /* SCK, MOSI, MISO, order invariant */
 } stm32f4_spi_ports[] = {
     { .name = "spi1", .index = 1, .function = STM32F4_GPIO_AF_SPI1,
         .gpio = {STM32F4_GPIO_PA5, STM32F4_GPIO_PA6, STM32F4_GPIO_PA7} },
