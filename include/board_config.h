@@ -16,4 +16,11 @@ struct lis302dl_accel_config {
 
 extern struct lis302dl_accel_config lis302dl_accel_config;
 
+struct hmc5883_mag_config {
+    uint32_t valid;
+    char *parent_name;
+};
+
+extern struct hmc5883_mag_config hmc5883_mag_config;
+
 #endif
