@@ -273,6 +273,8 @@ static int stm32f4_i2c_write(struct i2c *i2c, uint8_t addr, uint8_t *data,
     count = 10000;
     while (!(raw_mem_read(&port->regs->SR1) & I2C_SR1_ADDR)) {
         if ((raw_mem_read(&port->regs->SR1) & I2C_SR1_AF) || !count--) {
+            /* Clear error */
+            raw_mem_clear_bits(&port->regs->SR1, I2C_SR1_AF);
             ret = -1;
             goto out;
         }
@@ -341,6 +343,8 @@ static int stm32f4_i2c_read(struct i2c *i2c, uint8_t addr, uint8_t *data,
     count = 10000;
     while (!(raw_mem_read(&port->regs->SR1) & I2C_SR1_ADDR)) {
         if ((raw_mem_read(&port->regs->SR1) & I2C_SR1_AF) || !count--) {
+            /* Clear error */
+            raw_mem_clear_bits(&port->regs->SR1, I2C_SR1_AF);
             goto out_err;
         }
     }
