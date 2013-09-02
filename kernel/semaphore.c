@@ -9,7 +9,7 @@
 
 static void held_semaphores_insert(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
 void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore *semaphore) __attribute__((section(".kernel")));
-static void deadlock_check(struct task_t *task) __attribute__((section(".kernel")));
+static void deadlock_check(volatile struct semaphore *sem) __attribute__((section(".kernel")));
 
 void acquire(volatile struct semaphore *semaphore) {
     if (!task_switching) {
@@ -43,7 +43,7 @@ static int get_lock(volatile struct semaphore *semaphore) {
     }
     else {
         if (semaphore->held_by != NULL) {
-            deadlock_check(semaphore->held_by);
+            deadlock_check(semaphore);
 
             /* Add to waitlist if higher priority */
             if (semaphore->waiting) {
@@ -104,8 +104,14 @@ void held_semaphores_remove(struct semaphore *list[], volatile struct semaphore 
     /* Not found, but this may be fine, as kernel_task frees semaphores on behalf of the deceased */
 }
 
-static void deadlock_check(struct task_t *task) {
+static void deadlock_check(volatile struct semaphore *sem) {
+    struct task_t *task = sem->held_by;
     struct task_semaphore_data *task_data = &task->semaphore_data;
+
+    if (task == curr_task) {
+        panic_print("Task (0x%x) attempted to double acquire semaphore 0x%x",
+                    curr_task, sem);
+    }
 
     if (task_data->waiting) {
         for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
