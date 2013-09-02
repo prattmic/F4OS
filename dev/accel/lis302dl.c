@@ -199,7 +199,7 @@ err_free_obj:
 /* Protects the constructor from reentrance */
 static struct semaphore lis302dl_driver_sem = INIT_SEMAPHORE;
 
-static struct device_driver lis320dl_driver = {
+static struct device_driver lis302dl_driver = {
     .name = "lis302dl",
     .probe = lis302dl_probe,
     .ctor = lis302dl_ctor,
@@ -208,7 +208,7 @@ static struct device_driver lis320dl_driver = {
 };
 
 static int lis302dl_register(void) {
-    device_driver_register(&lis320dl_driver);
+    device_driver_register(&lis302dl_driver);
 
     return 0;
 }
