@@ -10,13 +10,14 @@ struct semaphore driver_sem = INIT_SEMAPHORE;
 
 /* Find and construct a device */
 struct obj *device_get(const char *name) {
-    struct device_driver *driver = NULL;
+    struct device_driver *iter, *driver = NULL;
     struct obj *obj = NULL;
     int exists;
 
     acquire(&driver_sem);
-    list_for_each_entry(driver, &drivers, list) {
-        if (strncmp((char *)name, (char *)driver->name, 32) == 0) {
+    list_for_each_entry(iter, &drivers, list) {
+        if (strncmp((char *)name, (char *)iter->name, 32) == 0) {
+            driver = iter;
             break;
         }
     }
@@ -39,7 +40,7 @@ struct obj *device_get(const char *name) {
     obj = get_by_name_from_class((char *)name, driver->class);
     /* Success! */
     if (obj) {
-        return obj;
+        goto out;
     }
 
     /* See if the device exists */
@@ -50,6 +51,7 @@ struct obj *device_get(const char *name) {
         obj = driver->ctor(name);
     }
 
+out:
     release(driver->sem);
 
     return obj;
