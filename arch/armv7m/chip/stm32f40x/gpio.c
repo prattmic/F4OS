@@ -123,6 +123,14 @@ static inline void stm32f4_gpio_clock_enable(struct stm32f4_gpio gpio) {
  *  set GPIO pull up/down
  *  @param val  Pull up/down setting from enum stm32f4_gpio_pull
  *  @returns zero on success, negative on error
+ * STM32F4_GPIO_SPEED:
+ *  set GPIO output speed
+ *  @param val  Output speed setting from enum stm32f4_gpio_speed
+ *  @returns zero on success, negative on error
+ * STM32F4_GPIO_TYPE:
+ *  set GPIO output type
+ *  @param val  Output type setting from enum stm32f4_gpio_type
+ *  @returns zero on success, negative on error
  * STM32F4_GPIO_CLOCK_ENABLE:
  *  Enables the RCC clock controling the GPIO port.
  *  @param val  Don't care
@@ -141,6 +149,9 @@ static int stm32f4_gpio_set_flags(struct gpio *g, unsigned int flag, int val) {
         return 0;
     case STM32F4_GPIO_SPEED:
         gpio_ospeedr(gpio.port, gpio.pin, val);
+        return 0;
+    case STM32F4_GPIO_TYPE:
+        gpio_otyper(gpio.port, gpio.pin, val);
         return 0;
     case STM32F4_GPIO_CLOCK_ENABLE:
         stm32f4_gpio_clock_enable(gpio);
