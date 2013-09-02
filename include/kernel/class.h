@@ -31,7 +31,6 @@
 #include <kernel/collection.h>
 
 typedef struct class {
-    void(*dtor)(struct obj *);
     struct collection instances;
     struct obj_type *type;
     struct obj      obj;

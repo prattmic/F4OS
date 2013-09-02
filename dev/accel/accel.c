@@ -27,11 +27,7 @@ void accel_dtor(struct obj *o) {
     ops->deinit(a);
 }
 
-struct class accel_class = {
-    .dtor = &accel_dtor,
-    .instances = INIT_COLLECTION(accel_class.instances),
-    .type = &accel_type_s,
-};
+struct class accel_class = INIT_CLASS(accel_class, "accel", &accel_type_s);
 
 /* Set up accelerometer system */
 int accel_setup(void) {

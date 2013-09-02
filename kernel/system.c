@@ -9,12 +9,7 @@ struct obj_type system_type_s = {
     .offset = offset_of(system_t, obj),
 };
 
-/* What to do with destroyed system? They could be made dynamically */
-struct class system_class = {
-    .dtor = NULL,
-    .instances = INIT_COLLECTION(system_class.instances),
-    .type = &system_type_s,
-};
+struct class system_class = INIT_CLASS(system_class, "system", &system_type_s);
 
 struct system dev_system = INIT_SYSTEM(dev_system, dev);
 
