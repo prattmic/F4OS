@@ -5,5 +5,6 @@ SRCS += device.c
 
 DIRS += hw/
 DIRS += accel/
+DIRS += mag/
 
 include $(BASE)/tools/submake.mk
