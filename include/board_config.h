@@ -30,4 +30,13 @@ struct ms5611_baro_config {
 
 extern struct ms5611_baro_config ms5611_baro_config;
 
+struct mpu6000_spi_config {
+    uint32_t valid;
+    char *parent_name;
+    uint32_t cs_gpio;
+    uint8_t cs_active_low;
+};
+
+extern struct mpu6000_spi_config mpu6000_spi_config;
+
 #endif

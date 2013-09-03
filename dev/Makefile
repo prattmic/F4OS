@@ -9,4 +9,6 @@ DIRS += baro/
 DIRS += gyro/
 DIRS += mag/
 
+DIRS_$(CONFIG_MPU6000) += mpu6000/
+
 include $(BASE)/tools/submake.mk

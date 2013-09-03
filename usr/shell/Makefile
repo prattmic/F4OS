@@ -14,7 +14,6 @@ SRCS += mag.c
 
 SRCS_$(CONFIG_HAVE_LED) 	+= blink.c
 SRCS_$(CONFIG_9DOF_GYRO) 	+= ghetto_gyro.c
-SRCS_$(CONFIG_MPU6000)		+= px4_accel_gyro.c
 SRCS_$(CONFIG_MM_PROFILING) += mem_perf.c
 
 # Date and rev for uname

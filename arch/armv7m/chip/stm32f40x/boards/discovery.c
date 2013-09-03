@@ -15,6 +15,9 @@ struct hmc5883_mag_config hmc5883_mag_config;
 /* There is no ms5611, so empty config */
 struct ms5611_baro_config ms5611_baro_config;
 
+/* There is no mpu6000, so empty config */
+struct mpu6000_spi_config mpu6000_spi_config;
+
 /* GPIO LEDs available - Red, Green, Orange, Blue */
 const struct led leds_avail[] = {{STM32F4_GPIO_PD14, 0}, {STM32F4_GPIO_PD12, 0},
                                  {STM32F4_GPIO_PD13, 0}, {STM32F4_GPIO_PD15, 0}};
