@@ -10,6 +10,7 @@ SRCS += list_test.c
 SRCS += system_ctl.c
 SRCS += accel.c
 SRCS += baro.c
+SRCS += gyro.c
 SRCS += mag.c
 
 SRCS_$(CONFIG_HAVE_LED) 	+= blink.c
