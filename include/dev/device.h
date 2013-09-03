@@ -47,4 +47,18 @@ struct obj *device_get(const char *name);
  */
 void device_driver_register(struct device_driver *driver);
 
+/**
+ * Put an instance of a device
+ *
+ * When finished with a device, device_put returns it to the system,
+ * possibly freeing its resources and destroying its object completely.
+ *
+ * The device must not be accessed after calling this function
+ *
+ * @param device    Device to put
+ */
+static inline void device_put(struct obj *device) {
+    obj_put(device);
+}
+
 #endif

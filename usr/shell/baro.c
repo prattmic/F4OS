@@ -27,6 +27,7 @@ void baro(int argc, char **argv) {
 
     while(1) {
         if(getc() == 'q') {
+            device_put(o);
             return;
         }
         else {
