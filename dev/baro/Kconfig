@@ -1,0 +1,9 @@
+menu "Barometers"
+
+config MS5611
+    bool "Measurement Specialists MS5611 Barometer"
+    depends on HAVE_I2C
+    ---help---
+    Standard barometer driver for MS5611.
+
+endmenu

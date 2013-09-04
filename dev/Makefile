@@ -4,10 +4,10 @@ SRCS += buf_stream.c
 SRCS += device.c
 
 DIRS += hw/
-DIRS += accel/
-DIRS += baro/
-DIRS += gyro/
-DIRS += mag/
+DIRS_$(CONFIG_ACCELEROMETERS) += accel/
+DIRS_$(CONFIG_BAROMETERS) += baro/
+DIRS_$(CONFIG_GYROSCOPES) += gyro/
+DIRS_$(CONFIG_MAGNETOMETERS) += mag/
 
 DIRS_$(CONFIG_MPU6000) += mpu6000/
 

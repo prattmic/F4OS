@@ -1,0 +1,17 @@
+menu "Gyroscopes"
+
+config MPU6000_GYRO
+    bool "InvenSense MPU6000 Gyroscope"
+    depends on MPU6000
+    ---help---
+        MPU6000 gyroscope driver.  Provides access to the gyroscope
+        features of the MPU6000, with a standard gyroscope driver.
+
+config 9DOF_GYRO
+    bool "ITG-3200 Gyro"
+    depends on HAVE_I2C && STM32_BOARD_DISCOVERY
+    ---help---
+        Gyroscope on Sparkfun 9DOF sensor stick, connected
+        to I2C1 on the STM32F4 Discovery board
+
+endmenu
