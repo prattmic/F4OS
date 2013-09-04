@@ -19,7 +19,22 @@ KCONFIG_HEADER := $(BASE)/include/config/autoconf.h
 KCONFIG_MAKE_DEFS := $(BASE)/include/config/auto.conf
 
 # Include configuration
+# Ignores errors because we need to support make *_defconfig or menuconfig
+# to create the configuration.  However, if the file doesn't exist, do not
+# allow building
 -include $(KCONFIG_MAKE_DEFS)
+ifeq ($(wildcard $(KCONFIG_MAKE_DEFS)),)
+	# Disallow build because OS not configured
+	DISALLOW_BUILD = F4OS not configured
+endif
+
+# Don't build if applying a defconfig
+# This way `make -j4 defconfig all` will only do the config,
+# and not try to build.
+ifneq ($(findstring defconfig,$(MAKECMDGOALS)),)
+	# Disallow build because this is a defconfig run
+	DISALLOW_BUILD = Parallel configure and build not supported
+endif
 
 # The quotes from Kconfig are annoying
 CONFIG_ARCH := $(shell echo $(CONFIG_ARCH))
@@ -62,19 +77,15 @@ export
 
 .PHONY: proj unoptimized ctags cscope .FORCE
 
-# Don't build if applying a defconfig
-# This way `make -j4 defconfig all` will only do the config,
-# and not try to build.
-ifeq ($(findstring defconfig,$(MAKECMDGOALS)),)
+ifeq ($(DISALLOW_BUILD),)
 all: CFLAGS += -O2
 all: $(PREFIX) proj
 
 unoptimized: CFLAGS += -O0
 unoptimized: $(PREFIX) proj
 else
-# Running defconfig, so don't build
-all: ;
-unoptimized: ;
+all unoptimized:
+	$(error $(DISALLOW_BUILD))
 endif
 
 # Flash the board
@@ -106,14 +117,16 @@ $(BASE)/.config:
 	$(VERBOSE)echo "Please run 'make menuconfig' or one of the 'make *_defconfig' before continuing.\n";
 	$(VERBOSE)exit 1;
 
-$(KCONFIG_HEADER): $(KCONFIG_DIR)/conf/conf $(BASE)/.config $(deps_config)
+ifeq ($(findstring defconfig,$(MAKECMDGOALS)),)
+$(KCONFIG_MAKE_DEFS) $(KCONFIG_HEADER): $(KCONFIG_DIR)/conf/conf $(BASE)/.config $(deps_config)
+	$(VERBOSE)echo "GEN include/config/"
 	$(VERBOSE)mkdir -p $(BASE)/include/config
 	$(VERBOSE)KCONFIG_AUTOHEADER=$(KCONFIG_HEADER) KCONFIG_AUTOCONFIG=$(KCONFIG_MAKE_DEFS) \
 		$(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
-
-# Don't attempt to build this at include time.
-# It will be build by the KCONFIG_HEADER rule
+else
+# If one of the goals is a defconfig, don't bother trying to generate the config
 $(KCONFIG_MAKE_DEFS): ;
+endif
 
 proj: 	$(PREFIX)/$(PROJ_NAME).elf
 
@@ -149,9 +162,6 @@ $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/link.ld
 # Preprocess the linker script
 $(PREFIX)/link.ld : $(LINK_SCRIPT)
 	$(VERBOSE)echo "CPP $(subst $(BASE)/,,$<)" && cpp -MD -MT $@ $(CPPFLAGS) $< -o $@
-
-# LINK_SCRIPT expansion depends on the config defines
-$(LINK_SCRIPT): $(KCONFIG_HEADER)
 
 # Include linker script dependencies
 -include $(PREFIX)/link.d
