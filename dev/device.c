@@ -62,3 +62,21 @@ void device_driver_register(struct device_driver *driver) {
     list_add(&driver->list, &drivers);
     release(&driver_sem);
 }
+
+int device_list_class(struct class *class, const char **names, int max) {
+    struct device_driver *driver;
+    int total = 0;
+
+    acquire(&driver_sem);
+    list_for_each_entry(driver, &drivers, list) {
+        if (driver->class == class) {
+            if (total < max) {
+                names[total] = driver->name;
+            }
+            total++;
+        }
+    }
+    release(&driver_sem);
+
+    return total;
+}

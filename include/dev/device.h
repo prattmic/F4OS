@@ -61,4 +61,18 @@ static inline void device_put(struct obj *device) {
     obj_put(device);
 }
 
+/**
+ * List all device drivers for class
+ *
+ * Get a list of all registered device drivers that are for objects in a
+ * given class.
+ *
+ * @param class Class to find devices for
+ * @param names Output array of names, should be able to hold max names
+ * @param max   Maximum number of names to place in names array
+ *
+ * @returns Total number of device drivers matching class, regardless of max
+ */
+int device_list_class(struct class *class, const char **names, int max);
+
 #endif
