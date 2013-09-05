@@ -19,7 +19,7 @@ void gpio_dtor(struct obj *o) {
     struct gpio_ops *ops;
 
     assert_type(o, &gpio_type_s);
-    g = (struct gpio *) to_gpio(o);
+    g = to_gpio(o);
     ops = (struct gpio_ops *)o->ops;
     ops->reset(g);
     ops->dtor(g);

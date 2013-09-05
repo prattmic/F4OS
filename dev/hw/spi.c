@@ -12,15 +12,15 @@ struct obj_type spi_type_s  = {
 struct class spi_class = INIT_CLASS(spi_class, "spi", &spi_type_s);
 
 static void spi_dtor(struct obj *o) {
-    struct spi *s;
+    struct spi *spi;
     struct spi_ops *ops;
 
     assert_type(o, &spi_type_s);
-    s = (struct spi *) to_spi(o);
+    spi = to_spi(o);
     ops = (struct spi_ops *)o->ops;
-    ops->deinit(s);
+    ops->deinit(spi);
 
-    if (s->priv) {
-        kfree(s->priv);
+    if (spi->priv) {
+        kfree(spi->priv);
     }
 }

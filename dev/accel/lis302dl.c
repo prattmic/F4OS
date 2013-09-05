@@ -28,7 +28,7 @@ struct lis302dl {
 };
 
 static int lis302dl_init(struct accel *a) {
-    struct spi *spi = (struct spi *) to_spi(a->device.parent);
+    struct spi *spi = to_spi(a->device.parent);
     struct spi_ops *spi_ops = (struct spi_ops *)spi->obj.ops;
     struct lis302dl *lis_accel = (struct lis302dl *) a->priv;
 
@@ -50,7 +50,7 @@ static int lis302dl_deinit(struct accel *a) {
     int ret = 0;
 
     if (lis_accel->ready) {
-        struct spi *spi = (struct spi *) to_spi(a->device.parent);
+        struct spi *spi = to_spi(a->device.parent);
         struct spi_ops *spi_ops = (struct spi_ops *)spi->obj.ops;
 
         /* Power down mode */
@@ -67,7 +67,7 @@ static int lis302dl_deinit(struct accel *a) {
 }
 
 static int lis302dl_get_raw_data(struct accel *a, struct accel_raw_data *data) {
-    struct spi *spi = (struct spi *) to_spi(a->device.parent);
+    struct spi *spi = to_spi(a->device.parent);
     struct spi_ops *spi_ops = (struct spi_ops *)spi->obj.ops;
     struct lis302dl *lis_accel = (struct lis302dl *) a->priv;
 

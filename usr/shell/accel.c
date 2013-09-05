@@ -18,7 +18,7 @@ void accel(int argc, char **argv) {
         return;
     }
 
-    struct accel *a = (struct accel *) to_accel(o);
+    struct accel *a = to_accel(o);
     struct accel_ops *ops = (struct accel_ops *) o->ops;
     struct accel_data data;
 
