@@ -10,8 +10,25 @@ PREFIX := $(BASE)/out
 # Userspace program to build (folder in usr/)
 USR ?= shell
 
-# Kconfig source directory
-KCONFIG_DIR := $(BASE)/tools/kconfig-frontends/frontends/
+# Folder to look for/build kconfig in
+KCONFIG_CUSTOM_DIR := $(BASE)/tools/kconfig-frontends
+
+# (n)conf can either be provided by the environment, PATH, or
+# our custom installation
+CONF ?= $(shell \
+	which conf > /dev/null;	\
+	if [ $$? -eq 0 ];	\
+	then echo `which conf`;	\
+	else echo $(KCONFIG_CUSTOM_DIR)/frontends/conf/conf;	\
+	fi)
+
+NCONF ?= $(shell \
+	which nconf > /dev/null;	\
+	if [ $$? -eq 0 ];	\
+	then echo `which nconf`;	\
+	else echo $(KCONFIG_CUSTOM_DIR)/frontends/nconf/nconf;	\
+	fi)
+
 # Config header for source files
 KCONFIG_HEADER := $(BASE)/include/config/autoconf.h
 # Config defines for Make
@@ -117,11 +134,14 @@ include $(BASE)/configs/Makefile.in
 # Kconfig file dependencies
 -include $(KCONFIG_MAKE_DEFS).cmd
 
-$(KCONFIG_DIR)/conf/conf:
-	env - PATH=$(PATH) $(BASE)/tools/build_kconfig.sh $(BASE)
+# Clear the build variables, so that kconfig-frontends doesn't try to build
+# for our target chip.
+$(CONF) $(NCONF):
+	$(VERBOSE)CC= OBJCOPY= LD= CFLAGS= LDFLAGS= CPPFLAGS= MAKEFLAGS= \
+		$(BASE)/tools/build_kconfig.sh $(KCONFIG_CUSTOM_DIR)
 
-menuconfig: $(KCONFIG_DIR)/conf/conf
-	$(KCONFIG_DIR)/nconf/nconf $(BASE)/Kconfig
+menuconfig: $(NCONF)
+	$(NCONF) $(BASE)/Kconfig
 
 # Dummy rule to tell the user to run configuration
 $(BASE)/.config:
@@ -130,11 +150,11 @@ $(BASE)/.config:
 	$(VERBOSE)exit 1;
 
 ifeq ($(findstring defconfig,$(MAKECMDGOALS)),)
-$(KCONFIG_MAKE_DEFS) $(KCONFIG_HEADER): $(KCONFIG_DIR)/conf/conf $(BASE)/.config $(deps_config)
-	$(VERBOSE)echo "GEN include/config/"
+$(KCONFIG_MAKE_DEFS) $(KCONFIG_HEADER): $(CONF) $(BASE)/.config $(deps_config)
+	$(call print_command,"GEN",$(call relative_path,$@))
 	$(VERBOSE)mkdir -p $(BASE)/include/config
 	$(VERBOSE)KCONFIG_AUTOHEADER=$(KCONFIG_HEADER) KCONFIG_AUTOCONFIG=$(KCONFIG_MAKE_DEFS) \
-		$(KCONFIG_DIR)/conf/conf --silentoldconfig Kconfig
+		$(CONF) --silentoldconfig Kconfig
 else
 # If one of the goals is a defconfig, don't bother trying to generate the config
 $(KCONFIG_MAKE_DEFS): ;

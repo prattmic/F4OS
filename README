@@ -18,12 +18,12 @@ https://launchpad.net/gcc-arm-embedded.
 F4OS uses a Kconfig build configuration system.  Select the configuration
 with "make menuconfig" or select a defconfig with "make example_defconfig".
 See "make help" for a list of available defconfigs.  Kconfig is provided
-by the kconfig-frontends project
-(http://ymorin.is-a-geek.org/projects/kconfig-frontends).  This project
-is included in tools/ directory and should be built automatically before
-the first OS build.  It requires automake, libtoolize, gperf, flex, bison,
-and libncurses-dev to build.  See the README in tools/kconfig-frontends/
-for more details.
+by the kconfig-frontends project.  If the Kconfig tools are not installed,
+the build system should offer to download and install them the first time
+`make` is called.  kconfig-frontends requires (at least) autoconf, automake,
+bison, flex, gperf, libtoolize, libncurses5-dev, and m4 to build.
+See the project website for more details
+(http://ymorin.is-a-geek.org/projects/kconfig-frontends).
 
 Flashing:
 

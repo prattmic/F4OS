@@ -1,8 +1,8 @@
 # Create a rule for applying a defconfig
 # $(1) = Path to defconfig
 define define_defconfig_rule
-$(notdir $(1)): $(KCONFIG_DIR)/conf/conf clean
-	$(VERBOSE)$(KCONFIG_DIR)/conf/conf $(BASE)/Kconfig --defconfig=$(1)
+$(notdir $(1)): $(CONF) clean
+	$(VERBOSE)$(CONF) $(BASE)/Kconfig --defconfig=$(1)
 	$(VERBOSE)+$(MAKE) $(KCONFIG_HEADER)
 endef
 
