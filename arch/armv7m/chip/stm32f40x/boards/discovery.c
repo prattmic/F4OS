@@ -9,6 +9,11 @@ struct lis302dl_accel_config lis302dl_accel_config = {
     .cs_active_low = 0,
 };
 
+struct itg3200_gyro_config itg3200_gyro_config = {
+    .valid = BOARD_CONFIG_VALID_MAGIC,
+    .parent_name = "i2c1",
+};
+
 /* There is no hmc5883, so empty config */
 struct hmc5883_mag_config hmc5883_mag_config;
 

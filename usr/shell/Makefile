@@ -14,7 +14,6 @@ SRCS_$(CONFIG_BAROMETERS) += baro.c
 SRCS_$(CONFIG_GYROSCOPES) += gyro.c
 SRCS_$(CONFIG_MAGNETOMETERS) += mag.c
 SRCS_$(CONFIG_HAVE_LED) 	+= blink.c
-SRCS_$(CONFIG_9DOF_GYRO) 	+= ghetto_gyro.c
 SRCS_$(CONFIG_MM_PROFILING) += mem_perf.c
 
 # Date and rev for uname

@@ -16,6 +16,13 @@ struct lis302dl_accel_config {
 
 extern struct lis302dl_accel_config lis302dl_accel_config;
 
+struct itg3200_gyro_config {
+    uint32_t valid;
+    char *parent_name;
+};
+
+extern struct itg3200_gyro_config itg3200_gyro_config;
+
 struct hmc5883_mag_config {
     uint32_t valid;
     char *parent_name;

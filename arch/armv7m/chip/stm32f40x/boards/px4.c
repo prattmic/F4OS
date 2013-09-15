@@ -5,6 +5,9 @@
 /* There is no lis302dl, so config is empty */
 struct lis302dl_accel_config lis302dl_accel_config;
 
+/* There is no itg3200, so config is empty */
+struct itg3200_gyro_config itg3200_gyro_config;
+
 struct hmc5883_mag_config hmc5883_mag_config = {
     .valid = BOARD_CONFIG_VALID_MAGIC,
     .parent_name = "i2c2",
