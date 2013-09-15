@@ -22,7 +22,7 @@
  * @returns Value at __address
  */
 #define raw_mem_read(__address) ({    \
-    typeof(*__address) __val = *(volatile typeof(__address))__address; \
+    typeof(*__address) __val = *(volatile typeof(__address))(__address); \
     memory_barrier();   \
     __val;              \
 })
