@@ -6,6 +6,8 @@ $(error submake obj not specified)
 endif
 endif
 
+include $(BASE)/tools/common.mk
+
 .DEFAULT_GOAL := $(obj)
 
 obj_prefix := $(basename $(obj))_
@@ -33,7 +35,8 @@ $(subst /,,$(1))))
 # $(2) = Directory obj to create
 define define_compile_rules
 $(2): .FORCE
-	+$(MAKE) -C $(1) obj=$(2)
+	$(call print_command,"MAKE",$(call relative_path,$(1))/)
+	$(VERBOSE)+$(MAKE) -C $(1) obj=$(2)
 endef
 
 # Create rule for each directory
@@ -42,9 +45,17 @@ $(foreach DIR, $(DIRS), $(eval $(call define_compile_rules,$(DIR),$(call dir_obj
 # All of the directory object files
 DIR_OBJS := $(foreach DIR, $(DIRS), $(call dir_obj, $(DIR)))
 
+ifeq ($(strip $(OBJS)$(DIR_OBJS)),)
+# Nothing to build!  Generate an empty object
+$(obj):
+	$(call print_command,"LD",$(call relative_path,$@))
+	$(VERBOSE)echo "" | $(CC) -c -xc $(CFLAGS) -o $@ -
+else
 # Actual directory obj rule
 # Links all source and subdirectory objects
 $(obj): $(OBJS) $(DIR_OBJS)
-	$(VERBOSE)echo "LD $(subst $(PREFIX)/,,$@)" && $(LD) -r $^ -o $@
+	$(call print_command,"LD",$(call relative_path,$@))
+	$(VERBOSE)$(LD) -r $^ -o $@
+endif
 
 include $(BASE)/tools/build.mk

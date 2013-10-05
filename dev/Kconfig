@@ -69,14 +69,40 @@ config SHARED_MEM_SIZE
         The size of buffer to be allocated for each shared memory
         resource opened.
 
-menu "I2C Devices"
-    depends on HAVE_I2C
+source "dev/mpu6000/Kconfig"
 
-    source "dev/Kconfig.I2C"
-endmenu
+config ACCELEROMETERS
+    bool "Accelerometer support"
+    ---help---
+        Include support for accelerometers.
 
-menu "SPI Devices"
-    depends on HAVE_SPI
+if ACCELEROMETERS
+    source "dev/accel/Kconfig"
+endif
 
-    source "dev/Kconfig.SPI"
-endmenu
+config BAROMETERS
+    bool "Barometer support"
+    ---help---
+        Include support for barometers.
+
+if BAROMETERS
+    source "dev/baro/Kconfig"
+endif
+
+config GYROSCOPES
+    bool "Gyroscope support"
+    ---help---
+        Include support for gyroscopes.
+
+if GYROSCOPES
+    source "dev/gyro/Kconfig"
+endif
+
+config MAGNETOMETERS
+    bool "Magnetometer support"
+    ---help---
+        Include support for magnetometers.
+
+if MAGNETOMETERS
+    source "dev/mag/Kconfig"
+endif

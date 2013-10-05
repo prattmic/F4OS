@@ -1,0 +1,17 @@
+menu "Accelerometers"
+
+config MPU6000_ACCEL
+    bool "InvenSense MPU6000 Accelerometer"
+    depends on MPU6000
+    ---help---
+        MPU6000 accelerometer driver.  Provides access to the accelerometer
+        features of the MPU6000, with a standard accelerometer driver.
+
+config STM_LIS302DL
+    bool "STMicro LIS302DL Accelerometer"
+    depends on HAVE_SPI
+    ---help---
+        3-axis accelerometer from STMicro.  Configured with
+        struct lis302dl_accel_config from board_config.h.
+
+endmenu

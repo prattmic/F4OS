@@ -32,7 +32,9 @@
 #define UART8_BASE                      (APB1PERIPH_BASE + 0x7C00)                              /* UART8 Base Address */
 #define UART7_BASE                      (APB1PERIPH_BASE + 0x7800)                              /* UART7 Base Address */
 #define PWR_BASE                        (APB1PERIPH_BASE + 0x7000)                              /* Power Control base address */
-#define I2C_BASE(port)                  (APB1PERIPH_BASE + 0x5400 + (0x400*(port-1)))           /* I2C (1,2,3) base address */
+#define I2C3_BASE                       (APB1PERIPH_BASE + 0x5C00)                              /* I2C3 base address */
+#define I2C2_BASE                       (APB1PERIPH_BASE + 0x5800)                              /* I2C2 base address */
+#define I2C1_BASE                       (APB1PERIPH_BASE + 0x5400)                              /* I2C1 base address */
 #define UART5_BASE                      (APB1PERIPH_BASE + 0x5000)                              /* UART5 Base Address */
 #define UART4_BASE                      (APB1PERIPH_BASE + 0x4C00)                              /* UART4 Base Address */
 #define USART3_BASE                     (APB1PERIPH_BASE + 0x4800)                              /* USART3 Base Address */
@@ -95,28 +97,6 @@
 /* Power Control (PWR) */
 #define PWR_CR                          (volatile uint32_t *) (PWR_BASE + 0x00)                 /* Power Control Register */
 #define PWR_CSR                         (volatile uint32_t *) (PWR_BASE + 0x04)                 /* Power Control/Status Register */
-
-/* SPI */
-#define SPI_CR1(port)                   (volatile uint32_t *) (SPI_BASE(port) + 0x00)           /* SPI control register 1 */
-#define SPI_CR2(port)                   (volatile uint32_t *) (SPI_BASE(port) + 0x04)           /* SPI control register 2 */
-#define SPI_SR(port)                    (volatile uint32_t *) (SPI_BASE(port) + 0x08)           /* SPI status register */
-#define SPI_DR(port)                    (volatile uint32_t *) (SPI_BASE(port) + 0x0c)           /* SPI data register */
-#define SPI_CRCPR(port)                 (volatile uint32_t *) (SPI_BASE(port) + 0x10)           /* SPI CRC polynomial register */
-#define SPI_RXCRCR(port)                (volatile uint32_t *) (SPI_BASE(port) + 0x14)           /* SPI RX CRC register */
-#define SPI_TXCRCR(port)                (volatile uint32_t *) (SPI_BASE(port) + 0x18)           /* SPI TX CRC register */
-#define SPI_I2SCFGR(port)               (volatile uint32_t *) (SPI_BASE(port) + 0x1c)           /* SPI I2C configuration register */
-#define SPI_I2SPR(port)                 (volatile uint32_t *) (SPI_BASE(port) + 0x20)           /* SPI I2C prescaler register */
-
-/* I2C */
-#define I2C_CR1(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x00)           /* I2C control register 1 */
-#define I2C_CR2(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x04)           /* I2C control register 2 */
-#define I2C_OAR1(port)                  (volatile uint32_t *) (I2C_BASE(port) + 0x08)           /* I2C own address register 1 */
-#define I2C_OAR2(port)                  (volatile uint32_t *) (I2C_BASE(port) + 0x0C)           /* I2C own address register 2 */
-#define I2C_DR(port)                    (volatile uint32_t *) (I2C_BASE(port) + 0x10)           /* I2C data register */
-#define I2C_SR1(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x14)           /* I2C status register 1 */
-#define I2C_SR2(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x18)           /* I2C status register 2 */
-#define I2C_CCR(port)                   (volatile uint32_t *) (I2C_BASE(port) + 0x1C)           /* I2C clock control register */
-#define I2C_TRISE(port)                 (volatile uint32_t *) (I2C_BASE(port) + 0x20)           /* I2C TRISE register */
 
 /* GPIO Port (GPIO) */
 #define GPIO_MODER(port)                (volatile uint32_t *) (GPIO_BASE(port) + 0x00)          /* Port mode register */
@@ -458,62 +438,7 @@
 #include <arch/chip/spi.h>
 
 /* I2C */
-#define I2C_CR1_PE                      (uint32_t) (1 << 0)                                     /* I2C peripheral enable */
-#define I2C_CR1_SMBUS                   (uint32_t) (1 << 1)                                     /* I2C SMBus mode */
-#define I2C_CR1_SMBTYPE                 (uint32_t) (1 << 3)                                     /* I2C SMBus type (0=Device, 1=Host) */
-#define I2C_CR1_ENARP                   (uint32_t) (1 << 4)                                     /* I2C enable ARP */
-#define I2C_CR1_ENPEC                   (uint32_t) (1 << 5)                                     /* I2C enable PEC */
-#define I2C_CR1_ENGC                    (uint32_t) (1 << 6)                                     /* I2C enable general call */
-#define I2C_CR1_NOSTRETCH               (uint32_t) (1 << 7)                                     /* I2C clock stretching disable */
-#define I2C_CR1_START                   (uint32_t) (1 << 8)                                     /* I2C START generation */
-#define I2C_CR1_STOP                    (uint32_t) (1 << 9)                                     /* I2C STOP generation */
-#define I2C_CR1_ACK                     (uint32_t) (1 << 10)                                    /* I2C ACK enable */
-#define I2C_CR1_POS                     (uint32_t) (1 << 11)                                    /* I2C ACK/PEC position */
-#define I2C_CR1_PEC                     (uint32_t) (1 << 12)                                    /* I2C packet error checking */
-#define I2C_CR1_ALERT                   (uint32_t) (1 << 13)                                    /* I2C SMBus alert */
-#define I2C_CR1_SWRST                   (uint32_t) (1 << 15)                                    /* I2C software reset */
-
-#define I2C_CR2_FREQ(n)                 (uint32_t) (n << 0)                                     /* I2C clock frequency */
-#define I2C_CR2_ITERREN                 (uint32_t) (1 << 8)                                     /* I2C error interrupt enable */
-#define I2C_CR2_ITEVTEN                 (uint32_t) (1 << 9)                                     /* I2C event interrupt enable */
-#define I2C_CR2_ITBUFEN                 (uint32_t) (1 << 10)                                    /* I2C buffer interrupt enable */
-#define I2C_CR2_DMAEN                   (uint32_t) (1 << 11)                                    /* I2C DMA requests enable */
-#define I2C_CR2_LAST                    (uint32_t) (1 << 12)                                    /* I2C DMA last transfer */
-
-#define I2C_OAR1_ADD10(n)               (uint32_t) (n << 0)                                     /* I2C interface address (10-bit) */
-#define I2C_OAR1_ADD7(n)                (uint32_t) (n << 1)                                     /* I2C interface address (7-bit) */
-#define I2C_OAR1_ADDMODE                (uint32_t) (1 << 15)                                    /* I2C interface address mode (1=10-bit) */
-
-#define I2C_OAR2_ENDUAL                 (uint32_t) (1 << 0)                                     /* I2C dual address mode enable */
-#define I2C_OAR2_ADD2(n)                (uint32_t) (n << 1)                                     /* I2C interface address 2 (7-bit) */
-
-#define I2C_SR1_SB                      (uint32_t) (1 << 0)                                     /* I2C start bit generated */
-#define I2C_SR1_ADDR                    (uint32_t) (1 << 1)                                     /* I2C address sent/matched */
-#define I2C_SR1_BTF                     (uint32_t) (1 << 2)                                     /* I2C byte transfer finished */
-#define I2C_SR1_ADD10                   (uint32_t) (1 << 3)                                     /* I2C 10-bit header sent */
-#define I2C_SR1_STOPF                   (uint32_t) (1 << 4)                                     /* I2C stop detection */
-#define I2C_SR1_RXNE                    (uint32_t) (1 << 6)                                     /* I2C DR not empty */
-#define I2C_SR1_TXE                     (uint32_t) (1 << 7)                                     /* I2C DR empty */
-#define I2C_SR1_BERR                    (uint32_t) (1 << 8)                                     /* I2C bus error */
-#define I2C_SR1_ARLO                    (uint32_t) (1 << 9)                                     /* I2C attribution lost */
-#define I2C_SR1_AF                      (uint32_t) (1 << 10)                                    /* I2C acknowledge failure */
-#define I2C_SR1_OVR                     (uint32_t) (1 << 11)                                    /* I2C overrun/underrun */
-#define I2C_SR1_PECERR                  (uint32_t) (1 << 12)                                    /* I2C PEC error in reception */
-#define I2C_SR1_TIMEOUT                 (uint32_t) (1 << 14)                                    /* I2C timeout or tlow error */
-#define I2C_SR1_SMBALERT                (uint32_t) (1 << 15)                                    /* I2C SMBus alert */
-
-#define I2C_SR2_MSL                     (uint32_t) (1 << 0)                                     /* I2C master/slave */
-#define I2C_SR2_BUSY                    (uint32_t) (1 << 1)                                     /* I2C bus busy */
-#define I2C_SR2_TRA                     (uint32_t) (1 << 2)                                     /* I2C transmitter/receiver */
-#define I2C_SR2_GENCALL                 (uint32_t) (1 << 4)                                     /* I2C general call address */
-#define I2C_SR2_SMBDEFAULT              (uint32_t) (1 << 5)                                     /* I2C SMBus device default address */
-#define I2C_SR2_SMBHOST                 (uint32_t) (1 << 6)                                     /* I2C SMBus host header */
-#define I2C_SR2_DUALF                   (uint32_t) (1 << 7)                                     /* I2C dual flag */
-#define I2C_SR2_PEC(r)                  (uint32_t) (r >> 8)                                     /* I2C packet error checking register */
-
-#define I2C_CCR_CCR(n)                  (uint32_t) (n & 0x0FFF)                                 /* I2C clock control register */
-#define I2C_CCR_DUTY                    (uint32_t) (1 << 14)                                    /* I2C fast mode duty cycle */
-#define I2C_CCR_FS                      (uint32_t) (1 << 15)                                    /* I2C master mode selection */
+#include <arch/chip/i2c.h>
 
 /* USART */
 #include <arch/chip/usart.h>

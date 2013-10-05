@@ -1,0 +1,9 @@
+menu "Magnetometers"
+
+config HMC5883
+    bool "Honeywell HMC5883 Magnetometer"
+    depends on HAVE_I2C
+    ---help---
+        Standard magnetometer driver for HMC5883.
+
+endmenu

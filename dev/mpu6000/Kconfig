@@ -1,0 +1,7 @@
+config MPU6000
+    bool "InvenSense MPU6000"
+    depends on HAVE_SPI
+    ---help---
+        Base class for MPU6000 support.  Provides device-level support for the
+        MPU6000, with support for reading/writing registers, allowing
+        accelerometer and gyro drivers to be built on top.

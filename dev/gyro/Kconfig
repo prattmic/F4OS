@@ -1,0 +1,17 @@
+menu "Gyroscopes"
+
+config MPU6000_GYRO
+    bool "InvenSense MPU6000 Gyroscope"
+    depends on MPU6000
+    ---help---
+        MPU6000 gyroscope driver.  Provides access to the gyroscope
+        features of the MPU6000, with a standard gyroscope driver.
+
+config ITG3200_GYRO
+    bool "InvenSense ITG-3200 Gyroscope"
+    depends on HAVE_I2C
+    ---help---
+        InvenSense ITG-3200 Gyroscope driver.  Configured with
+        struct itg3200_gyro_config from board_config.h
+
+endmenu

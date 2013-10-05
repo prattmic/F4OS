@@ -24,16 +24,6 @@ config STM32_BOARD
     default "discovery" if STM32_BOARD_DISCOVERY
     default "px4" if STM32_BOARD_PX4
 
-config DISCOVERY_LED
-    bool
-    depends on HAVE_LED
-    default y if STM32_BOARD_DISCOVERY
-
 config PERFCOUNTER
     bool
     default y
-
-config PX4_LED
-    bool
-    depends on HAVE_LED
-    default y if STM32_BOARD_PX4

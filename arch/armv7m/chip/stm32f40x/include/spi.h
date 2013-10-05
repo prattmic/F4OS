@@ -3,7 +3,7 @@
 
 #include <arch/chip/registers.h>
 
-typedef struct spi {
+struct stm32f4_spi_regs {
     volatile uint32_t CR1;      /* SPIx Control Register 1 */
     volatile uint32_t CR2;      /* SPIx Control Register 2 */
     volatile uint32_t SR;       /* SPIx Status Register */
@@ -13,18 +13,18 @@ typedef struct spi {
     volatile uint32_t TXCRCR;   /* SPIx TX CRC Register */
     volatile uint32_t I2SCFGR;  /* SPIx I2S Configuration Register */
     volatile uint32_t I2SPR;    /* SPIx I2S Prescaler Register */
-} spi_t;
+};
 
-static inline spi_t *get_spi(int x) {
+static inline struct stm32f4_spi_regs *get_spi(int x) {
     switch(x) {
-        case 1: return (spi_t *) SPI1_BASE;
-        case 2: return (spi_t *) SPI2_BASE;
-        case 3: return (spi_t *) SPI3_BASE;
-        case 4: return (spi_t *) SPI4_BASE;
-        case 5: return (spi_t *) SPI5_BASE;
-        case 6: return (spi_t *) SPI6_BASE;
+        case 1: return (struct stm32f4_spi_regs *) SPI1_BASE;
+        case 2: return (struct stm32f4_spi_regs *) SPI2_BASE;
+        case 3: return (struct stm32f4_spi_regs *) SPI3_BASE;
+        case 4: return (struct stm32f4_spi_regs *) SPI4_BASE;
+        case 5: return (struct stm32f4_spi_regs *) SPI5_BASE;
+        case 6: return (struct stm32f4_spi_regs *) SPI6_BASE;
     }
-    return (spi_t *) INVALID_PERIPH_BASE;
+    return (struct stm32f4_spi_regs *) INVALID_PERIPH_BASE;
 }
 
 /* SPIx Control Register 1 bit fields */

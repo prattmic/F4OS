@@ -40,6 +40,8 @@
 #ifndef ARCH_CHIP_REGISTERS_H_INCLUDED
 #define ARCH_CHIP_REGISTERS_H_INCLUDED
 
+#define INVALID_PERIPH_BASE     (0x0)
+
 //*****************************************************************************
 //
 // The following are defines for the base address of the memories and
