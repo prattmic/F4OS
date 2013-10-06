@@ -2,7 +2,7 @@
 # readlink to ensure folder is canonical
 # $(1) = File to get relative path of
 define relative_path
-$(subst $(BASE)/,,$(shell readlink -f "$(1)"))
+$(subst $(BASE)/,,$(shell readlink -m "$(1)"))
 endef
 
 RELATIVE_CURDIR = $(call relative_path,$(CURDIR))
