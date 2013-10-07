@@ -58,7 +58,9 @@ void sched_svc_yield(void) {
 }
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {
-    asm volatile("stmdb   %[stack]!, {%[zero]}  /* Empty */                     \n\
+    asm volatile(
+#ifdef CONFIG_HAVE_FPU
+                 "stmdb   %[stack]!, {%[zero]}  /* Empty for 8byte aligned SP */\n\
                   stmdb   %[stack]!, {%[zero]}  /* FPSCR */                     \n\
                   stmdb   %[stack]!, {%[zero]}  /* S15 */                       \n\
                   stmdb   %[stack]!, {%[zero]}  /* S14 */                       \n\
@@ -75,8 +77,9 @@ void create_context(task_ctrl* task, void (*lptr)(void)) {
                   stmdb   %[stack]!, {%[zero]}  /* S3 */                        \n\
                   stmdb   %[stack]!, {%[zero]}  /* S2 */                        \n\
                   stmdb   %[stack]!, {%[zero]}  /* S1 */                        \n\
-                  stmdb   %[stack]!, {%[zero]}  /* S0 */                        \n\
-                  stmdb   %[stack]!, {%[psr]}   /* xPSR */                      \n\
+                  stmdb   %[stack]!, {%[zero]}  /* S0 */                        \n"
+#endif
+                 "stmdb   %[stack]!, {%[psr]}   /* xPSR */                      \n\
                   stmdb   %[stack]!, {%[pc]}    /* PC */                        \n\
                   stmdb   %[stack]!, {%[lr]}    /* LR */                        \n\
                   stmdb   %[stack]!, {%[zero]}  /* R12 */                       \n\
@@ -91,8 +94,9 @@ void create_context(task_ctrl* task, void (*lptr)(void)) {
                   stmdb   %[stack]!, {%[frame]} /* R7 - Frame Pointer*/         \n\
                   stmdb   %[stack]!, {%[zero]}  /* R6 */                        \n\
                   stmdb   %[stack]!, {%[zero]}  /* R5 */                        \n\
-                  stmdb   %[stack]!, {%[zero]}  /* R4 */                        \n\
-                  stmdb   %[stack]!, {%[zero]}  /* S31 */                       \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R4 */                        \n"
+#ifdef CONFIG_HAVE_FPU
+                 "stmdb   %[stack]!, {%[zero]}  /* S31 */                       \n\
                   stmdb   %[stack]!, {%[zero]}  /* S30 */                       \n\
                   stmdb   %[stack]!, {%[zero]}  /* S29 */                       \n\
                   stmdb   %[stack]!, {%[zero]}  /* S28 */                       \n\
@@ -108,6 +112,7 @@ void create_context(task_ctrl* task, void (*lptr)(void)) {
                   stmdb   %[stack]!, {%[zero]}  /* S18 */                       \n\
                   stmdb   %[stack]!, {%[zero]}  /* S17 */                       \n\
                   stmdb   %[stack]!, {%[zero]}  /* S16 */"
+#endif
                   /* Output */
                   :[stack] "+r" (task->stack_top)
                   /* Input */

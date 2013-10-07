@@ -26,7 +26,10 @@ config HAVE_FPU
     prompt "FPU Support"
     default y
     ---help---
-        Please note that this option must be set to yes.
+        Enable support for ARMv7-M floating point extensions.
+
+        Without this option enabled, executing floating point instructions
+        will result in a usage fault.
 
 config SYS_CLOCK
     int

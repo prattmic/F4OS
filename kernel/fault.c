@@ -102,17 +102,14 @@ void panic_print(char *fmt, ...) {
 
 #ifdef CONFIG_HAVE_LED
 void toggle_led_delay(void) {
-    uint32_t count = 1000000;
+    uint32_t count = 3000000;
 
     /* Toggle LED */
     if (power_led) {
         led_toggle(power_led);
     }
 
-    while (--count) {
-        float delay = 2.81;
-        delay *= 3.14f;
-    }
+    while (--count);
 }
 #endif
 

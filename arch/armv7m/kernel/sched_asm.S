@@ -76,7 +76,9 @@ disable_psp:
 save_context:
     mrs     r0, psp
     stmfd   r0!, {r4-r11}   /* Saves multiple registers and writes the final address back to Rn */
+#ifdef CONFIG_HAVE_FPU
     vstmdb  r0!, {s16-s31}  /* Save FPU registers */
+#endif
     msr     psp, r0
     bx      lr
 
@@ -87,7 +89,9 @@ save_context:
 .type       restore_context, %function
 restore_context:
     mrs     r0, psp
+#ifdef CONFIG_HAVE_FPU
     vldmia  r0!, {s16-s31}  /* Restore FPU registers */
+#endif
     ldmfd   r0!, {r4-r11}   /* Writes multiple registers and writes the final address back to Rn */
     msr     psp, r0
     b       enable_psp      /* User process uses the PSP */

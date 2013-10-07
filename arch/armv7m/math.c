@@ -22,6 +22,7 @@
 
 #include <math.h>
 
+#ifdef CONFIG_HAVE_FPU
 float fabsf(float num) {
     __asm__("vabs.f32   %[num], %[num]  \r\n"
             :[num] "+w" (num)::"cc");
@@ -35,3 +36,4 @@ float sqrtf(float num) {
 
     return num;
 }
+#endif
