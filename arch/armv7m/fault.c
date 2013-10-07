@@ -24,17 +24,41 @@ static void stack_dump(void) {
     memory_dump(PSP(), 40);
 }
 
+/*
+ * Prepare for a fatal system fault
+ *
+ * This will disable task switching, and provide an early indication
+ * of the fault.
+ */
+static void fatal_fault_entry(void) {
+#ifdef CONFIG_HAVE_LED
+    /* Toggle red LED so there is some indication that something
+     * bad has happened if this handler hangs */
+    if (power_led) {
+        led_toggle(power_led);
+    }
+#endif
+
+    /* The system is going to panic, so go ahead and end task switching */
+    task_switching = 0;
+}
+
+/*
+ * Bring the system down due to a fatal fault
+ *
+ * Perform final steps of a system fatal fault, including permanently
+ * panicking the system.
+ */
+static void fatal_fault_exit(void) {
+    stack_dump();
+    panic();
+}
+
 void hardfault_handler(void) {
     uint32_t status;
     uint8_t interpretation = 0;
 
-#ifdef CONFIG_HAVE_LED
-    /* Toggle red LED so there is some indication that something
-     * bad has happened if this handler hangs */
-    led_toggle(0);
-#endif
-    /* We're done here... */
-    task_switching = 0;
+    fatal_fault_entry();
 
     status = *SCB_HFSR;
 
@@ -58,9 +82,7 @@ void hardfault_handler(void) {
         printk("No idea.  See pg. 226 in the STM32F4 Programming Reference Manual.\r\n");
     }
 
-    stack_dump();
-
-    panic();
+    fatal_fault_exit();
 }
 
 void memmanage_handler(void) {
@@ -69,13 +91,7 @@ void memmanage_handler(void) {
 
     status = (uint8_t) (*SCB_CFSR & 0xff);
 
-#ifdef CONFIG_HAVE_LED
-    /* Toggle red LED so there is some indication that something
-     * bad has happened if this handler hangs */
-    led_toggle(0);
-#endif
-    /* We're done here... */
-    task_switching = 0;
+    fatal_fault_entry();
 
     printk("\r\n-----------------Memory Management Fault-----------------\r\n");
     printk("The memory management fault status register contains: 0x%x\r\n", status);
@@ -116,9 +132,7 @@ void memmanage_handler(void) {
         printk("No idea.  See pg. 225 in the STM32F4 Programming Reference Manual.\r\n");
     }
 
-    stack_dump();
-
-    panic();
+    fatal_fault_exit();
 }
 
 void busfault_handler(void) {
@@ -127,13 +141,7 @@ void busfault_handler(void) {
 
     status = (uint8_t) ((*SCB_CFSR >> 8) & 0xff);
 
-#ifdef CONFIG_HAVE_LED
-    /* Toggle red LED so there is some indication that something
-     * bad has happened if this handler hangs */
-    led_toggle(0);
-#endif
-    /* We're done here... */
-    task_switching = 0;
+    fatal_fault_entry();
 
     printk("\r\n-----------------Bus Fault-----------------\r\n");
     printk("The bus fault status register contains: 0x%x\r\n", status);
@@ -181,9 +189,7 @@ void busfault_handler(void) {
         printk("No idea.  See pg. 224 in the STM32F4 Programming Reference Manual.\r\n");
     }
 
-    stack_dump();
-
-    panic();
+    fatal_fault_exit();
 }
 
 void usagefault_handler(void) {
@@ -192,13 +198,7 @@ void usagefault_handler(void) {
 
     status = (uint16_t) (*SCB_CFSR >> 16);
 
-#ifdef CONFIG_HAVE_LED
-    /* Toggle red LED so there is some indication that something
-     * bad has happened if this handler hangs */
-    led_toggle(0);
-#endif
-    /* We're done here... */
-    task_switching = 0;
+    fatal_fault_entry();
 
     printk("\r\n-----------------Usage Fault-----------------\r\n");
     printk("The usage fault status register contains: 0x%x\r\n", status);
@@ -237,7 +237,5 @@ void usagefault_handler(void) {
         printk("No idea.  See pg. 223 in the STM32F4 Programming Reference Manual.\r\n");
     }
 
-    stack_dump();
-
-    panic();
+    fatal_fault_exit();
 }

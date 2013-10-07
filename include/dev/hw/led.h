@@ -17,6 +17,13 @@ struct led {
 void init_power_led(void) __attribute__((section(".kernel")));
 
 /**
+ * Power led object
+ *
+ * Used by fault handlers for indicating error conditions
+ */
+extern struct obj *power_led;
+
+/**
  * Get LED object instance
  *
  * @param num   LED number to get instance of

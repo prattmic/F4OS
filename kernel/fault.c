@@ -59,9 +59,12 @@ void panic_print(char *fmt, ...) {
 #ifdef CONFIG_HAVE_LED
     /* Toggle red LED so there is some indication that something
      * bad has happened if this hangs */
-    led_toggle(0);
+    if (power_led) {
+        led_toggle(power_led);
+    }
 #endif
-    /* We're done here... */
+
+    /* The system is going to panic, so go ahead and end task switching */
     task_switching = 0;
 
     /* Print panic message */
@@ -80,7 +83,9 @@ void toggle_led_delay(void) {
     uint32_t count = 1000000;
 
     /* Toggle LED */
-    led_toggle(0);
+    if (power_led) {
+        led_toggle(power_led);
+    }
 
     while (--count) {
         float delay = 2.81;
