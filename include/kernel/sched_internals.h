@@ -109,14 +109,6 @@ void save_context(void);
 void restore_context(void);
 
 /**
- * Restore full context
- *
- * Restores a full context, including what would normally be restored by
- * interrupt exit.
- */
-void restore_full_context(void);
-
-/**
  * Get userspace stack pointer
  *
  * Used for saving the SP in a context switch

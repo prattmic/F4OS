@@ -21,6 +21,7 @@
  */
 
 #include <stddef.h>
+#include <dev/hw/systick.h>
 #include <kernel/fault.h>
 
 #include <kernel/sched.h>
@@ -79,7 +80,28 @@ int svc_task_switch(task_ctrl *task) {
         return -1;
     }
 
-    get_task_ctrl(curr_task)->stack_top = get_user_stack_pointer();
+    /*
+     * The scheduler is started by initiating a task switch from
+     * start_sched(), before task_switching is set.  In this case,
+     * perform the final setup before switching to the first task.
+     * Do not save the current task's stack pointer, since there is
+     * no current task.
+     */
+    if (!task_switching) {
+        /*
+         * Initialize preemptive system ticks
+         * Done in interrupt context to ensure that the first scheduler
+         * preemptive interrupt cannot occur until switching has actually
+         * begun (upon return from this interrupt).
+         */
+        init_systick();
+
+        task_switching = 1;
+    }
+    else {
+        get_task_ctrl(curr_task)->stack_top = get_user_stack_pointer();
+    }
+
     switch_task(task);
     return 0;
 }

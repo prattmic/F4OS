@@ -93,7 +93,19 @@ loop_zero_bss:
 .global     _svc_asm
 .type       _svc_asm, %function
 _svc_asm:
-    mrs     r0, psp
+    ands    r1, lr, #4      /* EXC_RETURN[2] = 1 indicates PSP use */
+
+    /*
+     * The first service call is made by the OS, running from the MSP,
+     * to start task switching.  On return from svc_handler, a user task
+     * will be scheduled.  Set EXC_RETURN[2] to make exception return
+     * restore the user task.
+     */
+    itte    eq
+    mrseq   r0, msp
+    orreq   lr, lr, #4
+    mrsne   r0, psp
+
     push    {lr}
     push    {r0}
     bl      save_context
