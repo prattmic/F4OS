@@ -34,6 +34,16 @@ struct list free_task_list;
 
 void svc_register_task(task_ctrl *task, int periodic) __attribute__((section(".kernel")));
 
+/*
+ * Switch to task
+ *
+ * NULL task is equivalent to yield, allowing the scheduler to select a task.
+ *
+ * Returns an error if task does not exist or is not runnable.
+ *
+ * @param task  Task to switch to, NULL to yield
+ * Return 0 on success, negative on error
+ */
 int svc_task_switch(task_ctrl *task) __attribute__((section(".kernel")));
 
 void end_task(void) __attribute__((section(".kernel"),naked));

@@ -34,7 +34,7 @@ int sched_service_call(uint32_t svc_number, ...) {
 
     switch (svc_number) {
         case SVC_YIELD:
-            sched_svc_yield();
+            svc_task_switch(NULL);
             break;
         case SVC_END_TASK:
             sched_svc_end_task();

@@ -138,12 +138,4 @@ void set_user_stack_pointer(uint32_t *stack_addr);
  */
 void create_context(task_ctrl *task, void (*lptr)(void));
 
-/**
- * Yield the current task
- *
- * Performs the SVC_YIELD service call.  This should save the task's current
- * stack pointer and call switch_task().
- */
-void sched_svc_yield(void);
-
 #endif

@@ -39,9 +39,8 @@ void pendsv_handler(void){
     /* Update periodic tasks */
     rtos_tick();
 
-    get_task_ctrl(curr_task)->stack_top = PSP();
-
-    switch_task(NULL);
+    /* Run the scheduler */
+    task_switch(NULL);
 }
 
 uint32_t *get_user_stack_pointer(void) {
@@ -50,11 +49,6 @@ uint32_t *get_user_stack_pointer(void) {
 
 void set_user_stack_pointer(uint32_t *stack_addr) {
     SET_PSP(stack_addr);
-}
-
-void sched_svc_yield(void) {
-    get_task_ctrl(curr_task)->stack_top = PSP();
-    switch_task(NULL);
 }
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {
