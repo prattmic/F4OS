@@ -1,7 +1,9 @@
-/* Portions of this file were based on source
+/*
+ * Portions of this file were based on source
  * code from Stack Overflow, and fall under the
  * Creative Commons Attribution-ShareAlike 2.5 Generic
- * license.  http://creativecommons.org/licenses/by-sa/2.5/ */
+ * license.  http://creativecommons.org/licenses/by-sa/2.5/
+ */
 
 #include <limits.h>
 #include <math.h>
