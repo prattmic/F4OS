@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <arch/chip/registers.h>
 #include <dev/hw/led.h>
 #include <kernel/sched.h>
 #include <kernel/obj.h>

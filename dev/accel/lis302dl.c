@@ -23,8 +23,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <arch/chip/gpio.h>
-#include <arch/chip/registers.h>
 #include <dev/device.h>
 #include <dev/accel.h>
 #include <dev/hw/spi.h>
