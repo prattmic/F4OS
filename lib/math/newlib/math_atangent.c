@@ -22,8 +22,8 @@ float atangentf(float x, float v, float u, int arctan2) {
 
     /* Preparation for calculating arctan2. */
     if (arctan2) {
-        if (u == 0.0) {
-            if (v == 0.0) {
+        if (u == 0.0f) {
+            if (v == 0.0f) {
                 return (FLOAT_NAN);
             }
             else {
@@ -48,7 +48,7 @@ float atangentf(float x, float v, float u, int arctan2) {
             /* Also check for underflow. */
             else if (e < FLT_MIN_EXP) {
                 branch = 2;
-                res = 0.0;
+                res = 0.0f;
             }
         }
     }
@@ -59,16 +59,16 @@ float atangentf(float x, float v, float u, int arctan2) {
         else
             f = fabsf (x);
 
-        if (f > 1.0) {
-            f = 1.0 / f;
+        if (f > 1.0f) {
+            f = 1.0f / f;
             N = 2;
         }
         else
             N = 0;
 
-        if (f > (2.0 - ROOT3)) {
-            A = ROOT3 - 1.0;
-            f = (((A * f - 0.5) - 0.5) + f) / (ROOT3 + f);
+        if (f > (2.0f - ROOT3)) {
+            A = ROOT3 - 1.0f;
+            f = (((A * f - 0.5f) - 0.5f) + f) / (ROOT3 + f);
             N++;
         }
 
@@ -93,12 +93,12 @@ float atangentf(float x, float v, float u, int arctan2) {
     }
 
     if (arctan2) {
-        if (u < 0.0)
+        if (u < 0.0f)
             res = FLOAT_PI - res;
-        if (v < 0.0)
+        if (v < 0.0f)
             res = -res;
     }
-    else if (x < 0.0) {
+    else if (x < 0.0f) {
         res = -res;
     }
 
@@ -114,7 +114,7 @@ float atanf(float x) {
             /* this should check to see if neg NaN or pos NaN... */
             return (FLOAT_PI_OVER_TWO);
         case 0:
-            return (0.0);
+            return (0.0f);
         default:
             return (atangentf (x, 0, 0, 0));
     }

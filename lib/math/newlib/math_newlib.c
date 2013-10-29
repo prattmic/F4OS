@@ -8,11 +8,11 @@
 #include <float.h>
 #include <math.h>
 
-static const float a[] = { -0.5527074855 };
-static const float b[] = { -0.6632718214e+1 };
-static const float C1 = 0.693145752;
-static const float C2 = 1.428606820e-06;
-static const float C3 = 0.4342944819;
+static const float a[] = { -0.5527074855f };
+static const float b[] = { -0.6632718214e+1f };
+static const float C1 = 0.693145752f;
+static const float C2 = 1.428606820e-06f;
+static const float C3 = 0.4342944819f;
 
 float logarithm(float x, int ten) {
     int N;
@@ -308,10 +308,10 @@ float ldexpf(float d, int e) {
       return (d);
 }
 
-static const float INV_LN2 = 1.442695040;
-static const float LN2 = 0.693147180;
-static const float p[] = { 0.249999999950, 0.00416028863 };
-static const float q[] = { 0.5, 0.04998717878 };
+static const float INV_LN2 = 1.442695040f;
+static const float LN2 = 0.693147180f;
+static const float p[] = { 0.249999999950f, 0.00416028863f };
+static const float q[] = { 0.5f, 0.04998717878f };
 
 float expf(float x) {
     int N;
@@ -359,7 +359,7 @@ float expf(float x) {
     return ldexpf(R, N);
 }
 
-#define __SQRT_HALF 0.70710678118654752440
+#define __SQRT_HALF 0.70710678118654752440f
 
 /* Allow the arch to define their own version */
 float __attribute__((weak)) sqrtf(float x) {
@@ -381,8 +381,8 @@ float __attribute__((weak)) sqrtf(float x) {
     }
 
     /* Initial checks are performed here. */
-    if (x == 0.0) {
-        return (0.0);
+    if (x == 0.0f) {
+        return (0.0f);
     }
     if (x < 0) {
         return (FLOAT_NAN);
@@ -393,12 +393,12 @@ float __attribute__((weak)) sqrtf(float x) {
     odd = exp & 1;
 
     /* Get the initial approximation. */
-    y = 0.41731 + 0.59016 * f;
+    y = 0.41731f + 0.59016f * f;
 
-    f *= 0.5;
+    f *= 0.5f;
     /* Calculate the remaining iterations. */
     for (i = 0; i < 2; ++i) {
-        y = y * 0.5 + f / y;
+        y = y * 0.5f + f / y;
     }
 
     /* Calculate the final value. */

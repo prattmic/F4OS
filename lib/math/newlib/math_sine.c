@@ -33,7 +33,7 @@ float sinef(float x, int cosine) {
         y = fabsf (x) + HALF_PI;
     }
     else {
-        if (x < 0.0) {
+        if (x < 0.0f) {
             sgn = -1;
             y = -x;
         }
@@ -49,17 +49,17 @@ float sinef(float x, int cosine) {
     }
 
     /* Calculate the exponent. */
-    if (y < 0.0)
-        N = (int) (y * ONE_OVER_PI - 0.5);
+    if (y < 0.0f)
+        N = (int) (y * ONE_OVER_PI - 0.5f);
     else
-        N = (int) (y * ONE_OVER_PI + 0.5);
+        N = (int) (y * ONE_OVER_PI + 0.5f);
     XN = (float) N;
 
     if (N & 1)
         sgn = -sgn;
 
     if (cosine)
-        XN -= 0.5;
+        XN -= 0.5f;
 
     y = fabsf (x) - XN * FLOAT_PI;
 
@@ -81,17 +81,17 @@ float sinef(float x, int cosine) {
     return (res);
 }
 
-static const float p[] = { 0.933935835, -0.504400557 };
-static const float q[] = { 0.560363004e+1, -0.554846723e+1 };
-static const float a[] = { 0.0, 0.785398163 };
-static const float b[] = { 1.570796326, 0.785398163 };
+static const float p[] = { 0.933935835f, -0.504400557f };
+static const float q[] = { 0.560363004e+1f, -0.554846723e+1f };
+static const float a[] = { 0.0f, 0.785398163f };
+static const float b[] = { 1.570796326f, 0.785398163f };
 
 float asinef(float x, int acosine) {
     int flag, i;
     int branch = 0;
     float R, P, Q, y;
-    float g = 0.0;
-    float res = 0.0;
+    float g = 0.0f;
+    float res = 0.0f;
 
     /* Check for special values. */
     i = numtestf (x);
@@ -105,15 +105,15 @@ float asinef(float x, int acosine) {
     y = fabsf (x);
     flag = acosine;
 
-    if (y > 0.5) {
+    if (y > 0.5f) {
         i = 1 - flag;
 
         /* Check for range error. */
-        if (y > 1.0) {
+        if (y > 1.0f) {
             return (FLOAT_NAN);
         }
 
-        g = (1 - y) / 2.0;
+        g = (1 - y) / 2.0f;
         y = -2 * sqrt (g);
         branch = 1;
     }
@@ -137,11 +137,11 @@ float asinef(float x, int acosine) {
     /* Calculate asine or acose. */
     if (flag == 0) {
         res = (a[i] + res) + a[i];
-        if (x < 0.0)
+        if (x < 0.0f)
             res = -res;
     }
     else {
-        if (x < 0.0)
+        if (x < 0.0f)
             res = (b[i] + res) + b[i];
         else
             res = (a[i] - res) + a[i];

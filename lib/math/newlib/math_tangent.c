@@ -28,15 +28,15 @@ float tanf(float x) {
     y = fabsf (x);
 
     /* Check for values that are out of our range. */
-    if (y > 105414357.0)
+    if (y > 105414357.0f)
     {
         return (y);
     }
 
-    if (x < 0.0)
-        N = (int) (x * TWO_OVER_PI - 0.5);
+    if (x < 0.0f)
+        N = (int) (x * TWO_OVER_PI - 0.5f);
     else
-        N = (int) (x * TWO_OVER_PI + 0.5);
+        N = (int) (x * TWO_OVER_PI + 0.5f);
 
     f = x - N * FLOAT_PI_OVER_TWO;
 
@@ -44,7 +44,7 @@ float tanf(float x) {
     if (-ROOTEPS < f && f < ROOTEPS)
     {
         xnum = f;
-        xden = 1.0;
+        xden = 1.0f;
     }
 
     /* Calculate the polynomial. */
@@ -53,7 +53,7 @@ float tanf(float x) {
         g = f * f;
 
         xnum = f * (p[0] * g) + f;
-        xden = (q[1] * g + q[0]) * g + 1.0;
+        xden = (q[1] * g + q[0]) * g + 1.0f;
     }
 
     /* Check for odd or even values. */
