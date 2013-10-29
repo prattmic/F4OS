@@ -1,8 +1,17 @@
 # Cortex-M4F has a single precision floating point unit
 
-CFLAGS += -mcpu=cortex-m4	# STM32F4 is a Cortex-M4F
+CFLAGS += -mcpu=cortex-m4
+
+ifeq ($(CONFIG_HAVE_FPU),y)
 CFLAGS += -mfloat-abi=hard	# Use FPU and hard float point calling conventions
 CFLAGS += -mfpu=fpv4-sp-d16	# Core contains an FPv4-SP-D16 FPU
+else
+CFLAGS += -lgcc		# libgcc to provide floating point routines
+endif
+
+ifeq ($(CONFIG_SHORT_DOUBLE),y)
 CFLAGS += -fsingle-precision-constant	# Contants are floats, not doubles
 CFLAGS += -fshort-double	# Treat doubles as 32-bit floats
-CFLAGS += -Wdouble-promotion# Warn when a float is promoted to a double
+else
+CFLAGS += -lgcc		# libgcc to provide double precision floating point routines
+endif

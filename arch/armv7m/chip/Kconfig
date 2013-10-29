@@ -31,6 +31,26 @@ config HAVE_FPU
         Without this option enabled, executing floating point instructions
         will result in a usage fault.
 
+        libgcc should be linked in to provide software floating point
+        arithmetic routines.
+
+config SHORT_DOUBLE
+    bool
+    prompt "Use short doubles"
+    default y if HAVE_FPU
+    ---help---
+        Build with '-fshort-double'.
+
+        This will make everything of the double type equivalent in size to
+        that of the float type.  That means that doubles will only be single
+        precision floating point values.  This is particularly useful for
+        chips that contain only a single precision floating point unit, to
+        ensure that the FPU is actually used for floating point arithmetic.
+
+        Chips with an FPU that have not enabled this option will require libgcc
+        to provide software routines for double precision floating point
+        arithmetic.
+
 config SYS_CLOCK
     int
     prompt "System clock speed"
