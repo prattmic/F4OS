@@ -52,6 +52,11 @@ void set_user_stack_pointer(uint32_t *stack_addr) {
 }
 
 void create_context(task_ctrl* task, void (*lptr)(void)) {
+    /* AAPCS requires an 8-byte aligned SP */
+    uintptr_t stack = (uintptr_t) task->stack_top;
+    stack -= stack % 8;
+    task->stack_top = (uint32_t *) stack;
+
     asm volatile(
 #ifdef CONFIG_HAVE_FPU
                  "stmdb   %[stack]!, {%[zero]}  /* Empty for 8byte aligned SP */\n\
