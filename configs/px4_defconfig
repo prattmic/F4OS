@@ -65,6 +65,7 @@ CONFIG_MAGNETOMETERS=y
 # Magnetometers
 #
 CONFIG_HMC5883=y
+# CONFIG_ROTARY_ENCODERS is not set
 
 #
 # Memory management

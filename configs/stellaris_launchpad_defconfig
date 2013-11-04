@@ -35,6 +35,7 @@ CONFIG_SHARED_MEM_SIZE=128
 # CONFIG_BAROMETERS is not set
 # CONFIG_GYROSCOPES is not set
 # CONFIG_MAGNETOMETERS is not set
+# CONFIG_ROTARY_ENCODERS is not set
 
 #
 # Memory management

@@ -106,3 +106,12 @@ config MAGNETOMETERS
 if MAGNETOMETERS
     source "dev/mag/Kconfig"
 endif
+
+config ROTARY_ENCODERS
+    bool "Rotary encoder support"
+    ---help---
+        Include support for rotary encoders.
+
+if ROTARY_ENCODERS
+    source "dev/rotary_encoder/Kconfig"
+endif
