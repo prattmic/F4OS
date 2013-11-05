@@ -49,16 +49,19 @@ struct stm32f4_i2c {
     struct stm32f4_i2c_regs *regs;
 };
 
-/* For now, all I2C ports are configured the same */
-static int stm32f4_i2c_init(struct i2c *i2c) {
+/*
+ * I2C peripheral initialization
+ *
+ * Initialize the I2C peripheral registers to the standard state.
+ * For now, all I2C ports are configured the same.
+ *
+ * The I2C semaphore should be held when calling this function.
+ *
+ * @param i2c   I2C peripheral to initialize
+ * @returns zero on success, negative on error
+ */
+static int stm32f4_i2c_initialize(struct i2c *i2c) {
     struct stm32f4_i2c *port = i2c->priv;
-
-    acquire(&i2c->lock);
-
-    /* Already initialized? */
-    if (port->ready) {
-        return 0;
-    }
 
     /* Enable I2C clock */
     switch (i2c->num) {
@@ -86,9 +89,32 @@ static int stm32f4_i2c_init(struct i2c *i2c) {
 
     port->ready = 1;
 
+    return 0;
+}
+
+/*
+ * For the init() method, just grab the lock and call the actual initialization
+ * function.
+ *
+ * If already initialized, even that can be skipped.
+ */
+static int stm32f4_i2c_init(struct i2c *i2c) {
+    struct stm32f4_i2c *port = i2c->priv;
+    int ret = 0;
+
+    acquire(&i2c->lock);
+
+    /* Already initialized? */
+    if (port->ready) {
+        goto out;
+    }
+
+    ret = stm32f4_i2c_initialize(i2c);
+
+out:
     release(&i2c->lock);
 
-    return 0;
+    return ret;
 }
 
 static int stm32f4_i2c_deinit(struct i2c *i2c) {
@@ -106,6 +132,8 @@ static int stm32f4_i2c_deinit(struct i2c *i2c) {
  * communication, leaving the peripheral expecting communication that won't
  * occur.  The only solution is to reset the peripheral.
  *
+ * The I2C semaphore should be held when calling this function.
+ *
  * Upon successful return, normal I2C use can continue.
  *
  * @param i2c   I2C port to rest
@@ -113,7 +141,6 @@ static int stm32f4_i2c_deinit(struct i2c *i2c) {
  */
 static int stm32f4_i2c_reset(struct i2c *i2c) {
     struct stm32f4_i2c *port = i2c->priv;
-    struct i2c_ops *ops = (struct i2c_ops *) i2c->obj.ops;
 
     port->ready = 0;
 
@@ -127,7 +154,7 @@ static int stm32f4_i2c_reset(struct i2c *i2c) {
     raw_mem_clear_bits(&port->regs->CR1, I2C_CR1_SWRST);
 
     /* Re-initialize */
-    return ops->init(i2c);
+    return stm32f4_i2c_initialize(i2c);
 }
 
 /**
@@ -139,6 +166,8 @@ static int stm32f4_i2c_reset(struct i2c *i2c) {
  * bus BUSY and prevents any further communication.  This condition is fixed
  * by manually clocking SCL until SDA is released by the slave.  As far as it
  * is concerned, we just completed a normal transaction.
+ *
+ * The I2C semaphore should be held when calling this function.
  *
  * @param i2c   I2C bus to clear
  * @returns 0 if BUSY successfully cleared, negative otherwise
@@ -206,16 +235,15 @@ static int stm32f4_i2c_prepare(struct i2c *i2c) {
         return -1;
     }
 
+    acquire(&i2c->lock);
+
     port = i2c->priv;
     if (!port->ready) {
-        struct i2c_ops *ops = (struct i2c_ops *) i2c->obj.ops;
-        ret = ops->init(i2c);
+        ret = stm32f4_i2c_initialize(i2c);
         if (ret) {
             return ret;
         }
     }
-
-    acquire(&i2c->lock);
 
     /* Check for bus error */
     if (raw_mem_read(&port->regs->SR1) & I2C_SR1_BERR) {
