@@ -554,6 +554,13 @@ static struct obj *stm32f4_i2c_ctor(const char *name) {
             goto err_free_gpio;
         }
 
+        /* Pull up */
+        err = ops->set_flags(gpio, STM32F4_GPIO_PULL,
+                             STM32F4_GPIO_PULL_UP);
+        if (err) {
+            goto err_free_gpio;
+        }
+
         /* Set to I2C mode */
         err = ops->set_flags(gpio, STM32F4_GPIO_ALT_FUNC,
                              STM32F4_GPIO_AF_I2C);
