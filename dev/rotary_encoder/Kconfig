@@ -1,3 +1,11 @@
 menu "Rotary encoders"
 
+config AS5048B
+    bool "AMS AS5048B Rotary Encoder"
+    depends on HAVE_I2C
+    ---help---
+        Standard rotary encoder driver for AS5048B.
+        Supports one-time programming of zero position
+        with calibrate method.
+
 endmenu

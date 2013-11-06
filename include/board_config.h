@@ -68,4 +68,13 @@ struct mpu6000_spi_config {
 
 extern struct mpu6000_spi_config mpu6000_spi_config;
 
+#ifdef CONFIG_AS5048B
+struct as5048b_rotary_encoder_config {
+    uint32_t valid;
+    char *parent_name;
+};
+
+extern struct as5048b_rotary_encoder_config as5048b_rotary_encoder_config;
+#endif
+
 #endif
