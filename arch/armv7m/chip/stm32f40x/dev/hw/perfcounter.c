@@ -58,6 +58,22 @@ void init_perfcounter(void) {
     init_tim1();
 }
 
-inline uint64_t perfcounter_getcount(void) {
-    return (*TIM2_CNT << 16)|(*TIM1_CNT);
+uint64_t perfcounter_getcount(void) {
+    uint32_t upper, lower;
+
+    /*
+     * Ensure atomic read of complete upper + lower value.
+     *
+     * If lower overflows between reading upper and lower, the value of upper
+     * is no longer valid, so it will not match the register, and another
+     * attempt is made.
+     *
+     * The lower timer must overflow suffciently slowly!
+     */
+    do {
+        upper = *TIM2_CNT;
+        lower = *TIM1_CNT;
+    } while(upper != *TIM2_CNT);
+
+    return (upper << 16) | lower;
 }
