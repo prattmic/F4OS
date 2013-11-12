@@ -63,6 +63,7 @@
 #define USART2_BASE                     (APB1PERIPH_BASE + 0x4400)                              /* USART2 Base Address */
 #define SPI3_BASE                       (APB1PERIPH_BASE + 0x3C00)                              /* SPI3 Base Address */
 #define SPI2_BASE                       (APB1PERIPH_BASE + 0x3800)                              /* SPI2 Base Address */
+#define TIM5_BASE                       (APB1PERIPH_BASE + 0x0C00)                              /* Timer 5 base address */
 #define TIM2_BASE                       (APB1PERIPH_BASE + 0x0000)                              /* Timer 2 base address */
 /* APB2 Peripherals */
 #define SPI6_BASE                       (APB2PERIPH_BASE + 0x5400)                              /* SPI6 Base Address */
@@ -116,6 +117,26 @@
 #define TIM2_DCR                        (volatile uint32_t *) (TIM2_BASE + 0x48)                /* TIM2 DMA control register */
 #define TIM2_DMAR                       (volatile uint32_t *) (TIM2_BASE + 0x4C)                /* TIM2 DMA address for full transfer */
 #define TIM2_OR                         (volatile uint32_t *) (TIM2_BASE + 0x50)                /* TIM2 option register */
+
+#define TIM5_CR1                        (volatile uint32_t *) (TIM5_BASE + 0x00)                /* TIM5 control register 1 */
+#define TIM5_CR2                        (volatile uint32_t *) (TIM5_BASE + 0x04)                /* TIM5 control register 2 */
+#define TIM5_SMCR                       (volatile uint32_t *) (TIM5_BASE + 0x08)                /* TIM5 slave mode control register */
+#define TIM5_DIER                       (volatile uint32_t *) (TIM5_BASE + 0x0C)                /* TIM5 DMA/Interrupt enable register */
+#define TIM5_SR                         (volatile uint32_t *) (TIM5_BASE + 0x10)                /* TIM5 status register */
+#define TIM5_EGR                        (volatile uint32_t *) (TIM5_BASE + 0x14)                /* TIM5 event generation register */
+#define TIM5_CCMR1                      (volatile uint32_t *) (TIM5_BASE + 0x18)                /* TIM5 capture/compare mode register 1 */
+#define TIM5_CCMR2                      (volatile uint32_t *) (TIM5_BASE + 0x1C)                /* TIM5 capture/compare mode register 2 */
+#define TIM5_CCER                       (volatile uint32_t *) (TIM5_BASE + 0x20)                /* TIM5 capture/compare enable register */
+#define TIM5_CNT                        (volatile uint32_t *) (TIM5_BASE + 0x24)                /* TIM5 counter */
+#define TIM5_PSC                        (volatile uint32_t *) (TIM5_BASE + 0x28)                /* TIM5 prescaler */
+#define TIM5_ARR                        (volatile uint32_t *) (TIM5_BASE + 0x2C)                /* TIM5 auto-reload register */
+#define TIM5_CCR1                       (volatile uint32_t *) (TIM5_BASE + 0x34)                /* TIM5 capture/compare register 1 */
+#define TIM5_CCR2                       (volatile uint32_t *) (TIM5_BASE + 0x38)                /* TIM5 capture/compare register 2 */
+#define TIM5_CCR3                       (volatile uint32_t *) (TIM5_BASE + 0x3C)                /* TIM5 capture/compare register 3 */
+#define TIM5_CCR4                       (volatile uint32_t *) (TIM5_BASE + 0x40)                /* TIM5 capture/compare register 4 */
+#define TIM5_DCR                        (volatile uint32_t *) (TIM5_BASE + 0x48)                /* TIM5 DMA control register */
+#define TIM5_DMAR                       (volatile uint32_t *) (TIM5_BASE + 0x4C)                /* TIM5 DMA address for full transfer */
+#define TIM5_OR                         (volatile uint32_t *) (TIM5_BASE + 0x50)                /* TIM5 option register */
 /* Power Control (PWR) */
 #define PWR_CR                          (volatile uint32_t *) (PWR_BASE + 0x00)                 /* Power Control Register */
 #define PWR_CSR                         (volatile uint32_t *) (PWR_BASE + 0x04)                 /* Power Control/Status Register */

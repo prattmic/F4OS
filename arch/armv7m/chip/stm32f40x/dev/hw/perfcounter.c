@@ -23,20 +23,13 @@
 #include <arch/chip/registers.h>
 #include <dev/hw/perfcounter.h>
 
-static void init_tim1(void) {
-    /* Enable timer clock */
-    *RCC_APB2ENR |= RCC_APB2ENR_TIM1EN;
+/* 64-bit timer, with TIM5 slave to TIM2 */
 
-    /* No prescale, max count */
-    *TIM1_PSC = 0;
-    *TIM1_ARR = 0xffff;
-
-    /* TIM1 set update event as output in master control reg */
-    *TIM1_CR2 |= (1 << 5);
-
-    /* Enable timers */
-    *TIM1_CR1 |= TIMx_CR1_CEN;
-}
+/*
+ * APB1 clock is system clock / 4.
+ * Timers on APB1 are clocked at 2 * APB1 clock.
+ */
+#define TIMER_PRESCALER (2)
 
 static void init_tim2(void) {
     /* Enable timer clock */
@@ -46,20 +39,36 @@ static void init_tim2(void) {
     *TIM2_PSC = 0;
     *TIM2_ARR = 0xffffffff;
 
-    /* External clock mode in TIM2 */
-    *TIM2_SMCR |= 0x7;
+    /* TIM2 set update event as output in master control reg */
+    *TIM2_CR2 |= (1 << 5);
 
     /* Enable timers */
     *TIM2_CR1 |= TIMx_CR1_CEN;
 }
 
+static void init_tim5(void) {
+    /* Enable timer clock */
+    *RCC_APB1ENR |= RCC_APB1ENR_TIM5EN;
+
+    /* No prescale, max count */
+    *TIM5_PSC = 0;
+    *TIM5_ARR = 0xffffffff;
+
+    /* External clock mode in TIM5 */
+    *TIM5_SMCR |= 0x7;
+
+    /* Enable timers */
+    *TIM5_CR1 |= TIMx_CR1_CEN;
+}
+
 void init_perfcounter(void) {
+    init_tim5();
     init_tim2();
-    init_tim1();
 }
 
 uint64_t perfcounter_getcount(void) {
     uint32_t upper, lower;
+    uint64_t count;
 
     /*
      * Ensure atomic read of complete upper + lower value.
@@ -71,9 +80,12 @@ uint64_t perfcounter_getcount(void) {
      * The lower timer must overflow suffciently slowly!
      */
     do {
-        upper = *TIM2_CNT;
-        lower = *TIM1_CNT;
-    } while(upper != *TIM2_CNT);
+        upper = *TIM5_CNT;
+        lower = *TIM2_CNT;
+    } while(upper != *TIM5_CNT);
 
-    return (upper << 16) | lower;
+    count = ((uint64_t)upper << 32) | lower;
+
+    /* Return in system clock ticks */
+    return TIMER_PRESCALER * count;
 }
