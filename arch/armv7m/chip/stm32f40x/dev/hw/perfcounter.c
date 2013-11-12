@@ -20,8 +20,11 @@
  * SOFTWARE.
  */
 
+#include <limits.h>
 #include <arch/chip/registers.h>
+#include <arch/chip/timer.h>
 #include <dev/hw/perfcounter.h>
+#include <dev/raw_mem.h>
 
 /* 64-bit timer, with TIM5 slave to TIM2 */
 
@@ -31,34 +34,44 @@
  */
 #define TIMER_PRESCALER (2)
 
+/* Acts as master timer, sends update event */
 static void init_tim2(void) {
+    struct stm32f4_timer_regs *regs = timer_get_regs(2);
+
     /* Enable timer clock */
     *RCC_APB1ENR |= RCC_APB1ENR_TIM2EN;
 
-    /* No prescale, max count */
-    *TIM2_PSC = 0;
-    *TIM2_ARR = 0xffffffff;
+    /* No clock prescale, max count */
+    raw_mem_write(&regs->PSC, 0);
 
-    /* TIM2 set update event as output in master control reg */
-    *TIM2_CR2 |= (1 << 5);
+    /* Maximum count value */
+    raw_mem_write(&regs->ARR, UINT32_MAX);
 
-    /* Enable timers */
-    *TIM2_CR1 |= TIMx_CR1_CEN;
+    /* Set update event as output in master control reg */
+    raw_mem_set_mask(&regs->CR2, TIM_CR2_MMS_MASK, TIM_CR2_MMS_UP);
+
+    /* Enable timer */
+    raw_mem_set_bits(&regs->CR1, TIM_CR1_CEN);
 }
 
+/* Acts as slave timer, incrementing on update event */
 static void init_tim5(void) {
+    struct stm32f4_timer_regs *regs = timer_get_regs(5);
+
     /* Enable timer clock */
     *RCC_APB1ENR |= RCC_APB1ENR_TIM5EN;
 
-    /* No prescale, max count */
-    *TIM5_PSC = 0;
-    *TIM5_ARR = 0xffffffff;
+    /* No clock prescale, max count */
+    raw_mem_write(&regs->PSC, 0);
 
-    /* External clock mode in TIM5 */
-    *TIM5_SMCR |= 0x7;
+    /* Maximum count value */
+    raw_mem_write(&regs->ARR, UINT32_MAX);
 
-    /* Enable timers */
-    *TIM5_CR1 |= TIMx_CR1_CEN;
+    /* External clock slave mode */
+    raw_mem_set_bits(&regs->SMCR, TIM_SMCR_SMS_EXT);
+
+    /* Enable timer */
+    raw_mem_set_bits(&regs->CR1, TIM_CR1_CEN);
 }
 
 void init_perfcounter(void) {
@@ -67,6 +80,8 @@ void init_perfcounter(void) {
 }
 
 uint64_t perfcounter_getcount(void) {
+    struct stm32f4_timer_regs *tim2 = timer_get_regs(2);
+    struct stm32f4_timer_regs *tim5 = timer_get_regs(5);
     uint32_t upper, lower;
     uint64_t count;
 
@@ -80,9 +95,9 @@ uint64_t perfcounter_getcount(void) {
      * The lower timer must overflow suffciently slowly!
      */
     do {
-        upper = *TIM5_CNT;
-        lower = *TIM2_CNT;
-    } while(upper != *TIM5_CNT);
+        upper = raw_mem_read(&tim5->CNT);
+        lower = raw_mem_read(&tim2->CNT);
+    } while(upper != raw_mem_read(&tim5->CNT));
 
     count = ((uint64_t)upper << 32) | lower;
 
