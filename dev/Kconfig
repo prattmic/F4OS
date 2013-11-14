@@ -69,6 +69,13 @@ config SHARED_MEM_SIZE
         The size of buffer to be allocated for each shared memory
         resource opened.
 
+config PWM_CLASS
+    bool "PWM Support"
+    default y
+    ---help---
+        Enable support for the PWM class and drivers.  The PWM drivers provide
+        support for hardware and/or software PWM outputs, given a GPIO object.
+
 source "dev/mpu6000/Kconfig"
 
 config ACCELEROMETERS
