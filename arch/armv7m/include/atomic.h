@@ -45,7 +45,7 @@ static inline int atomic_add(atomic_t *v, int i) {
         "   strex  %[failed], %[ret], [%[num]] \n\t"
         "   cmp    %[failed], #0               \n\t"
         "   bne    0b                          \n\t"
-        : [ret] "=r" (ret), [failed] "=r" (failed)
+        : [ret] "=&r" (ret), [failed] "=r" (failed)
         : [num] "r" (&v->num), [i] "ri" (i)
         : "memory"
     );
@@ -63,7 +63,7 @@ static inline int atomic_sub(atomic_t *v, int i) {
         "   strex  %[failed], %[ret], [%[num]] \n\t"
         "   cmp    %[failed], #0               \n\t"
         "   bne    0b                          \n\t"
-        : [ret] "=r" (ret), [failed] "=r" (failed)
+        : [ret] "=&r" (ret), [failed] "=r" (failed)
         : [num] "r" (&v->num), [i] "ri" (i)
         : "memory"
     );
@@ -110,7 +110,7 @@ static inline uint32_t atomic_or(uint32_t *ptr, uint32_t val) {
         "   strex %[failed], %[ret], [%[ptr]]   \n\t"
         "   cmp %[failed], #0                   \n\t"
         "   bne 0b                              \n\t"
-        : [failed] "=r" (failed), [ret] "=r" (ret)
+        : [failed] "=r" (failed), [ret] "=&r" (ret)
         : [ptr] "r" (ptr), [val] "ri" (val)
         : "memory"
     );
@@ -128,7 +128,7 @@ static inline uint32_t atomic_and(uint32_t *ptr, uint32_t val) {
         "   strex %[failed], %[ret], [%[ptr]]   \n\t"
         "   cmp %[failed], #0                   \n\t"
         "   bne 0b                              \n\t"
-        : [failed] "=r" (failed), [ret] "=r" (ret)
+        : [failed] "=r" (failed), [ret] "=&r" (ret)
         : [ptr] "r" (ptr), [val] "ri" (val)
         : "memory"
     );
