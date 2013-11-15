@@ -1,6 +1,7 @@
 SRCS += vector.S
 SRCS += clock.c
 SRCS += gpio.c
+SRCS_$(CONFIG_PWM_CLASS) += pwm.c
 
 DIRS += boards/
 DIRS += dev/
