@@ -24,6 +24,7 @@
 #define DEV_GPIO_H_INCLUDED
 
 #include <stdint.h>
+#include <kernel/class.h>
 #include <kernel/obj.h>
 
 struct gpio {
