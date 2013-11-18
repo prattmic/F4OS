@@ -16,6 +16,7 @@ SRCS_$(CONFIG_MAGNETOMETERS) += mag.c
 SRCS_$(CONFIG_ROTARY_ENCODERS) += rotary_encoder.c
 SRCS_$(CONFIG_HAVE_LED) 	+= blink.c
 SRCS_$(CONFIG_MM_PROFILING) += mem_perf.c
+SRCS_$(CONFIG_PWM_CLASS) += pwm.c
 
 # Date and rev for uname
 DATE := "$(shell date -u)"
