@@ -27,3 +27,12 @@ config HELD_SEMAPHORES_MAX
         The maximum number of semaphores any given task will
         be able to hold at one time.  Each held semaphore must
         be stored alongside the task to aid in deadlock checking.
+
+config BUILD_SYMBOL_TABLE
+    bool
+    prompt "Build symbol table into OS"
+    default y
+    ---help---
+        Build a complete function symbol table into the OS.  This table
+        will contain information necessary to provide function names in
+        stack traces.  If disabled, an empty symbol table will be included.

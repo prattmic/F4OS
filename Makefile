@@ -73,6 +73,7 @@ endif
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
+OBJDUMP = $(CROSS_COMPILE)objdump
 
 # Establish system includes directory, auto-include config
 INCLUDE_FLAGS := -isystem $(PREFIX)/include/ -include $(BASE)/include/config/autoconf.h
@@ -185,9 +186,10 @@ $(PREFIX)/$(PROJ_NAME).o: $(KCONFIG_HEADER) $(PREFIX)/include .FORCE
 	$(call print_command,"MAKE",$(call relative_path,$@))
 	$(VERBOSE)$(MAKE) -f f4os.mk obj=$@
 
-$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/link.ld
-	$(call print_command,"LD",$(call relative_path,$@))
-	$(VERBOSE)$(CC) $< -o $@ $(CFLAGS) -T $(PREFIX)/link.ld $(patsubst %,-Xlinker %,$(LFLAGS))
+# Copy final ELF created during symbol table generation
+$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).final.elf
+	$(call print_command,"CP",$(call relative_path,$@))
+	$(VERBOSE)cp $< $@
 
 %.hex: %.elf
 	$(call print_command,"OBJCOPY",$(call relative_path,$@))
@@ -204,6 +206,9 @@ $(PREFIX)/link.ld : $(LINK_SCRIPT)
 
 # Include linker script dependencies
 -include $(PREFIX)/link.d
+
+# Include symbol table generation
+include $(BASE)/tools/symbol_table.mk
 
 clean:
 	$(VERBOSE)-rm -rf $(PREFIX)
