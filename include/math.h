@@ -8,6 +8,7 @@
 #define MATH_H_INCLUDED
 
 #include <stdint.h>
+#include <compiler.h>
 
 uint32_t pow(uint32_t base, uint32_t exp);
 
@@ -72,39 +73,32 @@ typedef union {
     uint32_t i;
 } float_int;
 
-inline uint8_t isnan(float x) __attribute__((always_inline));
-inline uint8_t isinf(float x) __attribute__((always_inline));
-inline uint8_t isfinite(float x) __attribute__((always_inline));
-inline uint8_t ispos(float x) __attribute__((always_inline));
-inline uint32_t float_to_uint(float x) __attribute__((always_inline));
-inline float uint_to_float(uint32_t x) __attribute__((always_inline));
-
-inline uint8_t isnan(float x) {
-    return (uint8_t) ((float_to_uint(x) & 0x7fffffff) > 0x7f800000);
-}
-
-inline uint8_t isinf(float x) {
-    return (uint8_t) ((float_to_uint(x) & 0x7fffffff) == 0x7f800000);
-}
-
-inline uint8_t isfinite(float x) {
-	return (uint8_t) ((uint32_t)((float_to_uint(x)&0x7fffffff)-0x7ff00000)>>31);
-}
-
-inline uint8_t ispos(float x) {
-    return ((float_to_uint(x) & 0x80000000) ? 0 : 1);
-}
-
-inline uint32_t float_to_uint(float x) {
+static __always_inline uint32_t float_to_uint(float x) {
     float_int c;
     c.f = x;
     return c.i;
 }
 
-inline float uint_to_float(uint32_t x) {
+static __always_inline float uint_to_float(uint32_t x) {
     float_int c;
     c.i = x;
     return c.f;
+}
+
+static __always_inline uint8_t isnan(float x) {
+    return (uint8_t) ((float_to_uint(x) & 0x7fffffff) > 0x7f800000);
+}
+
+static __always_inline uint8_t isinf(float x) {
+    return (uint8_t) ((float_to_uint(x) & 0x7fffffff) == 0x7f800000);
+}
+
+static __always_inline uint8_t isfinite(float x) {
+	return (uint8_t) ((uint32_t)((float_to_uint(x)&0x7fffffff)-0x7ff00000)>>31);
+}
+
+static __always_inline uint8_t ispos(float x) {
+    return ((float_to_uint(x) & 0x80000000) ? 0 : 1);
 }
 
 #endif

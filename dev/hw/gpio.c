@@ -21,6 +21,7 @@
  */
 
 #include <stdint.h>
+#include <compiler.h>
 #include <dev/hw/gpio.h>
 #include <kernel/class.h>
 #include <kernel/init.h>
@@ -104,10 +105,10 @@ struct obj *gpio_get(uint32_t gpio) {
 
 /* In the event that there is no chip GPIO driver, provide stub gpio_valid
  * and _gpio_instantiate that always return failure. */
-int __attribute__((weak)) gpio_valid(uint32_t gpio) {
+int __weak gpio_valid(uint32_t gpio) {
     return GPIO_ERR_INVAL;
 }
 
-struct obj __attribute__((weak)) *_gpio_instantiate(uint32_t gpio) {
+struct obj __weak *_gpio_instantiate(uint32_t gpio) {
     return NULL;
 }

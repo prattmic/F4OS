@@ -28,6 +28,7 @@
  * scheduler files and arch-specific scheduler functions.
  */
 
+#include <compiler.h>
 #include <list.h>
 
 typedef struct task_ctrl {
@@ -48,12 +49,12 @@ typedef struct task_ctrl {
 } task_ctrl;
 
 /* Return task_ctrl struct given exported task_t address */
-static inline __attribute__((always_inline)) struct task_ctrl *get_task_ctrl(task_t *task) {
+static __always_inline struct task_ctrl *get_task_ctrl(task_t *task) {
     return container_of(task, struct task_ctrl, exported);
 }
 
 /* Return exportable task_t given task_ctrl address */
-static inline __attribute__((always_inline)) task_t *get_task_t(task_ctrl *task) {
+static __always_inline task_t *get_task_t(task_ctrl *task) {
     return &task->exported;
 }
 

@@ -20,16 +20,19 @@
  * SOFTWARE.
  */
 
-#include <stddef.h>
-#include <compiler.h>
-#include <math.h>
+/* Special compiler constructs, such as function and type attributes */
 
-float lowpass(float acc, float new, float gain) {
-    acc = acc * (1-gain);
+#ifndef COMPILER_H_INCLUDED
+#define COMPILER_H_INCLUDED
 
-    return acc + new * gain;
-}
+#define offset_of(type, member) __builtin_offsetof(type, member)
 
-float __weak fabsf(float num) {
-    return num > 0 ? num : -num;
-}
+#define container_of(ptr, type, member) ({ \
+    const typeof( ((type *)0)->member ) *__mptr = (ptr); \
+    (type *)( (char *)__mptr - __builtin_offsetof(type,member) );})
+
+#define __always_inline inline __attribute__((always_inline))
+#define __weak          __attribute__((weak))
+#define __packed        __attribute__((packed))
+
+#endif

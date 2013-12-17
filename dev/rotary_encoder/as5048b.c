@@ -264,4 +264,4 @@ static int as5048b_register(void) {
 CORE_INITIALIZER(as5048b_register)
 
 /* Provide a weak, invalid, default config */
-struct as5048b_rotary_encoder_config as5048b_rotary_encoder_config __attribute__((weak));
+struct as5048b_rotary_encoder_config as5048b_rotary_encoder_config __weak;

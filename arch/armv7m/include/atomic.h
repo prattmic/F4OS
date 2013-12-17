@@ -23,8 +23,7 @@
 #ifndef ARCH_ATOMIC_H_INCLUDED
 #define ARCH_ATOMIC_H_INCLUDED
 
-/* TODO: Move to a more general header */
-#define __always_inline    inline __attribute__((always_inline))
+#include <compiler.h>
 
 /* word aligned reads/writes of words are atomic */
 static __always_inline int atomic_read(atomic_t *v) {

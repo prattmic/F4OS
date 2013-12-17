@@ -21,6 +21,7 @@
  */
 
 #include <stdint.h>
+#include <compiler.h>
 #include <dev/hw/pwm.h>
 #include <kernel/class.h>
 #include <kernel/init.h>
@@ -63,6 +64,6 @@ CORE_INITIALIZER(pwm_setup)
  * In the event that there is no chip PWM driver, provide stub pwm_get
  * that always returns failure.
  */
-struct obj __attribute__((weak)) *pwm_get(struct obj *gpio, uint32_t duty) {
+struct obj __weak *pwm_get(struct obj *gpio, uint32_t duty) {
     return NULL;
 }

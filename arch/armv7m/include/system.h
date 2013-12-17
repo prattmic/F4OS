@@ -24,19 +24,18 @@
 #define ARCH_SYSTEM_H_INCLUDED
 
 #include <stdint.h>
+#include <compiler.h>
 
 /* Tells the compiler to provide the value in reg as
  * an input to an inline assembly block.  Even though
  * the block contains no instructions, the compiler may
  * not optimize it away, and is told that the value may
  * change and should not be relied upon. */
-inline void READ_AND_DISCARD(volatile uint32_t *reg) __attribute__((always_inline));
-inline void READ_AND_DISCARD(volatile uint32_t *reg) {
+static __always_inline void READ_AND_DISCARD(volatile uint32_t *reg) {
     asm volatile ("" : "=m" (*reg) : "r" (*reg));
 }
 
-inline uint8_t FAULTMASK(void) __attribute__((always_inline));
-inline uint8_t FAULTMASK(void) {
+static __always_inline uint8_t FAULTMASK(void) {
     uint8_t val;
 
     asm("mrs    %[val], faultmask"
@@ -46,8 +45,7 @@ inline uint8_t FAULTMASK(void) {
     return val;
 }
 
-inline uint8_t IPSR(void) __attribute__((always_inline));
-inline uint8_t IPSR(void) {
+static __always_inline uint8_t IPSR(void) {
     uint8_t val;
 
     asm("mrs    %[val], ipsr"
@@ -57,8 +55,7 @@ inline uint8_t IPSR(void) {
     return val;
 }
 
-inline uint32_t *PSP(void) __attribute__((always_inline));
-inline uint32_t *PSP(void) {
+static __always_inline uint32_t *PSP(void) {
     uint32_t *val;
 
     asm("mrs    %[val], psp"
@@ -68,15 +65,13 @@ inline uint32_t *PSP(void) {
     return val;
 }
 
-inline void *SET_PSP(void *addr) __attribute__((always_inline));
-inline void *SET_PSP(void *addr) {
+static __always_inline void *SET_PSP(void *addr) {
     asm volatile ("msr    psp, %[addr]"
         ::[addr] "r" (addr)
         :);
 }
 
-inline uint32_t *MSP(void) __attribute__((always_inline));
-inline uint32_t *MSP(void) {
+static __always_inline uint32_t *MSP(void) {
     uint32_t *val;
 
     asm("mrs    %[val], msp"

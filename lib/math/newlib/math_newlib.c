@@ -5,6 +5,7 @@
  */
 
 #include <stdint.h>
+#include <compiler.h>
 #include <float.h>
 #include <math.h>
 
@@ -362,7 +363,7 @@ float expf(float x) {
 #define __SQRT_HALF 0.70710678118654752440f
 
 /* Allow the arch to define their own version */
-float __attribute__((weak)) sqrtf(float x) {
+float __weak sqrtf(float x) {
     float f, y;
     int exp, i, odd;
 

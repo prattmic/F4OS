@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <compiler.h>
 #include <dev/resource.h>
 #include <dev/hw/usart.h>
 #include <dev/hw/led.h>
@@ -117,4 +118,4 @@ void toggle_led_delay(void) {
  * Provide a weak version that does nothing in case
  * the arch doesn't provide one
  */
-void __attribute__((weak)) disable_interrupts(void) {}
+void __weak disable_interrupts(void) {}
