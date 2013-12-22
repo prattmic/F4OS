@@ -38,7 +38,7 @@ struct obj *device_get(const char *name) {
 
     acquire(&driver_sem);
     list_for_each_entry(iter, &drivers, list) {
-        if (strncmp((char *)name, (char *)iter->name, 32) == 0) {
+        if (strncmp(name, iter->name, 32) == 0) {
             driver = iter;
             break;
         }

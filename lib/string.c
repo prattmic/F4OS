@@ -51,8 +51,8 @@ void memset(void *p, uint8_t value, uint32_t size) {
     }
 }
 
-void memcpy(void *dst, void *src, int n) {
-    uint8_t *s = src;
+void memcpy(void *dst, const void *src, int n) {
+    const uint8_t *s = src;
     uint8_t *d = dst;
 
     while(n--) {
@@ -61,8 +61,8 @@ void memcpy(void *dst, void *src, int n) {
 }
 
 // Overlap-safe memcpy
-void memmove(void *dst, void *src, size_t n) {
-    char *s = src;
+void memmove(void *dst, const void *src, size_t n) {
+    const char *s = src;
     char *d = dst;
     if ((uintptr_t)s < (uintptr_t)d)
         while(n--) d[n] = s[n];
@@ -70,7 +70,7 @@ void memmove(void *dst, void *src, size_t n) {
         while(n--) *d++ = *s++;
 }
 
-size_t strlen(char *s) {
+size_t strlen(const char *s) {
     size_t len = 0;
     while (*s++) {
         len++;
@@ -78,7 +78,7 @@ size_t strlen(char *s) {
     return len;
 }
 
-size_t strnlen(char *s, int n) {
+size_t strnlen(const char *s, int n) {
     size_t len = 0;
     while (*s++ && len < n) {
         len++;
@@ -103,7 +103,7 @@ void strreverse(char *s) {
     }
 }
 
-int strncmp(char *s, char *p, uint32_t n) {
+int strncmp(const char *s, const char *p, uint32_t n) {
     while (*s == *p && *s != '\0' && *p != '\0' && n) {
         s++;
         p++;
@@ -121,7 +121,7 @@ int strncmp(char *s, char *p, uint32_t n) {
     }
 }
 
-char *strncpy(char *destination, char *source, int num) {
+char *strncpy(char *destination, const char *source, int num) {
     char *ret = destination;
 
     while (*source && num-- > 0) {
@@ -136,7 +136,7 @@ char *strncpy(char *destination, char *source, int num) {
 }
 
 // Find if a character is in a list
-int chrnlst(char c, char *l) {
+int chrnlst(char c, const char *l) {
     for (int i = 0; l[i] != '\0'; i++) {
         if (c == l[i])
             return 1;
