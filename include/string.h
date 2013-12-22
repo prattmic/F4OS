@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,13 +26,17 @@
 #include <stddef.h>
 #include <stdint.h>
 
+void *memchr(const void *ptr, int value, size_t num);
+int memcmp(const void *ptr1, const void *ptr2, size_t num);
 void memset32(void *p, int32_t value, uint32_t size);
 void memset(void *p, uint8_t value, uint32_t size);
 void memcpy(void *dst, const void *src, int n);
 void memmove(void *dst, const void *src, size_t n);
+char *strchr(const char *s, int c);
 size_t strlen(const char *s);
 size_t strnlen(const char *s, int n);
 void strreverse(char *s);
+int strcmp(const char *s, const char *p);
 int strncmp(const char *s, const char *p, uint32_t n);
 char *strncpy(char *destination, const char *source, int num);
 int chrnlst(char c, const char *l);

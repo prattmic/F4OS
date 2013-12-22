@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,6 +25,40 @@
 #include <string.h>
 
 #include <kernel/fault.h>
+
+void *memchr(const void *ptr, int value, size_t num) {
+    const unsigned char *p = ptr;
+
+    while (num--) {
+        if (*p == value) {
+            return (void *) p;
+        }
+        p++;
+    }
+
+    return NULL;
+}
+
+int memcmp(const void *ptr1, const void *ptr2, size_t num) {
+    const unsigned char *p1 = ptr1;
+    const unsigned char *p2 = ptr2;
+
+    while (num--) {
+        if (*p1 != *p2) {
+            if (*p1 > *p2) {
+                return 1;
+            }
+            else {
+                return -1;
+            }
+        }
+
+        p1++;
+        p2++;
+    }
+
+    return 0;
+}
 
 /* Set size bytes to value from p */
 void memset32(void *p, int32_t value, uint32_t size) {
@@ -70,6 +104,18 @@ void memmove(void *dst, const void *src, size_t n) {
         while(n--) *d++ = *s++;
 }
 
+char *strchr(const char *s, int c) {
+    while (*s != c && *s) {
+        s++;
+    }
+
+    if (*s == c) {
+        return (char *) s;
+    }
+
+    return NULL;
+}
+
 size_t strlen(const char *s) {
     size_t len = 0;
     while (*s++) {
@@ -100,6 +146,23 @@ void strreverse(char *s) {
         char temp = *begin;
         *begin++ = *s;
         *s-- = temp;
+    }
+}
+
+int strcmp(const char *s, const char *p) {
+    while (*s == *p && *s != '\0' && *p != '\0') {
+        s++;
+        p++;
+    }
+
+    if (*s == *p) {
+        return 0;
+    }
+    else if (*s > *p) {
+        return 1;
+    }
+    else {
+        return -1;
     }
 }
 

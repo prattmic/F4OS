@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -28,6 +28,64 @@
 #include "test.h"
 
 /* Tests for the string library functions */
+
+int memchr_test(char *message, int len) {
+    struct {
+        char *mem;
+        int val;
+        size_t num;
+        char *addr;
+    } strings[] = {
+        [0] = { .mem = "", .val = 'a', .num = 1, .addr = NULL },
+        [1] = { .mem = "four", .val = 'u', .num = 4,
+                .addr = &strings[1].mem[2] },
+        [2] = { .mem = "\r\t\n\b", .val = 'a', .num = 4, .addr = NULL },
+        [3] = { .mem = "this\0is\0a", .val = 'a', .num = 9,
+                .addr = &strings[3].mem[8] },
+    };
+
+    for (int i = 0; i < ARRAY_LENGTH(strings); i++) {
+        char *ret = memchr(strings[i].mem, strings[i].val, strings[i].num);
+
+        if (ret != strings[i].addr) {
+            scnprintf(message, len, "memchr(\"%s\", '%c', %d) != %d",
+                      strings[i].mem, strings[i].val, strings[i].num,
+                      strings[i].addr);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("memchr", memchr_test);
+
+int memcmp_test(char *message, int len) {
+    struct {
+        char *mem1;
+        char *mem2;
+        size_t num;
+        int ret;
+    } strings[] = {
+        { .mem1 = "hello", .mem2 = "hello", .num = 5, .ret = 0 },
+        { .mem1 = "hello1", .mem2 = "hello", .num = 5, .ret = 0 },
+        { .mem1 = "hello1", .mem2 = "hello2", .num = 6, .ret = -1 },
+        { .mem1 = "hello2", .mem2 = "hello1", .num = 6, .ret = 1 },
+    };
+
+    for (int i = 0; i < ARRAY_LENGTH(strings); i++) {
+        int ret = memcmp(strings[i].mem1, strings[i].mem2, strings[i].num);
+
+        if (ret != strings[i].ret) {
+            scnprintf(message, len, "memcmp(\"%s\", \"%s\", %d) != %d",
+                      strings[i].mem1, strings[i].mem2, strings[i].num,
+                      strings[i].ret);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("memcmp", memcmp_test);
 
 #define MEM_SIZE    16
 #define MEM_MAGIC   0xBE
@@ -150,6 +208,33 @@ int memmove_src_last_overlap(char *message, int len) {
 }
 DEFINE_TEST("memmove with overlap, source last", memmove_src_last_overlap);
 
+int strchr_test(char *message, int len) {
+    struct {
+        char *mem;
+        int val;
+        char *addr;
+    } strings[] = {
+        [0] = { .mem = "", .val = 'a', .addr = NULL },
+        [1] = { .mem = "four", .val = 'u', .addr = &strings[1].mem[2] },
+        [2] = { .mem = "four", .val = '\0', .addr = &strings[2].mem[4] },
+        [3] = { .mem = "\r\t\n\b", .val = 'a', .addr = NULL },
+        [4] = { .mem = "this\0is\0a", .val = 'a', .addr = NULL },
+    };
+
+    for (int i = 0; i < ARRAY_LENGTH(strings); i++) {
+        char *ret = strchr(strings[i].mem, strings[i].val);
+
+        if (ret != strings[i].addr) {
+            scnprintf(message, len, "strchr(\"%s\", '%c') != %d",
+                      strings[i].mem, strings[i].val, strings[i].addr);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("strchr", strchr_test);
+
 int strlen_test(char *message, int len) {
     struct {
         char *str;
@@ -229,6 +314,34 @@ int strreverse_test(char *message, int len) {
     return PASSED;
 }
 DEFINE_TEST("strreverse", strreverse_test);
+
+int strcmp_test(char *message, int len) {
+    struct {
+        char *str1;
+        char *str2;
+        int ret;
+    } cases[] = {
+        { .str1 = "test", .str2 = "test", .ret = 0 },
+        { .str1 = "test1", .str2 = "test2", .ret = -1 },
+        { .str1 = "test2", .str2 = "test1", .ret = 1 },
+        { .str1 = "012345678a", .str2 = "012345678b", .ret = -1 },
+        { .str1 = "01234567890", .str2 = "01234567890", .ret = 0 },
+        { .str1 = "0123456789", .str2 = "0123456789", .ret = 0 },
+    };
+
+    for (int i = 0; i < ARRAY_LENGTH(cases); i++) {
+        int ret = strcmp(cases[i].str1, cases[i].str2);
+
+        if (ret != cases[i].ret) {
+            scnprintf(message, len, "strcmp(\"%s\", \"%s\") returned %d, not %d",
+                    cases[i].str1, cases[i].str2, ret, cases[i].ret);
+            return FAILED;
+        }
+    }
+
+    return PASSED;
+}
+DEFINE_TEST("strcmp", strcmp_test);
 
 int strncmp_test(char *message, int len) {
     struct {
