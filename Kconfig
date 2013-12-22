@@ -13,3 +13,11 @@ endmenu
 menu "Kernel"
 source kernel/Kconfig
 endmenu
+
+config DEVICE_TREE
+    string
+    prompt "Device Tree Source File"
+    ---help---
+        Source device tree file to be built into the OS for runtime
+        configuration.  This option should be a path to a device tree
+        source file, relative to the root OS directory.

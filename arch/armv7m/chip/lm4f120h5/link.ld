@@ -98,6 +98,15 @@ SECTIONS {
         . = ALIGN(8);
     } > FLASH
 
+    .dtb :
+    {
+        . = ALIGN(8);
+        _dtb_start = .;
+        *(.dtb*)
+        _dtb_end = .;
+        . = ALIGN(8);
+    } > FLASH
+
     _sidata = .;
     .data : AT ( _sidata )
     {

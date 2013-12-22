@@ -64,6 +64,12 @@ endif
 # The quotes from Kconfig are annoying
 CONFIG_ARCH := $(shell echo $(CONFIG_ARCH))
 CONFIG_CHIP := $(shell echo $(CONFIG_CHIP))
+CONFIG_DEVICE_TREE := $(shell echo $(CONFIG_DEVICE_TREE))
+
+ifeq ($(wildcard $(CONFIG_DEVICE_TREE)),)
+	# Disallow build because not device tree specified
+	DISALLOW_BUILD = Device tree source must be configured (CONFIG_DEVICE_TREE)
+endif
 
 # Include all arch-specific configs
 # CROSS_COMPILE, CFLAGS, etc
@@ -189,13 +195,25 @@ $(PREFIX)/include: $(PREFIX) $(KCONFIG_HEADER) .FORCE
 	$(VERBOSE)cp -a $(BASE)/arch/$(CONFIG_ARCH)/include/. $(PREFIX)/include/arch/
 	$(VERBOSE)cp -a $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/include/. $(PREFIX)/include/arch/chip/
 
+$(PREFIX)/device_tree.dtb: $(BASE)/$(CONFIG_DEVICE_TREE)
+	$(call print_command,"DTC",$(call relative_path,$@))
+	$(VERBOSE)dtc -I dts -O dtb $< > $@
+
+# Generate an assembly file to include the dtb in the correct section,
+# and build that into an object file.
+$(PREFIX)/device_tree.o: $(PREFIX)/device_tree.dtb
+	$(call print_command,"GEN",$(call relative_path,$(PREFIX)/device_tree.s))
+	$(VERBOSE)echo ".section .dtb\n.incbin \"$<\"" > $(PREFIX)/device_tree.s
+	$(call print_command,"CC",$(call relative_path,$@))
+	$(VERBOSE)$(CC) $(CFLAGS) -o $@ -c $(PREFIX)/device_tree.s
+
 $(PREFIX)/$(PROJ_NAME).o: $(KCONFIG_HEADER) $(PREFIX)/include .FORCE
 	$(call print_command,"MAKE",$(call relative_path,$@))
 	$(VERBOSE)$(MAKE) -f f4os.mk obj=$@
 
-$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/link.ld
+$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/link.ld $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/device_tree.o
 	$(call print_command,"LD",$(call relative_path,$@))
-	$(VERBOSE)$(CC) $< -o $@ $(CFLAGS) -T $(PREFIX)/link.ld $(patsubst %,-Xlinker %,$(LFLAGS))
+	$(VERBOSE)$(CC) $(filter-out $<,$^) -o $@ $(CFLAGS) -T $< $(patsubst %,-Xlinker %,$(LFLAGS))
 
 %.hex: %.elf
 	$(call print_command,"OBJCOPY",$(call relative_path,$@))

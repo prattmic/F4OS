@@ -37,6 +37,11 @@ architecture.  For ARMv7-M, the
 [GCC ARM Embedded](https://launchpad.net/gcc-arm-embedded) toolchain is
 recommended.
 
+Runtime configuration is performed using flattened device trees.  The device
+tree compiler (dtc) is required to process device tree files.  This compiler
+is available in most package managers as dtc or device-tree-compiler.  It can
+also be downloaded from the
+[source repository](http://git.jdl.com/gitweb/?p=dtc.git;a=summary).
 
 F4OS uses the Kconfig language for its build configuration, and needs at least
 the `conf` tool for processing KConfig files.  This tool is distibuted with the

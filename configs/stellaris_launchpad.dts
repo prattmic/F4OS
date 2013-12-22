@@ -1,0 +1,7 @@
+/dts-v1/;
+
+/ {
+    compatible = "ti,stellaris_launchpad", "ti,tiva_c_launchpad",
+        "ti,lm4f120h5qr", "ti,tm4c1233h6pm", "ti,lm4f120h5", "ti,tm4c1233h6",
+        "ti,lm4", "ti,tm4c";
+};

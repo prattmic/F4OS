@@ -1,0 +1,6 @@
+/dts-v1/;
+
+/ {
+    compatible = "stmicro,stm32f4discovery", "stmicro,stm32f407vg",
+        "stmicro,stm32f407", "stmicro,stm32f4";
+};
