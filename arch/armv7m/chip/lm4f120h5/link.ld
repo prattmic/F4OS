@@ -76,10 +76,16 @@ SECTIONS {
         . = ALIGN(8);
         _stext = .;
         *(.text*)
-        *(.rodata*)
         . = ALIGN(8);
 
         _etext = .;
+    } > FLASH
+
+    .rodata :
+    {
+        . = ALIGN(8);
+        *(.rodata*)
+        . = ALIGN(8);
     } > FLASH
 
     /* Special user section reserved only for general
