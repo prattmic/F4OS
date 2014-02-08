@@ -60,12 +60,14 @@ typedef struct class {
 
 #define to_class(__obj) container_of((__obj), struct class, obj)
 
-#define get_by_name_from_class(__name, __cls) get_by_name((__name), &(__cls)->instances)
+#define get_by_name_from_class(__name, __cls) \
+    get_by_name((__name), &(__cls)->instances)
 
 #define instantiate(name, class, ops, type) \
     __instantiate(name, class, ops, sizeof(type))
 
-struct obj *__instantiate(char *name, struct class *class, void *ops, size_t size);
+struct obj *__instantiate(char *name, struct class *class, void *ops,
+                          size_t size);
 
 /*
  * Make an instantiated class member visible to the rest of the OS.

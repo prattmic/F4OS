@@ -25,7 +25,8 @@
 #include <kernel/class.h>
 #include <mm/mm.h>
 
-struct obj *__instantiate(char *name, struct class *class, void *ops, size_t size) {
+struct obj *__instantiate(char *name, struct class *class, void *ops,
+                          size_t size) {
     struct obj *o;
     void *container;
 
