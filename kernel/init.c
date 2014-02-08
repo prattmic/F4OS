@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,6 +29,7 @@
 #include <kernel/init.h>
 
 #include <dev/arch.h>
+#include <dev/device.h>
 #include <dev/hw/perfcounter.h>
 #include <dev/hw/led.h>
 #include <dev/hw/usart.h>
@@ -71,6 +72,8 @@ void os_start(void) {
 #endif
 
     do_core_initializers();
+
+    device_driver_fdt_register();
 
     printf("\r\n%s\r\n", banner);
 

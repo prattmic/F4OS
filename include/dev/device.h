@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -68,6 +68,31 @@ struct obj *device_get(const char *name);
  * @param driver    Device driver to register
  */
 void device_driver_register(struct device_driver *driver);
+
+/**
+ * Register a generic compatible string device driver with the OS
+ *
+ * Register a device driver for all compatible entries in the device tree.
+ * The name field of the driver is the device tree compatible string that
+ * the driver supports.  The fields in this driver will be used to create
+ * standard device driver entries for each compatible device in the device
+ * tree.
+ *
+ * Note that driver will be stored after return!  Do not pass one from
+ * your stack!
+ *
+ * @param driver    Compatible string device driver to register
+ */
+void device_compat_driver_register(struct device_driver *driver);
+
+/**
+ * Automatically register device drivers from FDT
+ *
+ * Match nodes in the device tree to drivers registered as compatible
+ * string drivers with device_compat_driver_register(), and register
+ * those device drivers.
+ */
+void device_driver_fdt_register(void);
 
 /**
  * Put an instance of a device
