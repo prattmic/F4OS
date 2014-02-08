@@ -2,6 +2,7 @@ SRCS += resource.c
 SRCS += shared_mem.c
 SRCS += buf_stream.c
 SRCS += device.c
+SRCS += fdtparse.c
 
 DIRS += hw/
 DIRS_$(CONFIG_ACCELEROMETERS) += accel/
