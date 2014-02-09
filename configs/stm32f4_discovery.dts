@@ -3,4 +3,34 @@
 / {
     compatible = "stmicro,stm32f4discovery", "stmicro,stm32f407vg",
         "stmicro,stm32f407", "stmicro,stm32f4";
+
+    #address-cells = <1>;
+    #size-cells = <1>;
+
+    /* For now, define a generic gpio device for the gpio phandle */
+    gpio: gpio {};
+
+    i2c1: i2c@40005400 {
+        compatible = "stmicro,stm32f407-i2c";
+        reg = <0x40005400 0x24>;
+        i2c,scl-gpio = <&gpio 24 0>;    /* PB8 */
+        i2c,sda-gpio = <&gpio 25 0>;    /* PB9 */
+        stmicro,periph-id = <26>;       /* STM32F4_PERIPH_I2C1 */
+    };
+
+    i2c2: i2c@40005800 {
+        compatible = "stmicro,stm32f407-i2c";
+        reg = <0x40005800 0x24>;
+        i2c,scl-gpio = <&gpio 26 0>;    /* PB10 */
+        i2c,sda-gpio = <&gpio 27 0>;    /* PB11 */
+        stmicro,periph-id = <27>;       /* STM32F4_PERIPH_I2C2 */
+    };
+
+    i2c3: i2c@40005C00 {
+        compatible = "stmicro,stm32f407-i2c";
+        reg = <0x40005C00 0x24>;
+        i2c,scl-gpio = <&gpio 8 0>;     /* PA8 */
+        i2c,sda-gpio = <&gpio 41 0>;    /* PC9 */
+        stmicro,periph-id = <28>;       /* STM32F4_PERIPH_I2C3 */
+    };
 };

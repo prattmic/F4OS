@@ -20,13 +20,15 @@
  * SOFTWARE.
  */
 
+#include <libfdt.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 #include <arch/chip/gpio.h>
 #include <arch/chip/i2c.h>
-#include <arch/chip/registers.h>
+#include <arch/chip/rcc.h>
 #include <dev/device.h>
+#include <dev/fdtparse.h>
 #include <dev/hw/gpio.h>
 #include <dev/raw_mem.h>
 #include <dev/resource.h>
@@ -38,6 +40,8 @@
 
 #include <dev/hw/i2c.h>
 
+#define STM32F4_I2C_COMPAT "stmicro,stm32f407-i2c"
+
 enum {
     I2C_GPIO_SCL,
     I2C_GPIO_SDA,
@@ -45,6 +49,7 @@ enum {
 
 struct stm32f4_i2c {
     uint8_t                 ready;
+    int                     periph_id;
     struct gpio             *gpio[2];   /* SCL, then SDA */
     struct stm32f4_i2c_regs *regs;
 };
@@ -64,17 +69,8 @@ static int stm32f4_i2c_initialize(struct i2c *i2c) {
     struct stm32f4_i2c *port = i2c->priv;
 
     /* Enable I2C clock */
-    switch (i2c->num) {
-    case 1:
-        /* TODO: Clock module like GPIO, to properly handle clocks */
-        *RCC_APB1ENR |= RCC_APB1ENR_I2C1EN;
-        break;
-    case 2:
-        *RCC_APB1ENR |= RCC_APB1ENR_I2C2EN;
-        break;
-    case 3:
-        *RCC_APB1ENR |= RCC_APB1ENR_I2C3EN;
-        break;
+    if (rcc_set_clock_enable(port->periph_id, 1)) {
+        return -1;
     }
 
     /* Configure peripheral */
@@ -455,53 +451,49 @@ static struct i2c_ops stm32f4_i2c_ops = {
     .write = stm32f4_i2c_write,
 };
 
-/*
- * TODO: The I2C ports can be on multiple sets of pins.
- * Support this.
- */
-struct stm32f4_i2c_port {
-    char *name;
-    int index;
-    uint32_t gpio[2];   /* SCL, then SDA */
-} stm32f4_i2c_ports[] = {
-    { .name = "i2c1", .index = 1, .gpio = {
-        [I2C_GPIO_SCL] = STM32F4_GPIO_PB8,
-        [I2C_GPIO_SDA] = STM32F4_GPIO_PB9} },
-    { .name = "i2c2", .index = 2, .gpio = {
-        [I2C_GPIO_SCL] = STM32F4_GPIO_PB10,
-        [I2C_GPIO_SDA] = STM32F4_GPIO_PB11} },
-    { .name = "i2c3", .index = 3, .gpio = {
-        [I2C_GPIO_SCL] = STM32F4_GPIO_PA8,
-        [I2C_GPIO_SCL] = STM32F4_GPIO_PC9} },
-};
+static int stm32f4_i2c_probe(const char *name) {
+    const void *blob = fdtparse_get_blob();
+    int offset;
 
-#define NUM_I2C_PORTS   (sizeof(stm32f4_i2c_ports)/sizeof(stm32f4_i2c_ports[0]))
-
-static struct stm32f4_i2c_port *stm32f4_i2c_get_config(const char *name) {
-    for (int i = 0; i < NUM_I2C_PORTS; i++) {
-        if (strncmp((char *)name, stm32f4_i2c_ports[i].name, 5) == 0) {
-            return &stm32f4_i2c_ports[i];
-        }
+    /* Lookup peripheral node */
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return 0;
     }
 
-    return NULL;
-}
-
-static int stm32f4_i2c_probe(const char *name) {
-    return !!stm32f4_i2c_get_config(name);
+    /* Check that peripheral is compatible with driver */
+    return fdt_node_check_compatible(blob, offset, STM32F4_I2C_COMPAT) == 0;
 }
 
 static struct obj *stm32f4_i2c_ctor(const char *name) {
-    struct stm32f4_i2c_port *config = stm32f4_i2c_get_config(name);
+    const void *blob = fdtparse_get_blob();
+    int offset;
     struct obj *obj;
     struct i2c *i2c;
     struct stm32f4_i2c *port;
+    struct stm32f4_i2c_regs *regs;
+    int err, periph_id;
 
-    if (!config) {
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
         return NULL;
     }
 
-    obj = instantiate(config->name, &i2c_class, &stm32f4_i2c_ops, struct i2c);
+    if (fdt_node_check_compatible(blob, offset, STM32F4_I2C_COMPAT)) {
+        return NULL;
+    }
+
+    regs = fdtparse_get_addr32(blob, offset, "reg");
+    if (!regs) {
+        return NULL;
+    }
+
+    err = fdtparse_get_int(blob, offset, "stmicro,periph-id", &periph_id);
+    if (err) {
+        return NULL;
+    }
+
+    obj = instantiate(name, &i2c_class, &stm32f4_i2c_ops, struct i2c);
     if (!obj) {
         return NULL;
     }
@@ -509,8 +501,6 @@ static struct obj *stm32f4_i2c_ctor(const char *name) {
     i2c = to_i2c(obj);
 
     init_semaphore(&i2c->lock);
-
-    i2c->num = config->index;
 
     i2c->priv = kmalloc(sizeof(struct stm32f4_i2c));
     if (!i2c->priv) {
@@ -521,16 +511,24 @@ static struct obj *stm32f4_i2c_ctor(const char *name) {
     memset(port, 0, sizeof(*port));
 
     port->ready = 0;
-    port->regs = i2c_get_regs(i2c->num);
+    port->regs = regs;
+    port->periph_id = periph_id;
 
     /* Setup GPIOs */
     for (int i = 0; i < 2; i++) {
+        const char *i2c_gpio_props[] = {"i2c,scl-gpio", "i2c,sda-gpio"};
+        struct fdt_gpio fdt_gpio;
         struct obj *gpio_obj;
         struct gpio *gpio;
         struct gpio_ops *ops;
         int err;
 
-        gpio_obj = gpio_get(config->gpio[i]);
+        err = fdtparse_get_gpio(blob, offset, i2c_gpio_props[i], &fdt_gpio);
+        if (err) {
+            goto err_free_gpio;
+        }
+
+        gpio_obj = gpio_get(fdt_gpio.gpio);
         if (!gpio_obj) {
             goto err_free_gpio;
         }
@@ -589,30 +587,22 @@ err_free_obj:
     return NULL;
 }
 
+static struct semaphore stm32f4_i2c_driver_sem = INIT_SEMAPHORE;
+
+static struct device_driver stm32f4_i2c_compat_driver = {
+    .name = STM32F4_I2C_COMPAT,
+    .probe = stm32f4_i2c_probe,
+    .ctor = stm32f4_i2c_ctor,
+    .class = &i2c_class,
+    .sem = &stm32f4_i2c_driver_sem,
+};
+
 static int stm32f4_i2c_register(void) {
-    for (int i = 0; i < NUM_I2C_PORTS; i++) {
-        struct device_driver *drv = kmalloc(sizeof(*drv));
-        if (!drv) {
-            return -1;
-        }
-
-        struct semaphore *sem = kmalloc(sizeof(*sem));
-        if (!sem) {
-            kfree(drv);
-            return -1;
-        }
-
-        init_semaphore(sem);
-
-        drv->name = stm32f4_i2c_ports[i].name;
-        drv->probe = stm32f4_i2c_probe;
-        drv->ctor = stm32f4_i2c_ctor;
-        drv->class = &i2c_class;
-        drv->sem = sem;
-
-        device_driver_register(drv);
-    }
-
+    /*
+     * Used to automatically generate driver entries for all compatible
+     * nodes in the device tree.
+     */
+    device_compat_driver_register(&stm32f4_i2c_compat_driver);
     return 0;
 }
 CORE_INITIALIZER(stm32f4_i2c_register)
