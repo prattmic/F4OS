@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,7 +25,7 @@
 #include <kernel/class.h>
 #include <mm/mm.h>
 
-struct obj *__instantiate(char *name, struct class *class, void *ops,
+struct obj *__instantiate(const char *name, struct class *class, void *ops,
                           size_t size) {
     struct obj *o;
     void *container;

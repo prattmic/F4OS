@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -149,7 +149,8 @@ static int lm4f_gpio_dtor(struct gpio *gpio) {
     ops->reset(gpio);
 
     if (gpio->obj.name) {
-        free(gpio->obj.name);
+        /* Name is dynamically allocated, we can safely cast away const */
+        free((char *)gpio->obj.name);
     }
 
     return 0;
