@@ -24,6 +24,7 @@
 #define ARCH_CHIP_RCC_H_INCLUDED
 
 #include <stdint.h>
+#include <arch/chip/periph.h>
 #include <arch/chip/registers.h>
 
 struct stm32f4_rcc_regs {
@@ -66,6 +67,18 @@ struct stm32f4_rcc_regs {
 static inline struct stm32f4_rcc_regs *rcc_get_regs() {
     return (struct stm32f4_rcc_regs *) RCC_BASE;
 }
+
+/*
+ * Enable/disable peripheral clock
+ *
+ * Enables or disables the clock for the specified peripheral.  This covers
+ * any periphal clocks covered by RCC.
+ *
+ * @param periphid  Peripheral ID to enable/disable
+ * @param enable    1 to enable clocks, 0 to disable
+ * @returns 0 on success, negative on error
+ */
+int rcc_set_clock_enable(enum stm32f4_periph_id periphid, int enable);
 
 #define RCC_CR                      ((volatile uint32_t *) (RCC_BASE + 0x00))   /* Clock Control Register */
 #define RCC_PLLCFGR                 ((volatile uint32_t *) (RCC_BASE + 0x04))   /* PLL Configuration Register */

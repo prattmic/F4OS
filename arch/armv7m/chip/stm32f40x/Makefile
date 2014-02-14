@@ -1,5 +1,6 @@
 SRCS += vector.S
 SRCS += clock.c
+SRCS += rcc.c
 SRCS += gpio.c
 SRCS_$(CONFIG_PWM_CLASS) += pwm.c
 
