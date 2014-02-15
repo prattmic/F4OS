@@ -1,0 +1,7 @@
+/dts-v1/;
+/include/ "stm32f4.dtsi"
+
+/ {
+    compatible = "pixhawk,px4fmu", "stmicro,stm32f405rg",
+        "stmicro,stm32f405", "stmicro,stm32f4";
+};

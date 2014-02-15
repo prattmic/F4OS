@@ -1,6 +1,0 @@
-/dts-v1/;
-
-/ {
-    compatible = "pixhawk,px4", "stmicro,stm32f405rg",
-        "stmicro,stm32f405", "stmicro,stm32f4";
-};
