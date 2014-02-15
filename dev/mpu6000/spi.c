@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -287,7 +287,7 @@ static struct obj *mpu6000_spi_ctor(const char *name) {
 err_free_priv:
     kfree(mpu->priv);
 err_free_obj:
-    kfree(mpu6000_obj);
+    kfree(get_container(mpu6000_obj));
     return NULL;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -584,7 +584,7 @@ err_free_gpio:
     kfree(port);
 
 err_free_obj:
-    kfree(obj);
+    kfree(get_container(obj));
 
     return NULL;
 }

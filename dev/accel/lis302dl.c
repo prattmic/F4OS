@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -212,7 +212,7 @@ static struct obj *lis302dl_ctor(const char *name) {
 err_free_priv:
     kfree(accel->priv);
 err_free_obj:
-    kfree(accel_obj);
+    kfree(get_container(accel_obj));
     return NULL;
 }
 

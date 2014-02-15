@@ -63,6 +63,24 @@ typedef struct class {
 #define get_by_name_from_class(__name, __cls) \
     get_by_name((__name), &(__cls)->instances)
 
+/*
+ * Instantiate a class member
+ *
+ * Allocate (using kmalloc()) an instance of a class, using the container
+ * type, returning the instance obj.
+ *
+ * When finished with the class instance, the container should be freed
+ * with kfree().
+ *
+ * NOTE: The container type is not returned, the obj within the container.
+ * When freeing, use get_container() to get the address to free.
+ *
+ * @param name  Instance name
+ * @param class struct class of class type to instantiate
+ * @param ops   Class ops struct
+ * @param type  Type of class container
+ * @returns pointer to instance obj, or NULL on error
+ */
 #define instantiate(name, class, ops, type) \
     __instantiate(name, class, ops, sizeof(type))
 

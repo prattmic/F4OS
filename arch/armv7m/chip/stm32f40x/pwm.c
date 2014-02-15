@@ -878,7 +878,7 @@ struct obj *pwm_get(struct obj *gpio_obj, uint32_t duty) {
     return pwm_obj;
 
 err_free_pwm_obj:
-    kfree(pwm_obj);
+    kfree(get_container(pwm_obj));
 err_free_name:
     if (name) {
         free(name);
