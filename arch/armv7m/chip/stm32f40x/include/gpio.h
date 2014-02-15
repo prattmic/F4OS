@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 #include <atomic.h>
+#include <arch/chip/periph.h>
 #include <arch/chip/registers.h>
 
 inline static void gpio_moder(uint8_t port, uint8_t pin, uint8_t mode) {
@@ -133,6 +134,7 @@ enum stm32f4_gpio_alt_funcs {
     STM32F4_GPIO_AF_OTG_HS_FS   = 12,   /* USB OTG HS configured as FS */
     STM32F4_GPIO_AF_DCMI        = 13,
     STM32F4_GPIO_AF_EVENTOUT    = 15,
+    STM32F4_GPIO_AF_UNKNOWN     = -1,
 };
 
 enum stm32f4_gpio_pull {
@@ -297,5 +299,16 @@ enum stm32f4_gpios {
     STM32F4_GPIO_PI11,
     STM32F4_NUM_GPIOS,
 };
+
+/*
+ * Lookup AF number from periph id
+ *
+ * Use the STM32F4 peripheral id to determine the appropriate GPIO AF
+ * register entry.
+ *
+ * @param id    Periph ID to look up
+ * @return AF number, or STM32F4_GPIO_AF_UNKNOWN if not found/known
+ */
+enum stm32f4_gpio_alt_funcs gpio_periph_to_alt_func(enum stm32f4_periph_id id);
 
 #endif
