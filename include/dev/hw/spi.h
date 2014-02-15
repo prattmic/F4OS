@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -28,9 +28,6 @@
 #include <kernel/semaphore.h>
 
 struct spi {
-    /* Unique identifier
-     * Maybe there is a way to avoid this?  It is only needed for initialization */
-    uint8_t             num;
     struct semaphore    lock;
     void                *priv;
     struct obj          obj;

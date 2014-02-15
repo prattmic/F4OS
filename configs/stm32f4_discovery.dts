@@ -10,6 +10,33 @@
     /* For now, define a generic gpio device for the gpio phandle */
     gpio: gpio {};
 
+    spi1: spi@40013000 {
+        compatible = "stmicro,stm32f407-spi";
+        reg = <0x40013000 0x20>;
+        spi,sck-gpio = <&gpio 5 0>;     /* PA5 */
+        spi,miso-gpio = <&gpio 6 0>;    /* PA6 */
+        spi,mosi-gpio = <&gpio 7 0>;    /* PA7 */
+        stmicro,periph-id = <23>;       /* STM32F4_PERIPH_SPI1 */
+    };
+
+    spi2: spi@40003800 {
+        compatible = "stmicro,stm32f407-spi";
+        reg = <0x40003800 0x20>;
+        spi,sck-gpio = <&gpio 29 0>;    /* PB13 */
+        spi,miso-gpio = <&gpio 30 0>;   /* PB14 */
+        spi,mosi-gpio = <&gpio 31 0>;   /* PB15 */
+        stmicro,periph-id = <24>;       /* STM32F4_PERIPH_SPI2 */
+    };
+
+    spi3: spi@40003C00 {
+        compatible = "stmicro,stm32f407-spi";
+        reg = <0x40003C00 0x20>;
+        spi,sck-gpio = <&gpio 19 0>;    /* PB3 */
+        spi,miso-gpio = <&gpio 20 0>;   /* PB4 */
+        spi,mosi-gpio = <&gpio 21 0>;   /* PB5 */
+        stmicro,periph-id = <25>;       /* STM32F4_PERIPH_SPI3 */
+    };
+
     i2c1: i2c@40005400 {
         compatible = "stmicro,stm32f407-i2c";
         reg = <0x40005400 0x24>;

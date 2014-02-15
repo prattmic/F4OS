@@ -20,15 +20,18 @@
  * SOFTWARE.
  */
 
+#include <libfdt.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <arch/system.h>
 #include <arch/chip/gpio.h>
+#include <arch/chip/rcc.h>
 #include <arch/chip/spi.h>
 #include <arch/chip/registers.h>
 #include <dev/device.h>
+#include <dev/fdtparse.h>
 #include <dev/hw/gpio.h>
 #include <kernel/semaphore.h>
 #include <kernel/class.h>
@@ -37,26 +40,14 @@
 
 #include <dev/hw/spi.h>
 
+#define STM32F4_SPI_COMPAT "stmicro,stm32f407-spi"
+
 struct stm32f4_spi {
     uint8_t                 ready;
+    int                     periph_id;
     struct gpio             *gpio[3];    /* Each SPI port uses 3 GPIOs */
     struct stm32f4_spi_regs *regs;
 };
-
-static int init_spi1(struct spi *s) {
-    struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
-
-    port->regs = get_spi(1);
-
-    *RCC_APB2ENR |= RCC_APB2ENR_SPI1EN;     /* Enable SPI1 Clock */
-
-    /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
-    port->regs->CR1 |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
-
-    port->regs->CR1 |= SPI_CR1_SPE;
-
-    return 0;
-}
 
 /* The SPI semaphore must already be held when calling this function */
 static int stm32f4_spi_init(struct spi *s) {
@@ -68,17 +59,18 @@ static int stm32f4_spi_init(struct spi *s) {
         goto out;
     }
 
-    switch (s->num) {
-    case 1:
-        ret = init_spi1(s);
-        break;
-    default:
-        ret = -1;
+    /* Enable SPI Clock */
+    ret = rcc_set_clock_enable(port->periph_id, 1);
+    if (ret) {
+        goto out;
     }
 
-    if (ret == 0) {
-        port->ready = 1;
-    }
+    /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
+    port->regs->CR1 |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
+
+    port->regs->CR1 |= SPI_CR1_SPE;
+
+    port->ready = 1;
 
 out:
     return ret;
@@ -236,43 +228,48 @@ struct spi_ops stm32f4_spi_ops = {
     .end_transaction = stm32f4_spi_end_transaction,
 };
 
-struct stm32f4_spi_port {
-    char *name;
-    int index;
-    int function;       /* GPIO AF */
-    uint32_t gpio[3];   /* SCK, MOSI, MISO, order invariant */
-} stm32f4_spi_ports[] = {
-    { .name = "spi1", .index = 1, .function = STM32F4_GPIO_AF_SPI1,
-        .gpio = {STM32F4_GPIO_PA5, STM32F4_GPIO_PA6, STM32F4_GPIO_PA7} },
-};
+static int stm32f4_spi_probe(const char *name) {
+    const void *blob = fdtparse_get_blob();
+    int offset;
 
-#define NUM_SPI_PORTS   (sizeof(stm32f4_spi_ports)/sizeof(stm32f4_spi_ports[0]))
-
-static struct stm32f4_spi_port *stm32f4_get_config(const char *name) {
-    for (int i = 0; i < NUM_SPI_PORTS; i++) {
-        if (strncmp((char *)name, stm32f4_spi_ports[i].name, 5) == 0) {
-            return &stm32f4_spi_ports[i];
-        }
+    /* Lookup peripheral node */
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return 0;
     }
 
-    return NULL;
-}
-
-static int stm32f4_spi_probe(const char *name) {
-    return !!stm32f4_get_config(name);
+    /* Check that peripheral is compatible with driver */
+    return fdt_node_check_compatible(blob, offset, STM32F4_SPI_COMPAT) == 0;
 }
 
 static struct obj *stm32f4_spi_ctor(const char *name) {
-    struct stm32f4_spi_port *config = stm32f4_get_config(name);
+    const void *blob = fdtparse_get_blob();
+    int offset, err, periph_id, gpio_af;
     struct obj *obj;
     struct spi *spi;
+    struct stm32f4_spi_regs *regs;
     struct stm32f4_spi *port;
 
-    if (!config) {
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
         return NULL;
     }
 
-    obj = instantiate(config->name, &spi_class, &stm32f4_spi_ops, struct spi);
+    if (fdt_node_check_compatible(blob, offset, STM32F4_SPI_COMPAT)) {
+        return NULL;
+    }
+
+    regs = fdtparse_get_addr32(blob, offset, "reg");
+    if (!regs) {
+        return NULL;
+    }
+
+    err = fdtparse_get_int(blob, offset, "stmicro,periph-id", &periph_id);
+    if (err) {
+        return NULL;
+    }
+
+    obj = instantiate(name, &spi_class, &stm32f4_spi_ops, struct spi);
     if (!obj) {
         return NULL;
     }
@@ -280,9 +277,6 @@ static struct obj *stm32f4_spi_ctor(const char *name) {
     spi = to_spi(obj);
 
     init_semaphore(&spi->lock);
-
-    /* May be unnecessary */
-    spi->num = config->index;
 
     spi->priv = kmalloc(sizeof(struct stm32f4_spi));
     if (!spi->priv) {
@@ -293,14 +287,30 @@ static struct obj *stm32f4_spi_ctor(const char *name) {
     memset(port, 0, sizeof(*port));
 
     port->ready = 0;
+    port->periph_id = periph_id;
+    port->regs = regs;
+
+    gpio_af = gpio_periph_to_alt_func(port->periph_id);
+    if (gpio_af == STM32F4_GPIO_AF_UNKNOWN) {
+        goto err_free_obj;
+    }
 
     /* Setup GPIOs */
     for (int i = 0; i < 3; i++) {
+        const char *i2c_gpio_props[3] =
+            {"spi,sck-gpio", "spi,miso-gpio", "spi,mosi-gpio"};
+        struct fdt_gpio fdt_gpio;
         struct obj *gpio_obj;
         struct gpio *gpio;
         struct gpio_ops *ops;
+        int err;
 
-        gpio_obj = gpio_get(config->gpio[i]);
+        err = fdtparse_get_gpio(blob, offset, i2c_gpio_props[i], &fdt_gpio);
+        if (err) {
+            goto err_free_gpio;
+        }
+
+        gpio_obj = gpio_get(fdt_gpio.gpio);
         if (!gpio_obj) {
             goto err_free_gpio;
         }
@@ -309,10 +319,19 @@ static struct obj *stm32f4_spi_ctor(const char *name) {
 
         ops = gpio_obj->ops;
 
-        ops->set_flags(gpio, STM32F4_GPIO_SPEED,
-                       STM32F4_GPIO_SPEED_50MHZ);
-        ops->set_flags(gpio, STM32F4_GPIO_ALT_FUNC,
-                       config->function);
+        /* High speed GPIOs */
+        err = ops->set_flags(gpio, STM32F4_GPIO_SPEED,
+                             STM32F4_GPIO_SPEED_50MHZ);
+        if (err) {
+            goto err_free_gpio;
+        }
+
+        /* Set to proper SPI mode */
+        err = ops->set_flags(gpio, STM32F4_GPIO_ALT_FUNC,
+                             gpio_af);
+        if (err) {
+            goto err_free_gpio;
+        }
 
         port->gpio[i] = gpio;
     }
@@ -337,30 +356,22 @@ err_free_obj:
     return NULL;
 }
 
+static struct semaphore stm32f4_spi_driver_sem = INIT_SEMAPHORE;
+
+static struct device_driver stm32f4_spi_compat_driver = {
+    .name = STM32F4_SPI_COMPAT,
+    .probe = stm32f4_spi_probe,
+    .ctor = stm32f4_spi_ctor,
+    .class = &spi_class,
+    .sem = &stm32f4_spi_driver_sem,
+};
+
 static int stm32f4_spi_register(void) {
-    for (int i = 0; i < NUM_SPI_PORTS; i++) {
-        struct device_driver *drv = kmalloc(sizeof(*drv));
-        if (!drv) {
-            return -1;
-        }
-
-        struct semaphore *sem = kmalloc(sizeof(*sem));
-        if (!sem) {
-            kfree(drv);
-            return -1;
-        }
-
-        init_semaphore(sem);
-
-        drv->name = stm32f4_spi_ports[i].name;
-        drv->probe = stm32f4_spi_probe;
-        drv->ctor = stm32f4_spi_ctor;
-        drv->class = &spi_class;
-        drv->sem = sem;
-
-        device_driver_register(drv);
-    }
-
+    /*
+     * Used to automatically generate driver entries for all compatible
+     * nodes in the device tree.
+     */
+    device_compat_driver_register(&stm32f4_spi_compat_driver);
     return 0;
 }
 CORE_INITIALIZER(stm32f4_spi_register)
