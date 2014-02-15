@@ -106,4 +106,22 @@ void *fdtparse_get_addr32(const void *fdt, int offset, const char *name);
 int fdtparse_get_gpio(const void *fdt, int offset, const char *name,
                       struct fdt_gpio *gpio);
 
+/**
+ * Get full path to a node
+ *
+ * Compute the full path of a node at offset, recording that path in the
+ * buffer returned.  This buffer is malloc()'d, and must be free()'d when
+ * no longer needed.
+ *
+ * NOTE: This function is expensive, as it must scan the device tree
+ * structure from the start to nodeoffset, possibly multiple times,
+ * depending on the size of the path.
+ *
+ * @param fdt  pointer to the device tree blob
+ * @param offset    offset of node to get full path of
+ * @returns pointer to NUL-terminated buffer containing full path, or
+ *  NULL on error
+ */
+char *fdtparse_get_path(const void *fdt, int offset);
+
 #endif

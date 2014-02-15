@@ -32,9 +32,6 @@
 #include <mm/mm.h>
 #include <dev/device.h>
 
-/* Maximum path length for FDT device driver names */
-#define FDT_PATH_LEN_MAX    (100)
-
 struct list drivers = INIT_LIST(drivers);
 struct semaphore driver_sem = INIT_SEMAPHORE;
 
@@ -163,25 +160,16 @@ void device_driver_fdt_register(void) {
             struct device_driver *iter = NULL;
             list_for_each_entry(iter, &compat_drivers, list) {
                 if (!strcmp(iter->name, compat)) {
-                    int err;
-                    /* TODO: remove arbitrary length limit */
-                    char *name = malloc(FDT_PATH_LEN_MAX*sizeof(char));
-                    if (!name) {
-                        fprintf(stderr, "%s: Unable to allocate name",
-                                __func__);
-                        goto next_node;
-                    }
-
                     /*
                      * TODO: Since we are walking the entire tree, we could
                      * just build the path as we go, rather than calling
                      * this expensive function, which will itself walk the
                      * entire tree.
                      */
-                    err = fdt_get_path(blob, offset, name, FDT_PATH_LEN_MAX);
-                    if (err) {
-                        fprintf(stderr, "%s: Unable to get path: %d",
-                                __func__, err);
+                    char *name = fdtparse_get_path(blob, offset);
+                    if (!name) {
+                        fprintf(stderr, "%s: Unable to get name",
+                                __func__);
                         goto next_node;
                     }
 

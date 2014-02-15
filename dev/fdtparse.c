@@ -21,6 +21,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <libfdt.h>
 #include <dev/fdtparse.h>
 
@@ -102,4 +103,39 @@ int fdtparse_get_gpio(const void *fdt, int offset, const char *name,
     gpio->flags = fdt32_to_cpu(cell[2]);
 
     return 0;
+}
+
+char *fdtparse_get_path(const void *fdt, int offset) {
+    int err, size;
+    char *path = NULL;
+
+    /* Make an arbitrary best guess at the max path size */
+    size = 32;
+
+    do {
+        /*
+         * There wasn't enough space last time,
+         * free that attempt and try again.
+         */
+        if (path) {
+            free(path);
+            size += 32;
+        }
+
+        path = malloc(size);
+        if (!path) {
+            fprintf(stderr, "%s: Unable to allocate %d bytes for path\n",
+                    __func__, size);
+            return NULL;
+        }
+
+        err = fdt_get_path(fdt, offset, path, size);
+    } while (err == -FDT_ERR_NOSPACE);
+
+    if (err) {
+        free(path);
+        return NULL;
+    }
+
+    return path;
 }
