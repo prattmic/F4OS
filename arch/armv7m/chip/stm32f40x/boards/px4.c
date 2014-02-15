@@ -24,9 +24,6 @@
 #include <dev/hw/led.h>
 #include <board_config.h>
 
-/* There is no lis302dl, so config is empty */
-struct lis302dl_accel_config lis302dl_accel_config;
-
 /* There is no itg3200, so config is empty */
 struct itg3200_gyro_config itg3200_gyro_config;
 

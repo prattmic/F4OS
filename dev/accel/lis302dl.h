@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -43,6 +43,8 @@
 #define LIS302DL_OUTX       ((uint8_t) 0x29)
 #define LIS302DL_OUTY       ((uint8_t) 0x2B)
 #define LIS302DL_OUTZ       ((uint8_t) 0x2D)
+
+#define LIS302DL_WHOAMI_VAL ((uint8_t) 0x3B)        /* WHOAMI id value */
 
 #define LIS302DL_CTRL1_XEN  ((uint8_t) (1 << 0))    /* X axis enable */
 #define LIS302DL_CTRL1_YEN  ((uint8_t) (1 << 1))    /* Y axis enable */

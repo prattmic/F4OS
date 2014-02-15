@@ -20,11 +20,13 @@
  * SOFTWARE.
  */
 
+#include <libfdt.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <dev/device.h>
 #include <dev/accel.h>
+#include <dev/fdtparse.h>
 #include <dev/hw/spi.h>
 #include <dev/resource.h>
 #include <kernel/class.h>
@@ -34,13 +36,14 @@
 #include <kernel/sched.h>
 #include <kernel/semaphore.h>
 #include <mm/mm.h>
-#include <board_config.h>
 
 #include "lis302dl.h"
 
 /*
  * STMicro LIS302DL Accelerometer Driver
  */
+
+#define LIS302DL_COMPAT "stmicro,lis302dl"
 
 struct lis302dl {
     struct spi_dev spi_dev;
@@ -149,33 +152,165 @@ struct accel_ops lis302dl_ops = {
     .get_raw_data = lis302dl_get_raw_data,
 };
 
+/*
+ * Get and configure the CS GPIO for the LIS302DL
+ *
+ * @param fdt   pointer to device tree blob
+ * @param offset    lis320dl offset in device tree
+ * @returns pointer to configure CS GPIO, or NULL on error
+ */
+static struct gpio *lis302dl_setup_cs(const void *fdt, int offset) {
+    struct fdt_gpio cs_gpio;
+    struct obj *cs_obj;
+    struct gpio *cs;
+    struct gpio_ops *cs_ops;
+    int err;
+
+    err = fdtparse_get_gpio(fdt, offset, "cs-gpio", &cs_gpio);
+    if (err) {
+        return NULL;
+    }
+
+    /* Get chip select GPIO */
+    cs_obj = gpio_get(cs_gpio.gpio);
+    if (!cs_obj) {
+        return NULL;
+    }
+
+    cs = to_gpio(cs_obj);
+
+    /* Initialize chip select */
+    cs_ops = (struct gpio_ops *) cs_obj->ops;
+
+    err = cs_ops->active_low(cs, cs_gpio.flags & GPIO_FDT_ACTIVE_LOW);
+    if (err) {
+        goto err_put_gpio;
+    }
+
+    err = cs_ops->direction(cs, GPIO_OUTPUT);
+    if (err) {
+        goto err_put_gpio;
+    }
+
+    err = cs_ops->set_output_value(cs, 1);
+    if (err) {
+        goto err_put_gpio;
+    }
+
+    return cs;
+
+err_put_gpio:
+    gpio_put(cs_obj);
+    return NULL;
+}
+
+/* Verify that the WHOAMI register contains the correct value */
 static int lis302dl_probe(const char *name) {
-    /* Check if the board has a valid config for the accelerometer. */
-    return lis302dl_accel_config.valid == BOARD_CONFIG_VALID_MAGIC;
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, ret;
+    char *parent;
+    struct obj *spi_obj;
+    struct spi *spi;
+    struct spi_ops *spi_ops;
+    struct spi_dev spi_dev = {};
+
+    /* Read of 1 byte, WHOAMI */
+    uint8_t addr = LIS302DL_WHOAMI | SPI_READ;
+    uint8_t response;
+
+    /* Default to assuming no device */
+    ret = 0;
+
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return 0;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, LIS302DL_COMPAT)) {
+        return 0;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return 0;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
+        return 0;
+    }
+
+    spi_obj = device_get(parent);
+
+    spi = to_spi(spi_obj);
+    spi_ops = (struct spi_ops *)spi->obj.ops;
+
+    spi_dev.cs = lis302dl_setup_cs(blob, offset);
+    if (!spi_dev.cs) {
+        goto out_put_spi;
+    }
+
+    spi_ops->start_transaction(spi, &spi_dev);
+
+    /* Write start address */
+    if (spi_ops->write(spi, &spi_dev, &addr, 1) != 1) {
+        goto out;
+    }
+    /* Read data */
+    if (spi_ops->read(spi, &spi_dev, &response, 1) != 1) {
+        goto out;
+    }
+
+    /* Does the register contain the value it should? */
+    ret = response == LIS302DL_WHOAMI_VAL;
+
+out:
+    spi_ops->end_transaction(spi, &spi_dev);
+
+    gpio_put(&spi_dev.cs->obj);
+out_put_spi:
+    device_put(spi_obj);
+    free(parent);
+
+    return ret;
 }
 
 static struct obj *lis302dl_ctor(const char *name) {
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset;
+    char *parent;
     struct obj *accel_obj;
     struct accel *accel;
     struct lis302dl *lis_accel;
-    struct obj *cs_obj;
-    struct gpio_ops *cs_ops;
 
-    /* Check if the board has a valid config for the accelerometer.
-     * There should be, this was checked in probe. */
-    if (lis302dl_accel_config.valid != BOARD_CONFIG_VALID_MAGIC) {
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return NULL;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, LIS302DL_COMPAT)) {
+        return NULL;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return NULL;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
         return NULL;
     }
 
     /* Instantiate an accel obj with lis302dl ops */
-    accel_obj = instantiate((char *)name, &accel_class, &lis302dl_ops, struct accel);
+    accel_obj = instantiate(name, &accel_class, &lis302dl_ops, struct accel);
     if (!accel_obj) {
-        return NULL;
+        goto err_free_parent;
     }
 
     /* Connect accel to its parent SPI device */
     accel = to_accel(accel_obj);
-    accel->device.parent = device_get(lis302dl_accel_config.parent_name);
+    accel->device.parent = device_get(parent);
     if (!accel->device.parent) {
         goto err_free_obj;
     }
@@ -190,22 +325,15 @@ static struct obj *lis302dl_ctor(const char *name) {
     lis_accel->ready = 0;
     lis_accel->spi_dev.extended_transaction = 0;
 
-    /* Get chip select GPIO */
-    cs_obj = gpio_get(lis302dl_accel_config.cs_gpio);
-    if (!cs_obj) {
+    lis_accel->spi_dev.cs = lis302dl_setup_cs(blob, offset);
+    if (!lis_accel->spi_dev.cs) {
         goto err_free_priv;
     }
 
-    lis_accel->spi_dev.cs = to_gpio(cs_obj);
-
-    /* Initialize chip select */
-    cs_ops = (struct gpio_ops *) cs_obj->ops;
-    cs_ops->active_low(lis_accel->spi_dev.cs, lis302dl_accel_config.cs_active_low);
-    cs_ops->direction(lis_accel->spi_dev.cs, GPIO_OUTPUT);
-    cs_ops->set_output_value(lis_accel->spi_dev.cs, 1);
-
     /* Export to the OS */
     class_export_member(accel_obj);
+
+    free(parent);
 
     return accel_obj;
 
@@ -213,14 +341,16 @@ err_free_priv:
     kfree(accel->priv);
 err_free_obj:
     kfree(get_container(accel_obj));
+err_free_parent:
+    free(parent);
     return NULL;
 }
 
 /* Protects the constructor from reentrance */
 static struct semaphore lis302dl_driver_sem = INIT_SEMAPHORE;
 
-static struct device_driver lis302dl_driver = {
-    .name = "lis302dl",
+static struct device_driver lis302dl_compat_driver = {
+    .name = LIS302DL_COMPAT,
     .probe = lis302dl_probe,
     .ctor = lis302dl_ctor,
     .class = &accel_class,
@@ -228,7 +358,7 @@ static struct device_driver lis302dl_driver = {
 };
 
 static int lis302dl_register(void) {
-    device_driver_register(&lis302dl_driver);
+    device_compat_driver_register(&lis302dl_compat_driver);
 
     return 0;
 }
