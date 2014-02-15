@@ -58,11 +58,10 @@ static int init_spi1(struct spi *s) {
     return 0;
 }
 
+/* The SPI semaphore must already be held when calling this function */
 static int stm32f4_spi_init(struct spi *s) {
     int ret = 0;
     struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
-
-    acquire(&s->lock);
 
     /* Already initialized? */
     if (port->ready) {
@@ -82,8 +81,6 @@ static int stm32f4_spi_init(struct spi *s) {
     }
 
 out:
-    release(&s->lock);
-
     return ret;
 }
 
@@ -142,10 +139,8 @@ static int stm32f4_spi_read_write(struct spi *spi, struct spi_dev *dev,
 
     struct stm32f4_spi *port = (struct stm32f4_spi *) spi->priv;
 
-    /* Initialized? */
-    if (!port || !port->ready) {
-        struct spi_ops *ops = (struct spi_ops *) spi->obj.ops;
-        ops->init(spi);
+    if (!port) {
+        return -1;
     }
 
     /* Verify valid SPI device */
@@ -164,6 +159,12 @@ static int stm32f4_spi_read_write(struct spi *spi, struct spi_dev *dev,
     if (!dev->extended_transaction) {
         acquire(&spi->lock);
         cs_ops->set_output_value(dev->cs, 0);
+    }
+
+    /* Initialized? */
+    if (!port->ready) {
+        struct spi_ops *ops = (struct spi_ops *) spi->obj.ops;
+        ops->init(spi);
     }
 
     /* Data MUST be read after each TX */
