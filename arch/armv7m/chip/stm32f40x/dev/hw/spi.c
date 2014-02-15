@@ -59,14 +59,14 @@ static int init_spi1(struct spi *s) {
 }
 
 static int stm32f4_spi_init(struct spi *s) {
-    int ret;
+    int ret = 0;
     struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
 
     acquire(&s->lock);
 
     /* Already initialized? */
     if (port->ready) {
-        return 0;
+        goto out;
     }
 
     switch (s->num) {
@@ -81,6 +81,7 @@ static int stm32f4_spi_init(struct spi *s) {
         port->ready = 1;
     }
 
+out:
     release(&s->lock);
 
     return ret;
