@@ -5,3 +5,10 @@
     compatible = "pixhawk,px4fmu", "stmicro,stm32f405rg",
         "stmicro,stm32f405", "stmicro,stm32f4";
 };
+
+&i2c2 {
+    hmc5883l@1E {
+        compatible = "honeywell,hmc5883l", "honeywell,hmc5883";
+        reg = <0x1E>;
+    };
+};

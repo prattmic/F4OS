@@ -36,13 +36,6 @@ struct itg3200_gyro_config {
 
 extern struct itg3200_gyro_config itg3200_gyro_config;
 
-struct hmc5883_mag_config {
-    uint32_t valid;
-    char *parent_name;
-};
-
-extern struct hmc5883_mag_config hmc5883_mag_config;
-
 struct ms5611_baro_config {
     uint32_t valid;
     char *parent_name;
