@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -42,7 +42,5 @@ static void i2c_dtor(struct obj *o) {
     ops = (struct i2c_ops *) o->ops;
     ops->deinit(i2c);
 
-    if (i2c->priv) {
-        kfree(i2c->priv);
-    }
+    /* Deinitialize, but don't destroy the I2C device */
 }
