@@ -20,14 +20,19 @@
  * SOFTWARE.
  */
 
+#include <libfdt.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <dev/device.h>
+#include <dev/fdtparse.h>
 #include <dev/gyro.h>
 #include <dev/mpu6000/class.h>
 #include <kernel/class.h>
 #include <kernel/init.h>
 #include <mm/mm.h>
 #include "regs.h"
+
+#define MPU6000_GYRO_COMPAT    "invensense,mpu6000-gyro"
 
 struct mpu6000_gyro {
     int ready;
@@ -112,28 +117,85 @@ struct gyro_ops mpu6000_gyro_ops = {
     .get_raw_data = mpu6000_gyro_get_raw_data,
 };
 
+/* Verify parent MPU6000 exists */
 static int mpu6000_gyro_probe(const char *name) {
-    /* TODO: Check that parent exists */
-    return 1;
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, ret;
+    char *parent;
+    struct obj *parent_obj;
+
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return 0;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, MPU6000_GYRO_COMPAT)) {
+        return 0;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return 0;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
+        return 0;
+    }
+
+    /* Attempt to get parent MPU6000 */
+    parent_obj = device_get(parent);
+    if (parent_obj) {
+        /* Found it!  Good to go! */
+        device_put(parent_obj);
+        ret = 1;
+    }
+    else {
+        /* No MPU6000, no MPU6000 gyro */
+        ret = 0;
+    }
+
+    free(parent);
+
+    return ret;
 }
 
 static struct obj *mpu6000_gyro_ctor(const char *name) {
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset;
+    char *parent;
     struct obj *gyro_obj;
     struct gyro *gyro;
     struct mpu6000_gyro *mpu_gyro;
 
-    gyro_obj = instantiate((char *)name, &gyro_class, &mpu6000_gyro_ops,
-                              struct gyro);
-    if (!gyro_obj) {
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
         return NULL;
     }
 
-    /*
-     * Connect to parent MPU6000
-     * TODO: Support more than SPI
-     */
+    if (fdt_node_check_compatible(blob, offset, MPU6000_GYRO_COMPAT)) {
+        return NULL;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return NULL;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
+        return NULL;
+    }
+
+    gyro_obj = instantiate(name, &gyro_class, &mpu6000_gyro_ops,
+                           struct gyro);
+    if (!gyro_obj) {
+        goto err_free_parent;
+    }
+
+    /* Connect to parent MPU6000 */
     gyro = to_gyro(gyro_obj);
-    gyro->device.parent = device_get("mpu6000_spi");
+    gyro->device.parent = device_get(parent);
     if (!gyro->device.parent) {
         goto err_free_obj;
     }
@@ -150,17 +212,21 @@ static struct obj *mpu6000_gyro_ctor(const char *name) {
     /* Export to the OS */
     class_export_member(gyro_obj);
 
+    free(parent);
+
     return gyro_obj;
 
 err_free_obj:
     kfree(get_container(gyro_obj));
+err_free_parent:
+    free(parent);
     return NULL;
 }
 
 static struct semaphore mpu6000_gyro_driver_sem = INIT_SEMAPHORE;
 
-static struct device_driver mpu6000_gyro_driver = {
-    .name = "mpu6000_gyro",
+static struct device_driver mpu6000_gyro_compat_driver = {
+    .name = MPU6000_GYRO_COMPAT,
     .probe = mpu6000_gyro_probe,
     .ctor = mpu6000_gyro_ctor,
     .class = &gyro_class,
@@ -168,7 +234,7 @@ static struct device_driver mpu6000_gyro_driver = {
 };
 
 static int mpu6000_gyro_register(void) {
-    device_driver_register(&mpu6000_gyro_driver);
+    device_compat_driver_register(&mpu6000_gyro_compat_driver);
 
     return 0;
 }

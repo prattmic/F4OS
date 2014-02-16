@@ -20,9 +20,11 @@
  * SOFTWARE.
  */
 
+#include <libfdt.h>
 #include <stdint.h>
-#include <board_config.h>
+#include <stdlib.h>
 #include <dev/device.h>
+#include <dev/fdtparse.h>
 #include <dev/hw/gpio.h>
 #include <dev/hw/spi.h>
 #include <dev/mpu6000/class.h>
@@ -30,6 +32,8 @@
 #include <kernel/obj.h>
 #include <mm/mm.h>
 #include "regs.h"
+
+#define MPU6000_SPI_COMPAT  "invensense,mpu6000-spi"
 
 /* When set in register addres, perform a read instead of write */
 #define MPU6000_SPI_READ    ((uint8_t) (1 << 7))
@@ -220,33 +224,169 @@ struct mpu6000_ops mpu6000_spi_ops = {
     .enable_gyroscope = mpu6000_spi_enable_gyro,
 };
 
+/*
+ * Get and configure the CS GPIO for the MPU6000
+ *
+ * @param fdt   pointer to device tree blob
+ * @param offset    mpu6000 offset in device tree
+ * @returns pointer to configure CS GPIO, or NULL on error
+ */
+static struct gpio *mpu6000_spi_setup_cs(const void *fdt, int offset) {
+    struct fdt_gpio cs_gpio;
+    struct obj *cs_obj;
+    struct gpio *cs;
+    struct gpio_ops *cs_ops;
+    int err;
+
+    err = fdtparse_get_gpio(fdt, offset, "cs-gpio", &cs_gpio);
+    if (err) {
+        return NULL;
+    }
+
+    /* Get chip select GPIO */
+    cs_obj = gpio_get(cs_gpio.gpio);
+    if (!cs_obj) {
+        return NULL;
+    }
+
+    cs = to_gpio(cs_obj);
+
+    /* Initialize chip select */
+    cs_ops = (struct gpio_ops *) cs_obj->ops;
+
+    err = cs_ops->active_low(cs, cs_gpio.flags & GPIO_FDT_ACTIVE_LOW);
+    if (err) {
+        goto err_put_gpio;
+    }
+
+    err = cs_ops->direction(cs, GPIO_OUTPUT);
+    if (err) {
+        goto err_put_gpio;
+    }
+
+    err = cs_ops->set_output_value(cs, 1);
+    if (err) {
+        goto err_put_gpio;
+    }
+
+    return cs;
+
+err_put_gpio:
+    gpio_put(cs_obj);
+    return NULL;
+}
+
+/* Verify that the WHOAMI register contains the correct value */
 static int mpu6000_spi_probe(const char *name) {
-    /* Check if the board has a valid config for the mpu6000. */
-    return mpu6000_spi_config.valid == BOARD_CONFIG_VALID_MAGIC;
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, ret;
+    char *parent;
+    struct obj *spi_obj;
+    struct spi *spi;
+    struct spi_ops *spi_ops;
+    struct spi_dev spi_dev = {};
+
+    /* Read of 1 byte, WHOAMI */
+    uint8_t addr = MPU6000_WHOAMI | MPU6000_SPI_READ;
+    uint8_t response;
+
+    /* Default to assuming no device */
+    ret = 0;
+
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return 0;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, MPU6000_SPI_COMPAT)) {
+        return 0;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return 0;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
+        return 0;
+    }
+
+    spi_obj = device_get(parent);
+
+    spi = to_spi(spi_obj);
+    spi_ops = (struct spi_ops *)spi->obj.ops;
+
+    spi_dev.cs = mpu6000_spi_setup_cs(blob, offset);
+    if (!spi_dev.cs) {
+        goto out_put_spi;
+    }
+
+    spi_ops->start_transaction(spi, &spi_dev);
+
+    /* Write start address */
+    if (spi_ops->write(spi, &spi_dev, &addr, 1) != 1) {
+        goto out;
+    }
+    /* Read data */
+    if (spi_ops->read(spi, &spi_dev, &response, 1) != 1) {
+        goto out;
+    }
+
+    /*
+     * Does the register contain the value it should?
+     * Note: bits 0 and 7 of the register are reserved, don't check them.
+     */
+    ret = (response & 0x7E) == MPU6000_WHOAMI_VAL;
+
+out:
+    spi_ops->end_transaction(spi, &spi_dev);
+
+    gpio_put(&spi_dev.cs->obj);
+out_put_spi:
+    device_put(spi_obj);
+    free(parent);
+
+    return ret;
 }
 
 static struct obj *mpu6000_spi_ctor(const char *name) {
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset;
+    char *parent;
     struct obj *mpu6000_obj;
     struct mpu6000 *mpu;
     struct mpu6000_spi *mpu_spi;
-    struct obj *cs_obj;
-    struct gpio_ops *cs_ops;
 
-    /* Check if the board has a valid config for the mpu6000. */
-    if (mpu6000_spi_config.valid != BOARD_CONFIG_VALID_MAGIC) {
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return NULL;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, MPU6000_SPI_COMPAT)) {
+        return NULL;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return NULL;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
         return NULL;
     }
 
     /* Instantiate an mpu6000 obj with mpu6000_spi ops */
-    mpu6000_obj = instantiate((char *)name, &mpu6000_class, &mpu6000_spi_ops,
+    mpu6000_obj = instantiate(name, &mpu6000_class, &mpu6000_spi_ops,
                               struct mpu6000);
     if (!mpu6000_obj) {
-        return NULL;
+        goto err_free_parent;
     }
 
     /* Connect mpu6000 to its parent SPI device */
     mpu = to_mpu6000(mpu6000_obj);
-    mpu->device.parent = device_get(mpu6000_spi_config.parent_name);
+    mpu->device.parent = device_get(parent);
     if (!mpu->device.parent) {
         goto err_free_obj;
     }
@@ -262,25 +402,17 @@ static struct obj *mpu6000_spi_ctor(const char *name) {
         goto err_free_obj;
     }
 
-    /* Get chip select GPIO */
-    cs_obj = gpio_get(mpu6000_spi_config.cs_gpio);
-    if (!cs_obj) {
+    mpu_spi = (struct mpu6000_spi *) mpu->priv;
+    mpu_spi->spi_dev.extended_transaction = 0;
+    mpu_spi->spi_dev.cs = mpu6000_spi_setup_cs(blob, offset);
+    if (!mpu_spi->spi_dev.cs) {
         goto err_free_priv;
     }
 
-    mpu_spi = (struct mpu6000_spi *) mpu->priv;
-    mpu_spi->spi_dev.cs = to_gpio(cs_obj);
-    mpu_spi->spi_dev.extended_transaction = 0;
-
-    /* Initialize chip select */
-    cs_ops = (struct gpio_ops *) cs_obj->ops;
-    cs_ops->active_low(mpu_spi->spi_dev.cs,
-                       mpu6000_spi_config.cs_active_low);
-    cs_ops->direction(mpu_spi->spi_dev.cs, GPIO_OUTPUT);
-    cs_ops->set_output_value(mpu_spi->spi_dev.cs, 1);
-
     /* Export to the OS */
     class_export_member(mpu6000_obj);
+
+    free(parent);
 
     return mpu6000_obj;
 
@@ -288,13 +420,15 @@ err_free_priv:
     kfree(mpu->priv);
 err_free_obj:
     kfree(get_container(mpu6000_obj));
+err_free_parent:
+    free(parent);
     return NULL;
 }
 
 static struct semaphore mpu6000_spi_driver_sem = INIT_SEMAPHORE;
 
-static struct device_driver mpu6000_spi_driver = {
-    .name = "mpu6000_spi",
+static struct device_driver mpu6000_spi_compat_driver = {
+    .name = MPU6000_SPI_COMPAT,
     .probe = mpu6000_spi_probe,
     .ctor = mpu6000_spi_ctor,
     .class = &mpu6000_class,
@@ -302,7 +436,7 @@ static struct device_driver mpu6000_spi_driver = {
 };
 
 static int mpu6000_spi_register(void) {
-    device_driver_register(&mpu6000_spi_driver);
+    device_compat_driver_register(&mpu6000_spi_compat_driver);
 
     return 0;
 }

@@ -24,13 +24,6 @@
 #include <dev/hw/led.h>
 #include <board_config.h>
 
-struct mpu6000_spi_config mpu6000_spi_config = {
-    .valid = BOARD_CONFIG_VALID_MAGIC,
-    .parent_name = "spi1",
-    .cs_gpio = STM32F4_GPIO_PB0,
-    .cs_active_low = 0,
-};
-
 /* GPIO LEDs available - Red, Blue */
 const struct led leds_avail[] = {{STM32F4_GPIO_PB14, 0}, {STM32F4_GPIO_PB15, 0}};
 

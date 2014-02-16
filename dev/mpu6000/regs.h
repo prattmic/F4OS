@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -86,5 +86,8 @@
 #define MPU6000_PWR_MGMT_2_STBY_XG          0x04
 #define MPU6000_PWR_MGMT_2_STBY_YG          0x02
 #define MPU6000_PWR_MGMT_2_STBY_ZG          0x01
+
+/* Bits 0 and 7 are reserved */
+#define MPU6000_WHOAMI_VAL                  0x68
 
 #endif

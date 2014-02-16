@@ -24,9 +24,6 @@
 #include <dev/hw/led.h>
 #include <board_config.h>
 
-/* There is no mpu6000, so empty config */
-struct mpu6000_spi_config mpu6000_spi_config;
-
 /* GPIO LEDs available - Red, Green, Orange, Blue */
 const struct led leds_avail[] = {{STM32F4_GPIO_PD14, 0}, {STM32F4_GPIO_PD12, 0},
                                  {STM32F4_GPIO_PD13, 0}, {STM32F4_GPIO_PD15, 0}};

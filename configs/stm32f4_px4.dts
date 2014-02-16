@@ -6,6 +6,22 @@
         "stmicro,stm32f405", "stmicro,stm32f4";
 };
 
+&spi1 {
+    mpu6000@0 {
+        compatible = "invensense,mpu6000-spi";
+        reg = <0>;
+        cs-gpio = <&gpio 16 0>; /* PB0 */
+
+        accel {
+            compatible = "invensense,mpu6000-accel";
+        };
+
+        gyro {
+            compatible = "invensense,mpu6000-gyro";
+        };
+    };
+};
+
 &i2c2 {
     hmc5883l@1E {
         compatible = "honeywell,hmc5883l", "honeywell,hmc5883";

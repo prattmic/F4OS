@@ -29,13 +29,4 @@
 
 #define BOARD_CONFIG_VALID_MAGIC 0xdeb1afea
 
-struct mpu6000_spi_config {
-    uint32_t valid;
-    char *parent_name;
-    uint32_t cs_gpio;
-    uint8_t cs_active_low;
-};
-
-extern struct mpu6000_spi_config mpu6000_spi_config;
-
 #endif
