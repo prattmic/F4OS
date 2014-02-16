@@ -70,6 +70,7 @@ struct obj *device_get(const char *name) {
     obj = get_by_name_from_class((char *)name, driver->class);
     /* Success! */
     if (obj) {
+        obj_get(obj);
         goto out;
     }
 
