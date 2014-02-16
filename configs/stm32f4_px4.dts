@@ -11,4 +11,9 @@
         compatible = "honeywell,hmc5883l", "honeywell,hmc5883";
         reg = <0x1E>;
     };
+
+    ms5611@76 {
+        compatible = "meas-spec,ms5611-01ba03";
+        reg = <0x76>;
+    };
 };

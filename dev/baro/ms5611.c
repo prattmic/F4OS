@@ -20,12 +20,13 @@
  * SOFTWARE.
  */
 
+#include <libfdt.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
-#include <board_config.h>
+#include <dev/fdtparse.h>
 #include <dev/hw/i2c.h>
 #include <dev/baro.h>
 #include <kernel/init.h>
@@ -34,11 +35,12 @@
 
 struct ms5611 {
     uint8_t             ready;
+    int                 addr;
     struct semaphore    lock;
     uint16_t            c[7];   /* Conversion parameters */
 };
 
-#define MS5611_ADDR     0x76
+#define MS5611_COMPAT    "meas-spec,ms5611-01ba03"
 
 static int ms5611_init(struct baro *baro) {
     struct i2c *i2c = to_i2c(baro->device.parent);
@@ -53,12 +55,12 @@ static int ms5611_init(struct baro *baro) {
 
     for (int i = 1; i <= 6; i++) {
         packet = 0xA0 + 2*i;  /* Read C[i] */
-        ret = i2c_ops->write(i2c, MS5611_ADDR, &packet, 1);
+        ret = i2c_ops->write(i2c, ms5611_baro->addr, &packet, 1);
         if (ret != 1) {
             goto err_release_sem;
         }
 
-        ret = i2c_ops->read(i2c, MS5611_ADDR, data, 2);
+        ret = i2c_ops->read(i2c, ms5611_baro->addr, data, 2);
         if (ret != 2) {
             goto err_release_sem;
         }
@@ -92,22 +94,23 @@ static int ms5611_has_temp(struct baro *baro) {
  * Read the internal ADC and return its contents
  *
  * @param i2c   I2C bus that MS5611 is on
+ * @param addr  Device I2C address
  * @param value Pointer to unsigned int to place ADC value in
  *
  * @returns 0 on sucess, negative on error
  */
-static int ms5611_read_adc(struct i2c *i2c, uint32_t *value) {
+static int ms5611_read_adc(struct i2c *i2c, uint8_t addr, uint32_t *value) {
     struct i2c_ops *i2c_ops = (struct i2c_ops *) i2c->obj.ops;
     uint8_t packet, raw_data[4];
     int ret;
 
     packet = 0x00;  /* Read ADC */
-    ret = i2c_ops->write(i2c, MS5611_ADDR, &packet, 1);
+    ret = i2c_ops->write(i2c, addr, &packet, 1);
     if (ret != 1) {
         return -1;
     }
 
-    ret = i2c_ops->read(i2c, MS5611_ADDR, raw_data, 3);
+    ret = i2c_ops->read(i2c, addr, raw_data, 3);
     if (ret != 3) {
         return -1;
     }
@@ -136,7 +139,7 @@ static int ms5611_get_data(struct baro *baro, struct baro_data *data) {
     acquire(&ms5611_baro->lock);
 
     packet = 0x48;  /* Initiate pressure conversion */
-    ret = i2c_ops->write(i2c, MS5611_ADDR, &packet, 1);
+    ret = i2c_ops->write(i2c, ms5611_baro->addr, &packet, 1);
     if (ret != 1) {
         goto err_release_sem;
     }
@@ -145,13 +148,13 @@ static int ms5611_get_data(struct baro *baro, struct baro_data *data) {
     usleep(10000);
 
     /* Digital pressure value */
-    ret = ms5611_read_adc(i2c, &d1);
+    ret = ms5611_read_adc(i2c, ms5611_baro->addr, &d1);
     if (ret) {
         goto err_release_sem;
     }
 
     packet = 0x58;  /* Initiate temperature conversion */
-    ret = i2c_ops->write(i2c, MS5611_ADDR, &packet, 1);
+    ret = i2c_ops->write(i2c, ms5611_baro->addr, &packet, 1);
     if (ret != 1) {
         goto err_release_sem;
     }
@@ -160,7 +163,7 @@ static int ms5611_get_data(struct baro *baro, struct baro_data *data) {
     usleep(10000);
 
     /* Digital temperature value */
-    ret = ms5611_read_adc(i2c, &d2);
+    ret = ms5611_read_adc(i2c, ms5611_baro->addr, &d2);
     if (ret) {
         goto err_release_sem;
     }
@@ -216,30 +219,106 @@ struct baro_ops ms5611_ops = {
     .get_data = ms5611_get_data,
 };
 
+/* No way to identify chip, simply check for something at the address */
 static int ms5611_probe(const char *name) {
-    /* Check if the board has a valid config for the baronetometer. */
-    return ms5611_baro_config.valid == BOARD_CONFIG_VALID_MAGIC;
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, addr, err;
+    char *parent;
+    struct obj *i2c_obj;
+    struct i2c *i2c;
+    struct i2c_ops *i2c_ops;
+    uint8_t data;
+    int ret = 0;
+
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return 0;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, MS5611_COMPAT)) {
+        return 0;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return 0;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
+        return 0;
+    }
+
+    i2c_obj = device_get(parent);
+    if (!i2c_obj) {
+        goto out_free_parent;
+    }
+
+    i2c = to_i2c(i2c_obj);
+    i2c_ops = (struct i2c_ops *)i2c->obj.ops;
+
+    err = fdtparse_get_int(blob, offset, "reg", &addr);
+    if (err) {
+        goto out;
+    }
+
+    /* Attempt write of dummy register */
+    data = 0;
+    err = i2c_ops->write(i2c, addr, &data, 1);
+    if (err == 1) {
+        /*
+         * Either *something* is at this address, or this i2c peripheral
+         * doesn't handle bus errors.
+         */
+        ret = 1;
+    }
+    else {
+        ret = 0;
+    }
+
+out:
+    device_put(i2c_obj);
+out_free_parent:
+    free(parent);
+    return ret;
 }
 
 static struct obj *ms5611_ctor(const char *name) {
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, err;
+    char *parent;
     struct obj *baro_obj;
     struct baro *baro;
     struct ms5611 *ms5611_baro;
 
-    /* Check if the board has a valid config for the baronetometer. */
-    if (ms5611_baro_config.valid != BOARD_CONFIG_VALID_MAGIC) {
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return NULL;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, MS5611_COMPAT)) {
+        return NULL;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return NULL;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
         return NULL;
     }
 
     /* Instantiate an baro obj with ms5611 ops */
-    baro_obj = instantiate((char *)name, &baro_class, &ms5611_ops, struct baro);
+    baro_obj = instantiate(name, &baro_class, &ms5611_ops, struct baro);
     if (!baro_obj) {
-        return NULL;
+        goto err_free_parent;
     }
 
     /* Connect baro to its parent I2C device */
     baro = to_baro(baro_obj);
-    baro->device.parent = device_get(ms5611_baro_config.parent_name);
+    baro->device.parent = device_get(parent);
     if (!baro->device.parent) {
         goto err_free_obj;
     }
@@ -254,20 +333,31 @@ static struct obj *ms5611_ctor(const char *name) {
     ms5611_baro->ready = 0;
     init_semaphore(&ms5611_baro->lock);
 
+    err = fdtparse_get_int(blob, offset, "reg", &ms5611_baro->addr);
+    if (err) {
+        goto err_free_priv;
+    }
+
     /* Export to the OS */
     class_export_member(baro_obj);
 
+    free(parent);
+
     return baro_obj;
 
+err_free_priv:
+    kfree(baro->priv);
 err_free_obj:
     kfree(get_container(baro_obj));
+err_free_parent:
+    free(parent);
     return NULL;
 }
 
 static struct semaphore ms5611_driver_sem = INIT_SEMAPHORE;
 
-static struct device_driver ms5611_driver = {
-    .name = "ms5611",
+static struct device_driver ms5611_compat_driver = {
+    .name = MS5611_COMPAT,
     .probe = ms5611_probe,
     .ctor = ms5611_ctor,
     .class = &baro_class,
@@ -275,7 +365,7 @@ static struct device_driver ms5611_driver = {
 };
 
 static int ms5611_register(void) {
-    device_driver_register(&ms5611_driver);
+    device_compat_driver_register(&ms5611_compat_driver);
 
     return 0;
 }

@@ -29,9 +29,6 @@ struct itg3200_gyro_config itg3200_gyro_config = {
     .parent_name = "i2c1",
 };
 
-/* There is no ms5611, so empty config */
-struct ms5611_baro_config ms5611_baro_config;
-
 /* There is no mpu6000, so empty config */
 struct mpu6000_spi_config mpu6000_spi_config;
 

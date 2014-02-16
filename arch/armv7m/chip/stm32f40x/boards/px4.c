@@ -27,11 +27,6 @@
 /* There is no itg3200, so config is empty */
 struct itg3200_gyro_config itg3200_gyro_config;
 
-struct ms5611_baro_config ms5611_baro_config = {
-    .valid = BOARD_CONFIG_VALID_MAGIC,
-    .parent_name = "i2c2",
-};
-
 struct mpu6000_spi_config mpu6000_spi_config = {
     .valid = BOARD_CONFIG_VALID_MAGIC,
     .parent_name = "spi1",
