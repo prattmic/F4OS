@@ -419,7 +419,7 @@ static struct obj *mpu6000_spi_ctor(const char *name) {
 err_free_priv:
     kfree(mpu->priv);
 err_free_obj:
-    kfree(get_container(mpu6000_obj));
+    class_deinstantiate(mpu6000_obj);
 err_free_parent:
     free(parent);
     return NULL;

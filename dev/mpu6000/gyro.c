@@ -217,7 +217,7 @@ static struct obj *mpu6000_gyro_ctor(const char *name) {
     return gyro_obj;
 
 err_free_obj:
-    kfree(get_container(gyro_obj));
+    class_deinstantiate(gyro_obj);
 err_free_parent:
     free(parent);
     return NULL;

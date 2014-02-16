@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -50,8 +50,8 @@ void pwm_dtor(struct obj *o) {
     obj_put(pwm->gpio);
 
     /* We are completely done with this object, get rid of it */
-    collection_del(&pwm_class.instances, o);
-    kfree(pwm);
+    class_unexport_member(o);
+    class_deinstantiate(o);
 }
 
 int pwm_setup(void) {

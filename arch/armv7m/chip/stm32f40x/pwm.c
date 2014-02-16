@@ -819,8 +819,7 @@ struct obj *pwm_get(struct obj *gpio_obj, uint32_t duty) {
     struct stm32f4_pwm *stm32_pwm;
     enum timer_channels timer_channel;
     int timer, channel;
-    char name_buf[32];
-    char *name;
+    char name[32];
     int err, function;
 
     /* Verify GPIO is valid */
@@ -851,13 +850,12 @@ struct obj *pwm_get(struct obj *gpio_obj, uint32_t duty) {
     }
 
     /* Construct PWM name */
-    scnprintf(name_buf, 32, "pwm_%s", gpio_obj->name);
-    name = strndup(name_buf, 32);   /* If NULL, name will simply be empty */
+    scnprintf(name, 32, "pwm_%s", gpio_obj->name);
 
     /* Instantiate PWM object */
     pwm_obj = instantiate(name, &pwm_class, &stm32f4_pwm_ops, struct pwm);
     if (!pwm_obj) {
-        goto err_free_name;
+        goto err_put_gpio;
     }
 
     /* Initialize fields */
@@ -878,18 +876,13 @@ struct obj *pwm_get(struct obj *gpio_obj, uint32_t duty) {
     return pwm_obj;
 
 err_free_pwm_obj:
-    kfree(get_container(pwm_obj));
-err_free_name:
-    if (name) {
-        free(name);
-    }
-
+    class_deinstantiate(pwm_obj);
+err_put_gpio:
+    obj_put(gpio_obj);
     /* Free timer channel that was taken */
     acquire(&channels_available_sem);
     channels_available |= timer_channel;
     release(&channels_available_sem);
-err_put_gpio:
-    obj_put(gpio_obj);
 err:
     return NULL;
 }

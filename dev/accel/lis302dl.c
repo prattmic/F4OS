@@ -340,7 +340,7 @@ static struct obj *lis302dl_ctor(const char *name) {
 err_free_priv:
     kfree(accel->priv);
 err_free_obj:
-    kfree(get_container(accel_obj));
+    class_deinstantiate(accel_obj);
 err_free_parent:
     free(parent);
     return NULL;

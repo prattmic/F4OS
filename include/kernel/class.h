@@ -67,15 +67,14 @@ typedef struct class {
  * Instantiate a class member
  *
  * Allocate (using kmalloc()) an instance of a class, using the container
- * type, returning the instance obj.
+ * type, returning the instance obj.  The provided name will be copied.
  *
  * When finished with the class instance, the container should be freed
- * with kfree().
+ * with class_deinstantiate().
  *
  * NOTE: The container type is not returned, the obj within the container.
- * When freeing, use get_container() to get the address to free.
  *
- * @param name  Instance name
+ * @param name  Instance name (will be copied)
  * @param class struct class of class type to instantiate
  * @param ops   Class ops struct
  * @param type  Type of class container
@@ -88,6 +87,17 @@ struct obj *__instantiate(const char *name, struct class *class, void *ops,
                           size_t size);
 
 /*
+ * Deinstantiate a class instance
+ *
+ * Undoes the actions of instantiate(), destroying the obj and container
+ * of the class instance.  The obj must not be used after calling this
+ * function.
+ *
+ * @param obj   Class instance to destroy
+ */
+void class_deinstantiate(struct obj *obj);
+
+/*
  * Make an instantiated class member visible to the rest of the OS.
  *
  * Until this function is called, the class member is not visible
@@ -97,6 +107,17 @@ struct obj *__instantiate(const char *name, struct class *class, void *ops,
  * @returns zero on success, negative on error
  */
 int class_export_member(struct obj *o);
+
+/*
+ * Remove a class instance from visibility in the OS
+ *
+ * This function should only be called after class_export_member()
+ * if called.
+ *
+ * @param o Class member to unexport
+ * @returns zero on success, negative on error
+ */
+int class_unexport_member(struct obj *o);
 
 #define INIT_CLASS(symbol, name, obj_type) {    \
     .instances = INIT_COLLECTION((symbol).instances), \

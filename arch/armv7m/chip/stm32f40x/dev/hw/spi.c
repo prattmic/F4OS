@@ -351,7 +351,7 @@ err_free_gpio:
     kfree(port);
 
 err_free_obj:
-    kfree(get_container(obj));
+    class_deinstantiate(obj);
 
     return NULL;
 }

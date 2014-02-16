@@ -148,11 +148,6 @@ static int lm4f_gpio_dtor(struct gpio *gpio) {
 
     ops->reset(gpio);
 
-    if (gpio->obj.name) {
-        /* Name is dynamically allocated, we can safely cast away const */
-        free((char *)gpio->obj.name);
-    }
-
     return 0;
 }
 
@@ -192,15 +187,12 @@ int gpio_valid(uint32_t gpio) {
 struct obj *_gpio_instantiate(uint32_t gpio) {
     struct lm4f_gpio g = lm4f_gpio_decode(gpio);
 
-    char name_tmp[5] = {'\0'};
-    lm4f_gpio_build_name(g, name_tmp);
-
-    /* Don't care if NULL, then we just won't have a name */
-    char *name = strndup(name_tmp, 5);
+    char name[5] = {'\0'};
+    lm4f_gpio_build_name(g, name);
 
     struct obj *o = instantiate(name, &gpio_class, &lm4f_gpio_ops, struct gpio);
     if (!o) {
-        goto err;
+        return NULL;
     }
 
     lm4f_gpio_clock_enable(g);
@@ -212,11 +204,4 @@ struct obj *_gpio_instantiate(uint32_t gpio) {
     class_export_member(o);
 
     return o;
-
-err:
-    if (name) {
-        free(name);
-    }
-
-    return NULL;
 }

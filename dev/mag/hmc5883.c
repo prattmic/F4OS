@@ -322,7 +322,7 @@ static struct obj *hmc5883_ctor(const char *name) {
 err_free_priv:
     kfree(mag->priv);
 err_free_obj:
-    kfree(get_container(mag_obj));
+    class_deinstantiate(mag_obj);
 err_free_parent:
     free(parent);
     return NULL;

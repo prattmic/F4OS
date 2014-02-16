@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -48,8 +48,8 @@ void gpio_dtor(struct obj *o) {
     ops->dtor(g);
 
     /* We are completely done with this object, get rid of it */
-    collection_del(&gpio_class.instances, o);
-    kfree(g);
+    class_unexport_member(o);
+    class_deinstantiate(o);
 }
 
 int gpio_setup(void) {

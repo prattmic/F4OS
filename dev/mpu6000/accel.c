@@ -217,7 +217,7 @@ static struct obj *mpu6000_accel_ctor(const char *name) {
     return accel_obj;
 
 err_free_obj:
-    kfree(get_container(accel_obj));
+    class_deinstantiate(accel_obj);
 err_free_parent:
     free(parent);
     return NULL;

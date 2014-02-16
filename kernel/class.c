@@ -21,6 +21,7 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <list.h>
 #include <kernel/class.h>
 #include <mm/mm.h>
@@ -41,13 +42,29 @@ struct obj *__instantiate(const char *name, struct class *class, void *ops,
     atomic_set(&o->refcount, 1);
     o->type = class->type;
     o->ops = ops;
-    o->name = name;
+    o->name = strdup(name);
+    if (!o->name) {
+        goto err;
+    }
+
     list_init(&o->list);
 
     /* add to class collection of instances */
     o->parent = &class->obj;
 
     return o;
+
+err:
+    kfree(container);
+    return NULL;
+}
+
+void class_deinstantiate(struct obj *obj) {
+    if (obj->name) {
+        free((char *)obj->name);
+    }
+
+    kfree(get_container(obj));
 }
 
 int class_export_member(struct obj *o) {
@@ -57,6 +74,17 @@ int class_export_member(struct obj *o) {
 
     struct class *class = to_class(o->parent);
     collection_add(&class->instances, o);
+
+    return 0;
+}
+
+int class_unexport_member(struct obj *o) {
+    if (!o->parent) {
+        return -1;
+    }
+
+    struct class *class = to_class(o->parent);
+    collection_del(&class->instances, o);
 
     return 0;
 }

@@ -303,7 +303,7 @@ static struct obj *itg3200_ctor(const char *name) {
 err_free_priv:
     kfree(gyro->priv);
 err_free_obj:
-    kfree(get_container(gyro_obj));
+    class_deinstantiate(gyro_obj);
 err_free_parent:
     free(parent);
     return NULL;

@@ -336,7 +336,7 @@ static struct obj *as5048b_ctor(const char *name) {
     return rotary_encoder_obj;
 
 err_free_obj:
-    kfree(get_container(rotary_encoder_obj));
+    class_deinstantiate(rotary_encoder_obj);
 err_free_parent:
     free(parent);
     return NULL;
