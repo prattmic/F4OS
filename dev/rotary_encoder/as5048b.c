@@ -20,22 +20,23 @@
  * SOFTWARE.
  */
 
+#include <libfdt.h>
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <board_config.h>
+#include <dev/fdtparse.h>
 #include <dev/hw/i2c.h>
 #include <dev/rotary_encoder.h>
 #include <kernel/init.h>
 #include <kernel/semaphore.h>
 #include <mm/mm.h>
 
-/* Multiple addresses are valid, set A1 = 0, A2 = 0 */
-#define AS5048B_ADDR    (0x40)
+#define AS5048B_COMPAT  "ams,as5048b"
 
 /* Registers */
 #define AS5048B_PROG    (3)
+#define AS5048B_ADDR    (21)
 #define AS5048B_OTPH    (22)
 #define AS5048B_DIAG    (251)
 #define AS5048B_ANGLEH  (254)
@@ -47,6 +48,7 @@
 struct as5048b {
     struct semaphore    lock;
     uint32_t calibration_zero;
+    int addr;
 };
 
 static int as5048b_init(struct rotary_encoder *rotary_encoder) {
@@ -73,13 +75,13 @@ static int as5048b_get_raw_data(struct rotary_encoder *rotary_encoder,
 
     /* Start reading from ANGLEH */
     raw_data[0] = AS5048B_ANGLEH;
-    ret = i2c_ops->write(i2c, AS5048B_ADDR, raw_data, 1);
+    ret = i2c_ops->write(i2c, ams_rotary_encoder->addr, raw_data, 1);
     if (ret != 1) {
         goto out_err;
     }
 
     /* Read the two data registers */
-    ret = i2c_ops->read(i2c, AS5048B_ADDR, raw_data, 2);
+    ret = i2c_ops->read(i2c, ams_rotary_encoder->addr, raw_data, 2);
     if (ret != 2) {
         goto out_err;
     }
@@ -167,13 +169,13 @@ static int as5048b_status(struct rotary_encoder *rotary_encoder) {
 
     /* Start reading from DIAG */
     data = AS5048B_DIAG;
-    ret = i2c_ops->write(i2c, AS5048B_ADDR, &data, 1);
+    ret = i2c_ops->write(i2c, ams_rotary_encoder->addr, &data, 1);
     if (ret != 1) {
         goto out_err;
     }
 
     /* Read the register */
-    ret = i2c_ops->read(i2c, AS5048B_ADDR, &data, 1);
+    ret = i2c_ops->read(i2c, ams_rotary_encoder->addr, &data, 1);
     if (ret != 1) {
         goto out_err;
     }
@@ -196,32 +198,117 @@ struct rotary_encoder_ops as5048b_ops = {
     .status = as5048b_status,
 };
 
+/*
+ * Attempt to identify the chip by verifying that the I2C address register
+ * matches the 5 MSBs of the actual address
+ */
 static int as5048b_probe(const char *name) {
-    /* Check if the board has a valid config for the rotary encoder. */
-    return as5048b_rotary_encoder_config.valid == BOARD_CONFIG_VALID_MAGIC;
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, addr, err;
+    char *parent;
+    struct obj *i2c_obj;
+    struct i2c *i2c;
+    struct i2c_ops *i2c_ops;
+    uint8_t data;
+    int ret = 0;
+
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return 0;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, AS5048B_COMPAT)) {
+        return 0;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return 0;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
+        return 0;
+    }
+
+    i2c_obj = device_get(parent);
+    if (!i2c_obj) {
+        goto out_free_parent;
+    }
+
+    i2c = to_i2c(i2c_obj);
+    i2c_ops = (struct i2c_ops *)i2c->obj.ops;
+
+    err = fdtparse_get_int(blob, offset, "reg", &addr);
+    if (err) {
+        goto out;
+    }
+
+    /* Attempt read of ADDR register */
+    data = AS5048B_ADDR;
+    err = i2c_ops->write(i2c, addr, &data, 1);
+    if (err != 1) {
+        ret = 0;
+        goto out;
+    }
+
+    err = i2c_ops->read(i2c, addr, &data, 1);
+    if (err != 1) {
+        ret = 0;
+        goto out;
+    }
+
+    /*
+     * The ADDR register contains the 5 MSBs of the 7-bit I2C address.
+     * Bit 4 in the register is inverted (why??)
+     * Verify that is matches the 5 MSBs of the address from FDT.
+     */
+    ret = ((data ^ 0x10) & 0x1f) == (addr >> 2);
+
+out:
+    device_put(i2c_obj);
+out_free_parent:
+    free(parent);
+    return ret;
 }
 
 static struct obj *as5048b_ctor(const char *name) {
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, err;
+    char *parent;
     struct obj *rotary_encoder_obj;
     struct rotary_encoder *rotary_encoder;
     struct as5048b *ams_rotary_encoder;
 
-    /* Check if the board has a valid config for the rotary encoder. */
-    if (as5048b_rotary_encoder_config.valid != BOARD_CONFIG_VALID_MAGIC) {
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return NULL;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, AS5048B_COMPAT)) {
+        return NULL;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return NULL;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
         return NULL;
     }
 
     /* Instantiate an rotary_encoder obj with as5048b ops */
-    rotary_encoder_obj = instantiate((char *)name, &rotary_encoder_class,
+    rotary_encoder_obj = instantiate(name, &rotary_encoder_class,
                                      &as5048b_ops, struct rotary_encoder);
     if (!rotary_encoder_obj) {
-        return NULL;
+        goto err_free_parent;
     }
 
     /* Connect rotary_encoder to its parent I2C device */
     rotary_encoder = to_rotary_encoder(rotary_encoder_obj);
-    rotary_encoder->device.parent =
-        device_get(as5048b_rotary_encoder_config.parent_name);
+    rotary_encoder->device.parent = device_get(parent);
     if (!rotary_encoder->device.parent) {
         goto err_free_obj;
     }
@@ -236,20 +323,29 @@ static struct obj *as5048b_ctor(const char *name) {
     init_semaphore(&ams_rotary_encoder->lock);
     ams_rotary_encoder->calibration_zero = 0;
 
+    err = fdtparse_get_int(blob, offset, "reg", &ams_rotary_encoder->addr);
+    if (err) {
+        goto err_free_obj;
+    }
+
     /* Export to the OS */
     class_export_member(rotary_encoder_obj);
+
+    free(parent);
 
     return rotary_encoder_obj;
 
 err_free_obj:
     kfree(get_container(rotary_encoder_obj));
+err_free_parent:
+    free(parent);
     return NULL;
 }
 
 static struct semaphore as5048b_driver_sem = INIT_SEMAPHORE;
 
-static struct device_driver as5048b_driver = {
-    .name = "as5048b",
+static struct device_driver as5048b_compat_driver = {
+    .name = AS5048B_COMPAT,
     .probe = as5048b_probe,
     .ctor = as5048b_ctor,
     .class = &rotary_encoder_class,
@@ -257,11 +353,8 @@ static struct device_driver as5048b_driver = {
 };
 
 static int as5048b_register(void) {
-    device_driver_register(&as5048b_driver);
+    device_compat_driver_register(&as5048b_compat_driver);
 
     return 0;
 }
 CORE_INITIALIZER(as5048b_register)
-
-/* Provide a weak, invalid, default config */
-struct as5048b_rotary_encoder_config as5048b_rotary_encoder_config __weak;
