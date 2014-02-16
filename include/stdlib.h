@@ -29,7 +29,8 @@
 void *malloc(size_t size) __attribute__((malloc,section(".kernel")));
 void free(void *address) __attribute__((section(".kernel")));
 void abort(void) __attribute__((section(".kernel")));
-char *strndup(char *str, int n);
+char *strndup(const char *str, int n);
+char *strdup(const char *str);
 int atoi(char buf[]);
 char *itoa(int number, char *buf, uint32_t len, uint32_t base);
 char *uitoa(uint32_t number, char *buf, uint32_t len, uint32_t base);

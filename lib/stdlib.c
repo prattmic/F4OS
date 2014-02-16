@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *strndup(char *str, int n) {
+char *strndup(const char *str, int n) {
     int len = strnlen(str, n);
 
     char *dup = malloc(len+1);  // Room for NULL
@@ -22,6 +22,10 @@ char *strndup(char *str, int n) {
     dup[len] = '\0';
 
     return dup;
+}
+
+char *strdup(const char *str) {
+    return strndup(str, strlen(str));
 }
 
 int atoi(char buf[]) {
