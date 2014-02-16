@@ -11,7 +11,6 @@ config ITG3200_GYRO
     bool "InvenSense ITG-3200 Gyroscope"
     depends on HAVE_I2C
     ---help---
-        InvenSense ITG-3200 Gyroscope driver.  Configured with
-        struct itg3200_gyro_config from board_config.h
+        InvenSense ITG-3200 Gyroscope driver.
 
 endmenu

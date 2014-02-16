@@ -22,7 +22,6 @@
 
 #include <arch/chip/gpio.h>
 #include <dev/hw/led.h>
-#include <board_config.h>
 
 /* GPIO LEDs available - Red, Blue */
 const struct led leds_avail[] = {{STM32F4_GPIO_PB14, 0}, {STM32F4_GPIO_PB15, 0}};

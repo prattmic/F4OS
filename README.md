@@ -314,9 +314,9 @@ In the driver initialization, the driver is added as an accelerometer object,
 gets the object for its parent bus, and gets objects for the GPIOs it will use,
 and configures those.
 
-Currently, all board-specific driver configuration (parent bus names, chip
-select GPIOs, etc) is done via board configuration structs defined in
-`include/board_config.h`, and implemented for each board.
+Board/chip physical configurations and interconnects are described by the
+configured device tree source file.  The DTS file to use for a given build
+is configured with `CONFIG_DEVICE_TREE`.
 
 ### Chip and Architecture Ports
 
