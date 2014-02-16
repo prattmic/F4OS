@@ -20,19 +20,28 @@
  * SOFTWARE.
  */
 
-#include <board_config.h>
+#include <libfdt.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <dev/fdtparse.h>
 #include <dev/hw/i2c.h>
 #include <dev/gyro.h>
 #include <kernel/init.h>
 #include <kernel/semaphore.h>
 #include <mm/mm.h>
 
-#define ITG3200_ADDR    0x68    /* I2C address */
+#define ITG3200_COMPAT  "invensense,itg3200"
+
+#define ITG3200_WHOAMI      0x0     /* Who Am I register */
+/* Who Am I register value (bits 6:1 defined) */
+#define ITG3200_WHOAMI_VAL  0x68
+
 #define ITG3200_XOUT_H  0x1D    /* X output high data register */
 #define ITG3200_GAIN    14.375  /* LSB/(deg/s) */
 
 struct itg3200 {
     uint8_t             ready;
+    int                 addr;
     struct semaphore    lock;
 };
 
@@ -47,7 +56,7 @@ static int itg3200_init(struct gyro *gyro) {
 
     packet[0] = 0x3E;   /* Power Management Register */
     packet[1] = 0x01;   /* Clock PLL with X gyro reference */
-    ret = i2c_ops->write(i2c, ITG3200_ADDR, packet, 2);
+    ret = i2c_ops->write(i2c, itg_gyro->addr, packet, 2);
     if (ret != 2) {
         goto err;
     }
@@ -55,7 +64,7 @@ static int itg3200_init(struct gyro *gyro) {
     packet[0] = 0x15;   /* Sample Rate Divider Register */
     packet[1] = 0x07;   /* Sample rate = 1kHz / (7 + 1) = 125Hz */
     packet[2] = 0x18;   /* (Full Scale Register) Gyro full-scale range */
-    ret = i2c_ops->write(i2c, ITG3200_ADDR, packet, 3);
+    ret = i2c_ops->write(i2c, itg_gyro->addr, packet, 3);
     if (ret != 3) {
         goto err;
     }
@@ -84,7 +93,7 @@ static int itg3200_deinit(struct gyro *gyro) {
 
     packet[0] = 0x3E;   /* Power Management Register */
     packet[1] = 0x40;   /* Sleep mode */
-    ret = i2c_ops->write(i2c, ITG3200_ADDR, packet, 2);
+    ret = i2c_ops->write(i2c, itg_gyro->addr, packet, 2);
 
     release(&itg_gyro->lock);
 
@@ -111,13 +120,13 @@ static int itg3200_get_raw_data(struct gyro *gyro, struct gyro_raw_data *data) {
 
     /* Start reading from XOUT_H */
     raw_data[0] = ITG3200_XOUT_H;
-    ret = i2c_ops->write(i2c, ITG3200_ADDR, raw_data, 1);
+    ret = i2c_ops->write(i2c, itg_gyro->addr, raw_data, 1);
     if (ret != 1) {
         goto out_err;
     }
 
     /* Read the six data registers */
-    ret = i2c_ops->read(i2c, ITG3200_ADDR, raw_data, 6);
+    ret = i2c_ops->read(i2c, itg_gyro->addr, raw_data, 6);
     if (ret != 6) {
         goto out_err;
     }
@@ -159,30 +168,112 @@ struct gyro_ops itg3200_ops = {
     .get_raw_data = itg3200_get_raw_data,
 };
 
+/* Verify contents of WHOAMI register */
 static int itg3200_probe(const char *name) {
-    /* Check if the board has a valid config for the gyronetometer. */
-    return itg3200_gyro_config.valid == BOARD_CONFIG_VALID_MAGIC;
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, addr, err;
+    char *parent;
+    struct obj *i2c_obj;
+    struct i2c *i2c;
+    struct i2c_ops *i2c_ops;
+    uint8_t data;
+    int ret = 0;
+
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return 0;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, ITG3200_COMPAT)) {
+        return 0;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return 0;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
+        return 0;
+    }
+
+    i2c_obj = device_get(parent);
+    if (!i2c_obj) {
+        goto out_free_parent;
+    }
+
+    i2c = to_i2c(i2c_obj);
+    i2c_ops = (struct i2c_ops *)i2c->obj.ops;
+
+    err = fdtparse_get_int(blob, offset, "reg", &addr);
+    if (err) {
+        goto out;
+    }
+
+    /* Attempt read of WHOAMI register */
+    data = ITG3200_WHOAMI;
+    err = i2c_ops->write(i2c, addr, &data, 1);
+    if (err != 1) {
+        ret = 0;
+        goto out;
+    }
+
+    err = i2c_ops->read(i2c, addr, &data, 1);
+    if (err != 1) {
+        ret = 0;
+        goto out;
+    }
+
+    /*
+     * The WHOAMI register contains bits 6:1 of the I2C device address.
+     * Verify it matches the value from the datasheet.
+     */
+    ret = (data & 0x7e) == ITG3200_WHOAMI_VAL;
+
+out:
+    device_put(i2c_obj);
+out_free_parent:
+    free(parent);
+    return ret;
 }
 
 static struct obj *itg3200_ctor(const char *name) {
+    const void *blob = fdtparse_get_blob();
+    int offset, parent_offset, err;
+    char *parent;
     struct obj *gyro_obj;
     struct gyro *gyro;
     struct itg3200 *itg_gyro;
 
-    /* Check if the board has a valid config for the gyronetometer. */
-    if (itg3200_gyro_config.valid != BOARD_CONFIG_VALID_MAGIC) {
+    offset = fdt_path_offset(blob, name);
+    if (offset < 0) {
+        return NULL;
+    }
+
+    if (fdt_node_check_compatible(blob, offset, ITG3200_COMPAT)) {
+        return NULL;
+    }
+
+    parent_offset = fdt_parent_offset(blob, offset);
+    if (parent_offset < 0) {
+        return NULL;
+    }
+
+    parent = fdtparse_get_path(blob, parent_offset);
+    if (!parent) {
         return NULL;
     }
 
     /* Instantiate an gyro obj with itg3200 ops */
-    gyro_obj = instantiate((char *)name, &gyro_class, &itg3200_ops, struct gyro);
+    gyro_obj = instantiate(name, &gyro_class, &itg3200_ops, struct gyro);
     if (!gyro_obj) {
-        return NULL;
+        goto err_free_parent;
     }
 
     /* Connect gyro to its parent I2C device */
     gyro = to_gyro(gyro_obj);
-    gyro->device.parent = device_get(itg3200_gyro_config.parent_name);
+    gyro->device.parent = device_get(parent);
     if (!gyro->device.parent) {
         goto err_free_obj;
     }
@@ -197,20 +288,31 @@ static struct obj *itg3200_ctor(const char *name) {
     itg_gyro->ready = 0;
     init_semaphore(&itg_gyro->lock);
 
+    err = fdtparse_get_int(blob, offset, "reg", &itg_gyro->addr);
+    if (err) {
+        goto err_free_priv;
+    }
+
     /* Export to the OS */
     class_export_member(gyro_obj);
 
+    free(parent);
+
     return gyro_obj;
 
+err_free_priv:
+    kfree(gyro->priv);
 err_free_obj:
     kfree(get_container(gyro_obj));
+err_free_parent:
+    free(parent);
     return NULL;
 }
 
 static struct semaphore itg3200_driver_sem = INIT_SEMAPHORE;
 
-static struct device_driver itg3200_driver = {
-    .name = "itg3200",
+static struct device_driver itg3200_compat_driver = {
+    .name = ITG3200_COMPAT,
     .probe = itg3200_probe,
     .ctor = itg3200_ctor,
     .class = &gyro_class,
@@ -218,7 +320,7 @@ static struct device_driver itg3200_driver = {
 };
 
 static int itg3200_register(void) {
-    device_driver_register(&itg3200_driver);
+    device_compat_driver_register(&itg3200_compat_driver);
 
     return 0;
 }

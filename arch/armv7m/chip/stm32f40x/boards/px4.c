@@ -24,9 +24,6 @@
 #include <dev/hw/led.h>
 #include <board_config.h>
 
-/* There is no itg3200, so config is empty */
-struct itg3200_gyro_config itg3200_gyro_config;
-
 struct mpu6000_spi_config mpu6000_spi_config = {
     .valid = BOARD_CONFIG_VALID_MAGIC,
     .parent_name = "spi1",

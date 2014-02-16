@@ -29,13 +29,6 @@
 
 #define BOARD_CONFIG_VALID_MAGIC 0xdeb1afea
 
-struct itg3200_gyro_config {
-    uint32_t valid;
-    char *parent_name;
-};
-
-extern struct itg3200_gyro_config itg3200_gyro_config;
-
 struct mpu6000_spi_config {
     uint32_t valid;
     char *parent_name;
