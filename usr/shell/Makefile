@@ -8,6 +8,7 @@ SRCS += getchar.c
 SRCS += shared_deq_test.c
 SRCS += list_test.c
 SRCS += system_ctl.c
+SRCS += panic.c
 
 SRCS_$(CONFIG_ACCELEROMETERS) += accel.c
 SRCS_$(CONFIG_BAROMETERS) += baro.c
