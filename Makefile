@@ -78,6 +78,7 @@ ifneq ($(V), 1)
 endif
 
 CC = $(CROSS_COMPILE)gcc
+CPP = $(CROSS_COMPILE)cpp
 LD = $(CROSS_COMPILE)ld
 OBJCOPY = $(CROSS_COMPILE)objcopy
 
@@ -207,7 +208,7 @@ $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/link.ld
 # Preprocess the linker script
 $(PREFIX)/link.ld : $(LINK_SCRIPT)
 	$(call print_command,"CPP",$(call relative_path,$<))
-	$(VERBOSE)cpp -MD -MT $@ $(CPPFLAGS) $< -o $@
+	$(VERBOSE)$(CPP) -MD -MT $@ $(CPPFLAGS) $< -o $@
 
 # Include linker script dependencies
 -include $(PREFIX)/link.d
