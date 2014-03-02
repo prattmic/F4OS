@@ -21,7 +21,7 @@ SRCS_$(CONFIG_PWM_CLASS) += pwm.c
 # Date and rev for uname
 DATE := "$(shell date -u)"
 SHA := $(shell git log HEAD -n 1 --format='%h')
-DIRTY := $(shell git status --porcelain | wc -c)
+DIRTY := $(strip $(shell git status --porcelain | wc -c))
 CFLAGS += -D BUILD_TIME='$(DATE)' -D BUILD_SHA='"$(SHA)"' -D BUILD_DIRTY=$(DIRTY)
 
 include $(BASE)/tools/submake.mk
