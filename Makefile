@@ -1,9 +1,16 @@
 # all the files will be generated with this name (main.elf, main.bin, main.hex, etc)
 PROJ_NAME=f4os
 
+# Use greadlink if on Mac OS X
+READLINK := readlink
+UNAME := $(shell uname -s)
+ifeq ($(UNAME), Darwin)
+READLINK := greadlink
+endif
+
 # Project base
 # Use readlink to ensure path is canonical
-BASE := $(shell readlink -f $(CURDIR))
+BASE := $(shell $(READLINK) -f $(CURDIR))
 # Output directory
 PREFIX := $(BASE)/out
 
