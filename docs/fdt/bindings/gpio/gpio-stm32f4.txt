@@ -1,0 +1,10 @@
+GPIO for STM32F4 chips
+
+Required properties:
+    - compatible: Must be "stmicro,stm32f407-gpio"
+
+When referencing GPIOs in a GPIO property, the valid GPIO numbers can be found
+in arch/armv7m/chip/stm32f40x/include/gpio.h in enum stm32f4_gpios.
+
+Only the standard FDT GPIO flags are supported.  These are documented in
+gpio-prop.txt.

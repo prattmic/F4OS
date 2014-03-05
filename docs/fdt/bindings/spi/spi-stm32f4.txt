@@ -1,0 +1,34 @@
+SPI for STM32F4 chips
+
+Required properties:
+    - compatible: Must be "stmicro,stm32f407-spi"
+    - reg: register base address and register map size
+    - spi,sck-gpio: GPIO property for the SCK GPIO
+    - spi,miso-gpio: GPIO property for the MISO GPIO
+    - spi,mosi-gpio: GPIO property for the MOSI GPIO
+    - stmicro,periph-id: STM32F4 Peripheral ID associated with the bus
+    - #address-cells = <1>;
+    - #size-cells = <0>;
+
+Optional properties:
+    - Child nodes describing devices on the bus,
+      conforming to the SPI bus bindings
+
+Example:
+
+spi1: spi@40013000 {
+    #address-cells = <1>;
+    #size-cells = <0>;
+    compatible = "stmicro,stm32f407-spi";
+    reg = <0x40013000 0x20>;
+    spi,sck-gpio = <&gpio 5 0>;     /* PA5 */
+    spi,miso-gpio = <&gpio 6 0>;    /* PA6 */
+    spi,mosi-gpio = <&gpio 7 0>;    /* PA7 */
+    stmicro,periph-id = <23>;       /* STM32F4_PERIPH_SPI1 */
+
+    lis302dl@0 {
+        compatible = "stmicro,lis302dl";
+        reg = <0>;
+        cs-gpio = <&gpio 67 0>;  /* PE3 */
+    };
+};

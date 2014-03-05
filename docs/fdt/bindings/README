@@ -1,0 +1,7 @@
+This directory contains device tree bindings for F4OS.
+
+Bindings are split into subdirectories based on category, and describe
+the required and optional properties for the different bindings.
+
+General documentation for devicetree can be found at:
+http://www.devicetree.org

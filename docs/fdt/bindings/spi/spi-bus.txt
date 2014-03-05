@@ -1,0 +1,6 @@
+SPI Bus Bindings
+
+Binding for devices on a SPI bus
+
+Required properties:
+    - cs-gpio:  GPIO property describing the CS GPIO

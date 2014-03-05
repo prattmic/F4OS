@@ -1,0 +1,14 @@
+Invensense MPU6000 bindings
+
+Required properties:
+    - compatible: must be either "invensense,mpu6000-spi" or
+      "invensense,mpu6000-i2c" (currently unsupported)
+
+The MPU6000 may either be on an I2C or SPI bus, and should conform to
+the appropriate bus bindings.
+
+Options properties:
+    - "accel" node, with compatible = "invensense,mpu6000-accel" to indicate
+      accelerometer support.
+    - "gyro" node, with compatible = "invensense,mpu6000-gyro" to indicate
+      gyroscope support.

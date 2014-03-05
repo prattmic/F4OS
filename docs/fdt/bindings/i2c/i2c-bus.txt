@@ -1,0 +1,6 @@
+I2C Bus Bindings
+
+Binding for devices on an I2C bus
+
+Required properties:
+    - reg: I2C device address on the bus

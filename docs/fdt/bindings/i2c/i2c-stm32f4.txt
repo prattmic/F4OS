@@ -1,0 +1,31 @@
+I2C for STM32F4 chips
+
+Required properties:
+    - compatible: Must be "stmicro,stm32f407-i2c"
+    - reg: register base address and register map size
+    - i2c,scl-gpio: GPIO property for the SCL GPIO
+    - i2c,sda-gpio: GPIO property for the SDA GPIO
+    - stmicro,periph-id: STM32F4 Peripheral ID of the bus peripheral
+    - #address-cells = <1>;
+    - #size-cells = <0>;
+
+Optional properties:
+    - Child nodes describing devices on the bus,
+      conforming to the I2C bus bindings
+
+Example:
+
+i2c1: i2c@40005400 {
+    #address-cells = <1>;
+    #size-cells = <0>;
+    compatible = "stmicro,stm32f407-i2c";
+    reg = <0x40005400 0x24>;
+    i2c,scl-gpio = <&gpio 24 0>;    /* PB8 */
+    i2c,sda-gpio = <&gpio 25 0>;    /* PB9 */
+    stmicro,periph-id = <26>;       /* STM32F4_PERIPH_I2C1 */
+
+    hmc5883l@1E {
+        compatible = "honeywell,hmc5883l", "honeywell,hmc5883";
+        reg = <0x1E>;
+    };
+};

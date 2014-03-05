@@ -1,0 +1,9 @@
+GPIO property bindings
+
+When referencing a GPIO, the GPIO property consists of three cells:
+    - phandle to GPIO device controlling the GPIO
+    - GPIO number on the device
+    - GPIO flags, defined below and by the GPIO device
+
+Global valid GPIO flags are found in include/dev/hw/gpio.h:
+    - GPIO_FDT_ACTIVE_LOW (1 << 0): GPIO is active low
