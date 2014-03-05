@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,13 +26,14 @@
 #include <dev/accel.h>
 #include <kernel/obj.h>
 #include <math.h>
+#include "device_lookup.h"
 #include "app.h"
 
 void accel(int argc, char **argv) {
     const char *driver;
 
     if (argc != 1 && argc != 2) {
-        printf("Usage: %s [driver]\r\n", argv[0]);
+        printf("Usage: %s [device]\r\n", argv[0]);
         return;
     }
 
@@ -40,26 +41,8 @@ void accel(int argc, char **argv) {
         driver = argv[1];
     }
     else {
-        int total;
-
-        /* Hopefully, there is only one accelerometer driver */
-        total = device_list_class(&accel_class, &driver, 1);
-        if (total < 1) {
-            printf("Error: No accelerometer drivers found.\r\n");
-            return;
-        }
-        else if (total > 1) {
-            const char *names[total];
-            /* Now, get all of the drivers */
-            total = device_list_class(&accel_class, names, total);
-
-            printf("Multiple accelerometer drivers found:\r\n");
-            for (int i = 0; i < total; i++) {
-                printf("* %s\r\n", names[i]);
-            }
-
-            printf("Please specify a driver as an argument\r\n");
-
+        driver = device_auto_lookup(&accel_class);
+        if (!driver) {
             return;
         }
     }

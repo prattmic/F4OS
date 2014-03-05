@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,15 +24,30 @@
 #include <dev/device.h>
 #include <dev/mag.h>
 #include <kernel/obj.h>
+#include "device_lookup.h"
 #include "app.h"
 
 void mag(int argc, char **argv) {
-    if (argc != 1) {
-        printf("Usage: %s\r\n", argv[0]);
+    const char *driver;
+
+    if (argc != 1 && argc != 2) {
+        printf("Usage: %s [device]\r\n", argv[0]);
         return;
     }
 
-    struct obj *o = device_get("hmc5883");
+    if (argc == 2) {
+        driver = argv[1];
+    }
+    else {
+        driver = device_auto_lookup(&mag_class);
+        if (!driver) {
+            return;
+        }
+    }
+
+    printf("Connecting to magnetometer '%s'\r\n", driver);
+
+    struct obj *o = device_get(driver);
     if (!o) {
         printf("Error: unable to find magnetometer.\r\n");
         return;
