@@ -4,8 +4,9 @@
     #address-cells = <1>;
     #size-cells = <1>;
 
-    /* For now, define a generic gpio device for the gpio phandle */
-    gpio: gpio {};
+    gpio: gpio {
+        compatible = "stmicro,stm32f407-gpio";
+    };
 
     spi1: spi@40013000 {
         #address-cells = <1>;
