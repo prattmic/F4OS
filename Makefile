@@ -116,7 +116,7 @@ include $(BASE)/tools/common.mk
 
 ###################################################
 
-.PHONY: proj unoptimized ctags cscope .FORCE
+.PHONY: proj unoptimized binary burn ctags cscope .FORCE
 
 ifeq ($(DISALLOW_BUILD),)
 all: CFLAGS += -O2
@@ -125,11 +125,15 @@ all: $(PREFIX) proj
 unoptimized: CFLAGS += -O0
 unoptimized: $(PREFIX) proj
 
-proj: $(PREFIX)/$(PROJ_NAME).elf $(PREFIX)/$(PROJ_NAME).bin
+proj: binary
 else
 all unoptimized proj:
 	$(error $(DISALLOW_BUILD))
 endif
+
+# Binary for flashing
+binary: $(KCONFIG_HEADER) $(PREFIX)/$(PROJ_NAME).elf
+	$(VERBOSE)$(MAKE) -C arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/ binary
 
 # Flash the board
 burn: $(KCONFIG_HEADER)
@@ -217,14 +221,6 @@ $(PREFIX)/$(PROJ_NAME).o: $(KCONFIG_HEADER) $(PREFIX)/include .FORCE
 $(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/link.ld $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/device_tree.o
 	$(call print_command,"LD",$(call relative_path,$@))
 	$(VERBOSE)$(CC) $(filter-out $<,$^) -o $@ $(CFLAGS) -T $< $(patsubst %,-Xlinker %,$(LFLAGS))
-
-%.hex: %.elf
-	$(call print_command,"OBJCOPY",$(call relative_path,$@))
-	$(VERBOSE)$(OBJCOPY) -O ihex $< $@
-
-%.bin: %.elf
-	$(call print_command,"OBJCOPY",$(call relative_path,$@))
-	$(VERBOSE)$(OBJCOPY) -O binary $< $@
 
 # Preprocess the linker script
 $(PREFIX)/link.ld : $(LINK_SCRIPT)

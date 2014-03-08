@@ -14,6 +14,14 @@ $(obj_prefix)%.o : %.c $(KCONFIG_HEADER)
 	$(call print_command,"CC","$(RELATIVE_CURDIR)/$<")
 	$(VERBOSE)$(CC) -MD -c $(CFLAGS) $< -o $@
 
+%.hex: %.elf
+	$(call print_command,"OBJCOPY",$(call relative_path,$@))
+	$(VERBOSE)$(OBJCOPY) -O ihex $< $@
+
+%.bin: %.elf
+	$(call print_command,"OBJCOPY",$(call relative_path,$@))
+	$(VERBOSE)$(OBJCOPY) -O binary $< $@
+
 -include $(addprefix $(obj_prefix), $(SRCS:.S=.d))
 -include $(addprefix $(obj_prefix), $(SRCS:.c=.d))
 
