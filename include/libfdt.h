@@ -51,7 +51,7 @@
  *     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <arch/libfdt_env.h>
+#include <libfdt_env.h>
 #include <fdt.h>
 
 #define FDT_FIRST_SUPPORTED_VERSION	0x10
