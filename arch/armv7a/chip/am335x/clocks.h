@@ -209,6 +209,13 @@ enum dpll_en_modes {
     DPLL_LOCK_MODE,
 };
 
+/* Clock module module modes */
+enum cm_module_modes {
+    CM_MODULEMODE_DISABLED = 0,
+    CM_MODULEMODE_ENABLED = 0x2,
+    CM_MODULEMODE = 0x3,
+};
+
 #define CM_IDLEST_ST_MN_BYPASS_MASK     (1 << 8)    /* DPLL in MN Bypass */
 #define CM_IDLEST_ST_DPLL_CLK_LOCK      (1 << 0)    /* DPLL in Locked */
 
