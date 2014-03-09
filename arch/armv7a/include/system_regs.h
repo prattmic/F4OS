@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,28 +20,20 @@
  * SOFTWARE.
  */
 
-#include <compiler.h>
-#include <kernel/sched.h>
-#include <kernel/sched_internals.h>
-#include "sched_internals.h"
+#ifndef ARCH_SYSTEM_REGS_H_INCLUDED
+#define ARCH_SYSTEM_REGS_H_INCLUDED
 
-volatile uint8_t task_switching = 0;
-task_t * volatile curr_task;
+#define CPSR_MODE       (0x1f)  /* CPSR processor mode mask */
+#define CPSR_MODE_USR   (0x10)  /* User mode */
+#define CPSR_MODE_FIQ   (0x11)  /* FIQ mode */
+#define CPSR_MODE_IRQ   (0x12)  /* IRQ mode */
+#define CPSR_MODE_SVC   (0x13)  /* SVC mode */
+#define CPSR_MODE_MON   (0x16)  /* Monitor mode */
+#define CPSR_MODE_ABT   (0x17)  /* Abort mode */
+#define CPSR_MODE_HYP   (0x1A)  /* Hypervisor mode */
+#define CPSR_MODE_UND   (0x1B)  /* Undefined mode */
+#define CPSR_MODE_SYS   (0x1F)  /* System mode */
 
-void start_sched(void) {
-    /* Set up initial tasks */
-    new_task(&kernel_task, 10, 4);
-    new_task(&sleep_task, 0, 0);
+#define CPSR_THUMB      (0x20)  /* Thumb execution state */
 
-    /* Setup boot tasks specified by end user. */
-    main();
-
-    /* Perform last minute arch setup */
-    arch_sched_start_bootstrap();
-
-    /* Switch to first task */
-    task_switch(NULL);
-}
-
-/* By default, do nothing */
-void __weak arch_sched_start_bootstrap(void) {}
+#endif

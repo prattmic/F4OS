@@ -23,24 +23,62 @@
 #include <stddef.h>
 #include <kernel/sched.h>
 #include <kernel/sched_internals.h>
+#include <arch/system_regs.h>
 
-uint32_t *get_user_stack_pointer(void) {
-    /* TODO */
-    return NULL;
-}
-
-void set_user_stack_pointer(uint32_t *stack_addr) {
-    /* TODO */
-}
-
-void sched_svc_yield(void) {
-    /* TODO */
-}
-
+/*
+ * Create context in format defined by save_context
+ */
 void create_context(task_ctrl* task, void (*lptr)(void)) {
-    /* TODO */
+    /* AAPCS requires an 8-byte aligned SP */
+    uintptr_t stack = (uintptr_t) task->stack_top;
+    stack -= stack % 8;
+    task->stack_top = (uint32_t *) stack;
+
+    /* This runs in user mode, obviously */
+    uint32_t cpsr = CPSR_MODE_USR;
+
+    /* Set Thumb bit if address is a Thumb address */
+    if (((uintptr_t) task->fptr) & 1) {
+        cpsr |= CPSR_THUMB;
+    }
+
+    asm volatile("stmdb   %[stack]!, {%[pc]}    /* PC */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R12 */  \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R11 */  \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R10 */  \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R9 */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R8 */   \n\
+                  stmdb   %[stack]!, {%[frame]} /* R7 */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R6 */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R5 */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R4 */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R3 */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R2 */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R1 */   \n\
+                  stmdb   %[stack]!, {%[zero]}  /* R0 */   \n\
+                  stmdb   %[stack]!, {%[cpsr]}  /* CPSR */ \n\
+                  stmdb   %[stack]!, {%[lr]}    /* LR */   \n"
+                  /* Output */
+                  :[stack] "+r" (task->stack_top)
+                  /* Input */
+                  :[pc] "r" (task->fptr), [lr] "r" (lptr),
+                   [frame] "r" (task->stack_limit), [zero] "r" (0),
+                   [cpsr] "r" (cpsr)
+                  /* Clobber */
+                  :);
 }
 
-void restore_full_context(void) {
-    /* TODO */
+/* Switch into user mode in perparation for task switching */
+void arch_sched_start_bootstrap(void) {
+    /*
+     * Take the SP and LR along with us as we go into user mode,
+     * to ensure we can return and continue execution as normal.
+     */
+    asm volatile("mov   r0, sp  \n\
+                  mov   r1, lr  \n\
+                  cps   %[mode] \n\
+                  mov   lr, r1  \n\
+                  mov   sp, r0  \n"
+                 ::[mode] "I" (CPSR_MODE_USR)
+                 : "r0", "r1");
 }

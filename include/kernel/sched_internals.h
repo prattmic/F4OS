@@ -139,4 +139,15 @@ void set_user_stack_pointer(uint32_t *stack_addr);
  */
 void create_context(task_ctrl *task, void (*lptr)(void));
 
+/**
+ * Perpare arch for task switching
+ *
+ * Perform very last minute arch changes for task switching.
+ *
+ * Called immediately before task_switch() when starting the scheduler.
+ *
+ * May be left undefined.  A no-op weak version will be provided.
+ */
+void arch_sched_start_bootstrap(void);
+
 #endif

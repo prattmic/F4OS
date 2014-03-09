@@ -23,15 +23,58 @@
 #ifndef ARCH_SVC_H_INCLUDED
 #define ARCH_SVC_H_INCLUDED
 
-/* SVC not yet supported */
+#include <stdint.h>
+#include <arch/system_regs.h>
 
-/* Return -1 */
-#define SVC(call)   ({ -1; })
-#define SVC_ARG(call, arg)  SVC(call)
-#define SVC_ARG2(call, arg1, arg2)  SVC(call)
+/*
+ * We need to make sure that we get the return value
+ * without screwing up r0, since GCC doesn't understand that
+ * SVC has a return value.
+ *
+ * Save the LR to prevent clobbering it with reentrant SVC calls.
+ */
+#define SVC(call)  ({ \
+    uint32_t ret = 0;   \
+    asm volatile ("push {lr}     \n"    \
+                  "svc  %[code]  \n"    \
+                  "pop  {lr}     \n"    \
+                  "mov  %[ret], r0  \n" \
+                  :[ret] "+r" (ret)     \
+                  :[code] "I" (call)    \
+                  :"r0");               \
+    ret;    \
+})
 
+#define SVC_ARG(call, arg)  ({ \
+    uint32_t ret = 0;   \
+    asm volatile ("mov  r0, %[ar]  \n"  \
+                  "push {lr}     \n"    \
+                  "svc  %[code]  \n"    \
+                  "pop  {lr}     \n"    \
+                  "mov  %[ret], r0  \n" \
+                  :[ret] "+r" (ret)     \
+                  :[code] "I" (call), [ar] "r" (arg)     \
+                  :"r0");               \
+    ret;    \
+})
+
+#define SVC_ARG2(call, arg1, arg2)  ({ \
+    uint32_t ret = 0;   \
+    asm volatile ("mov  r0, %[ar1]  \n"  \
+                  "mov  r1, %[ar2]  \n"  \
+                  "push {lr}     \n"    \
+                  "svc  %[code]  \n"    \
+                  "pop  {lr}     \n"    \
+                  "mov  %[ret], r0  \n" \
+                  :[ret] "+r" (ret)     \
+                  :[code] "I" (call), [ar1] "r" (arg1), [ar2] "r" (arg2)     \
+                  :"r0", "r1");               \
+    ret;    \
+})
+
+/* SVC is always valid */
 static inline int arch_svc_legal(void) {
-    return 0;   /* No. */
+    return 1;
 }
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,28 +20,25 @@
  * SOFTWARE.
  */
 
-#include <compiler.h>
-#include <kernel/sched.h>
-#include <kernel/sched_internals.h>
-#include "sched_internals.h"
+#ifndef ARCH_ARMV7A_KERNEL_SCHED_ASM_H_INCLUDED
+#define ARCH_ARMV7A_KERNEL_SCHED_ASM_H_INCLUDED
 
-volatile uint8_t task_switching = 0;
-task_t * volatile curr_task;
+struct stacked_registers {
+    uint32_t cpsr;
+    uint32_t r0;
+    uint32_t r1;
+    uint32_t r2;
+    uint32_t r3;
+    uint32_t r4;
+    uint32_t r5;
+    uint32_t r6;
+    uint32_t r7;
+    uint32_t r8;
+    uint32_t r9;
+    uint32_t r10;
+    uint32_t r11;
+    uint32_t r12;
+    uint32_t pc;    /* Address of instruction following SVC */
+};
 
-void start_sched(void) {
-    /* Set up initial tasks */
-    new_task(&kernel_task, 10, 4);
-    new_task(&sleep_task, 0, 0);
-
-    /* Setup boot tasks specified by end user. */
-    main();
-
-    /* Perform last minute arch setup */
-    arch_sched_start_bootstrap();
-
-    /* Switch to first task */
-    task_switch(NULL);
-}
-
-/* By default, do nothing */
-void __weak arch_sched_start_bootstrap(void) {}
+#endif

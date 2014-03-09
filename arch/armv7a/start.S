@@ -29,7 +29,7 @@ _start:
 _vectors:
     b       _reset
     b       _undefined_instruction
-    b       _software_interrupt
+    b       _service_call
     b       _prefetch_abort
     b       _data_abort
     b       _hypervisor_mode
@@ -104,40 +104,45 @@ initialize_sp:
     cps     #CPSR_MODE_SVC
     bx      lr
 
-_software_interrupt:
-    b       .
+_service_call:
+    /* Address of instruction after SVC, pass to save_context on stack */
+    push    {lr}
+    bl      save_context    /* Puts pointer to registers in r0 */
+    bl      svc_handler
+    bl      restore_context
+    pop     {lr}
+
+    subs    pc, lr, #0
 
 _irq:
-    /* Save all non-banked registers, lr, and spsr */
-    stmfd   sp!, {r0-r12, lr}
-    mrs     r0, spsr
-    stmfd   sp!, {r0}
-
+    /*
+     * LR contains address of instruction AFTER the preempted one.
+     * Subtract 4 to get preempted instruction, and pass to
+     * save_context on stack.
+     */
+    sub     lr, lr, #4
+    push    {lr}
+    bl      save_context
     bl      irq_handler
+    bl      restore_context
+    pop     {lr}
 
-    /* Restore registers */
-    ldmfd   sp!, {r0}
-    msr     spsr, r0
-    ldmfd   sp!, {r0-r12, lr}
-
-    /* Return */
-    subs    pc, lr, #4
+    subs    pc, lr, #0
 
 _fiq:
-    /* Save all non-banked registers, lr, and spsr */
-    stmfd   sp!, {r0-r7, lr}
-    mrs     r0, spsr
-    stmfd   sp!, {r0}
-
+    /*
+     * LR contains address of instruction AFTER the preempted one.
+     * Subtract 4 to get preempted instruction, and pass to
+     * save_context on stack.
+     */
+    sub     lr, lr, #4
+    push    {lr}
+    bl      save_context
     bl      fiq_handler
+    bl      restore_context
+    pop     {lr}
 
-    /* Restore registers */
-    ldmfd   sp!, {r0}
-    msr     spsr, r0
-    ldmfd   sp!, {r0-r7, lr}
-
-    /* Return */
-    subs    pc, lr, #4
+    subs    pc, lr, #0
 
 _undefined_instruction:
     b       undefined_instruction
