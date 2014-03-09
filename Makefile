@@ -197,7 +197,10 @@ $(PREFIX)/include: $(PREFIX) $(KCONFIG_HEADER) .FORCE
 
 $(PREFIX)/device_tree.dtb: $(BASE)/$(CONFIG_DEVICE_TREE)
 	$(call print_command,"DTC",$(call relative_path,$@))
-	$(VERBOSE)dtc -I dts -O dtb $< > $@
+	$(VERBOSE)dtc -I dts -O dtb -d $(PREFIX)/device_tree.d -o $@ $<
+
+# Include device tree dependencies
+-include $(PREFIX)/device_tree.d
 
 # Generate an assembly file to include the dtb in the correct section,
 # and build that into an object file.
