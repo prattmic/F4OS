@@ -10,4 +10,150 @@
         interrupt-controller;
         #interrupt-cells = <1>;
     };
+
+    /* The AM33xx is interconnected through a 2-level architecture */
+    l3 {
+        compatible = "simple-bus";
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+
+        /* Fast clock domain */
+        l3f {
+            compatible = "simple-bus";
+            #address-cells = <1>;
+            #size-cells = <1>;
+            ranges;
+        };
+
+        /* Slow clock domain */
+        l3s {
+            compatible = "simple-bus";
+            #address-cells = <1>;
+            #size-cells = <1>;
+            ranges;
+
+            /* L4 standard peripherals */
+            l4_per {
+                compatible = "simple-bus";
+                #address-cells = <1>;
+                #size-cells = <1>;
+                ranges;
+            };
+
+            /* L4 high speed peripherals */
+            l4_fast {
+                compatible = "simple-bus";
+                #address-cells = <1>;
+                #size-cells = <1>;
+                ranges;
+            };
+
+            /* L4 wakeup peripherals */
+            l4_wkup {
+                compatible = "simple-bus";
+                #address-cells = <1>;
+                #size-cells = <1>;
+                ranges;
+                clocks = <&cmwkup 0xc>;
+
+                prcm: prcm@44e00000 {
+                    compatible = "ti,am33xx-prcm";
+                    regs = <0x44e00000 0x1300>;
+                    #address-cells = <1>;
+                    #size-cells = <1>;
+                    ranges;
+                    #clock-cells = <1>;
+
+                    cmper: cmper@44e00000 {
+                        compatible = "ti,am33xx-prcm-cmper";
+                        regs = <0x44e00000 0x100>;
+                        #clock-cells = <1>;
+                    };
+
+                    cmwkup: cmwkup@44e00400 {
+                        compatible = "ti,am33xx-prcm-cmwkup";
+                        regs = <0x44e00400 0x100>;
+                        #clock-cells = <1>;
+                    };
+
+                    cmdpll: cmdpll@44e00500 {
+                        compatible = "ti,am33xx-prcm-cmdpll";
+                        regs = <0x44e00500 0x100>;
+                        #clock-cells = <1>;
+                    };
+
+                    cmmpu: cmmpu@44e00600 {
+                        compatible = "ti,am33xx-prcm-cmmpu";
+                        regs = <0x44e00600 0x100>;
+                        #clock-cells = <1>;
+                    };
+
+                    cmdevice: cmdevice@44e00700 {
+                        compatible = "ti,am33xx-prcm-cmdevice";
+                        regs = <0x44e00700 0x100>;
+                        #clock-cells = <1>;
+                    };
+
+                    cmrtc: cmrtc@44e00800 {
+                        compatible = "ti,am33xx-prcm-cmrtc";
+                        regs = <0x44e00800 0x100>;
+                        #clock-cells = <1>;
+                    };
+
+                    cmgfx: cmgfx@44e00900 {
+                        compatible = "ti,am33xx-prcm-cmgfx";
+                        regs = <0x44e00900 0x100>;
+                        #clock-cells = <1>;
+                    };
+
+                    cmcefuse: cmcefuse@44e00a00 {
+                        compatible = "ti,am33xx-prcm-cmcefuse";
+                        regs = <0x44e00a00 0x100>;
+                        #clock-cells = <1>;
+                    };
+
+                    prmirq: prmirq@44e00b00 {
+                        compatible = "ti,am33xx-prprm-prmirq";
+                        regs = <0x44e00b00 0x100>;
+                    };
+
+                    prmper: prmper@44e00c00 {
+                        compatible = "ti,am33xx-prprm-prmper";
+                        regs = <0x44e00c00 0x100>;
+                    };
+
+                    prmwkup: prmwkup@44e00d00 {
+                        compatible = "ti,am33xx-prprm-prmwkup";
+                        regs = <0x44e00d00 0x100>;
+                    };
+
+                    prmmpu: prmmpu@44e00e00 {
+                        compatible = "ti,am33xx-prprm-prmmpu";
+                        regs = <0x44e00e00 0x100>;
+                    };
+
+                    prmdevice: prmdevice@44e00f00 {
+                        compatible = "ti,am33xx-prprm-prmdevice";
+                        regs = <0x44e00f00 0x100>;
+                    };
+
+                    prmrtc: prmrtc@44e01000 {
+                        compatible = "ti,am33xx-prprm-prmrtc";
+                        regs = <0x44e01000 0x100>;
+                    };
+
+                    prmgfx: prmgfx@44e01100 {
+                        compatible = "ti,am33xx-prprm-prmgfx";
+                        regs = <0x44e01100 0x100>;
+                    };
+
+                    prmcefuse: prmcefuse@44e01200 {
+                        compatible = "ti,am33xx-prprm-prmcefuse";
+                        regs = <0x44e01200 0x100>;
+                    };
+                };
+            };
+        };
+    };
 };

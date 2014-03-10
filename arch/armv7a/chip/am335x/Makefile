@@ -1,6 +1,7 @@
 SRCS += chip.c
 SRCS += clocks.c
 SRCS += interrupts.c
+SRCS += prcm.c
 SRCS += timer.c
 
 SRCS_$(CONFIG_HAVE_USART) += usart.c

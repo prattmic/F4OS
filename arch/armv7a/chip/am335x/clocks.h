@@ -216,6 +216,15 @@ enum cm_module_modes {
     CM_MODULEMODE = 0x3,
 };
 
+/* Clock idle status */
+enum cm_idle_status {
+    CM_IDLEST_FUNC = 0,
+    CM_IDLEST_TRANS = (1 << 16),
+    CM_IDLEST_IDLE = (2 << 16),
+    CM_IDLEST_DIS = (3 << 16),
+    CM_IDLEST = (3 << 16),
+};
+
 #define CM_IDLEST_ST_MN_BYPASS_MASK     (1 << 8)    /* DPLL in MN Bypass */
 #define CM_IDLEST_ST_DPLL_CLK_LOCK      (1 << 0)    /* DPLL in Locked */
 

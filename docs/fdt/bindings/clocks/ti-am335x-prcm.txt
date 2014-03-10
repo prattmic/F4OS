@@ -1,0 +1,10 @@
+TI AM335x PRCM clocks bindings
+
+Clock providers #clock-cells should be 1.  The clock specifier
+specifies the register offset of the clock control register from
+the provider base address.
+
+Clock users optional properties:
+    - ti,clock-select: Same format as general clocks binding.
+        Specifies clock provider register offset used to select
+        peripheral clock source when written.
