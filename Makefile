@@ -206,7 +206,7 @@ $(PREFIX)/device_tree.dtb: $(BASE)/$(CONFIG_DEVICE_TREE)
 # and build that into an object file.
 $(PREFIX)/device_tree.o: $(PREFIX)/device_tree.dtb
 	$(call print_command,"GEN",$(call relative_path,$(PREFIX)/device_tree.s))
-	$(VERBOSE)echo ".section .dtb\n.incbin \"$<\"" > $(PREFIX)/device_tree.s
+	$(VERBOSE)echo ".section .dtb, \"wa\"\n.incbin \"$<\"" > $(PREFIX)/device_tree.s
 	$(call print_command,"CC",$(call relative_path,$@))
 	$(VERBOSE)$(CC) $(CFLAGS) -o $@ -c $(PREFIX)/device_tree.s
 
