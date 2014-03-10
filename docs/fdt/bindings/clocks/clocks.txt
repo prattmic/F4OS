@@ -1,0 +1,16 @@
+Clocks bindings
+
+Clock bindings describe the clocks that a peripheral is connected to.
+
+Clock providers required properties:
+    - #clock-cells: Number of clock specifier cells
+
+Clock users specify the clocks they use in the "clocks" property.
+
+Required properties:
+    - clocks: List of multiple clock provider entry.  Each entry begins
+          with the provider phandle, followed by #clock-cells specifiers
+
+Optional properties:
+    - clock-names: String list of clock names, in the same order as the
+          clocks property

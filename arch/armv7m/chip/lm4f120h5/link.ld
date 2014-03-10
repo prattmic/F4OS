@@ -98,6 +98,15 @@ SECTIONS {
         . = ALIGN(8);
     } > FLASH
 
+    /* Special section for static list of clock drivers */
+    .clocks :
+    {
+        _clocks_start = .;
+        *(.clocks*)
+        _clocks_end = .;
+        . = ALIGN(8);
+    } > FLASH
+
     .dtb :
     {
         . = ALIGN(8);
