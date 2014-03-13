@@ -20,6 +20,8 @@
  * SOFTWARE.
  */
 
+#include <arch/system_regs.h>
+
 .globl _start
 .globl _vectors
 .section    .vector,"a"
@@ -40,7 +42,10 @@ _reset:
     mcr     p15, 0, r0, c12, c0, 0
 
     /* Load stack pointer */
-    ldr     sp, =CONFIG_INIT_STACK_POINTER
+    ldr     sp, =CONFIG_INIT_SVC_STACK_POINTER
+
+    /* Load other modes' stack pointers */
+    bl      initialize_sp
 
     /* Initialize C runtime */
     ldr     r0, =_bss_start
@@ -70,20 +75,36 @@ copy_data:
     /* Good to go! */
     b       os_start
 
-/* For now, all exceptions hang */
-_undefined_instruction:
-    b       .
+/*
+ * Initialize priviledged mode stack pointers
+ *
+ * Set the SP in IRQ, FIQ, ABT, and UND modes to the configured
+ * default values.
+ *
+ * Should be entered from SVC mode.
+ */
+initialize_sp:
+    /* IRQ sp */
+    cps     #CPSR_MODE_IRQ
+    ldr     sp, =CONFIG_INIT_IRQ_STACK_POINTER
+
+    /* FIQ sp */
+    cps     #CPSR_MODE_FIQ
+    ldr     sp, =CONFIG_INIT_FIQ_STACK_POINTER
+
+    /* ABT sp */
+    cps     #CPSR_MODE_ABT
+    ldr     sp, =CONFIG_INIT_ABT_STACK_POINTER
+
+    /* UND sp */
+    cps     #CPSR_MODE_UND
+    ldr     sp, =CONFIG_INIT_UND_STACK_POINTER
+
+    /* Back to SVC mode */
+    cps     #CPSR_MODE_SVC
+    bx      lr
 
 _software_interrupt:
-    b       .
-
-_prefetch_abort:
-    b       .
-
-_data_abort:
-    b       .
-
-_hypervisor_mode:
     b       .
 
 _irq:
@@ -117,6 +138,19 @@ _fiq:
 
     /* Return */
     subs    pc, lr, #4
+
+_undefined_instruction:
+    b       undefined_instruction
+
+_prefetch_abort:
+    b       prefetch_abort
+
+_data_abort:
+    b       data_abort
+
+/* Hypervisor mode unsupported */
+_hypervisor_mode:
+    b       panic
 
 .global     panic
 .type       panic, %function

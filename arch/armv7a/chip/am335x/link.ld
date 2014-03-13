@@ -4,7 +4,8 @@
 /* Specify the memory areas */
 MEMORY
 {
-  SRAM (xrw)    : ORIGIN = 0x402F0400, LENGTH = 130K
+  SRAM (xrw)    : ORIGIN = 0x402F0400, LENGTH = 63K
+  OCMC_RAW (xrw): ORIGIN = 0x40300000, LENGTH = 64K
 }
 
 /* Heap */

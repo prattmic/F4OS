@@ -1,8 +1,32 @@
-config INIT_STACK_POINTER
+config INIT_SVC_STACK_POINTER
     hex
-    prompt "Initial Stack Pointer"
+    prompt "Initial SVC Stack Pointer"
     ---help---
-        The stack pointer is initialized to this value
+        The SVC mode stack pointer is initialized to this value
+
+config INIT_IRQ_STACK_POINTER
+    hex
+    prompt "Initial IRQ Stack Pointer"
+    ---help---
+        The IRQ mode stack pointer is initialized to this value
+
+config INIT_FIQ_STACK_POINTER
+    hex
+    prompt "Initial FIQ Stack Pointer"
+    ---help---
+        The FIQ mode stack pointer is initialized to this value
+
+config INIT_ABT_STACK_POINTER
+    hex
+    prompt "Initial ABT Stack Pointer"
+    ---help---
+        The ABT mode stack pointer is initialized to this value
+
+config INIT_UND_STACK_POINTER
+    hex
+    prompt "Initial UND Stack Pointer"
+    ---help---
+        The UND mode stack pointer is initialized to this value
 
 config COPY_DATA
     bool
