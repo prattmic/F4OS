@@ -137,6 +137,11 @@ static __always_inline uint32_t *MSP(void) {
 
 /**********************************************************************************************************************************************/
 
+/* Special purpose CONTROL register */
+#define CONTROL_NPRIV                   (1 << 0)                                                /* Execution privilege in thread mode */
+#define CONTROL_SPSEL                   (1 << 1)                                                /* SP selection */
+#define CONTROL_FPCA                    (1 << 2)                                                /* FP extension enable */
+
 /* System Control Block */
 #define SCB_ICSR_PENDSVCLR              (uint32_t) (1 << 27)                                    /* Clear PendSV interrupt */
 #define SCB_ICSR_PENDSVSET              (uint32_t) (1 << 28)                                    /* Set PendSV interrupt */

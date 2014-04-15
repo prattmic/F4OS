@@ -38,7 +38,11 @@ void init_arch(void) {
     /* Enable the FPU */
     *SCB_CPACR |= SCB_CPACR_CP10_FULL | SCB_CPACR_CP11_FULL;
 
-    /* Enable floating point state preservation */
-    *FPU_CCR |= FPU_CCR_ASPEN;
+    /* Enable floating point extension, and thus state preservation */
+    asm volatile ("mrs  r0, control \t\n"
+                  "orr  r0, %[fpca] \t\n"
+                  "msr  control, r0 \t\n"
+                  :: [fpca] "I" (CONTROL_FPCA)
+                  : "r0");
 #endif
 }
