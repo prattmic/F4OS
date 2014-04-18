@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <linker_array.h>
 #include <mm/mm.h>
 #include <dev/resource.h>
 #include <kernel/sched.h>
@@ -86,24 +87,38 @@ void os_start(void) {
     panic_print("Task switching ended.");
 }
 
-/* TODO: Something nicer when an initializer fails... */
-static void do_initializers(initializer_t *start, initializer_t *end) {
-    initializer_t *curr = start;
+LINKER_ARRAY_DECLARE(initializers_early)
+LINKER_ARRAY_DECLARE(initializers_core)
+LINKER_ARRAY_DECLARE(initializers_late)
 
-    for(; curr < end; curr++) {
-        if((**curr)())
+/* TODO: Something nicer when an initializer fails... */
+
+void do_early_initializers(void) {
+    initializer_t *initializer;
+
+    LINKER_ARRAY_FOR_EACH(initializers_early, initializer) {
+        if (initializer->func()) {
             panic();
+        }
     }
 }
 
-void do_early_initializers(void) {
-    do_initializers(&__begin_early_initializer, &__end_early_initializer);
-}
-
 void do_core_initializers(void) {
-    do_initializers(&__begin_core_initializer, &__end_core_initializer);
+    initializer_t *initializer;
+
+    LINKER_ARRAY_FOR_EACH(initializers_core, initializer) {
+        if (initializer->func()) {
+            panic();
+        }
+    }
 }
 
 void do_late_initializers(void) {
-    do_initializers(&__begin_late_initializer, &__end_late_initializer);
+    initializer_t *initializer;
+
+    LINKER_ARRAY_FOR_EACH(initializers_late, initializer) {
+        if (initializer->func()) {
+            panic();
+        }
+    }
 }

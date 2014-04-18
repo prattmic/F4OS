@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+#ifndef KERNEL_INIT_H_INCLUDED
+#define KERNEL_INIT_H_INCLUDED
+
 /*
  * INITIALIZERS - Initialize something at system start
  *
@@ -32,20 +35,22 @@
  * function and its stringified name, making it easy to print out which
  * initializers fail to run, if there is ever a need for it.
  *
- * There are three ypes of initializers, all run in the following order:
+ * There are three types of initializers, all run in the following order:
  * early_initializer
  * core_initializer
  * late_initializer
  */
 
-typedef int (*initializer_t)(void);
+#include <linker_array.h>
 
-extern initializer_t __begin_early_initializer, __end_early_initializer;
-extern initializer_t __begin_core_initializer, __end_core_initializer;
-extern initializer_t __begin_late_initializer, __end_late_initializer;
+typedef struct initializer {
+    int (*func)(void);
+} initializer_t;
 
-#define __initializer(fn, stage) \
-    initializer_t initializer_##fn __attribute__((unused, section(".initializers." #stage))) = fn;
+#define __initializer(_fn, stage) \
+    initializer_t _initializer_##_fn LINKER_ARRAY_ENTRY(initializers_##stage) = { \
+        .func = _fn,  \
+    };
 
 #define EARLY_INITIALIZER(fn) __initializer(fn, early)
 
@@ -56,3 +61,5 @@ extern initializer_t __begin_late_initializer, __end_late_initializer;
 void do_early_initializers(void);
 void do_core_initializers(void);
 void do_late_initializers(void);
+
+#endif
