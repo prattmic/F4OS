@@ -95,16 +95,6 @@ SECTIONS {
         KEEP(*(SORT_BY_NAME(.linker_array.*)))
     } > FLASH
 
-    /* Special user section reserved only for general
-     * use by user programs. */
-    .user :
-    {
-        _user_start = .;
-        *(.user*)
-        _user_end = .;
-        . = ALIGN(8);
-    } > FLASH
-
     .dtb :
     {
         . = ALIGN(8);
