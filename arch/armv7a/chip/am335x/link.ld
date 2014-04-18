@@ -67,6 +67,11 @@ SECTIONS {
         . = ALIGN(8);
     } > SRAM
 
+    .linker_array :
+    {
+        KEEP(*(SORT_BY_NAME(.linker_array.*)))
+    } > SRAM
+
     /* Special user section reserved only for general
      * use by user programs. */
     .user :

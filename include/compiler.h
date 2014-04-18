@@ -35,4 +35,7 @@
 #define __weak          __attribute__((weak))
 #define __packed        __attribute__((packed))
 
+#define STRINGIFY(s)    STRINGIFY2(s)
+#define STRINGIFY2(s)   #s
+
 #endif

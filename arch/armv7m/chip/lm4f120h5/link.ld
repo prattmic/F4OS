@@ -88,6 +88,11 @@ SECTIONS {
         . = ALIGN(8);
     } > FLASH
 
+    .linker_array :
+    {
+        KEEP(*(SORT_BY_NAME(.linker_array.*)))
+    } > FLASH
+
     /* Special user section reserved only for general
      * use by user programs. */
     .user :
