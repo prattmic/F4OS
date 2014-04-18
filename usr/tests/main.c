@@ -22,33 +22,29 @@
 
 #include <stddef.h>
 #include <stdio.h>
+#include <linker_array.h>
 #include <kernel/sched.h>
 #include "test.h"
 
-extern struct test _user_start;
-extern struct test _user_end;
-
-struct test *tests = (struct test *)&_user_start;
-
-#define NUM_TESTS ((int)(&_user_end - &_user_start))
+LINKER_ARRAY_DECLARE(tests)
 
 #define MESSAGE_LEN 128
 
 void run_tests(void) {
+    struct test *test;
     int failures = 0;
 
     /* Wait for stdin/stdout - getc returns a negative error when it is not connected. */
     while (getc() < 0);
 
-    for (int i = 0; i < NUM_TESTS; i++) {
-        struct test test = tests[i];
+    LINKER_ARRAY_FOR_EACH(tests, test) {
         char message[MESSAGE_LEN] = {'\0'};
 
-        printf("Test '%s'...", test.name);
+        printf("Test '%s'...", test->name);
 
         /* Call test, but don't allow the last byte in
          * message to be set */
-        int ret = test.func(message, sizeof(message)-1);
+        int ret = test->func(message, sizeof(message)-1);
 
         if (ret) {
             failures++;
