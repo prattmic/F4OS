@@ -25,17 +25,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <linker_array.h>
 
 #include "shell.h"
 #include "app.h"
 
-/* The reserved user section is used for storing commands */
-extern command_t _user_start;
-extern command_t _user_end;
-
-command_t *valid_commands = (command_t *)&_user_start;
-
-#define NUM_COMMANDS ((int)(&_user_end - &_user_start))
+LINKER_ARRAY_DECLARE(shell_apps)
 
 static char *cmd_hist[SHELL_HISTORY]; // Command history buffer
 static int   cmd_index;               // Next buffer index to fill
@@ -180,13 +175,16 @@ static int start_match(char *buf, char *cmd, int n) {
 }
 
 static int fill_next_match(char *buf, int n) {
-    for (uint32_t i = 0; i < NUM_COMMANDS; i++) {
-        int index = start_match(buf, valid_commands[i].name, n);
+    struct command *command;
+
+    LINKER_ARRAY_FOR_EACH(shell_apps, command) {
+        int index = start_match(buf, command->name, n);
         if(index) {
-           strncpy(&buf[index], &valid_commands[i].name[index], valid_commands[i].len - index);
-           return valid_commands[i].len;
+           strncpy(&buf[index], &command->name[index], command->len - index);
+           return command->len;
         }
     }
+
     return n;
 }
 
@@ -276,13 +274,15 @@ void parse_command(char *command, int *argc, char ***argv) {
 }
 
 void run_command(char *command, int argc, char **argv) {
+    struct command *current_command;
+
     if (!argc) {
         return;
     }
 
-    for (int i = 0; i < NUM_COMMANDS; i++) {
-        if (!strncmp(argv[0], valid_commands[i].name, SHELL_BUF_MAX)) {
-            valid_commands[i].fptr(argc, argv);
+    LINKER_ARRAY_FOR_EACH(shell_apps, current_command) {
+        if (!strncmp(argv[0], current_command->name, SHELL_BUF_MAX)) {
+            current_command->fptr(argc, argv);
             return;
         }
     }
@@ -291,10 +291,12 @@ void run_command(char *command, int argc, char **argv) {
 }
 
 void help(int argc, char **argv) {
+    struct command *command;
+
     puts("Available commands:\r\n");
 
-    for (uint32_t i = 0; i < NUM_COMMANDS; i++) {
-        printf("%s\r\n", valid_commands[i].name);
+    LINKER_ARRAY_FOR_EACH(shell_apps, command) {
+        printf("%s\r\n", command->name);
     }
 }
 DEFINE_APP(help)
