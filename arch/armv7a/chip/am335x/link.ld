@@ -82,15 +82,6 @@ SECTIONS {
         . = ALIGN(8);
     } > SRAM
 
-    /* Special section for static list of clock drivers */
-    .clocks :
-    {
-        _clocks_start = .;
-        *(.clocks*)
-        _clocks_end = .;
-        . = ALIGN(8);
-    } > SRAM
-
     .dtb :
     {
         . = ALIGN(8);

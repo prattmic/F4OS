@@ -23,7 +23,7 @@
 #ifndef DEV_CLOCKS_H_INCLUDED
 #define DEV_CLOCKS_H_INCLUDED
 
-/* TODO: Generic static list/array implementation */
+#include <linker_array.h>
 
 struct clock_driver {
     /* FDT compatible string this driver is compatible with */
@@ -84,7 +84,7 @@ struct clock_driver {
  * };
  */
 #define DECLARE_CLOCK_DRIVER(name) \
-    struct clock_driver name##_clock_driver __attribute__((section(".clocks")))
+    struct clock_driver _clock_driver_##name LINKER_ARRAY_ENTRY(clocks)
 
 /*
  * Enable clocks

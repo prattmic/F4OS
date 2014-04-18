@@ -24,18 +24,14 @@
 #include <stddef.h>
 #include <dev/clocks.h>
 
-extern struct clock_driver _clocks_start;
-extern struct clock_driver _clocks_end;
-
-static struct clock_driver *drivers = &_clocks_start;
-
-#define NUM_DRIVERS ((int)(&_clocks_end - &_clocks_start))
+LINKER_ARRAY_DECLARE(clocks)
 
 static struct clock_driver *clocks_lookup(const void *fdt, int offset, const char *name) {
     const struct fdt_property *prop;
     int len, controller;
     fdt32_t *cell;
     uint32_t phandle;
+    struct clock_driver *driver;
 
     prop = fdt_get_property(fdt, offset, name, &len);
     if (len < 0) {
@@ -56,9 +52,9 @@ static struct clock_driver *clocks_lookup(const void *fdt, int offset, const cha
         return NULL;
     }
 
-    for (int i = 0; i < NUM_DRIVERS; i++) {
-        if (!fdt_node_check_compatible(fdt, controller, drivers[i].compat)) {
-            return &drivers[i];
+    LINKER_ARRAY_FOR_EACH(clocks, driver) {
+        if (!fdt_node_check_compatible(fdt, controller, driver->compat)) {
+            return driver;
         }
     }
 
