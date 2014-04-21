@@ -31,10 +31,9 @@ Only a few things should be required to get running:
   and FIQ interrupts as they occur.  Their function prototypes can be found in
   `arch/armv7a/include/chip.h`.
 * An `init_systick()` function, which initializes a timer to preempt the
-  system at CONFIG_SYSTICK_FREQ, and runs the scheduler.  The interrupt
-  handler should increment system_ticks, call rtos_tick(), and call
-  task_switch().  The function prototype can be found in
-  `include/dev/hw/systick.h`.
+  system at CONFIG_SYSTICK_FREQ, and performs a system tick by calling
+  `sched_system_tick()`.  The function prototypes can be found in
+  `include/dev/hw/systick.h` and `include/kernel/sched_internals/h`.
 
 At that point, it should be possible to run F4OS on the chip, with all extra
 features disabled (no outputs, no GPIOs, etc).  From there, chip peripheral

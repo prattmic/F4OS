@@ -22,7 +22,6 @@
 
 #include <libfdt.h>
 #include <stdio.h>
-#include <time.h>
 #include <dev/clocks.h>
 #include <dev/fdtparse.h>
 #include <dev/raw_mem.h>
@@ -46,13 +45,8 @@ void systick_handler(void *data) {
     /* Acknowledge interrupt */
     raw_mem_set_bits(&regs->tisr, AM335X_DMTIMER_TISR_OVF_IT_FLAG);
 
-    system_ticks++;
-
-    /* Update periodic tasks */
-    rtos_tick();
-
-    /* Run the scheduler */
-    task_switch(NULL);
+    /* Perform OS system tick */
+    sched_system_tick();
 }
 
 void init_systick(void) {

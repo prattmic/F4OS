@@ -22,10 +22,21 @@
 
 #include <stdarg.h>
 #include <stdint.h>
+#include <time.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>
 #include <kernel/sched_internals.h>
 #include "sched_internals.h"
+
+void sched_system_tick(void) {
+    system_ticks++;
+
+    /* Update periodic tasks */
+    rtos_tick();
+
+    /* Run the scheduler */
+    task_switch(NULL);
+}
 
 int sched_service_call(uint32_t svc_number, ...) {
     int ret = 0;

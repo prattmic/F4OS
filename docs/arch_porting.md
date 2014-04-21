@@ -13,8 +13,11 @@ architecture:
   initializing the system and peripheral clocks
 * Exception handling
 * Scheduler support, including:
-    * A preemptive interrupt for task switching
+    * A preemptive interrupt for system ticks
+        * This should call `sched_system_tick()` at CONFIG_SYSTICK_FREQ.
     * A software interrupt, for service calls
     * Context switching routines
     * A mechanism for differentiating kernel and user stack pointers
+    * A list of Arch-provided functions can be found in
+      `include/kernel/sched_internals.h`.
 

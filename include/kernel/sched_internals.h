@@ -150,4 +150,15 @@ void create_context(task_ctrl *task, void (*lptr)(void));
  */
 void arch_sched_start_bootstrap(void);
 
+/**
+ * Perform OS system tick
+ *
+ * Perform a system tick, which includes incrementing the tick counter,
+ * handling of real-time tasks, and performing a preemptive task switch.
+ *
+ * This function should be called in privileged mode with a frequency of
+ * CONFIG_SYSTICK_FREQ.
+ */
+void sched_system_tick(void);
+
 #endif

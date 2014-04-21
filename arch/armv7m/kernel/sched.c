@@ -21,26 +21,19 @@
  */
 
 #include <arch/system.h>
-#include <time.h>
 #include <kernel/sched.h>
 #include <kernel/sched_internals.h>
 #include "sched.h"
 
 /* System tick interrupt handler */
 void systick_handler(void) {
-    system_ticks++;
-
     /* Call PendSV to do switching */
     *SCB_ICSR |= SCB_ICSR_PENDSVSET;
 }
 
 /* PendSV interrupt handler */
 void pendsv_handler(void){
-    /* Update periodic tasks */
-    rtos_tick();
-
-    /* Run the scheduler */
-    task_switch(NULL);
+    sched_system_tick();
 }
 
 uint32_t *get_user_stack_pointer(void) {
