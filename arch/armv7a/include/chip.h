@@ -50,4 +50,12 @@ void irq_handler(void) __attribute__((section(".kernel")));
  */
 void fiq_handler(void) __attribute__((section(".kernel")));
 
+/**
+ * Enable chip system tick timer
+ *
+ * Enable system tick timer, as described by the docs for
+ * arch_sched_start_system_tick() in include/kernel/sched_internals.h.
+ */
+void chip_sched_start_system_tick(void);
+
 #endif

@@ -22,7 +22,13 @@
 
 #include <arch/chip.h>
 #include "clocks.h"
+#include "timer.h"
 
 void init_chip(void) {
     am335x_clock_config();
+}
+
+void chip_sched_start_system_tick(void) {
+    /* Use DMTimer 1ms to handle system ticks */
+    am335x_dmtimer1ms_init_systick();
 }

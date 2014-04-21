@@ -22,7 +22,17 @@
 
 #include <arch/chip.h>
 #include <dev/arch.h>
+#include <kernel/sched.h>
+#include <kernel/sched_internals.h>
 
 void init_arch(void) {
     init_chip();
+}
+
+void arch_sched_start_system_tick(void) {
+    /*
+     * There is no universal timer for system ticks,
+     * the chip will take care of things.
+     */
+    chip_sched_start_system_tick();
 }

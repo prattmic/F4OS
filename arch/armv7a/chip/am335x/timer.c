@@ -25,7 +25,6 @@
 #include <dev/clocks.h>
 #include <dev/fdtparse.h>
 #include <dev/raw_mem.h>
-#include <dev/hw/systick.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>
 #include <kernel/sched_internals.h>
@@ -39,7 +38,7 @@
 #define TIMER_CNT_PER_SYSTICK   (TIMER_FREQ/CONFIG_SYSTICK_FREQ)
 
 /* Registers passed into handler */
-void systick_handler(void *data) {
+static void dmtimer1ms_systick_handler(void *data) {
     struct am335x_dmtimer_1ms *regs = data;
 
     /* Acknowledge interrupt */
@@ -49,7 +48,7 @@ void systick_handler(void *data) {
     sched_system_tick();
 }
 
-void init_systick(void) {
+void am335x_dmtimer1ms_init_systick(void) {
     const void *fdt = fdtparse_get_blob();
     struct am335x_dmtimer_1ms *regs;
     int offset, len;
@@ -110,7 +109,7 @@ void init_systick(void) {
 
     /* Register and enable interrupt.  Pass registers to handler */
     if (am335x_interrupt_register(fdt, offset, interrupt_num,
-                                  systick_handler, regs)) {
+                                  dmtimer1ms_systick_handler, regs)) {
         panic_print("Unable to register DMTimer 1ms interrupt");
     }
 

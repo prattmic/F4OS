@@ -22,6 +22,9 @@
 
 #include <arch/chip.h>
 #include <arch/system.h>
+#include <dev/hw/systick.h>
+#include <kernel/sched.h>
+#include <kernel/sched_internals.h>
 
 /* Set up universal Cortex M perihperals/system settings */
 void init_arch(void) {
@@ -45,4 +48,9 @@ void init_arch(void) {
                   :: [fpca] "I" (CONTROL_FPCA)
                   : "r0");
 #endif
+}
+
+void arch_sched_start_system_tick(void) {
+    /* The SysTick timer handles system ticks */
+    init_systick();
 }

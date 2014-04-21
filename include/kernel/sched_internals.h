@@ -157,8 +157,17 @@ void arch_sched_start_bootstrap(void);
  * handling of real-time tasks, and performing a preemptive task switch.
  *
  * This function should be called in privileged mode with a frequency of
- * CONFIG_SYSTICK_FREQ.
+ * CONFIG_SYSTICK_FREQ once arch_sched_start_system_tick() has been called.
  */
 void sched_system_tick(void);
+
+/**
+ * Enable arch system tick timer
+ *
+ * Upon calling this function, the arch should enable whatever timer or
+ * structure is necessary to begin calling sched_system_tick() with a
+ * frequency of CONFIG_SYSTICK_FREQ.
+ */
+void arch_sched_start_system_tick(void);
 
 #endif

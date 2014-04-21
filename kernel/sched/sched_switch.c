@@ -21,7 +21,6 @@
  */
 
 #include <stddef.h>
-#include <dev/hw/systick.h>
 #include <kernel/fault.h>
 
 #include <kernel/sched.h>
@@ -86,12 +85,12 @@ int svc_task_switch(task_ctrl *task) {
      */
     if (!task_switching) {
         /*
-         * Initialize preemptive system ticks
+         * Begin preemptive system ticks
          * Done in interrupt context to ensure that the first scheduler
          * preemptive interrupt cannot occur until switching has actually
          * begun (upon return from this interrupt).
          */
-        init_systick();
+        arch_sched_start_system_tick();
 
         task_switching = 1;
     }

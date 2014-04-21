@@ -104,4 +104,16 @@ struct am335x_dmtimer_1ms {
 #define AM335X_DMTIMER_1MS_CLK_RC32K    (0x3)       /* DMTimer 1ms CLK_RC32K source */
 #define AM335X_DMTIMER_1MS_CLK_32768    (0x4)       /* DMTimer 1ms CLK_32768 source */
 
+/**
+ * Initialize DMTimer 1ms for system ticks
+ *
+ * The first DMTimer 1ms is used.
+ *
+ * Fire an interrupt at a frequency of CONFIG_SYSTICK_FREQ, calling
+ * sched_system_tick() in the handler.
+ *
+ * TODO: Use generalized timer setup, allowing timer to be specified.
+ */
+void am335x_dmtimer1ms_init_systick(void);
+
 #endif
