@@ -28,7 +28,8 @@ Only a few things should be required to get running:
 * An `init_chip()` function, which initializes the system and peripheral
   clocks.  The function prototype can be found in `arch/armv7a/include/chip.h`.
 * `irq_handler()` and `fiq_handler()` functions, which lookup and handle IRQ
-  and FIQ interrupts as they occur.
+  and FIQ interrupts as they occur.  Their function prototypes can be found in
+  `arch/armv7a/include/chip.h`.
 * An `init_systick()` function, which initializes a timer to preempt the
   system at CONFIG_SYSTICK_FREQ, and runs the scheduler.  The interrupt
   handler should increment system_ticks, call rtos_tick(), and call

@@ -23,6 +23,7 @@
 #include <libfdt.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <arch/chip.h>
 #include <dev/fdtparse.h>
 #include <dev/raw_mem.h>
 #include <kernel/init.h>

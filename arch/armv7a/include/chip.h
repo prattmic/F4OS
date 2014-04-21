@@ -23,6 +23,31 @@
 #ifndef ARCH_CHIP_H_INCLUDED
 #define ARCH_CHIP_H_INCLUDED
 
+/*
+ * Perform core chip setup
+ *
+ * Called extremely early in boot.  This should perform core essential
+ * chip setup, before anything else is run.  Most notably, this includes
+ * core clock setup.
+ */
 void init_chip(void) __attribute__((section(".kernel")));
+
+/*
+ * Handle IRQ
+ *
+ * Called when an IRQ interrupt is raised.  Should determine the IRQ
+ * source, and handle it appropriately.  System state is saved before
+ * calling this function, and restored when it returns.
+ */
+void irq_handler(void) __attribute__((section(".kernel")));
+
+/*
+ * Handle FIQ
+ *
+ * Called when an FIQ interrupt is raised.  Should determine the FIQ
+ * source, and handle it appropriately.  System state is saved before
+ * calling this function, and restored when it returns.
+ */
+void fiq_handler(void) __attribute__((section(".kernel")));
 
 #endif
