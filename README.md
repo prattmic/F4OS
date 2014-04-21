@@ -1,41 +1,48 @@
 F4OS
 ======
 
-F4OS is a small real-time operating system intended for use on microcontrollers.
-F4OS is designed to be chip-agnostic, and fairly simple to port to new chips,
-possibly even new architectures.  To that end, the driver/resource model
-is designed to be as generic as possible, so that only a minimal configuration
-is required to move between chips.
+F4OS is a small real-time operating system intended for use in embedded
+applications.  F4OS is designed to be chip-agnostic, fairly simple to port
+to new chips, or even new architectures.  To that end, the hardware abstration
+model is designed to be as generic as possible, so that only minimal
+configuration changes are required to move between chips.
 
 F4OS was originally developed on the STMicro STM32F4DISCOVERY Board, which is
 where the name F4OS originates.
 
 ## Supported Hardware
 
-The focus of F4OS is support for ARM hardware.  Currently, the only supported
-architecture is ARMv7-M, the microcontroller variant of ARMv7.
+F4OS currently supports the following architectures:
 
-All of the chips currently supported are ARM Cortex-M4F chips, however ARM
-Cortex-M4 and ARM Cortex-M3 should be supported simply by disabling FPU support
-(`CONFIG_HAVE_FPU`).
+* ARMv7-A
+    * Currently entirely MMU-less rudimentary support
+    * See [ARMv7-A docs](docs/armv7a.md) for more details on support for
+      this architecture
+* ARMv7-M
+    * See [ARMv7-M docs](docs/armv7m.md) for more details on support for
+      this architecture
 
 Currently, the supported chips include:
 
 * STMicro STM32F40x series
+    * ARMv7-M Cortex-M4F chip
     * Board configs included for the STM32F4DISCOVERY board and PX4 autopilot
     * Peripheral drivers include: GPIO, USART, SPI, I2C, USB CDC slave
 * TI Stellaris LM4F120H5QR, aka TI Tiva C TM4C1233H6PM
+    * ARMv7-M Cortex-M4F chip
     * Board config included for the TI Stellaris Launchpad
     * Peripheral drivers include: GPIO, USART
+* TI AM335x Sitara series
+    * ARMv7-A Cortex-A8 chip
+    * Board config included for the Beaglebone Black
+    * Peripheral drivers include: USART
 
 ## Building F4OS
 
 ### Requirements
 
 A cross-compiling toolchain is required to build F4OS for the target
-architecture.  For ARMv7-M, the
-[GCC ARM Embedded](https://launchpad.net/gcc-arm-embedded) toolchain is
-recommended.
+architecture.  See the architecture file in `docs/` for recommended toolchains.
 
 Runtime configuration is performed using flattened device trees.  The device
 tree compiler (dtc) is required to process device tree files.  This compiler
@@ -48,7 +55,6 @@ the `conf` tool for processing KConfig files.  This tool is distibuted with the
 Linux kernel, but it and other tools are packaged for external use by the
 [kconfig-frontends](http://ymorin.is-a-geek.org/projects/kconfig-frontends)
 project.
-
 
 On its first run, the F4OS build system will search for the Kconfig tools,
 and if not found, will offer to automatically download and build the
@@ -89,7 +95,7 @@ and raw binary of the OS, respectively.  In order to actually run F4OS, it
 needs to be flashed on the chip it was built for, most likely using the raw
 binary.
 
-`make flash` is provided to automate the process of flashing the OS, for
+`make burn` is provided to automate the process of flashing the OS, for
 supported boards and debuggers.  It simply calls a script in the chip
 directory, which is responsible for flashing.
 
@@ -102,6 +108,10 @@ supported chips:
     * PX4 autopilot uses the J-Link JTAG tools
 * LM4F120H5QR
     * Stellaris Launchpad uses the J-Link JTAG tools
+* AM335x
+    * The 'burn' target is not defined.  Instead, the build system generates
+      `out/MLO`, which should be loaded onto the AM335x boot media, where
+      it will be loaded by the chip as the first stage bootloader.
 
 The 'burn' target of the chip Makefile, found at
 `arch/$ARCH/chip/$CHIP/Makefile`, may be modified to flash by other means.
@@ -165,6 +175,9 @@ Some examples of chip default output devices:
 * LM4F120H5QR (`stellaris_launchpad_defconfig`)
     * Standard out and standard error are over USART1 (PA0 and PA1),
       at a baud rate of 115200.
+* AM335X (`beaglebone_black_defconfig`)
+    * Standard out and standard error are over UART0 at a baud rate of
+      115200.
 
 ## Extending F4OS
 
@@ -323,34 +336,11 @@ is configured with `CONFIG_DEVICE_TREE`.
 F4OS aims to make porting to new architectures, and especially new chips, as
 easy as possible.
 
-For new ARMv7-M chips, only a few things should be required to get running:
+For information on porting to a new chip on a supported architecture, see the
+architecture file in `docs/`.
 
-* A linker script to place sections in the right portion of memory
-    * An example can be found in `arch/armv7m/chip/lm4f120h5/link.ld`
-* A vector table initialized with the reset and exception vectors
-* An `init_clock()` function, which initializes the system and peripheral
-  clocks
-
-At that point, it should be possible to run F4OS on the chip, with all extra
-features disabled (no outputs, no GPIOs, etc).  From there, chip peripheral
-drivers can be written to provide additional functionality.
-
-Porting to a new architecture is much more involved.  F4OS has never been
-ported to anything other than ARMv7-M, however it has been designed to be
-as architecture-agnostic as possible, outside of the `arch/` folder.
-
-Some of the things that would be necessary to begin porting to a new
-architecture:
-
-* Initial system and C runtime startup, eventually calling `os_start()`
-* `init_arch()` to do architecture and chip initialization, including
-  initializing the system and peripheral clocks
-* Exception handling
-* Scheduler support, including:
-    * A preemptive interrupt for task switching
-    * A software interrupt, for service calls
-    * Context switching routines
-    * A mechanism for differentiating kernel and user stack pointers
+For information on porting to a new architecture, see the
+[architectyre porting document](docs/arch_porting.md).
 
 ## Contributing
 
