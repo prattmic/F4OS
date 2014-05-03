@@ -63,7 +63,7 @@ is unnecessary.
 
 kconfig-frontends does itself have several dependencies which must be installed
 on the host system in order to build the project.  These include: autoconf,
-automake, bison, flex, gperf, libtoolize, libncurses5-dev, and m4.
+automake, bison, flex, gperf, libtoolize, libncurses5-dev, m4, and pkg-config.
 
 ### Configuration and building
 
