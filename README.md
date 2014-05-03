@@ -22,20 +22,14 @@ F4OS currently supports the following architectures:
     * See [ARMv7-M docs](docs/armv7m.md) for more details on support for
       this architecture
 
-Currently, the supported chips include:
+Currently, the supported chips include the following.  See the chip
+documentation pages for more details on chip support.
 
-* STMicro STM32F40x series
-    * ARMv7-M Cortex-M4F chip
-    * Board configs included for the STM32F4DISCOVERY board and PX4 autopilot
-    * Peripheral drivers include: GPIO, USART, SPI, I2C, USB CDC slave
-* TI Stellaris LM4F120H5QR, aka TI Tiva C TM4C1233H6PM
-    * ARMv7-M Cortex-M4F chip
-    * Board config included for the TI Stellaris Launchpad
-    * Peripheral drivers include: GPIO, USART
-* TI AM335x Sitara series
-    * ARMv7-A Cortex-A8 chip
-    * Board config included for the Beaglebone Black
-    * Peripheral drivers include: USART
+| Architecture  | Chip                                                          | Officially Supported Boards   |
+| ------------- | ------------------------------------------------------------- | ----------------------------- |
+| ARMv7-M       | [STMicro STM32F4 series](docs/stm32f4.md)                     | STM32F4DISCOVERY, PX4FMU 1.x  |
+| ARMv7-M       | [TI Tiva C series](docs/tivac.md), aka TI Stellaris LM4F      | TI Stellaris Launchpad        |
+| ARMv7-A       | [TI Sitara AM335x series](docs/am335x.md)                     | BeagleBone Black              |
 
 ## Building F4OS
 
@@ -88,33 +82,15 @@ Once configured, it is simply to build the entire OS.
 
     $ make
 
-### Flashing
+### Flashing/Booting
 
-Building F4OS will generate `out/f4os.elf` and `out/f4os.bin`, an ELF object
-and raw binary of the OS, respectively.  In order to actually run F4OS, it
-needs to be flashed on the chip it was built for, most likely using the raw
-binary.
+Building F4OS will generate `out/f4os.elf`, an ELF object, and an appropriate
+binary for running the OS on the configured chip.  In order to actually run
+F4OS, it needs to be flashed/booted on the chip it was built for.
 
-`make burn` is provided to automate the process of flashing the OS, for
-supported boards and debuggers.  It simply calls a script in the chip
-directory, which is responsible for flashing.
-
-Depending on the chip, different mechanisms may be used.  For the currently
-supported chips:
-
-* STM32F40x
-    * STM32F4DISCOVERY board uses the
-      [stlink](https://github.com/texane/stlink) utility
-    * PX4 autopilot uses the J-Link JTAG tools
-* LM4F120H5QR
-    * Stellaris Launchpad uses the J-Link JTAG tools
-* AM335x
-    * The 'burn' target is not defined.  Instead, the build system generates
-      `out/MLO`, which should be loaded onto the AM335x boot media, where
-      it will be loaded by the chip as the first stage bootloader.
-
-The 'burn' target of the chip Makefile, found at
-`arch/$ARCH/chip/$CHIP/Makefile`, may be modified to flash by other means.
+See the documentation page for the configured chip for details on flashing or
+booting.  For chips with internal flash, `make burn` is generally used to
+automate the process of flashing the OS.
 
 ## Using F4OS
 
@@ -166,18 +142,8 @@ manually selected in the "Drivers" menu of the configuration.  The options are
 
     $ make menuconfig
 
-Some examples of chip default output devices:
-
-* STM32F40x (`discovery_defconfig` and `px_defconfig`)
-    * Standard out is over USB, with the device
-      acting as a USB CDC slave on the USB OTG port, and standard error is over
-      USART1 (PB6 and PB7), at a baud rate of 115200.
-* LM4F120H5QR (`stellaris_launchpad_defconfig`)
-    * Standard out and standard error are over USART1 (PA0 and PA1),
-      at a baud rate of 115200.
-* AM335X (`beaglebone_black_defconfig`)
-    * Standard out and standard error are over UART0 at a baud rate of
-      115200.
+See specific chip documentation pages for for more information about board
+default stdout and stderr devices.
 
 ## Extending F4OS
 
