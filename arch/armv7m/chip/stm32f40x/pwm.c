@@ -388,22 +388,22 @@ static int timer_enabled(uint8_t timer) {
 }
 
 /*
- * Determine timer duty cycle, in microseconds
+ * Determine timer period, in microseconds
  *
- * Computes the duty cycle of the timer in its current configuration.
+ * Computes the period of the timer in its current configuration.
  * Only upcounting mode is supported, others will result in an error.
  *
- * @param timer Timer to get duty cycle of
- * @returns duty cycle in microseconds, negative on error
+ * @param timer Timer to get period of
+ * @returns period in microseconds, negative on error
  */
-static int timer_duty_cycle(uint8_t timer) {
+static int timer_period(uint8_t timer) {
     struct stm32f4_timer_regs *regs = timer_get_regs(timer);
     uint32_t cr1 = raw_mem_read(&regs->CR1);
     uint32_t prescaler = raw_mem_read(&regs->PSC) + 1;
     uint32_t reload = raw_mem_read(&regs->ARR);
     uint32_t clock = timer_clock(timer);
     uint32_t frequency = clock/prescaler;
-    uint32_t duty_cycle = (1e6*reload)/frequency;
+    uint32_t period = (1e6*reload)/frequency;
 
     /* Ensure edge-aligned mode */
     if ((cr1 & TIM_CR1_CMS_MASK) != TIM_CR1_CMS_EDGE) {
@@ -415,19 +415,19 @@ static int timer_duty_cycle(uint8_t timer) {
         return -1;
     }
 
-    return duty_cycle;
+    return period;
 }
 
 /*
  * Initialize and enable timer
  *
- * Set the duty cycle and begin counting
+ * Set the period and begin counting
  *
  * @param timer Timer to initialize
- * @param duty  Duty cycle, in microseconds, to configure
+ * @param duty  Period, in microseconds, to configure
  * @returns zero on success, negative on error
  */
-int timer_initialize(uint8_t timer, uint32_t duty) {
+int timer_initialize(uint8_t timer, uint32_t period) {
     struct stm32f4_timer_regs *regs = timer_get_regs(timer);
     uint32_t clock = timer_clock(timer);
 
@@ -481,8 +481,8 @@ int timer_initialize(uint8_t timer, uint32_t duty) {
     /* Prescale to 1MHz clock */
     raw_mem_write(&regs->PSC, clock/1e6 - 1);
 
-    /* Each cycle is 1us, reload to desired duty cycle */
-    raw_mem_write(&regs->ARR, duty);
+    /* Each cycle is 1us, reload to desired period */
+    raw_mem_write(&regs->ARR, period);
 
     /* Update event every overflow */
     raw_mem_write(&regs->RCR, 0);
@@ -600,7 +600,7 @@ static int stm32f4_pwm_enable(struct pwm *pwm, uint8_t enable) {
     return 0;
 }
 
-static int32_t stm32f4_pwm_set_duty_cycle(struct pwm *pwm, uint32_t duty) {
+static int32_t stm32f4_pwm_set_period(struct pwm *pwm, uint32_t period) {
     struct stm32f4_pwm *stm32_pwm = pwm->priv;
     struct stm32f4_timer_regs *regs = timer_get_regs(stm32_pwm->timer);
     uint32_t clock = timer_clock(stm32_pwm->timer);
@@ -622,8 +622,8 @@ static int32_t stm32f4_pwm_set_duty_cycle(struct pwm *pwm, uint32_t duty) {
     /* Prescale to 1MHz clock */
     raw_mem_write(&regs->PSC, clock/1e6 - 1);
 
-    /* Each cycle is 1us, reload to desired duty cycle */
-    raw_mem_write(&regs->ARR, duty);
+    /* Each cycle is 1us, reload to desired period */
+    raw_mem_write(&regs->ARR, period);
 
     /* Generate update event to reload ARR */
     raw_mem_set_bits(&regs->EGR, TIM_EGR_UG);
@@ -632,17 +632,17 @@ static int32_t stm32f4_pwm_set_duty_cycle(struct pwm *pwm, uint32_t duty) {
 
     release(&channels_available_sem);
 
-    return duty;
+    return period;
 
 err:
     release(&channels_available_sem);
     return -1;
 }
 
-static uint32_t stm32f4_pwm_get_duty_cycle(struct pwm *pwm) {
+static uint32_t stm32f4_pwm_get_period(struct pwm *pwm) {
     struct stm32f4_pwm *stm32_pwm = pwm->priv;
 
-    return timer_duty_cycle(stm32_pwm->timer);
+    return timer_period(stm32_pwm->timer);
 }
 
 static int32_t stm32f4_pwm_set_pulse_width(struct pwm *pwm, uint32_t width) {
@@ -724,8 +724,8 @@ static int stm32f4_pwm_dtor(struct pwm *pwm) {
 
 static struct pwm_ops stm32f4_pwm_ops = {
     .enable = stm32f4_pwm_enable,
-    .set_duty_cycle = stm32f4_pwm_set_duty_cycle,
-    .get_duty_cycle = stm32f4_pwm_get_duty_cycle,
+    .set_period = stm32f4_pwm_set_period,
+    .get_period = stm32f4_pwm_get_period,
     .set_pulse_width = stm32f4_pwm_set_pulse_width,
     .get_pulse_width = stm32f4_pwm_get_pulse_width,
     .is_hardware = stm32f4_pwm_is_hardware,
@@ -737,16 +737,16 @@ static struct pwm_ops stm32f4_pwm_ops = {
  *
  * Search through the timer channels that may be used as a PWM output
  * for a given GPIO, and select one that is available and can be configured
- * to the correct duty cycle.
+ * to the correct period.
  *
  * Once taken, configure the timer as necessary.
  *
  * @param gpio  GPIO object to find a timer channel for
- * @param duty  Desired duty cycle
+ * @param period  Desired period
  * @returns timer channel taken, INVALID_TIMER_CHANNEL on error
  */
 static enum timer_channels find_and_configure_timer_channel(struct gpio *gpio,
-                                                            uint32_t duty) {
+                                                            uint32_t period) {
     uint32_t valid_channels, available;
     uint32_t selected_timer, selected_channel;
     enum timer_channels selected_timer_channel = INVALID_TIMER_CHANNEL;
@@ -768,7 +768,7 @@ static enum timer_channels find_and_configure_timer_channel(struct gpio *gpio,
         if (available & timer_channel) {
             uint8_t timer = timer_channel_to_timer(timer_channel);
             acquire(timer_semaphore(timer));
-            if (!timer_enabled(timer) || (timer_duty_cycle(timer) == duty)) {
+            if (!timer_enabled(timer) || (timer_period(timer) == period)) {
                 selected_timer_channel = timer_channel;
                 break;
             }
@@ -785,7 +785,7 @@ static enum timer_channels find_and_configure_timer_channel(struct gpio *gpio,
     selected_channel = timer_channel_to_channel(selected_timer_channel);
 
     if (!timer_enabled(selected_timer)) {
-        err = timer_initialize(selected_timer, duty);
+        err = timer_initialize(selected_timer, period);
         if (err) {
             goto err_release_selected_timer;
         }
@@ -811,7 +811,7 @@ err_release_channels_available:
     return INVALID_TIMER_CHANNEL;
 }
 
-struct obj *pwm_get(struct obj *gpio_obj, uint32_t duty) {
+struct obj *pwm_get(struct obj *gpio_obj, uint32_t period) {
     struct gpio *gpio;
     struct gpio_ops *gpio_ops;
     struct obj *pwm_obj;
@@ -831,7 +831,7 @@ struct obj *pwm_get(struct obj *gpio_obj, uint32_t duty) {
     gpio_ops = gpio_obj->ops;
 
     /* Find an available timer */
-    timer_channel = find_and_configure_timer_channel(gpio, duty);
+    timer_channel = find_and_configure_timer_channel(gpio, period);
     if (timer_channel == INVALID_TIMER_CHANNEL) {
         goto err;
     }

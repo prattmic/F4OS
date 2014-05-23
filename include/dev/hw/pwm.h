@@ -51,32 +51,32 @@ struct pwm_ops {
      */
     int     (*enable)(struct pwm *, uint8_t);
     /**
-     * Set duty cycle
+     * Set period
      *
-     * Sets the duty cycle of the PWM output, in microseconds.  If the duty
-     * cycle cannot be changed (if a timer is being shared between several
+     * Sets the period of the PWM output, in microseconds.  If the
+     * period cannot be changed (if a timer is being shared between several
      * outputs, for example), an error value is returned.
      *
-     * The duty cycle will be set as closely to the passed in parameter as
-     * possible.  The actual set duty cycle will be returned.
+     * The period will be set as closely to the passed in parameter as
+     * possible.  The actual set period will be returned.
      *
-     * @param pwm   PWM output to change duty cycle of
-     * @param duty  Desired duty cycle, in microseconds
-     * @returns set duty cycle, negative on error
+     * @param pwm   PWM output to change period of
+     * @param period  Desired period, in microseconds
+     * @returns set period, negative on error
      */
-    int32_t (*set_duty_cycle)(struct pwm *, uint32_t);
+    int32_t (*set_period)(struct pwm *, uint32_t);
     /**
-     * Get duty cycle
+     * Get period
      *
-     * Gets the current duty cycle of the PWM output, in microseconds.
+     * Gets the current period of the PWM output, in microseconds.
      *
-     * If output is disabled, this returns the configured duty cycle value,
+     * If output is disabled, this returns the configured period value,
      * should the output be enabled.
      *
-     * @param pwm   PWM output to get duty cycle of
-     * @returns Duty cycle of output
+     * @param pwm   PWM output to get period of
+     * @returns Period of output
      */
-    uint32_t(*get_duty_cycle)(struct pwm *);
+    uint32_t(*get_period)(struct pwm *);
     /**
      * Set pulse width
      *
@@ -133,9 +133,9 @@ extern struct class pwm_class;
  * either in hardware or software is allocated, and will output signals
  * on the passed in GPIO.
  *
- * The desired duty cycle is passed in to aid in matching the GPIO with a
+ * The desired period is passed in to aid in matching the GPIO with a
  * compatible timer.  If matched with a timer used by other PWM outputs,
- * it may not be possible to change the duty cycle after instantiation.
+ * it may not be possible to change the period after instantiation.
  *
  * If neither a hardware or software object can be allocated, NULL will be
  * returned.
@@ -147,10 +147,10 @@ extern struct class pwm_class;
  * finish, the object should be freed with pwm_put().
  *
  * @param gpio  GPIO number to get PWM object for
- * @param duty  Desired duty cycle
+ * @param period  Desired period
  * @returns PWM object on success, NULL on error
  */
-struct obj *pwm_get(struct obj *gpio, uint32_t duty);
+struct obj *pwm_get(struct obj *gpio, uint32_t period);
 
 /**
  * Return PWM object

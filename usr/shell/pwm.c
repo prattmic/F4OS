@@ -29,8 +29,8 @@
 #include "app.h"
 
 static char *usage =
-    "usage: pwm gpio_num duty_cycle pulse_width\r\n\r\n"
-    "Enable PWM on gpio with given duty cycle and pulse width\r\n"
+    "usage: pwm gpio_num period(us) pulse_width\r\n\r\n"
+    "Enable PWM on gpio with given period and pulse width\r\n"
     "Once the output is enabled, there is currently no way to disable\r\n"
     "or modify the output.\r\n";
 
@@ -40,7 +40,7 @@ void pwm(int argc, char **argv) {
     struct pwm *pwm;
     struct pwm_ops *ops;
     struct obj *gpio;
-    int gpio_num, duty, width;
+    int gpio_num, period, width;
     int ret;
 
     if (argc != 4) {
@@ -49,7 +49,7 @@ void pwm(int argc, char **argv) {
     }
 
     gpio_num = atoi(argv[1]);
-    duty = atoi(argv[2]);
+    period = atoi(argv[2]);
     width = atoi(argv[3]);
 
     gpio = gpio_get(gpio_num);
@@ -58,7 +58,7 @@ void pwm(int argc, char **argv) {
         return;
     }
 
-    pwm_obj = pwm_get(gpio, duty);
+    pwm_obj = pwm_get(gpio, period);
     if (!pwm_obj) {
         printf("Unable to get PWM\r\n");
         return;
