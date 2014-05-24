@@ -76,6 +76,13 @@ config PWM_CLASS
         Enable support for the PWM class and drivers.  The PWM drivers provide
         support for hardware and/or software PWM outputs, given a GPIO object.
 
+config ADC_CLASS
+    bool "ADC Support"
+    default y
+    ---help---
+        Enable support for the ADC class and drivers.  The ADC drivers provide
+        support for analog inputs, given a GPIO object.
+
 source "dev/mpu6000/Kconfig"
 
 config ACCELEROMETERS
