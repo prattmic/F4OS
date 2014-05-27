@@ -8,8 +8,8 @@
 };
 
 &spi1 {
-    lis302dl@0 {
-        compatible = "stmicro,lis302dl";
+    lis3dsh@0 {
+        compatible = "stmicro,lis3dsh";
         reg = <0>;
         cs-gpio = <&gpio 67 0>;  /* PE3 */
     };
