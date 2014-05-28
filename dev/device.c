@@ -28,15 +28,15 @@
 #include <dev/fdtparse.h>
 #include <kernel/class.h>
 #include <kernel/obj.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <mm/mm.h>
 #include <dev/device.h>
 
 struct list drivers = INIT_LIST(drivers);
-struct semaphore driver_sem = INIT_SEMAPHORE;
+struct mutex driver_mut = INIT_MUTEX;
 
 struct list compat_drivers = INIT_LIST(compat_drivers);
-struct semaphore compat_driver_sem = INIT_SEMAPHORE;
+struct mutex compat_driver_mut = INIT_MUTEX;
 
 /* Find and construct a device */
 struct obj *device_get(const char *name) {
@@ -44,14 +44,14 @@ struct obj *device_get(const char *name) {
     struct obj *obj = NULL;
     int exists;
 
-    acquire(&driver_sem);
+    acquire(&driver_mut);
     list_for_each_entry(iter, &drivers, list) {
         if (strcmp(name, iter->name) == 0) {
             driver = iter;
             break;
         }
     }
-    release(&driver_sem);
+    release(&driver_mut);
 
     /* No driver, too bad... */
     if (!driver) {
@@ -59,12 +59,12 @@ struct obj *device_get(const char *name) {
     }
 
     /*
-     * Use a driver-specific semaphore to prevent an instance of this
+     * Use a driver-specific mutex to prevent an instance of this
      * device from being constructed and added to the class after we
      * have decided that there is not an instance.  In such a case, the
      * device would get double constructed.
      */
-    acquire(driver->sem);
+    acquire(driver->mut);
 
     /* Try to find an existing instance */
     obj = get_by_name_from_class((char *)name, driver->class);
@@ -83,21 +83,21 @@ struct obj *device_get(const char *name) {
     }
 
 out:
-    release(driver->sem);
+    release(driver->mut);
 
     return obj;
 }
 
 void device_driver_register(struct device_driver *driver) {
-    acquire(&driver_sem);
+    acquire(&driver_mut);
     list_add(&driver->list, &drivers);
-    release(&driver_sem);
+    release(&driver_mut);
 }
 
 void device_compat_driver_register(struct device_driver *driver) {
-    acquire(&compat_driver_sem);
+    acquire(&compat_driver_mut);
     list_add(&driver->list, &compat_drivers);
-    release(&compat_driver_sem);
+    release(&compat_driver_mut);
 }
 
 /**
@@ -122,7 +122,7 @@ static void device_driver_register_from_compat(struct device_driver *driver,
     new->probe = driver->probe;
     new->ctor = driver->ctor;
     new->class = driver->class;
-    new->sem = driver->sem;
+    new->mut = driver->mut;
 
     device_driver_register(new);
 }
@@ -132,10 +132,10 @@ void device_driver_fdt_register(void) {
     int offset = 0;
 
     /*
-     * Nothing else should run while this does, but grab the semaphore
+     * Nothing else should run while this does, but grab the mutex
      * just to be safe.
      */
-    acquire(&compat_driver_sem);
+    acquire(&compat_driver_mut);
 
     /*
      * Walk every node in the device.  For those with a 'compatible'
@@ -188,14 +188,14 @@ next_node:
         continue;
     } while (offset >= 0);
 
-    release(&compat_driver_sem);
+    release(&compat_driver_mut);
 }
 
 int device_list_class(struct class *class, const char **names, int max) {
     struct device_driver *driver;
     int total = 0;
 
-    acquire(&driver_sem);
+    acquire(&driver_mut);
     list_for_each_entry(driver, &drivers, list) {
         if (driver->class == class) {
             if (total < max) {
@@ -204,7 +204,7 @@ int device_list_class(struct class *class, const char **names, int max) {
             total++;
         }
     }
-    release(&driver_sem);
+    release(&driver_mut);
 
     return total;
 }

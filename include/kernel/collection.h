@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -64,15 +64,15 @@
 
 #include <list.h>
 #include <kernel/obj.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
 struct collection {
-    struct semaphore lock;
+    struct mutex lock;
     struct list list;
     struct list *curr;
 };
 
-#define INIT_COLLECTION(c) { .lock = INIT_SEMAPHORE, \
+#define INIT_COLLECTION(c) { .lock = INIT_MUTEX, \
                              .list = INIT_LIST((c).list), \
                              .curr = NULL, \
                            }

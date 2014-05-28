@@ -28,7 +28,7 @@
 #include <dev/hw/i2c.h>
 #include <dev/mag.h>
 #include <kernel/init.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <mm/mm.h>
 
 #define HMC5883_COMPAT  "honeywell,hmc5883"
@@ -48,7 +48,7 @@ struct hmc5883 {
     int                 addr;
     /* Differentiate between HMC5883 and HMC5883L */
     uint8_t             is_hmc5883l;
-    struct semaphore    lock;
+    struct mutex        lock;
 };
 
 static int hmc5883_init(struct mag *mag) {
@@ -305,7 +305,7 @@ static struct obj *hmc5883_ctor(const char *name) {
     hmc_mag = (struct hmc5883 *) mag->priv;
     hmc_mag->ready = 0;
     hmc_mag->is_hmc5883l = is_hmc5883l;
-    init_semaphore(&hmc_mag->lock);
+    init_mutex(&hmc_mag->lock);
 
     err = fdtparse_get_int(blob, offset, "reg", &hmc_mag->addr);
     if (err) {
@@ -328,14 +328,14 @@ err_free_parent:
     return NULL;
 }
 
-static struct semaphore hmc5883_driver_sem = INIT_SEMAPHORE;
+static struct mutex hmc5883_driver_mut = INIT_MUTEX;
 
 static struct device_driver hmc5883_compat_driver = {
     .name = HMC5883_COMPAT,
     .probe = hmc5883_probe,
     .ctor = hmc5883_ctor,
     .class = &mag_class,
-    .sem = &hmc5883_driver_sem,
+    .mut = &hmc5883_driver_mut,
 };
 
 static struct device_driver hmc5883l_compat_driver = {
@@ -343,7 +343,7 @@ static struct device_driver hmc5883l_compat_driver = {
     .probe = hmc5883_probe,
     .ctor = hmc5883_ctor,
     .class = &mag_class,
-    .sem = &hmc5883_driver_sem,
+    .mut = &hmc5883_driver_mut,
 };
 
 /* Driver supports both hmc5883 and hmc5883l */

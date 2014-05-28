@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@
 #include <kernel/fault.h>
 #include <kernel/sched.h>
 #include <kernel/sched_internals.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
 void svc_handler(uint32_t*) __attribute__((section(".kernel")));
 
@@ -46,7 +46,7 @@ void svc_handler(uint32_t *registers) {
             break;
         case SVC_ACQUIRE:
         case SVC_RELEASE:
-            registers[0] = semaphore_service_call(svc_number, registers[0]);
+            registers[0] = mutex_service_call(svc_number, registers[0]);
             break;
         default:
             panic_print("Unknown SVC: %d", svc_number);

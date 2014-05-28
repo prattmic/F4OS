@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,7 +26,7 @@
 #include <arch/system.h>
 #include <arch/chip/registers.h>
 #include <kernel/sched.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/fault.h>
 
 #include "usbdev_internals.h"
@@ -38,16 +38,16 @@ static int usbdev_resource_swrite(char *s, void *env);
 static char usbdev_resource_read(void *env, int *error);
 static int usbdev_resource_close(struct resource *resource);
 
-struct semaphore usbdev_read_semaphore = INIT_SEMAPHORE;
-struct semaphore usbdev_write_semaphore = INIT_SEMAPHORE;
+struct mutex usbdev_read_mutex = INIT_MUTEX;
+struct mutex usbdev_write_mutex = INIT_MUTEX;
 
 resource usb_resource = {.writer     = &usbdev_resource_write,
                         .swriter    = &usbdev_resource_swrite,
                         .reader     = &usbdev_resource_read,
                         .closer     = &usbdev_resource_close,
                         .env        = NULL,
-                        .read_sem   = &usbdev_read_semaphore,
-                        .write_sem  = &usbdev_write_semaphore};
+                        .read_mut   = &usbdev_read_mutex,
+                        .write_mut  = &usbdev_write_mutex};
 
 static int usbdev_resource_write(char c, void *env) {
     if (usb_ready) {

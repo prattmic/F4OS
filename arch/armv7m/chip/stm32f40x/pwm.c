@@ -36,7 +36,7 @@
 #include <dev/hw/gpio.h>
 #include <dev/hw/pwm.h>
 #include <dev/raw_mem.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <mm/mm.h>
 
 struct stm32f4_pwm {
@@ -173,11 +173,11 @@ static uint32_t gpio_to_timer_channel[STM32F4_NUM_GPIOS] = {
 static uint32_t channels_available = 0xffffffff;
 
 /* Lock for channel_available */
-static struct semaphore channels_available_sem = INIT_SEMAPHORE;
+static struct mutex channels_available_mut = INIT_MUTEX;
 
 /* Lock for each timer */
-static struct semaphore timer_sem[PWM_NUM_TIMERS] = {
-    [0 ... (PWM_NUM_TIMERS-1)] = INIT_SEMAPHORE,
+static struct mutex timer_mut[PWM_NUM_TIMERS] = {
+    [0 ... (PWM_NUM_TIMERS-1)] = INIT_MUTEX,
 };
 
 /* Get the timer number for a given timer channel */
@@ -289,22 +289,22 @@ static uint32_t timer_all_channels(uint8_t timer) {
 }
 
 /*
- * Get the timer_sem semaphore for the given timer number.
+ * Get the timer_mut mutex for the given timer number.
  * The timer number cannot be used to directly index into the array,
  * as not all timers are used.
  */
-static struct semaphore *timer_semaphore(uint8_t timer) {
+static struct mutex *timer_mutex(uint8_t timer) {
     switch (timer) {
-        case 1: return &timer_sem[TIM1];
-        case 3: return &timer_sem[TIM3];
-        case 4: return &timer_sem[TIM4];
-        case 8: return &timer_sem[TIM8];
-        case 9 : return &timer_sem[TIM9];
-        case 10: return &timer_sem[TIM10];
-        case 11: return &timer_sem[TIM11];
-        case 12: return &timer_sem[TIM12];
-        case 13: return &timer_sem[TIM13];
-        case 14: return &timer_sem[TIM14];
+        case 1: return &timer_mut[TIM1];
+        case 3: return &timer_mut[TIM3];
+        case 4: return &timer_mut[TIM4];
+        case 8: return &timer_mut[TIM8];
+        case 9 : return &timer_mut[TIM9];
+        case 10: return &timer_mut[TIM10];
+        case 11: return &timer_mut[TIM11];
+        case 12: return &timer_mut[TIM12];
+        case 13: return &timer_mut[TIM13];
+        case 14: return &timer_mut[TIM14];
         default: return NULL;
     }
 }
@@ -586,7 +586,7 @@ static int stm32f4_pwm_enable(struct pwm *pwm, uint8_t enable) {
             return -1;
     }
 
-    acquire(timer_semaphore(stm32_pwm->timer));
+    acquire(timer_mutex(stm32_pwm->timer));
 
     if (enable) {
         raw_mem_set_bits(&regs->CCER, reg);
@@ -595,7 +595,7 @@ static int stm32f4_pwm_enable(struct pwm *pwm, uint8_t enable) {
         raw_mem_clear_bits(&regs->CCER, reg);
     }
 
-    release(timer_semaphore(stm32_pwm->timer));
+    release(timer_mutex(stm32_pwm->timer));
 
     return 0;
 }
@@ -608,7 +608,7 @@ static int32_t stm32f4_pwm_set_period(struct pwm *pwm, uint32_t period) {
     uint32_t timer_channels;
 
     /* Verify that this is the only channel in use in the timer */
-    acquire(&channels_available_sem);
+    acquire(&channels_available_mut);
 
     timer_channels = channels_available & all_channels;
 
@@ -617,7 +617,7 @@ static int32_t stm32f4_pwm_set_period(struct pwm *pwm, uint32_t period) {
         goto err;
     }
 
-    acquire(timer_semaphore(stm32_pwm->timer));
+    acquire(timer_mutex(stm32_pwm->timer));
 
     /* Prescale to 1MHz clock */
     raw_mem_write(&regs->PSC, clock/1e6 - 1);
@@ -628,14 +628,14 @@ static int32_t stm32f4_pwm_set_period(struct pwm *pwm, uint32_t period) {
     /* Generate update event to reload ARR */
     raw_mem_set_bits(&regs->EGR, TIM_EGR_UG);
 
-    release(timer_semaphore(stm32_pwm->timer));
+    release(timer_mutex(stm32_pwm->timer));
 
-    release(&channels_available_sem);
+    release(&channels_available_mut);
 
     return period;
 
 err:
-    release(&channels_available_sem);
+    release(&channels_available_mut);
     return -1;
 }
 
@@ -657,9 +657,9 @@ static int32_t stm32f4_pwm_set_pulse_width(struct pwm *pwm, uint32_t width) {
         return -1;
     }
 
-    acquire(timer_semaphore(stm32_pwm->timer));
+    acquire(timer_mutex(stm32_pwm->timer));
     raw_mem_write(ccr, value);
-    release(timer_semaphore(stm32_pwm->timer));
+    release(timer_mutex(stm32_pwm->timer));
 
     /*
      * Value will be loaded into preload register and begin outputting at next
@@ -699,18 +699,18 @@ static int stm32f4_pwm_dtor(struct pwm *pwm) {
     ops->enable(pwm, 0);
 
     /* Free timer channel that was taken */
-    acquire(&channels_available_sem);
+    acquire(&channels_available_mut);
     channels_available |= stm32_pwm->timer_channel;
 
     if ((channels_available & all_channels) == all_channels) {
         /* No other channels in timer in use, disable timer */
         struct stm32f4_timer_regs *regs = timer_get_regs(stm32_pwm->timer);
-        acquire(timer_semaphore(stm32_pwm->timer));
+        acquire(timer_mutex(stm32_pwm->timer));
         raw_mem_clear_bits(&regs->CR1, TIM_CR1_CEN);
-        release(timer_semaphore(stm32_pwm->timer));
+        release(timer_mutex(stm32_pwm->timer));
     }
 
-    release(&channels_available_sem);
+    release(&channels_available_mut);
 
     kfree(pwm->priv);
 
@@ -755,7 +755,7 @@ static enum timer_channels find_and_configure_timer_channel(struct gpio *gpio,
     valid_channels = gpio_to_timer_channel[gpio->num];
 
     /* Check for available channels */
-    acquire(&channels_available_sem);
+    acquire(&channels_available_mut);
 
     available = valid_channels & channels_available;
     if (!available) {
@@ -767,12 +767,12 @@ static enum timer_channels find_and_configure_timer_channel(struct gpio *gpio,
         uint32_t timer_channel = (1 << i);
         if (available & timer_channel) {
             uint8_t timer = timer_channel_to_timer(timer_channel);
-            acquire(timer_semaphore(timer));
+            acquire(timer_mutex(timer));
             if (!timer_enabled(timer) || (timer_period(timer) == period)) {
                 selected_timer_channel = timer_channel;
                 break;
             }
-            release(timer_semaphore(timer));
+            release(timer_mutex(timer));
         }
     }
 
@@ -796,18 +796,18 @@ static enum timer_channels find_and_configure_timer_channel(struct gpio *gpio,
         goto err_release_selected_timer;
     }
 
-    release(timer_semaphore(selected_timer));
+    release(timer_mutex(selected_timer));
 
     /* Take timer channel */
     channels_available &= ~selected_timer_channel;
-    release(&channels_available_sem);
+    release(&channels_available_mut);
 
     return selected_timer_channel;
 
 err_release_selected_timer:
-    release(timer_semaphore(selected_timer));
+    release(timer_mutex(selected_timer));
 err_release_channels_available:
-    release(&channels_available_sem);
+    release(&channels_available_mut);
     return INVALID_TIMER_CHANNEL;
 }
 
@@ -880,9 +880,9 @@ err_free_pwm_obj:
 err_put_gpio:
     obj_put(gpio_obj);
     /* Free timer channel that was taken */
-    acquire(&channels_available_sem);
+    acquire(&channels_available_mut);
     channels_available |= timer_channel;
-    release(&channels_available_sem);
+    release(&channels_available_mut);
 err:
     return NULL;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,14 +32,14 @@ typedef struct task_t task_t;
 
 typedef int8_t rd_t;
 
-struct semaphore;
+struct mutex;
 
 typedef struct resource {
-    /* Separate read and write semaphores available.
+    /* Separate read and write mutexes available.
      * For resources that require one lock for all
      * actions, these should be set equal to one another. */
-    volatile struct semaphore   *read_sem;
-    volatile struct semaphore   *write_sem;
+    volatile struct mutex       *read_mut;
+    volatile struct mutex       *write_mut;
     void                        *env;
     int                         (*writer)(char, void*);
     int                         (*swriter)(char*, void*);   /* Optional string writer function used by swrite if available  */

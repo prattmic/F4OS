@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,7 +32,7 @@
 #include <dev/resource.h>
 #include <kernel/fault.h>
 #include <kernel/sched.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <mm/mm.h>
 
 #include <dev/hw/usart.h>
@@ -44,16 +44,16 @@
  * 1KB allocated. */
 #define USART_DMA_MSIZE     (500)
 
-struct semaphore usart_read_semaphore = INIT_SEMAPHORE;
-struct semaphore usart_write_semaphore = INIT_SEMAPHORE;
+struct mutex usart_read_mutex = INIT_MUTEX;
+struct mutex usart_write_mutex = INIT_MUTEX;
 
 resource usart_resource = { .writer     = &usart_putc,
                             .swriter    = &usart_puts,
                             .reader     = &usart_getc,
                             .closer     = &usart_close,
                             .env        = NULL,
-                            .read_sem   = &usart_read_semaphore,
-                            .write_sem  = &usart_write_semaphore};
+                            .read_mut   = &usart_read_mutex,
+                            .write_mut  = &usart_write_mutex};
 
 static uint16_t usart_baud(uint32_t baud) __attribute__((section(".kernel")));
 

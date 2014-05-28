@@ -34,7 +34,7 @@
 #include <kernel/fault.h>
 #include <kernel/init.h>
 #include <kernel/sched.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <mm/mm.h>
 
 #include "lis302dl.h"
@@ -347,14 +347,14 @@ err_free_parent:
 }
 
 /* Protects the constructor from reentrance */
-static struct semaphore lis302dl_driver_sem = INIT_SEMAPHORE;
+static struct mutex lis302dl_driver_mut = INIT_MUTEX;
 
 static struct device_driver lis302dl_compat_driver = {
     .name = LIS302DL_COMPAT,
     .probe = lis302dl_probe,
     .ctor = lis302dl_ctor,
     .class = &accel_class,
-    .sem = &lis302dl_driver_sem,
+    .mut = &lis302dl_driver_mut,
 };
 
 static int lis302dl_register(void) {

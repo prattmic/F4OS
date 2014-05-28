@@ -30,13 +30,13 @@
 #include <dev/hw/i2c.h>
 #include <dev/baro.h>
 #include <kernel/init.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <mm/mm.h>
 
 struct ms5611 {
     uint8_t             ready;
     int                 addr;
-    struct semaphore    lock;
+    struct mutex        lock;
     uint16_t            c[7];   /* Conversion parameters */
 };
 
@@ -57,12 +57,12 @@ static int ms5611_init(struct baro *baro) {
         packet = 0xA0 + 2*i;  /* Read C[i] */
         ret = i2c_ops->write(i2c, ms5611_baro->addr, &packet, 1);
         if (ret != 1) {
-            goto err_release_sem;
+            goto err_release_mut;
         }
 
         ret = i2c_ops->read(i2c, ms5611_baro->addr, data, 2);
         if (ret != 2) {
-            goto err_release_sem;
+            goto err_release_mut;
         }
 
         ms5611_baro->c[i] = (data[0] << 8) | data[1];
@@ -74,7 +74,7 @@ static int ms5611_init(struct baro *baro) {
 
     return 0;
 
-err_release_sem:
+err_release_mut:
     release(&ms5611_baro->lock);
     return -1;
 }
@@ -141,7 +141,7 @@ static int ms5611_get_data(struct baro *baro, struct baro_data *data) {
     packet = 0x48;  /* Initiate pressure conversion */
     ret = i2c_ops->write(i2c, ms5611_baro->addr, &packet, 1);
     if (ret != 1) {
-        goto err_release_sem;
+        goto err_release_mut;
     }
 
     /* Wait 10ms for conversion */
@@ -150,13 +150,13 @@ static int ms5611_get_data(struct baro *baro, struct baro_data *data) {
     /* Digital pressure value */
     ret = ms5611_read_adc(i2c, ms5611_baro->addr, &d1);
     if (ret) {
-        goto err_release_sem;
+        goto err_release_mut;
     }
 
     packet = 0x58;  /* Initiate temperature conversion */
     ret = i2c_ops->write(i2c, ms5611_baro->addr, &packet, 1);
     if (ret != 1) {
-        goto err_release_sem;
+        goto err_release_mut;
     }
 
     /* Wait 10ms for conversion */
@@ -165,7 +165,7 @@ static int ms5611_get_data(struct baro *baro, struct baro_data *data) {
     /* Digital temperature value */
     ret = ms5611_read_adc(i2c, ms5611_baro->addr, &d2);
     if (ret) {
-        goto err_release_sem;
+        goto err_release_mut;
     }
 
     release(&ms5611_baro->lock);
@@ -207,7 +207,7 @@ static int ms5611_get_data(struct baro *baro, struct baro_data *data) {
 
     return 0;
 
-err_release_sem:
+err_release_mut:
     release(&ms5611_baro->lock);
     return -1;
 }
@@ -331,7 +331,7 @@ static struct obj *ms5611_ctor(const char *name) {
 
     ms5611_baro = (struct ms5611 *) baro->priv;
     ms5611_baro->ready = 0;
-    init_semaphore(&ms5611_baro->lock);
+    init_mutex(&ms5611_baro->lock);
 
     err = fdtparse_get_int(blob, offset, "reg", &ms5611_baro->addr);
     if (err) {
@@ -354,14 +354,14 @@ err_free_parent:
     return NULL;
 }
 
-static struct semaphore ms5611_driver_sem = INIT_SEMAPHORE;
+static struct mutex ms5611_driver_mut = INIT_MUTEX;
 
 static struct device_driver ms5611_compat_driver = {
     .name = MS5611_COMPAT,
     .probe = ms5611_probe,
     .ctor = ms5611_ctor,
     .class = &baro_class,
-    .sem = &ms5611_driver_sem,
+    .mut = &ms5611_driver_mut,
 };
 
 static int ms5611_register(void) {

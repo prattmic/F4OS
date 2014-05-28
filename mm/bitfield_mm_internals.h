@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -52,8 +52,8 @@ typedef struct mm_block {
 
 extern mm_block_t userheap[];
 extern mm_block_t kernelheap[];
-extern struct semaphore userheap_mutex;
-extern struct semaphore kernelheap_mutex;
+extern struct mutex userheap_mutex;
+extern struct mutex kernelheap_mutex;
 
 /* Returns value to left shift mask by to look at freemask */
 static inline uint32_t addr_to_grain_offset(void *addr, void *base) {

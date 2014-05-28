@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -42,7 +42,7 @@ void *malloc(size_t size) {
     uint8_t order = size_to_order(size + MM_HEADER_SIZE);
     void *address;
 
-    acquire(&user_buddy.semaphore);
+    acquire(&user_buddy.mutex);
 
 #ifdef CONFIG_MM_PROFILING
     begin_malloc_timestamp = perfcounter_getcount();
@@ -54,7 +54,7 @@ void *malloc(size_t size) {
     end_malloc_timestamp = perfcounter_getcount();
 #endif
 
-    release(&user_buddy.semaphore);
+    release(&user_buddy.mutex);
 
     return address;
 }
@@ -66,9 +66,9 @@ void *kmalloc(size_t size) {
     uint8_t order = size_to_order(size + MM_HEADER_SIZE);
     void *address;
 
-    acquire(&kernel_buddy.semaphore);
+    acquire(&kernel_buddy.mutex);
     address = alloc(order, &kernel_buddy);
-    release(&kernel_buddy.semaphore);
+    release(&kernel_buddy.mutex);
 
     return address;
 }

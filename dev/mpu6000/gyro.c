@@ -223,14 +223,14 @@ err_free_parent:
     return NULL;
 }
 
-static struct semaphore mpu6000_gyro_driver_sem = INIT_SEMAPHORE;
+static struct mutex mpu6000_gyro_driver_mut = INIT_MUTEX;
 
 static struct device_driver mpu6000_gyro_compat_driver = {
     .name = MPU6000_GYRO_COMPAT,
     .probe = mpu6000_gyro_probe,
     .ctor = mpu6000_gyro_ctor,
     .class = &gyro_class,
-    .sem = &mpu6000_gyro_driver_sem,
+    .mut = &mpu6000_gyro_driver_mut,
 };
 
 static int mpu6000_gyro_register(void) {

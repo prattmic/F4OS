@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,11 +22,11 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
 #include "bitfield_mm_internals.h"
 
-static void *alloc(mm_block_t *heap, uint32_t hlen, uint16_t grains, void *base, struct semaphore *mutex) {
+static void *alloc(mm_block_t *heap, uint32_t hlen, uint16_t grains, void *base, struct mutex *mutex) {
     void *ret = NULL;
     uint32_t mask;
     uint32_t curr_free_blocks;

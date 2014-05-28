@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,7 +23,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/fault.h>
 
 #include <mm/mm.h>
@@ -34,17 +34,17 @@ static void buddy_merge(struct heapnode *node, struct buddy *buddy) __attribute_
 void free(void *address) {
     struct heapnode *node = (struct heapnode *) ((uint8_t *) address - MM_HEADER_SIZE);
 
-    acquire(&user_buddy.semaphore);
+    acquire(&user_buddy.mutex);
     buddy_merge(node, &user_buddy);
-    release(&user_buddy.semaphore);
+    release(&user_buddy.mutex);
 }
 
 void kfree(void *address) {
     struct heapnode *node = (struct heapnode *) ((uint8_t *) address - MM_HEADER_SIZE);
 
-    acquire(&kernel_buddy.semaphore);
+    acquire(&kernel_buddy.mutex);
     buddy_merge(node, &kernel_buddy);
-    release(&kernel_buddy.semaphore);
+    release(&kernel_buddy.mutex);
 }
 
 void buddy_merge(struct heapnode *node, struct buddy *buddy) {

@@ -25,10 +25,10 @@
 
 #include <dev/hw/gpio.h>
 #include <kernel/obj.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
 struct spi {
-    struct semaphore    lock;
+    struct mutex        lock;
     void                *priv;
     struct obj          obj;
 };

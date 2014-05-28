@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -33,13 +33,13 @@
 #include <dev/resource.h>
 #include <dev/shared_mem.h>
 #include <kernel/sched.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
-struct semaphore abandoned_sem = INIT_SEMAPHORE;
+struct mutex abandoned_mut = INIT_MUTEX;
 
-struct semaphore deadlock_sem1 = INIT_SEMAPHORE;
+struct mutex deadlock_mut1 = INIT_MUTEX;
 
-struct semaphore deadlock_sem2 = INIT_SEMAPHORE;
+struct mutex deadlock_mut2 = INIT_MUTEX;
 
 void abandon(void);
 void attempt_acquire(void);
@@ -64,7 +64,7 @@ void unit_tests(void) {
     fprintf(stderr, "Press any key on stdin to begin tests. (You passed the stderr test).\r\n");
     getc();
 
-    printf("Abandoned semaphore test...");
+    printf("Abandoned mutex test...");
     new_task(&abandon, 1, 0);
 
     //printf("Deadlock test...");
@@ -84,29 +84,29 @@ void unit_tests(void) {
 }
 
 void abandon(void) {
-    acquire(&abandoned_sem);
+    acquire(&abandoned_mut);
     new_task(&attempt_acquire, 1, 0);
 }
 
 void attempt_acquire(void) {
-    acquire(&abandoned_sem);
-    printf("Abandoned semaphore test passed.\r\n");
-    release(&abandoned_sem);
+    acquire(&abandoned_mut);
+    printf("Abandoned mutex test passed.\r\n");
+    release(&abandoned_mut);
 }
 
 void deadlock(void) {
-    acquire(&deadlock_sem1);
+    acquire(&deadlock_mut1);
     new_task(&deadlock2, 1, 0);
 
-    printf("Deadlock 1 is spending ages printing to the UART so that deadlock 2 can steal my other semaphore.\r\n");
-    acquire(&deadlock_sem2);
-    printf("Deadlock 1 acquired both semaphores.\r\n");
+    printf("Deadlock 1 is spending ages printing to the UART so that deadlock 2 can steal my other mutex.\r\n");
+    acquire(&deadlock_mut2);
+    printf("Deadlock 1 acquired both mutexes.\r\n");
 }
 
 void deadlock2(void) {
-    acquire(&deadlock_sem2);
-    acquire(&deadlock_sem1);
-    printf("Deadlock 2 acquired both semaphores.\r\n");
+    acquire(&deadlock_mut2);
+    acquire(&deadlock_mut1);
+    printf("Deadlock 2 acquired both mutexes.\r\n");
 }
 
 void rd_test(void) {

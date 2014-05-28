@@ -29,7 +29,7 @@
 #include <dev/hw/i2c.h>
 #include <dev/rotary_encoder.h>
 #include <kernel/init.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <mm/mm.h>
 
 #define AS5048B_COMPAT  "ams,as5048b"
@@ -46,7 +46,7 @@
 #define AS5048B_PROG_ENA    (1 << 0)
 
 struct as5048b {
-    struct semaphore    lock;
+    struct mutex    lock;
     uint32_t calibration_zero;
     int addr;
 };
@@ -320,7 +320,7 @@ static struct obj *as5048b_ctor(const char *name) {
     }
 
     ams_rotary_encoder = (struct as5048b *) rotary_encoder->priv;
-    init_semaphore(&ams_rotary_encoder->lock);
+    init_mutex(&ams_rotary_encoder->lock);
     ams_rotary_encoder->calibration_zero = 0;
 
     err = fdtparse_get_int(blob, offset, "reg", &ams_rotary_encoder->addr);
@@ -342,14 +342,14 @@ err_free_parent:
     return NULL;
 }
 
-static struct semaphore as5048b_driver_sem = INIT_SEMAPHORE;
+static struct mutex as5048b_driver_mut = INIT_MUTEX;
 
 static struct device_driver as5048b_compat_driver = {
     .name = AS5048B_COMPAT,
     .probe = as5048b_probe,
     .ctor = as5048b_ctor,
     .class = &rotary_encoder_class,
-    .sem = &as5048b_driver_sem,
+    .mut = &as5048b_driver_mut,
 };
 
 static int as5048b_register(void) {

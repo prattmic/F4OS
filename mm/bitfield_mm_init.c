@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,12 +22,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
 #include "bitfield_mm_internals.h"
 
-struct semaphore userheap_mutex = INIT_SEMAPHORE;
-struct semaphore kernelheap_mutex = INIT_SEMAPHORE;
+struct mutex userheap_mutex = INIT_MUTEX;
+struct mutex kernelheap_mutex = INIT_MUTEX;
 
 mm_block_t userheap[MM_USER_NUM_BLOCKS];
 mm_block_t kernelheap[MM_KERNEL_NUM_BLOCKS];

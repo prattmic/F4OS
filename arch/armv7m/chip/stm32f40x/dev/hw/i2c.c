@@ -33,7 +33,7 @@
 #include <dev/raw_mem.h>
 #include <dev/resource.h>
 #include <kernel/fault.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/class.h>
 #include <kernel/init.h>
 #include <mm/mm.h>
@@ -60,7 +60,7 @@ struct stm32f4_i2c {
  * Initialize the I2C peripheral registers to the standard state.
  * For now, all I2C ports are configured the same.
  *
- * The I2C semaphore should be held when calling this function.
+ * The I2C mutex should be held when calling this function.
  *
  * @param i2c   I2C peripheral to initialize
  * @returns zero on success, negative on error
@@ -128,7 +128,7 @@ static int stm32f4_i2c_deinit(struct i2c *i2c) {
  * communication, leaving the peripheral expecting communication that won't
  * occur.  The only solution is to reset the peripheral.
  *
- * The I2C semaphore should be held when calling this function.
+ * The I2C mutex should be held when calling this function.
  *
  * Upon successful return, normal I2C use can continue.
  *
@@ -163,7 +163,7 @@ static int stm32f4_i2c_reset(struct i2c *i2c) {
  * by manually clocking SCL until SDA is released by the slave.  As far as it
  * is concerned, we just completed a normal transaction.
  *
- * The I2C semaphore should be held when calling this function.
+ * The I2C mutex should be held when calling this function.
  *
  * @param i2c   I2C bus to clear
  * @returns 0 if BUSY successfully cleared, negative otherwise
@@ -500,7 +500,7 @@ static struct obj *stm32f4_i2c_ctor(const char *name) {
 
     i2c = to_i2c(obj);
 
-    init_semaphore(&i2c->lock);
+    init_mutex(&i2c->lock);
 
     i2c->priv = kmalloc(sizeof(struct stm32f4_i2c));
     if (!i2c->priv) {
@@ -587,14 +587,14 @@ err_free_obj:
     return NULL;
 }
 
-static struct semaphore stm32f4_i2c_driver_sem = INIT_SEMAPHORE;
+static struct mutex stm32f4_i2c_driver_mut = INIT_MUTEX;
 
 static struct device_driver stm32f4_i2c_compat_driver = {
     .name = STM32F4_I2C_COMPAT,
     .probe = stm32f4_i2c_probe,
     .ctor = stm32f4_i2c_ctor,
     .class = &i2c_class,
-    .sem = &stm32f4_i2c_driver_sem,
+    .mut = &stm32f4_i2c_driver_mut,
 };
 
 static int stm32f4_i2c_register(void) {

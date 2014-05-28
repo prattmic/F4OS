@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mm/mm.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <mm/mm.h>
@@ -68,15 +68,15 @@ rd_t open_shared_mem(void) {
     new_r->swriter = NULL;
     new_r->reader = &shared_mem_read;
     new_r->closer = &shared_mem_close;
-    new_r->read_sem = kmalloc(sizeof(semaphore));
-    if (new_r->read_sem) {
-        init_semaphore(new_r->read_sem);
+    new_r->read_mut = kmalloc(sizeof(mutex));
+    if (new_r->read_mut) {
+        init_mutex(new_r->read_mut);
     }
     else {
         ret = -1;
         goto err_free_new_r;
     }
-    new_r->write_sem = new_r->read_sem;
+    new_r->write_mut = new_r->read_mut;
 
     ret = add_resource(curr_task, new_r);
     if (ret < 0) {
@@ -120,8 +120,8 @@ int shared_mem_write(char c, void *env) {
 
 int shared_mem_close(resource *resource) {
     kfree(resource->env);
-    acquire_for_free(resource->read_sem);
-    kfree((void*) resource->read_sem);
+    acquire_for_free(resource->read_mut);
+    kfree((void*) resource->read_mut);
 
     return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,12 +22,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/fault.h>
 
 #include "bitfield_mm_internals.h"
 
-static void free_mem(void *mem, mm_block_t *heap, void *base, struct semaphore *mutex) {
+static void free_mem(void *mem, mm_block_t *heap, void *base, struct mutex *mutex) {
     alloc_header_t *header = (alloc_header_t *)((uintptr_t)mem - sizeof(alloc_header_t));
 
     if(header->magic != MM_MAGIC)

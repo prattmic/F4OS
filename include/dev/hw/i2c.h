@@ -25,10 +25,10 @@
 
 #include <stdint.h>
 #include <kernel/obj.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
 struct i2c {
-    struct semaphore    lock;
+    struct mutex        lock;
     void                *priv;
     struct obj          obj;
 };

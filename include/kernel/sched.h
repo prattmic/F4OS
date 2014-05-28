@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <compiler.h>
 #include <dev/resource.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/svc.h>
 
 /* Boolean field indicating whether or not the scheduler
@@ -40,7 +40,7 @@ extern volatile uint8_t task_switching;
  * the scheduler. */
 typedef struct task_t {
     struct task_resource_data   resource_data;
-    struct task_semaphore_data  semaphore_data;
+    struct task_mutex_data  mutex_data;
 } task_t;
 
 /* Unique identifier of the currently executing task */

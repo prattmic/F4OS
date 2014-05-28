@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -30,18 +30,18 @@ static uint32_t free_memory(struct buddy *buddy);
 
 uint32_t mm_space(void) {
     uint32_t space;
-    acquire(&user_buddy.semaphore);
+    acquire(&user_buddy.mutex);
     space = free_memory(&user_buddy);
-    release(&user_buddy.semaphore);
+    release(&user_buddy.mutex);
 
     return space;
 }
 
 uint32_t mm_kspace(void) {
     uint32_t space;
-    acquire(&kernel_buddy.semaphore);
+    acquire(&kernel_buddy.mutex);
     space = free_memory(&kernel_buddy);
-    release(&kernel_buddy.semaphore);
+    release(&kernel_buddy.mutex);
 
     return space;
 }

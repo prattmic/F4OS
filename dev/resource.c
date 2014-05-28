@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
 #include <string.h>
 #include <mm/mm.h>
 #include <kernel/sched.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/fault.h>
 
 #include <dev/resource.h>
@@ -145,7 +145,7 @@ int write(rd_t rd, char* d, int n) {
 
     int tot = 0;
 
-    acquire(resource->write_sem);
+    acquire(resource->write_mut);
 
     for(int i = 0; i < n; i++) {
         int ret = resource->writer(d[i], resource->env);
@@ -159,7 +159,7 @@ int write(rd_t rd, char* d, int n) {
         }
     }
 
-    release(resource->write_sem);
+    release(resource->write_mut);
 
     return tot;
 }
@@ -173,7 +173,7 @@ int swrite(rd_t rd, char* s) {
 
     int ret = 0;
 
-    acquire(resource->write_sem);
+    acquire(resource->write_mut);
 
     if (resource->swriter) {
         ret = resource->swriter(s, resource->env);
@@ -191,7 +191,7 @@ int swrite(rd_t rd, char* s) {
         }
     }
 
-    release(resource->write_sem);
+    release(resource->write_mut);
 
     return ret;
 }
@@ -230,7 +230,7 @@ int read(rd_t rd, char *buf, int n) {
 
     int tot = 0;
 
-    acquire(resource->read_sem);
+    acquire(resource->read_mut);
 
     for(int i = 0; i < n; i++) {
         int error;
@@ -246,7 +246,7 @@ int read(rd_t rd, char *buf, int n) {
         }
     }
 
-    release(resource->read_sem);
+    release(resource->read_mut);
 
     return tot;
 }

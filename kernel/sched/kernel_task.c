@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,7 +23,7 @@
 #include <stddef.h>
 #include <kernel/power.h>
 #include <kernel/fault.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/sched.h>
 #include <kernel/sched_internals.h>
 #include "sched_internals.h"
@@ -37,12 +37,12 @@ void kernel_task(void) {
         struct list *element = list_pop(&free_task_list);
         struct task_ctrl *task = list_entry(element, struct task_ctrl, free_task_list);
 
-        /* Free abandoned semaphores */
-        for (int i = 0; i < HELD_SEMAPHORES_MAX; i++) {
-            struct task_semaphore_data *sem_data = &get_task_t(task)->semaphore_data;
+        /* Free abandoned mutexes */
+        for (int i = 0; i < HELD_MUTEXES_MAX; i++) {
+            struct task_mutex_data *mut_data = &get_task_t(task)->mutex_data;
 
-            if (sem_data->held_semaphores[i]) {
-                release(sem_data->held_semaphores[i]);
+            if (mut_data->held_mutexes[i]) {
+                release(mut_data->held_mutexes[i]);
             }
         }
 

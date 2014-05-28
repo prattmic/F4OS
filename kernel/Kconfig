@@ -19,11 +19,11 @@ config RESOURCE_TABLE_SIZE
         The maximum number of resources any given task will
         be able to open at one time.
 
-config HELD_SEMAPHORES_MAX
+config HELD_MUTEXES_MAX
     int
-    prompt "Maximum number of held semaphores per task"
+    prompt "Maximum number of held mutexes per task"
     default 6
     ---help---
-        The maximum number of semaphores any given task will
-        be able to hold at one time.  Each held semaphore must
+        The maximum number of mutexes any given task will
+        be able to hold at one time.  Each held mutex must
         be stored alongside the task to aid in deadlock checking.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,7 +23,7 @@
 #ifndef MM_BUDDY_MM_INTERNALS_INCLUDED
 #define MM_BUDDY_MM_INTERNALS_INCLUDED
 
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
 #define MM_MAGIC    0xBEEF
 
@@ -42,7 +42,7 @@ struct heapnode {
 struct buddy {
     uint8_t max_order;
     uint8_t min_order;
-    struct semaphore semaphore;
+    struct mutex mutex;
     struct heapnode **list;
 };
 

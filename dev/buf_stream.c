@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <mm/mm.h>
 #include <kernel/sched.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/fault.h>
 #include <dev/resource.h>
 
@@ -64,9 +64,9 @@ static int buf_stream_write(char c, void *env) {
 }
 
 static int buf_stream_close(resource *resource) {
-    acquire_for_free(resource->read_sem);
+    acquire_for_free(resource->read_mut);
     free(resource->env);
-    free((void*) resource->read_sem);
+    free((void*) resource->read_mut);
     return 0;
 }
 
@@ -94,15 +94,15 @@ rd_t open_buf_stream(char *buf, uint32_t len) {
     new_r->swriter = NULL;
     new_r->reader = &buf_stream_read;
     new_r->closer = &buf_stream_close;
-    new_r->read_sem = malloc(sizeof(semaphore));
-    if (new_r->read_sem) {
-        init_semaphore(new_r->read_sem);
+    new_r->read_mut = malloc(sizeof(mutex));
+    if (new_r->read_mut) {
+        init_mutex(new_r->read_mut);
     }
     else {
         ret = -1;
         goto err_free_new_r;
     }
-    new_r->write_sem = new_r->read_sem;
+    new_r->write_mut = new_r->read_mut;
 
     ret = add_resource(curr_task, new_r);
     if (ret < 0) {

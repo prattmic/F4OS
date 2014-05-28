@@ -25,7 +25,7 @@
 
 #include <list.h>
 #include <kernel/obj.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/class.h>
 
 /*
@@ -43,7 +43,7 @@ struct device_driver {
     int                 (*probe)(const char *);
     struct obj          *(*ctor)(const char *);
     struct class        *class;
-    struct semaphore    *sem;
+    struct mutex        *mut;
     struct list         list;
 };
 

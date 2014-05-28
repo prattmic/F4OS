@@ -33,7 +33,7 @@
 #include <dev/device.h>
 #include <dev/fdtparse.h>
 #include <dev/hw/gpio.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/class.h>
 #include <kernel/init.h>
 #include <mm/mm.h>
@@ -49,7 +49,7 @@ struct stm32f4_spi {
     struct stm32f4_spi_regs *regs;
 };
 
-/* The SPI semaphore must already be held when calling this function */
+/* The SPI mutex must already be held when calling this function */
 static int stm32f4_spi_init(struct spi *s) {
     int ret = 0;
     struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
@@ -276,7 +276,7 @@ static struct obj *stm32f4_spi_ctor(const char *name) {
 
     spi = to_spi(obj);
 
-    init_semaphore(&spi->lock);
+    init_mutex(&spi->lock);
 
     spi->priv = kmalloc(sizeof(struct stm32f4_spi));
     if (!spi->priv) {
@@ -356,14 +356,14 @@ err_free_obj:
     return NULL;
 }
 
-static struct semaphore stm32f4_spi_driver_sem = INIT_SEMAPHORE;
+static struct mutex stm32f4_spi_driver_mut = INIT_MUTEX;
 
 static struct device_driver stm32f4_spi_compat_driver = {
     .name = STM32F4_SPI_COMPAT,
     .probe = stm32f4_spi_probe,
     .ctor = stm32f4_spi_ctor,
     .class = &spi_class,
-    .sem = &stm32f4_spi_driver_sem,
+    .mut = &stm32f4_spi_driver_mut,
 };
 
 static int stm32f4_spi_register(void) {

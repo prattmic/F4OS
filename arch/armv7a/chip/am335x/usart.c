@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <dev/raw_mem.h>
 #include <dev/resource.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <kernel/fault.h>
 #include "clocks.h"
 #include "memory_map.h"
@@ -46,8 +46,8 @@
 #define UART0_SYSC      ((volatile uint32_t *) (AM335X_UART0_BASE + 0x40))
 #define UART0_SYSS      ((volatile uint32_t *) (AM335X_UART0_BASE + 0x44))
 
-struct semaphore am335x_usart_read_semaphore = INIT_SEMAPHORE;
-struct semaphore am335x_usart_write_semaphore = INIT_SEMAPHORE;
+struct mutex am335x_usart_read_mutex = INIT_MUTEX;
+struct mutex am335x_usart_write_mutex = INIT_MUTEX;
 
 int usart_ready = 1;
 
@@ -152,6 +152,6 @@ resource usart_resource = { .writer     = &usart_putc,
                             .reader     = &usart_getc,
                             .closer     = &usart_close,
                             .env        = NULL,
-                            .read_sem   = &am335x_usart_read_semaphore,
-                            .write_sem  = &am335x_usart_write_semaphore};
+                            .read_mut   = &am335x_usart_read_mutex,
+                            .write_mut  = &am335x_usart_write_mutex};
 

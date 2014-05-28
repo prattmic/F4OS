@@ -24,7 +24,7 @@
 #include <kernel/fault.h>
 #include <kernel/sched.h>
 #include <kernel/sched_internals.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <arch/system_regs.h>
 #include "sched_asm.h"
 
@@ -60,7 +60,7 @@ void __attribute__((section(".kernel"))) svc_handler(struct stacked_registers *r
             break;
         case SVC_ACQUIRE:
         case SVC_RELEASE:
-            registers->r0 = semaphore_service_call(svc_number, registers->r0);
+            registers->r0 = mutex_service_call(svc_number, registers->r0);
             break;
         default:
             panic_print("Unknown SVC: %d", svc_number);

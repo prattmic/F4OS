@@ -394,7 +394,7 @@ static struct obj *mpu6000_spi_ctor(const char *name) {
     mpu->ready = 0;
     mpu->gyro_in_use = 0;
     mpu->accel_in_use = 0;
-    init_semaphore(&mpu->lock);
+    init_mutex(&mpu->lock);
 
     /* Set up private data */
     mpu->priv = kmalloc(sizeof(struct mpu6000_spi));
@@ -425,14 +425,14 @@ err_free_parent:
     return NULL;
 }
 
-static struct semaphore mpu6000_spi_driver_sem = INIT_SEMAPHORE;
+static struct mutex mpu6000_spi_driver_mut = INIT_MUTEX;
 
 static struct device_driver mpu6000_spi_compat_driver = {
     .name = MPU6000_SPI_COMPAT,
     .probe = mpu6000_spi_probe,
     .ctor = mpu6000_spi_ctor,
     .class = &mpu6000_class,
-    .sem = &mpu6000_spi_driver_sem,
+    .mut = &mpu6000_spi_driver_mut,
 };
 
 static int mpu6000_spi_register(void) {

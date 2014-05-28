@@ -27,7 +27,7 @@
 #include <dev/hw/i2c.h>
 #include <dev/gyro.h>
 #include <kernel/init.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 #include <mm/mm.h>
 
 #define ITG3200_COMPAT  "invensense,itg3200"
@@ -42,7 +42,7 @@
 struct itg3200 {
     uint8_t             ready;
     int                 addr;
-    struct semaphore    lock;
+    struct mutex        lock;
 };
 
 static int itg3200_init(struct gyro *gyro) {
@@ -286,7 +286,7 @@ static struct obj *itg3200_ctor(const char *name) {
 
     itg_gyro = (struct itg3200 *) gyro->priv;
     itg_gyro->ready = 0;
-    init_semaphore(&itg_gyro->lock);
+    init_mutex(&itg_gyro->lock);
 
     err = fdtparse_get_int(blob, offset, "reg", &itg_gyro->addr);
     if (err) {
@@ -309,14 +309,14 @@ err_free_parent:
     return NULL;
 }
 
-static struct semaphore itg3200_driver_sem = INIT_SEMAPHORE;
+static struct mutex itg3200_driver_mut = INIT_MUTEX;
 
 static struct device_driver itg3200_compat_driver = {
     .name = ITG3200_COMPAT,
     .probe = itg3200_probe,
     .ctor = itg3200_ctor,
     .class = &gyro_class,
-    .sem = &itg3200_driver_sem,
+    .mut = &itg3200_driver_mut,
 };
 
 static int itg3200_register(void) {

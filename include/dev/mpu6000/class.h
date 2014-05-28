@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@
 #include <dev/device.h>
 #include <kernel/class.h>
 #include <kernel/obj.h>
-#include <kernel/semaphore.h>
+#include <kernel/mutex.h>
 
 struct mpu6000 {
     struct device       device;
@@ -35,7 +35,7 @@ struct mpu6000 {
     uint8_t             ready;
     uint8_t             gyro_in_use;
     uint8_t             accel_in_use;
-    struct semaphore    lock;
+    struct mutex        lock;
     void                *priv;
 };
 
