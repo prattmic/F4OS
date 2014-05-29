@@ -8,5 +8,6 @@ SRCS += shared_mem.c
 SRCS += buf_stream.c
 SRCS += regression.c
 SRCS += init.c
+SRCS += mutex.c
 
 include $(BASE)/tools/submake.mk
