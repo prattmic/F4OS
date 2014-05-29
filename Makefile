@@ -208,11 +208,9 @@ $(PREFIX)/device_tree.dtb: $(BASE)/$(CONFIG_DEVICE_TREE)
 
 # Generate an assembly file to include the dtb in the correct section,
 # and build that into an object file.
-$(PREFIX)/device_tree.o: $(PREFIX)/device_tree.dtb
-	$(call print_command,"GEN",$(call relative_path,$(PREFIX)/device_tree.s))
-	$(VERBOSE)echo ".section .dtb, \"wa\"\n.incbin \"$<\"" > $(PREFIX)/device_tree.s
+$(PREFIX)/device_tree.o: $(PREFIX)/device_tree.dtb $(BASE)/tools/device_tree.S
 	$(call print_command,"CC",$(call relative_path,$@))
-	$(VERBOSE)$(CC) $(CFLAGS) -o $@ -c $(PREFIX)/device_tree.s
+	$(VERBOSE)$(CC) $(CFLAGS) -o $@ -DDEVICE_TREE_SOURCE='"$<"' -c $(BASE)/tools/device_tree.S
 
 $(PREFIX)/$(PROJ_NAME).o: $(KCONFIG_HEADER) $(PREFIX)/include .FORCE
 	$(call print_command,"MAKE",$(call relative_path,$@))
