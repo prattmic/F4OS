@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,13 +22,13 @@
 
 #include <string.h>
 #include <kernel/collection.h>
-#include <stdio.h>
+#include <kernel/reentrant_mutex.h>
 
 struct obj *collection_iter(struct collection *c) {
-    acquire(&c->lock);
+    reentrant_acquire(&c->lock);
 
     if(list_empty(&c->list)) {
-        release(&c->lock);
+        reentrant_release(&c->lock);
         return NULL;
     }
 
@@ -37,7 +37,7 @@ struct obj *collection_iter(struct collection *c) {
 }
 
 void collection_stop(struct collection *c) {
-    release(&c->lock);
+    reentrant_release(&c->lock);
 }
 
 struct obj *collection_next(struct collection *c) {
@@ -52,27 +52,27 @@ struct obj *collection_next(struct collection *c) {
 }
 
 void collection_add(struct collection *c, struct obj *o) {
-    acquire(&c->lock);
+    reentrant_acquire(&c->lock);
     list_add(&c->list, &o->list);
-    release(&c->lock);
+    reentrant_release(&c->lock);
 }
 
 void collection_del(struct collection *c, struct obj *o) {
-    acquire(&c->lock);
+    reentrant_acquire(&c->lock);
     list_remove(&o->list);
-    release(&c->lock);
+    reentrant_release(&c->lock);
 }
 
 struct obj *get_by_name(char *name, struct collection *c) {
     struct obj *curr;
 
-    acquire(&c->lock);
+    reentrant_acquire(&c->lock);
     list_for_each_entry(curr, &c->list, list) {
         if(!strncmp(curr->name, name, 32)) {
-            release(&c->lock);
+            reentrant_release(&c->lock);
             return curr;
         }
     }
-    release(&c->lock);
+    reentrant_release(&c->lock);
     return NULL;
 }

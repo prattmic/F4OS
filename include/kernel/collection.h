@@ -64,15 +64,15 @@
 
 #include <list.h>
 #include <kernel/obj.h>
-#include <kernel/mutex.h>
+#include <kernel/reentrant_mutex.h>
 
 struct collection {
-    struct mutex lock;
+    struct reentrant_mutex lock;
     struct list list;
     struct list *curr;
 };
 
-#define INIT_COLLECTION(c) { .lock = INIT_MUTEX, \
+#define INIT_COLLECTION(c) { .lock = INIT_REENTRANT_MUTEX, \
                              .list = INIT_LIST((c).list), \
                              .curr = NULL, \
                            }
