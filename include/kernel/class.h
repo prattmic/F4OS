@@ -61,7 +61,7 @@ typedef struct class {
 #define to_class(__obj) container_of((__obj), struct class, obj)
 
 #define get_by_name_from_class(__name, __cls) \
-    get_by_name((__name), &(__cls)->instances)
+    collection_get_by_name(&(__cls)->instances, (__name))
 
 /*
  * Instantiate a class member

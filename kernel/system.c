@@ -43,7 +43,7 @@ int create_dev_system(void) {
 CORE_INITIALIZER(create_dev_system)
 
 struct obj *get_by_name_from_system(struct system *sys, char *cls_name, char *inst_name) {
-    struct obj *cls_obj = get_by_name(cls_name, &sys->classes);
+    struct obj *cls_obj = collection_get_by_name(&sys->classes, cls_name);
 
     if(!cls_obj)
         return NULL;
@@ -53,7 +53,7 @@ struct obj *get_by_name_from_system(struct system *sys, char *cls_name, char *in
 }
 
 struct obj *get_system_by_name(char *name) {
-    return get_by_name(name, &systems);
+    return collection_get_by_name(&systems, name);
 }
 
 void register_with_system(struct system *sys, struct class *cls) {

@@ -22,13 +22,52 @@
 
 #include <string.h>
 #include <kernel/collection.h>
+#include <kernel/fault.h>
 #include <kernel/reentrant_mutex.h>
 
+/**
+ * Determine if iteration is in progress
+ *
+ * @param c collection to check
+ * @returns 1 if iteration is in progress, 0 otherwise
+ */
+static int collection_iterating(struct collection *c) {
+    int iterating = 0;
+
+    collection_lock(c);
+    if (c->curr) {
+        iterating = 1;
+    }
+    collection_unlock(c);
+
+    return iterating;
+}
+
+void collection_lock(struct collection *c) {
+    WARN_ON(!c);
+
+    if (c) {
+        reentrant_acquire(&c->lock);
+    }
+}
+
+void collection_unlock(struct collection *c) {
+    WARN_ON(!c);
+
+    if (c) {
+        reentrant_release(&c->lock);
+    }
+}
+
 struct obj *collection_iter(struct collection *c) {
-    reentrant_acquire(&c->lock);
+    if (!c) {
+        return NULL;
+    }
+
+    collection_lock(c);
 
     if(list_empty(&c->list)) {
-        reentrant_release(&c->lock);
+        collection_unlock(c);
         return NULL;
     }
 
@@ -37,10 +76,25 @@ struct obj *collection_iter(struct collection *c) {
 }
 
 void collection_stop(struct collection *c) {
-    reentrant_release(&c->lock);
+    WARN_ON(!c);
+
+    if (c) {
+        WARN_ON(!collection_iterating(c));
+
+        c->curr = NULL;
+        collection_unlock(c);
+    }
 }
 
 struct obj *collection_next(struct collection *c) {
+    if (!c) {
+        return NULL;
+    }
+
+    if (!collection_iterating(c)) {
+        return NULL;
+    }
+
     c->curr = c->curr->next;
 
     if(c->curr == &c->list) {
@@ -51,28 +105,49 @@ struct obj *collection_next(struct collection *c) {
     return container_of(c->curr, struct obj, list);
 }
 
-void collection_add(struct collection *c, struct obj *o) {
-    reentrant_acquire(&c->lock);
+int collection_add(struct collection *c, struct obj *o) {
+    if (!c || !o) {
+        return -1;
+    }
+
+    collection_lock(c);
     list_add(&c->list, &o->list);
-    reentrant_release(&c->lock);
+    collection_unlock(c);
+
+    return 0;
 }
 
-void collection_del(struct collection *c, struct obj *o) {
-    reentrant_acquire(&c->lock);
+int collection_del(struct collection *c, struct obj *o) {
+    if (!c || !o) {
+        return -1;
+    }
+
+    /* TODO: verify obj is actually in *this* collection's list */
+
+    collection_lock(c);
     list_remove(&o->list);
-    reentrant_release(&c->lock);
+    collection_unlock(c);
+
+    return 0;
 }
 
-struct obj *get_by_name(char *name, struct collection *c) {
+struct obj *collection_get_by_name(struct collection *c, const char *name) {
+    struct obj *ret = NULL;
     struct obj *curr;
 
-    reentrant_acquire(&c->lock);
+    if (!name || !c) {
+        return NULL;
+    }
+
+    collection_lock(c);
     list_for_each_entry(curr, &c->list, list) {
-        if(!strncmp(curr->name, name, 32)) {
-            reentrant_release(&c->lock);
-            return curr;
+        if(!strcmp(curr->name, name)) {
+            ret = curr;
+            goto out;
         }
     }
-    reentrant_release(&c->lock);
-    return NULL;
+
+out:
+    collection_unlock(c);
+    return ret;
 }
