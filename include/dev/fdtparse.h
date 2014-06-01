@@ -107,6 +107,31 @@ int fdtparse_get_gpio(const void *fdt, int offset, const char *name,
                       struct fdt_gpio *gpio);
 
 /**
+ * Extract GPIO information from multiple GPIO cells
+ *
+ * GPIO cells have the form <&gpio_device gpio_num gpio_flags>.  This function
+ * extracts that information from a list of cells into an array of
+ * struct fdt_gpio.
+ *
+ * @param fdt   pointer to the device tree blob
+ * @param offset    offset of node containing desired propery
+ * @param name  string name of gpio property
+ * @param gpio  array of struct fdt_gpio to return values in
+ * @param max   maximum number of GPIOs to return (size of gpio array)
+ * @returns number of gpios read on success,
+ *    -FDT_ERR_BADLAYOUT, if max number would be exceeded
+ *    -FDT_ERR_NOTFOUND, node does not have named property
+ *    -FDT_ERR_BADOFFSET, offset did not point to FDT_BEGIN_NODE tag
+ *    -FDT_ERR_BADMAGIC,
+ *    -FDT_ERR_BADVERSION,
+ *    -FDT_ERR_BADSTATE,
+ *    -FDT_ERR_BADSTRUCTURE,
+ *    -FDT_ERR_TRUNCATED, standard meanings
+ */
+int fdtparse_get_gpios(const void *fdt, int offset, const char *name,
+                       struct fdt_gpio *gpio, int max);
+
+/**
  * Get full path to a node
  *
  * Compute the full path of a node at offset, recording that path in the

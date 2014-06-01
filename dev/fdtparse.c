@@ -105,6 +105,34 @@ int fdtparse_get_gpio(const void *fdt, int offset, const char *name,
     return 0;
 }
 
+int fdtparse_get_gpios(const void *fdt, int offset, const char *name,
+                       struct fdt_gpio *gpio, int max) {
+    const struct fdt_property *prop;
+    int len, num, i;
+    fdt32_t *cell;
+
+    prop = fdt_get_property(fdt, offset, name, &len);
+    if (len < 0) {
+        return len;
+    }
+
+    /* GPIO cells have 3 fields */
+    num = len / (3*sizeof(fdt32_t));
+    if (num > max) {
+        return -FDT_ERR_BADLAYOUT;
+    }
+
+    cell = (fdt32_t *) prop->data;
+
+    for (i = 0; i < num; i++, cell += 3) {
+        /* cell[0] is gpio path, cell[1] is number, cell[2] is flags */
+        gpio[i].gpio = fdt32_to_cpu(cell[1]);
+        gpio[i].flags = fdt32_to_cpu(cell[2]);
+    }
+
+    return num;
+}
+
 char *fdtparse_get_path(const void *fdt, int offset) {
     int err, size;
     char *path = NULL;
