@@ -136,21 +136,36 @@ static int stm32f4_gpio_active_low(struct gpio *g, int active_low) {
     return 0;
 }
 
+/**
+ * Additionally supports flags in enum stm32f4_direction_gpio_flags:
+ * STM32F4_GPIO_DIRECTION_ANALOG:
+ *  Sets GPIO to analog mode.  Standard GPIO_INPUT/GPIO_OUTPUT flags
+ *  are ignored, as this mode is used for both analog input and output.
+ */
 static int stm32f4_gpio_direction(struct gpio *g, int flags) {
     struct stm32f4_gpio gpio = stm32f4_gpio_decode(g->num);
-    int mode;
+    int mode = 0;
     int ret = 0;
 
-    switch (flags & GPIO_DIRECTION_MASK) {
-    case GPIO_INPUT:
-        mode = GPIO_MODER_IN;
+    /* Analog mode does not depend on standard direction flags */
+    switch (flags & STM32F4_GPIO_DIRECTION_MASK) {
+    case STM32F4_GPIO_DIRECTION_ANALOG:
+        mode = GPIO_MODER_ANA;
         break;
-    case GPIO_OUTPUT:
-        mode = GPIO_MODER_OUT;
-        break;
-    default:
-        ret = -1;
-        goto out;
+    }
+
+    if (!mode) {
+        switch (flags & GPIO_DIRECTION_MASK) {
+        case GPIO_INPUT:
+            mode = GPIO_MODER_IN;
+            break;
+        case GPIO_OUTPUT:
+            mode = GPIO_MODER_OUT;
+            break;
+        default:
+            ret = -1;
+            goto out;
+        }
     }
 
     gpio_moder(gpio.port, gpio.pin, mode);

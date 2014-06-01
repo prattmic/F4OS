@@ -91,6 +91,12 @@ inline static void gpio_afr(uint8_t port, uint8_t pin, uint8_t mode) {
     }
 }
 
+/* Additional flags for direction */
+enum stm32f4_direction_gpio_flags {
+    STM32F4_GPIO_DIRECTION_ANALOG = (1 << 16),  /* Set GPIO to analog I/O */
+    STM32F4_GPIO_DIRECTION_MASK = (1 << 16),
+};
+
 /* Valid flags for set_flags */
 enum stm32f4_gpio_flags {
     STM32F4_GPIO_ALT_FUNC,
