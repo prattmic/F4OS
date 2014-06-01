@@ -38,4 +38,31 @@ int printk(char *fmt, ...) __attribute__((section(".kernel")));
 void panic_print(char *fmt, ...) __attribute__((noreturn));
 void toggle_led_delay(void) __attribute__((optimize(0)));
 
+/**
+ * Print a warning when a condition is true
+ *
+ * When _cond is true, output a warning with basic debugging information
+ * with printk().
+ */
+#define WARN_ON(_cond)  do {    \
+    if (_cond) {   \
+        printk("WARNING: assertion '%s' is false\r\n", STRINGIFY((_cond))); \
+        printk("note: in %s() at %s:%d\r\n", __func__, __FILE__, __LINE__);   \
+    }   \
+} while (0)
+
+/**
+ * Print an error and panic when a condition is true
+ *
+ * When _cond is true, output an error with basic debugging information
+ * with printk(), then panic the system.
+ */
+#define PANIC_ON(_cond)  do {    \
+    if (_cond) {   \
+        printk("ERROR: assertion '%s' is false\r\n", STRINGIFY((_cond))); \
+        printk("note: in %s() at %s:%d\r\n", __func__, __FILE__, __LINE__);   \
+        panic();    \
+    }   \
+} while (0)
+
 #endif
