@@ -111,7 +111,7 @@ int collection_add(struct collection *c, struct obj *o) {
     }
 
     collection_lock(c);
-    list_add(&c->list, &o->list);
+    list_add(&o->list, &c->list);
     collection_unlock(c);
 
     return 0;
