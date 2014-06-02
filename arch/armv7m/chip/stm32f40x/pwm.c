@@ -714,11 +714,6 @@ static int stm32f4_pwm_dtor(struct pwm *pwm) {
 
     kfree(pwm->priv);
 
-    if (pwm->obj.name) {
-        /* Name is dynamically allocated, we can safely cast away const */
-        free((char *)pwm->obj.name);
-    }
-
     return 0;
 }
 
