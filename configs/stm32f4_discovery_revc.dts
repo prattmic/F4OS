@@ -1,0 +1,16 @@
+/dts-v1/;
+/include/ "stm32f4.dtsi"
+
+/ {
+    compatible = "stmicro,stm32f4discovery-revc", "stmicro,stm32f4discovery",
+        "stmicro,stm32f407vg", "stmicro,stm32f407", "stmicro,stm32f4";
+
+};
+
+&spi1 {
+    lis3dsh@0 {
+        compatible = "stmicro,lis3dsh";
+        reg = <0>;
+        cs-gpio = <&gpio 67 0>;  /* PE3 */
+    };
+};

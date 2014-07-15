@@ -64,9 +64,16 @@ The LEDs and accelerometer, an STMicro LIS302DL, are supported by F4OS.  The
 LEDs are enumerated as LEDs 0-3, and the accelerometer is enumerated as a
 standard accelerometer obj.
 
-The provided defconfig can be used to configure F4OS for the Discovery board.
+defconfigs are provided for the revision B and revision C Discovery boards,
+which have different accelerometers.  The board revision is indicated as
+either MB997B (revision B) or MB997C (revision C).  Select the appropriate
+defconfig for your board.
 
-    $ make discovery_defconfig
+    $ make stm32f4_discovery_revb_defconfig
+
+or,
+
+    $ make stm32f4_discovery_revc_defconfig
 
 #### Flashing
 

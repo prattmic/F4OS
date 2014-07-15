@@ -2,8 +2,8 @@
 /include/ "stm32f4.dtsi"
 
 / {
-    compatible = "stmicro,stm32f4discovery", "stmicro,stm32f407vg",
-        "stmicro,stm32f407", "stmicro,stm32f4";
+    compatible = "stmicro,stm32f4discovery-revb", "stmicro,stm32f4discovery",
+        "stmicro,stm32f407vg", "stmicro,stm32f407", "stmicro,stm32f4";
 
 };
 
