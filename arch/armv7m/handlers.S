@@ -57,6 +57,20 @@ hang:
 .thumb_func
 .global _reset
 _reset:
+    /*
+     * Switch to the PSP
+     *
+     * Reserve 512 bytes of stack space for the MSP,
+     * which will be used in interrupt context.
+     *
+     * After task switching begins, only user stacks
+     * will be on the PSP, and this initial kernel
+     * stack will never be used again,
+     */
+    sub     r0, sp, #512
+    msr     psp, r0
+    bl      enable_psp
+
     /* Copy the data segment initializers from flash to CCM RAM */
     movs    r1, #0
     b       loop_copy_data
@@ -93,18 +107,7 @@ loop_zero_bss:
 .global     _svc_asm
 .type       _svc_asm, %function
 _svc_asm:
-    ands    r1, lr, #4      /* EXC_RETURN[2] = 1 indicates PSP use */
-
-    /*
-     * The first service call is made by the OS, running from the MSP,
-     * to start task switching.  On return from svc_handler, a user task
-     * will be scheduled.  Set EXC_RETURN[2] to make exception return
-     * restore the user task.
-     */
-    itte    eq
-    mrseq   r0, msp
-    orreq   lr, lr, #4
-    mrsne   r0, psp
+    mrs     r0, psp
 
     push    {lr}
     push    {r0}
