@@ -262,10 +262,13 @@ int rcc_set_clock_enable(enum stm32f4_periph_id periphid, int enable);
 #define RCC_APB2ENR_ADC3EN          ((uint32_t) (1 << 10))      /* ADC3 clock enable */
 #define RCC_APB2ENR_SDIOEN          ((uint32_t) (1 << 11))      /* SDIO clock enable */
 #define RCC_APB2ENR_SPI1EN          ((uint32_t) (1 << 12))      /* SPI1 clock enable */
+#define RCC_APB2ENR_SPI4EN          ((uint32_t) (1 << 13))      /* SPI4 clock enable */
 #define RCC_APB2ENR_SYSCFGEN        ((uint32_t) (1 << 14))      /* System configuration controller clock enable */
 #define RCC_APB2ENR_TIM9EN          ((uint32_t) (1 << 16))      /* TIM9 clock enable */
 #define RCC_APB2ENR_TIM10EN         ((uint32_t) (1 << 17))      /* TIM10 clock enable */
 #define RCC_APB2ENR_TIM11EN         ((uint32_t) (1 << 18))      /* TIM11 clock enable */
+#define RCC_APB2ENR_SPI5EN          ((uint32_t) (1 << 20))      /* SPI5 clock enable */
+#define RCC_APB2ENR_SPI6EN          ((uint32_t) (1 << 21))      /* SPI6 clock enable */
 
 #define RCC_AHB3ENR_FSMCEN          ((uint32_t) (1 << 0))       /* FSMC clock enable */
 
