@@ -1,0 +1,7 @@
+/include/ "05.dtsi"
+
+/* STM32F407 extends STM32F405 with additional peripherals */
+
+/ {
+    compatible = "stmicro,stm32f407", "stmicro,stm32f405", "stmicro,stm32f4";
+};

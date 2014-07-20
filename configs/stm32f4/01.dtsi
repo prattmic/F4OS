@@ -1,0 +1,16 @@
+/include/ "common.dtsi"
+
+/ {
+    compatible = "stmicro,stm32f401", "stmicro,stm32f4";
+
+    spi4: spi@40003C00 {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        compatible = "stmicro,stm32f407-spi";
+        reg = <0x40013400 0x20>;
+        spi,sck-gpio = <&gpio 68 0>;    /* PE4 */
+        spi,miso-gpio = <&gpio 69 0>;   /* PE5 */
+        spi,mosi-gpio = <&gpio 70 0>;   /* PE6 */
+        stmicro,periph-id = <57>;       /* STM32F4_PERIPH_SPI4 */
+    };
+};

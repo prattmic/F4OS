@@ -4,32 +4,6 @@
     #address-cells = <1>;
     #size-cells = <1>;
 
-    memory {
-        compatible = "address-layout";
-        #address-cells = <1>;
-        #size-cells = <1>;
-
-        flash {
-            attr = "rx";
-            reg = <0x08000000 0x100000>;
-        };
-
-        ccmram {
-            attr = "rwx";
-            reg = <0x10000000 0x10000>;
-        };
-
-        ram {
-            attr = "rwx";
-            reg = <0x20000000 0x1c000>;
-        };
-
-        ethram {
-            attr = "rwx";
-            reg = <0x2001c000 0x4000>;
-        };
-    };
-
     gpio: gpio {
         compatible = "stmicro,stm32f407-gpio";
     };
@@ -121,46 +95,6 @@
                                    <&gpio 35 0> /* PC3 */,
                                    <&gpio 36 0> /* PC4 */,
                                    <&gpio 37 0> /* PC5 */;
-        };
-
-        adc2 {
-            stmicro,periph-id = <44>;   /* STM32F4_PERIPH_ADC2 */
-            stmicro,adc-channels = <&gpio 0 0>  /* PA0 */,
-                                   <&gpio 1 0>  /* PA1 */,
-                                   <&gpio 2 0>  /* PA2 */,
-                                   <&gpio 3 0>  /* PA3 */,
-                                   <&gpio 4 0>  /* PA4 */,
-                                   <&gpio 5 0>  /* PA5 */,
-                                   <&gpio 6 0>  /* PA6 */,
-                                   <&gpio 7 0>  /* PA7 */,
-                                   <&gpio 16 0> /* PB0 */,
-                                   <&gpio 17 0> /* PB1 */,
-                                   <&gpio 32 0> /* PC0 */,
-                                   <&gpio 33 0> /* PC1 */,
-                                   <&gpio 34 0> /* PC2 */,
-                                   <&gpio 35 0> /* PC3 */,
-                                   <&gpio 36 0> /* PC4 */,
-                                   <&gpio 37 0> /* PC5 */;
-        };
-
-        adc3 {
-            stmicro,periph-id = <45>;   /* STM32F4_PERIPH_ADC3 */
-            stmicro,adc-channels = <&gpio 0 0>  /* PA0 */,
-                                   <&gpio 1 0>  /* PA1 */,
-                                   <&gpio 2 0>  /* PA2 */,
-                                   <&gpio 3 0>  /* PA3 */,
-                                   <&gpio 86 0> /* PF6 */,
-                                   <&gpio 87 0> /* PF7 */,
-                                   <&gpio 88 0> /* PF8 */,
-                                   <&gpio 89 0> /* PF9 */,
-                                   <&gpio 90 0> /* PF10 */,
-                                   <&gpio 83 0> /* PF3 */,
-                                   <&gpio 32 0> /* PC0 */,
-                                   <&gpio 33 0> /* PC1 */,
-                                   <&gpio 34 0> /* PC2 */,
-                                   <&gpio 35 0> /* PC3 */,
-                                   <&gpio 84 0> /* PF4 */,
-                                   <&gpio 85 0> /* PF5 */;
         };
     };
 };

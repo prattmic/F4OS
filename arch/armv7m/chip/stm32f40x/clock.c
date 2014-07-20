@@ -27,13 +27,20 @@
 #include <dev/raw_mem.h>
 #include <kernel/fault.h>
 
+#define SYS_CLOCK_MHZ   (CONFIG_SYS_CLOCK/1000000)
+
 #define HSE_STARTUP_TIMEOUT (0x0500)         /* Time out for HSE start up */
 /* PLL Options - See RM0090 Reference Manual pg. 95 */
 /* We set PLL_M to the board's defined oscillator frequency */
 #define PLL_M      CONFIG_STM32_OSC_FREQ   /* PLL_VCO = (HSE_VALUE or HSI_VALUE / PLL_M) * PLL_N */
 #define PLL_N      336
-#define PLL_P      2            /* SYSCLK = PLL_VCO / PLL_P */
+#define PLL_P      (PLL_N / SYS_CLOCK_MHZ) /* SYSCLK = PLL_VCO (= PLL_N) / PLL_P */
 #define PLL_Q      7            /* USB OTG FS, SDIO and RNG Clock =  PLL_VCO / PLLQ */
+
+/* PLL_P can only be 2, 4, 6, or 8 */
+#if PLL_P != 2 && PLL_P != 4 && PLL_P != 6 && PLL_P != 8
+#error Unable to compute valid PLL_P
+#endif
 
 void init_clock(void) {
     struct stm32f4_rcc_regs *regs = rcc_get_regs();

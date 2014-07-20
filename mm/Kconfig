@@ -43,9 +43,6 @@ config MM_USER_MAX_ORDER
     int
     depends on MM_ALLOCATOR_BUDDY
     prompt "User buddy heap max order"
-    default 17 if CHIP_STM32F40X
-    default 14 if CHIP_LM4F120H5
-    default 14 if CHIP_AM335X
     ---help---
         Maximum buddy block order for user buddy heap.
         Heap will be 2^order bytes.
@@ -62,9 +59,6 @@ config MM_KERNEL_MAX_ORDER
     int
     depends on MM_ALLOCATOR_BUDDY
     prompt "Kernel buddy heap max order"
-    default 15 if CHIP_STM32F40X
-    default 13 if CHIP_LM4F120H5
-    default 13 if CHIP_AM335X
     ---help---
         Maximum buddy block order for kernel buddy heap.
         Heap will be 2^order bytes.

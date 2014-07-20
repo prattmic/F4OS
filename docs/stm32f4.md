@@ -7,10 +7,9 @@ maximum frequency of 84MHz-180MHz.
 [Manufacturer product page](http://www.st.com/stm32f4)
 
 At present, the STMicro's STM32F4 chip series is the best supported by F4OS,
-and its namesake.  Support is currently targeted primarily at the STM32F405
-and STM32F407 chips, without regard for other variants, but they are generally
-compatible, and should work with only minor modifications.  In time, other
-variants will be officially supported.
+and its namesake.  Support is currently targeted at the STM32F401, STM32F405,
+and STM32F407 chips, with their differences described in the device tree source
+files.
 
 ## Peripherals
 
@@ -24,10 +23,11 @@ implemented as a standard resource.  It enumerates the device as an ACM device
 on a host machine (e.g., `/dev/ttyACM0`).
 
 ### SPI
-SPI1, SPI2, and SPI3 are supported as standard SPI objs.  Their pins are
+All SPI peripherals are supported as standard SPI objs.  Their pins are
 specified in the STM32F4 device tree source.  The peripherals are set to a
-default clock of PCLK/8.  For SPI1, this equates to `CONFIG_SYS_CLOCK/32`.
-For SPI2 and SPI3, this equates to `CONFIG_SYS_CLOCK/16`.
+default clock of PCLK/8.  For SPI1 and SPI4, this equates to
+`CONFIG_SYS_CLOCK/32`.  For SPI2 and SPI3, this equates to
+`CONFIG_SYS_CLOCK/16`.
 
 ### I2C
 I2C1, I2C2, and I2C3 are supported as standard I2C objs.  Their pins are
@@ -89,6 +89,22 @@ Micro USB port to your host machine, and it should be enumerated as an ACM
 device, which can be used with applications like screen:
 
     $ screen /dev/ttyACM0
+
+### 32F401CDISCOVERY
+
+The 32F401CDISCOVERY is STMicro's primary development board for the STM32F401.
+It has an STM32F401VC, and an integrated ST-LINK V2 JTAG debugger.  Onboard,
+it also has several LEDs, an accelerometer, gyroscope, magnetometer,
+microphone, and buttons.
+
+http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/PF259098
+
+This board is very similar to the STM32F4DISCOVERY board, and thus has similar
+support.
+
+A defconfig is provided for 32F401CDISCOVERY:
+
+    $ make 32f401cdiscovery_defconfig
 
 ### PX4FMU 1.x
 

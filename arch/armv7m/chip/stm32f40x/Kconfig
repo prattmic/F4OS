@@ -8,11 +8,15 @@ config STM32_OSC_FREQ
 
 choice
     prompt "Target board"
-    default STM32_BOARD_DISCOVERY
+    default STM32_BOARD_STM32F4DISCOVERY
 
-config STM32_BOARD_DISCOVERY
+config STM32_BOARD_STM32F4DISCOVERY
     bool
     prompt "STM32F407 Discovery Board"
+
+config STM32_BOARD_32F401CDISCOVERY
+    bool
+    prompt "STM32F401 Discovery Board"
 
 config STM32_BOARD_PX4
     bool
@@ -21,7 +25,8 @@ endchoice
 
 config STM32_BOARD
     string
-    default "discovery" if STM32_BOARD_DISCOVERY
+    default "stm32f4discovery" if STM32_BOARD_STM32F4DISCOVERY
+    default "32f401cdiscovery" if STM32_BOARD_32F401CDISCOVERY
     default "px4" if STM32_BOARD_PX4
 
 config PERFCOUNTER

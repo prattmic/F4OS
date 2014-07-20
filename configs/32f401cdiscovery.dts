@@ -1,0 +1,7 @@
+/dts-v1/;
+/include/ "stm32f4/01xc.dtsi"
+
+/ {
+    compatible = "stmicro,32f401cdiscovery", "stmicro,stm32f401vc",
+        "stmicro,stm32f401xc", "stmicro,stm32f401", "stmicro,stm32f4";
+};

@@ -6,7 +6,7 @@ then
     exit $E_BADARGS
 fi
 
-if [ "$1" == "discovery" ]
+if [ "$1" == "stm32f4discovery" ] || [ "$1" == "32f401cdiscovery" ]
 then
     st-flash write $2 0x8000000
     exit 0

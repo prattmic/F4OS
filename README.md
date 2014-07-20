@@ -25,11 +25,11 @@ F4OS currently supports the following architectures:
 Currently, the supported chips include the following.  See the chip
 documentation pages for more details on chip support.
 
-| Architecture  | Chip                                                          | Officially Supported Boards   |
-| ------------- | ------------------------------------------------------------- | ----------------------------- |
-| ARMv7-M       | [STMicro STM32F4 series](docs/stm32f4.md)                     | STM32F4DISCOVERY, PX4FMU 1.x  |
-| ARMv7-M       | [TI Tiva C series](docs/tivac.md), aka TI Stellaris LM4F      | TI Stellaris Launchpad        |
-| ARMv7-A       | [TI Sitara AM335x series](docs/am335x.md)                     | BeagleBone Black              |
+| Architecture  | Chip                                                          | Officially Supported Boards                     |
+| ------------- | ------------------------------------------------------------- | -----------------------------                   |
+| ARMv7-M       | [STMicro STM32F4 series](docs/stm32f4.md)                     | STM32F4DISCOVERY, 32F401CDISCOVERY, PX4FMU 1.x  |
+| ARMv7-M       | [TI Tiva C series](docs/tivac.md), aka TI Stellaris LM4F      | TI Stellaris Launchpad                          |
+| ARMv7-A       | [TI Sitara AM335x series](docs/am335x.md)                     | BeagleBone Black                                |
 
 ## Building F4OS
 
