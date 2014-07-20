@@ -75,7 +75,7 @@ endif
 # CROSS_COMPILE, CFLAGS, etc
 -include $(BASE)/arch/$(CONFIG_ARCH)/config.mk
 
-LINK_SCRIPT = $(BASE)/arch/$(CONFIG_ARCH)/chip/$(CONFIG_CHIP)/link.ld
+LINK_SCRIPT = $(BASE)/arch/$(CONFIG_ARCH)/link.ld
 
 # Command verbosity
 # Unless V=1, surpress output with @
@@ -216,14 +216,18 @@ $(PREFIX)/$(PROJ_NAME).o: $(KCONFIG_HEADER) $(PREFIX)/include .FORCE
 	$(call print_command,"MAKE",$(call relative_path,$@))
 	$(VERBOSE)$(MAKE) -f f4os.mk obj=$@
 
-$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/link.ld $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/device_tree.o
+$(PREFIX)/$(PROJ_NAME).elf: $(PREFIX)/link.lds $(PREFIX)/$(PROJ_NAME).o $(PREFIX)/device_tree.o
 	$(call print_command,"LD",$(call relative_path,$@))
 	$(VERBOSE)$(CC) $(filter-out $<,$^) -o $@ $(CFLAGS) -T $< $(patsubst %,-Xlinker %,$(LFLAGS))
 
+$(PREFIX)/memory.lds : $(PREFIX)/device_tree.dtb
+	$(call print_command,"GEN",$(call relative_path,$@))
+	$(VERBOSE)bash tools/build_memory.sh $^ > $@
+
 # Preprocess the linker script
-$(PREFIX)/link.ld : $(LINK_SCRIPT)
+$(PREFIX)/link.lds : $(LINK_SCRIPT) $(PREFIX)/memory.lds
 	$(call print_command,"CPP",$(call relative_path,$<))
-	$(VERBOSE)$(CPP) -MD -MT $@ $(CPPFLAGS) $< -o $@
+	$(VERBOSE)$(CPP) -MD -MT $@ $(patsubst %,-include %,$(filter-out $<,$^)) $(CPPFLAGS) $< -o $@
 
 # Include linker script dependencies
 -include $(PREFIX)/link.d

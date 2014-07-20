@@ -57,9 +57,9 @@ static void free_mem(void *mem, mm_block_t *heap, void *base, struct mutex *mute
 }
 
 void free(void *mem) {
-    free_mem(mem, userheap, &_suserheap, &userheap_mutex);
+    free_mem(mem, userheap, (void *)CONFIG_SUSERHEAP, &userheap_mutex);
 }
 
 void kfree(void *mem) {
-    free_mem(mem, kernelheap, &_skernelheap, &kernelheap_mutex);
+    free_mem(mem, kernelheap, (void *)CONFIG_SKERNELHEAP, &kernelheap_mutex);
 }

@@ -4,4 +4,22 @@
     compatible = "ti,stellaris_launchpad", "ti,tiva_c_launchpad",
         "ti,lm4f120h5qr", "ti,tm4c1233h6pm", "ti,lm4f120h5", "ti,tm4c1233h6",
         "ti,lm4", "ti,tm4c";
+
+    memory {
+        compatible = "address-layout";
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        /* 256 KiB flash */
+        flash {
+            attr = "rx";
+            reg = <0x00000000 0x40000>;
+        };
+
+        /* 32 KiB SRAM */
+        ram {
+            attr = "rwx";
+            reg = <0x20000000 0x8000>;
+        };
+    };
 };

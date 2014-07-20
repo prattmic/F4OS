@@ -82,12 +82,12 @@ copy_data_init:
     adds    r1, r1, #4
 
 loop_copy_data:
-    ldr     r0, =_sdata
-    ldr     r3, =_edata
+    ldr     r0, =_data_start
+    ldr     r3, =_data_end
     adds    r2, r0, r1
     cmp     r2, r3
     bcc     copy_data_init
-    ldr     r2, =_sbss
+    ldr     r2, =_bss_start
     b       loop_zero_bss
 
 /* Zero fill the bss segment. */
@@ -96,7 +96,7 @@ zero_bss:
     str     r3, [r2], #4
 
 loop_zero_bss:
-    ldr     r3, = _ebss
+    ldr     r3, = _bss_end
     cmp     r2, r3
     bcc     zero_bss
 

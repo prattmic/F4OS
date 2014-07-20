@@ -11,6 +11,24 @@
         #interrupt-cells = <1>;
     };
 
+    memory {
+        compatible = "address-layout";
+        #address-cells = <1>;
+        #size-cells = <1>;
+
+        /* 63 KiB SRAM */
+        sram {
+            attr = "rwx";
+            reg = <0x402f0400 0xfc00>;
+        };
+
+        /* 64 KiB OCMC RAM */
+        ocmc_ram {
+            attr = "rwx";
+            reg = <0x40300000 0x10000>;
+        };
+    };
+
     /* The AM33xx is interconnected through a 2-level architecture */
     l3 {
         compatible = "simple-bus";

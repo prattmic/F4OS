@@ -115,7 +115,8 @@ void *malloc(size_t size) {
     grains = size + MM_GRAIN_SIZE - 1;
     grains = grains/MM_GRAIN_SIZE;
 
-    mem = alloc(userheap, MM_USER_NUM_BLOCKS, grains, (void *)&_suserheap, &userheap_mutex);
+    mem = alloc(userheap, MM_USER_NUM_BLOCKS, grains,
+                (void *)CONFIG_SUSERHEAP, &userheap_mutex);
     return mem;
 }
 
@@ -134,6 +135,7 @@ void *kmalloc(size_t size) {
     grains = size + MM_GRAIN_SIZE - 1;
     grains = grains/MM_GRAIN_SIZE;
 
-    mem = alloc(kernelheap, MM_KERNEL_NUM_BLOCKS, grains, (void *)&_skernelheap, &kernelheap_mutex);
+    mem = alloc(kernelheap, MM_KERNEL_NUM_BLOCKS, grains,
+                (void *)CONFIG_SKERNELHEAP, &kernelheap_mutex);
     return mem;
 }

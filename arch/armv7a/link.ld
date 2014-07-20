@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,61 +20,44 @@
  * SOFTWARE.
  */
 
-/* Specify the memory areas */
-MEMORY
-{
-  FLASH (rx)      : ORIGIN = 0x00000000, LENGTH = 256K
-  RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 32K
-}
-
-/* Highest address of the kernel stack */
-_estack = 0x20001FFC;       /* quarter of 32K SRAM */
-
-/* Heap */
-_suserheap = CONFIG_SUSERHEAP;
-_euserheap = CONFIG_EUSERHEAP;
-_skernelheap = CONFIG_SKERNELHEAP;
-_ekernelheap = CONFIG_EKERNELHEAP;
-
 SECTIONS {
-    /* Vectors first - Always permitted by MPU */
-    .isr_vector :
+    .vector :
     {
-        . = ALIGN(4);
-        KEEP(*(.isr_vector))
-        . = ALIGN(4);
-    } > FLASH
+        . = ALIGN(8);
+        KEEP(*(.vector))
+        . = ALIGN(8);
+    } > CONFIG_VECTOR_VMA_REGION
+    AT> CONFIG_VECTOR_LMA_REGION
 
     .kernel :
     {
         . = ALIGN(8);
-        _skernel = .;
         *(.kernel*)
         . = ALIGN(8);
-        _ekernel = .;
-    } > FLASH
+    } > CONFIG_KERNEL_VMA_REGION
+    AT> CONFIG_KERNEL_LMA_REGION
 
     .text :
     {
         . = ALIGN(8);
-        _stext = .;
         *(.text*)
         . = ALIGN(8);
-
-        _etext = .;
-    } > FLASH
+    } > CONFIG_TEXT_VMA_REGION
+    AT> CONFIG_TEXT_LMA_REGION
 
     .rodata :
     {
         . = ALIGN(8);
         *(.rodata*)
         . = ALIGN(8);
-    } > FLASH
+    } > CONFIG_RODATA_VMA_REGION
+    AT> CONFIG_RODATA_LMA_REGION
 
     .linker_array :
     {
         KEEP(*(SORT_BY_NAME(.linker_array.*)))
-    } > FLASH
+    } > CONFIG_LINKER_ARRAY_VMA_REGION
+    AT> CONFIG_LINKER_ARRAY_LMA_REGION
 
     .dtb :
     {
@@ -83,32 +66,29 @@ SECTIONS {
         *(.dtb*)
         _dtb_end = .;
         . = ALIGN(8);
-    } > FLASH
+    } > CONFIG_DTB_VMA_REGION
+    AT> CONFIG_DTB_LMA_REGION
 
-    _sidata = .;
-    .data : AT ( _sidata )
+    .data :
     {
-        . = ALIGN(4);
-        _sdata = .;        /* create a global symbol at data start */
-        *(.data*)           /* .data sections */
+        . = ALIGN(8);
+        _data_start = .;
+        *(.data*)
+        _data_end = .;
+        . = ALIGN(8);
+    } > CONFIG_DATA_VMA_REGION
+    AT> CONFIG_DATA_LMA_REGION
 
-        . = ALIGN(4);
-        _edata = .;        /* define a global symbol at data end */
-    } > RAM
+    _sidata = LOADADDR(.data);
 
-    /* Uninitialized data section */
-    _sibss = .;
-    .bss : AT ( _sibss )
+    .bss :
     {
-        . = ALIGN(4);
-        _sbss = .;         /* define a global symbol at bss start */
+        . = ALIGN(8);
+        _bss_start = .;
         *(.bss*)
         *(COMMON)
-
-        . = ALIGN(4);
-        _ebss = .;         /* define a global symbol at bss end */
-    } > RAM
+        _bss_end = .;
+        . = ALIGN(8);
+    } > CONFIG_BSS_VMA_REGION
+    AT> CONFIG_BSS_LMA_REGION
 }
-
-PROVIDE(end = .);
-_end            = .;

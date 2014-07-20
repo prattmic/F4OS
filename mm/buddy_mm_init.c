@@ -25,11 +25,6 @@
 
 #include "buddy_mm_internals.h"
 
-extern void *_suserheap;
-extern void *_euserheap;
-extern void *_skernelheap;
-extern void *_ekernelheap;
-
 struct buddy user_buddy;
 /* Use one extra word so that we index with order directly, instead of order-1 */
 struct heapnode *user_buddy_list[CONFIG_MM_USER_MAX_ORDER+1];
@@ -46,7 +41,7 @@ void init_heap(void) {
     init_mutex(&user_buddy.mutex);
     user_buddy.list = user_buddy_list;
 
-    init_buddy(&user_buddy, &_suserheap);
+    init_buddy(&user_buddy, (void *)CONFIG_SUSERHEAP);
 
     /* Kernel buddy */
     kernel_buddy.max_order = CONFIG_MM_KERNEL_MAX_ORDER;
@@ -54,7 +49,7 @@ void init_heap(void) {
     init_mutex(&kernel_buddy.mutex);
     kernel_buddy.list = kernel_buddy_list;
 
-    init_buddy(&kernel_buddy, &_skernelheap);
+    init_buddy(&kernel_buddy, (void *)CONFIG_SKERNELHEAP);
 }
 
 static void init_buddy(struct buddy *buddy, void *address) {

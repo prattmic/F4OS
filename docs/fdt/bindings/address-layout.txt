@@ -1,0 +1,20 @@
+Generic address space layout bindings
+
+These bindings describe the layout of a device's physical address map.
+This is used primarily to describe regions of memory for program storage
+and memory (e.g., ROM, RAM, flash).
+
+The core's address space layout should be described in /memory, which
+contains a subnode for each region of memory.
+
+Required properties:
+    - compatible: must be "address-layout"
+    - #address-cells: must be <1>
+    - #size-cells: must be <1>
+
+Region subnode properties:
+    - reg: start address and size of region
+    - attr: string describing region attributes, in the same format as
+        LD's MEMORY attr string[1].
+
+[1]: https://sourceware.org/binutils/docs/ld/MEMORY.html#MEMORY

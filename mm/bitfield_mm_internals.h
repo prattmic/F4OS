@@ -23,11 +23,6 @@
 #ifndef MM_BITFIELD_MM_INTERNALS_H_INCLUDED
 #define MM_BITFIELD_MM_INTERNALS_H_INCLUDED
 
-extern uint32_t _suserheap;
-extern uint32_t _euserheap;
-extern uint32_t _skernelheap;
-extern uint32_t _ekernelheap;
-
 #define MM_GRAINS_PER_BLOCK 32          /* Due to bits in uint32_t */
 #define MM_GRAIN_SIZE (1 << CONFIG_MM_GRAIN_SHIFT)
 #define MM_MAGIC 0xABCD

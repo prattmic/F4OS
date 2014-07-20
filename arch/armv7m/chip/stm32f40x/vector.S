@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,8 +24,8 @@
 .thumb
 
 /* Vector table */
-.section    .isr_vector,"a"
-.word   _estack             /* stack top address */
+.section    .vector,"a"
+.word   CONFIG_INITIAL_SP   /* stack top address */
 .word   _reset              /* 1 Reset */
 .word   hang                /* 2 NMI */
 .word   hardfault_handler   /* 3 HardFault */

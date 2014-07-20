@@ -1,3 +1,74 @@
 menu "Chip"
 source arch/armv7m/chip/Kconfig
 endmenu
+
+menu "Memory layout"
+
+config VECTOR_VMA_REGION
+    string "VMA region for .vector section"
+    default "flash"
+
+config VECTOR_LMA_REGION
+    string "LMA region for .vector section"
+    default VECTOR_VMA_REGION
+
+config KERNEL_VMA_REGION
+    string "VMA region for .kernel section"
+    default "flash"
+
+config KERNEL_LMA_REGION
+    string "LMA region for .kernel section"
+    default KERNEL_VMA_REGION
+
+config TEXT_VMA_REGION
+    string "VMA region for .text section"
+    default "flash"
+
+config TEXT_LMA_REGION
+    string "LMA region for .text section"
+    default TEXT_VMA_REGION
+
+config RODATA_VMA_REGION
+    string "VMA region for .rodata section"
+    default "flash"
+
+config RODATA_LMA_REGION
+    string "LMA region for .rodata section"
+    default RODATA_VMA_REGION
+
+config LINKER_ARRAY_VMA_REGION
+    string "VMA region for .linker_array section"
+    default "flash"
+
+config LINKER_ARRAY_LMA_REGION
+    string "LMA region for .linker_array section"
+    default LINKER_ARRAY_VMA_REGION
+
+config DTB_VMA_REGION
+    string "VMA region for .dtb section"
+    default "flash"
+
+config DTB_LMA_REGION
+    string "LMA region for .dtb section"
+    default DTB_VMA_REGION
+
+config DATA_VMA_REGION
+    string "VMA region for .data section"
+    default "ram"
+
+config DATA_LMA_REGION
+    string "LMA region for .data section"
+    default "flash"
+
+config BSS_VMA_REGION
+    string "VMA region for .bss section"
+    default "ram"
+
+config BSS_LMA_REGION
+    string "LMA region for .bss section"
+    default "flash"
+
+endmenu
+
+config INITIAL_SP
+    hex "Initial SP value"
