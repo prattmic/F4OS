@@ -101,4 +101,7 @@ static __always_inline uint8_t ispos(float x) {
     return ((float_to_uint(x) & 0x80000000) ? 0 : 1);
 }
 
+#define DIV_ROUND_UP(dividend, divisor) \
+    (((dividend) + (divisor) - 1) / (divisor))
+
 #endif

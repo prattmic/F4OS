@@ -55,12 +55,20 @@ extern volatile uint32_t total_tasks;
  * This function should not return. */
 void start_sched(void);
 
-/* Create a new task in the scheduler.  This task consists
- * of a function pointer, a priority, and a period.
- * Non-periodic tasks use a period of zero.
+/*
+ * Create a new task in the scheduler.
+ *
+ * This task consists of a function pointer, a priority, and a period,
+ * given in microseconds.  The period will be rounded up to the nearest
+ * period achievable by the scheduler.  Non-periodic tasks use a period
+ * of zero.
+ *
  * Depending on the scheduler, priority and period may
- * have no effect. Returns task_t reference to new task. */
-task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period);
+ * have no effect.
+ *
+ * Returns task_t reference to new task.
+ */
+task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period_us);
 
 /* End-users set up boot tasks here.
  * This function will be run before scheduling starts, and

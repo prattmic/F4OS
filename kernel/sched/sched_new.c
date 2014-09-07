@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -92,13 +93,25 @@ static int register_task(task_ctrl *task, int periodic) {
     return 0;
 }
 
-task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
-    task_ctrl *task = create_task(fptr, priority, period);
+task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period_us) {
+    uint32_t tick_period_us, period_ticks;
+    task_ctrl *task;
+
+    /* Tick period in us / tick */
+    tick_period_us = 1000*1000 / CONFIG_SYSTICK_FREQ;
+
+    /*
+     * Round ticks up, ensuring that short period tasks are not
+     * treated as non-periodic, if even one tick is too long.
+     */
+    period_ticks = DIV_ROUND_UP(period_us, tick_period_us);
+
+    task = create_task(fptr, priority, period_ticks);
     if (task == NULL) {
         goto fail;
     }
 
-    int ret = register_task(task, period);
+    int ret = register_task(task, period_ticks);
     if (ret != 0) {
         goto fail2;
     }

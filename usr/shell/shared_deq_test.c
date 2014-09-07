@@ -108,8 +108,8 @@ void deq_test(int argc, char **argv) {
     sdeq_add(&deque, m2);
     sdeq_add(&deque, m3);
 
-    new_task(&t1, 1, 40);
-    new_task(&t2, 1, 100);
+    new_task(&t1, 1, 10*1000);
+    new_task(&t2, 1, 25*1000);
     yield_if_possible();
 
     /* Make sure other tasks are done */

@@ -36,7 +36,7 @@ typedef struct task_ctrl {
     uint32_t    *stack_top;
     uint32_t    *stack_base;
     void        (*fptr)(void);
-    uint32_t    period;
+    uint32_t    period; /* in ticks */
     uint32_t    ticks_until_wake;
     uint8_t     priority;
     uint8_t     running;

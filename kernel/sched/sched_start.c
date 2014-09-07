@@ -29,8 +29,11 @@ volatile uint8_t task_switching = 0;
 task_t * volatile curr_task;
 
 void start_sched(void) {
-    /* Set up initial tasks */
-    new_task(&kernel_task, 10, 4);
+    /*
+     * Set up initial tasks.
+     * Kernel task performs cleanup every millisecond.
+     */
+    new_task(&kernel_task, 10, 1000);
     new_task(&sleep_task, 0, 0);
 
     /* Setup boot tasks specified by end user. */

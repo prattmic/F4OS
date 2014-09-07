@@ -37,10 +37,11 @@ struct blinker {
     char *name;
     void (*func)(void);
     uint8_t enabled;
+    uint32_t period;    /* in us */
 } blink_funcs[] = {
-    {.name = "1", .func = &led1, .enabled = 0},
-    {.name = "2", .func = &led2, .enabled = 0},
-    {.name = "3", .func = &led3, .enabled = 0}
+    {.name = "1", .func = &led1, .enabled = 0, .period = 50*1000},
+    {.name = "2", .func = &led2, .enabled = 0, .period = 100*1000},
+    {.name = "3", .func = &led3, .enabled = 0, .period = 150*1000}
 };
 
 void blink(int argc, char **argv) {
@@ -59,7 +60,7 @@ void blink(int argc, char **argv) {
                 }
                 else {
                     printf("Enabling LED %s...", blink_funcs[j].name);
-                    new_task(blink_funcs[j].func, 5, 200*(j+1));
+                    new_task(blink_funcs[j].func, 5, blink_funcs[j].period);
                     blink_funcs[j].enabled = 1;
                     printf("Done.\r\n");
                 }
