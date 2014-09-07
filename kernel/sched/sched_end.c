@@ -52,7 +52,8 @@ void sched_svc_end_task(void) {
     struct task_ctrl *task = get_task_ctrl(curr_task);
 
     if (task->stack_limit > task->stack_top) {
-        panic_print("Task (0x%x, fptr: 0x%x) has overflowed its stack. stack_top: 0x%x stack_limit: 0x%x", task, task->fptr, task->stack_top, task->stack_limit);
+        panic_print("Task (0x%x, fptr: 0x%x) has overflowed its stack. stack_top: 0x%x stack_limit: 0x%x",
+                    task, task->fptr, task->stack_top, task->stack_limit);
     }
 
     list_remove(&task->runnable_task_list);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -34,9 +34,6 @@
 #include <kernel/sched_internals.h>
 #include "sched_internals.h"
 
-static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) __attribute__((section(".kernel")));
-static int register_task(task_ctrl *task_ptr, int periodic) __attribute__((section(".kernel")));
-
 struct list runnable_task_list = INIT_LIST(runnable_task_list);
 struct list periodic_task_list = INIT_LIST(periodic_task_list);
 
@@ -45,29 +42,8 @@ DEFINE_INSERT_TASK_FUNC(periodic_task_list);
 
 volatile uint32_t total_tasks = 0;
 
-task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
-    task_ctrl *task = create_task(fptr, priority, period);
-    if (task == NULL) {
-        goto fail;
-    }
-
-    int ret = register_task(task, period);
-    if (ret != 0) {
-        goto fail2;
-    }
-
-    total_tasks += 1;
-
-    return get_task_t(task);
-
-fail2:
-    free(task->stack_limit);
-    kfree(task);
-fail:
-    panic_print("Could not allocate task with function pointer 0x%x", fptr);
-}
-
-static task_ctrl *create_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
+static task_ctrl *create_task(void (*fptr)(void), uint8_t priority,
+                              uint32_t period) {
     task_ctrl *task;
     uint32_t *memory;
     static uint32_t pid_source = 1;
@@ -114,6 +90,28 @@ static int register_task(task_ctrl *task, int periodic) {
     }
 
     return 0;
+}
+
+task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period) {
+    task_ctrl *task = create_task(fptr, priority, period);
+    if (task == NULL) {
+        goto fail;
+    }
+
+    int ret = register_task(task, period);
+    if (ret != 0) {
+        goto fail2;
+    }
+
+    total_tasks += 1;
+
+    return get_task_t(task);
+
+fail2:
+    free(task->stack_limit);
+    kfree(task);
+fail:
+    panic_print("Could not allocate task with function pointer 0x%x", fptr);
 }
 
 void svc_register_task(task_ctrl *task, int periodic) {
