@@ -23,13 +23,17 @@
 #ifndef DEV_SHARED_DEQ_H_INCLUDED
 #define DEV_SHARED_DEQ_H_INCLUDED
 
-/* Needs list.h */
+#include <list.h>
+#include <kernel/mutex.h>
 
 typedef struct shared_deq {
     LIST_ELEMENT;
     struct mutex mut;
 } shared_deq_t;
 
+
+#define EXTERN_SHARED_DEQ(name)        \
+    extern struct shared_deq name
 
 #define DEFINE_SHARED_DEQ(name)         \
     struct shared_deq name = {          \
