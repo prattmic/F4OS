@@ -23,8 +23,16 @@
 #ifndef USR_AUTOPILOT_SENSORS_H_INCLUDED
 #define USR_AUTOPILOT_SENSORS_H_INCLUDED
 
-extern struct mutex mag_mutex;
-extern volatile struct mag_data locked_mag_data;
+#include <list.h>
+#include <dev/mag.h>
+#include <dev/shared_deq.h>
+
+EXTERN_SHARED_DEQ(mag_queue);
+
+struct mag_queue_entry {
+    LIST_ELEMENT;
+    struct mag_data data;
+};
 
 void read_mag(void);
 

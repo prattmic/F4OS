@@ -21,18 +21,25 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <dev/mag.h>
+#include <dev/shared_deq.h>
 #include <kernel/mutex.h>
 
 #include "sensors.h"
 #include "controller.h"
 
 void controller(void) {
-    struct mag_data mag;
+    struct mag_queue_entry *mag;
 
-    acquire(&mag_mutex);
-    mag = locked_mag_data;
-    release(&mag_mutex);
+    mag = sdeq_pop(&mag_queue, struct mag_queue_entry);
 
-    printf("Mag: X: %f\tY: %f\tZ: %f\r\n", mag.x, mag.y, mag.z);
+    if (!mag) {
+        printf("No new mag data\r\n");
+        return;
+    }
+
+    printf("Mag: X: %f\tY: %f\tZ: %f\r\n",
+           mag->data.x, mag->data.y, mag->data.z);
+    free(mag);
 }

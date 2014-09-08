@@ -24,13 +24,12 @@
 #include <stdlib.h>
 #include <dev/device.h>
 #include <dev/mag.h>
-#include <kernel/mutex.h>
+#include <dev/shared_deq.h>
 #include <kernel/obj.h>
 
 #include "sensors.h"
 
-struct mutex mag_mutex = INIT_MUTEX;
-volatile struct mag_data locked_mag_data;
+DEFINE_SHARED_DEQ(mag_queue);
 
 static struct mag *setup_mag(void) {
     struct obj *obj;
@@ -47,7 +46,7 @@ static struct mag *setup_mag(void) {
 void read_mag(void) {
     static struct mag *mag = NULL;
     struct mag_ops *ops;
-    struct mag_data data;
+    struct mag_queue_entry *entry;
     int err;
 
     if (!mag) {
@@ -56,13 +55,17 @@ void read_mag(void) {
 
     ops = mag->obj.ops;
 
-    err = ops->get_data(mag, &data);
+    entry = malloc(sizeof(*entry));
+    if (!entry) {
+        printf("Failed to allocate mag queue entry\r\n");
+        return;
+    }
+
+    err = ops->get_data(mag, &entry->data);
     if (err) {
         printf("Failed to get mag data: %d\r\n", err);
         return;
     }
 
-    acquire(&mag_mutex);
-    locked_mag_data = data;
-    release(&mag_mutex);
+    sdeq_add(&mag_queue, entry);
 }
