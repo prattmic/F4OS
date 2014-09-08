@@ -51,17 +51,14 @@ static inline void __sdeq_add(shared_deq_t *sdeq, list_t *l) {
     release(&sdeq->mut);
 }
 
-/*
 #define sdeq_pop(sdeq, type) ({                     \
-    struct list* __mptr = __sdeq_pop(sdeq);         \
-    type* __ret;                                    \
-    if (__mptr) {                                   \
-        __ret = container_of(__mptr, type, _list);  \
+    type *__ret = NULL;                             \
+    struct list *__entry = __sdeq_pop(sdeq);        \
+    if (__entry) {                                  \
+        __ret = container_of(__entry, type, _list); \
     }                                               \
-    else                                            \
-        __ret = NULL;                               \
-    __ret;})
-*/
+    __ret;                                          \
+})
 
 static inline list_t *__sdeq_pop(shared_deq_t *sdeq) {
     list_t *ret;
