@@ -28,10 +28,6 @@
 struct task_t;
 typedef struct task_t task_t;
 
-#define RESOURCE_TABLE_SIZE         CONFIG_RESOURCE_TABLE_SIZE
-
-typedef int8_t rd_t;
-
 struct mutex;
 
 typedef struct resource {
@@ -47,16 +43,36 @@ typedef struct resource {
     int                         (*closer)(struct resource*);
 } resource;
 
-struct task_resource_data {
-    struct resource *resources[RESOURCE_TABLE_SIZE];
-    rd_t top_rd;
-};
-
 resource *create_new_resource(void) __attribute__((section(".kernel")));
-rd_t add_resource(task_t *task, resource* r) __attribute__((section(".kernel")));
 void task_resource_setup(task_t *task) __attribute__((section(".kernel")));
 
-extern resource *default_resources[];
+/*
+ * Close initialized resource
+ *
+ * @returns 0 on success, negative on error
+ */
+int resource_close(struct resource *resource);
+
+/*
+ * Create a char_device wrapper for resource
+ *
+ * Allocate and get a char_dev obj, which acts as an abstract
+ * interface to the passed resource.
+ *
+ * When finished, use obj_put() to free structures.
+ *
+ * @param resource  Resource to wrap
+ * @return Character device wrapper, or NULL on error
+ */
+struct char_device *resource_to_char_device(struct resource *resource);
+
+/*
+ * Check if two char_devices share the same underlying resource
+ *
+ * @returns true if d1 and d2 have the same underlying resource, else false
+ */
+int resource_char_device_equal(struct char_device *d1,
+                               struct char_device *d2);
 
 /* Determine default stdout/stderr */
 extern struct resource usart_resource;

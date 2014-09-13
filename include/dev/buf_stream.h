@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,8 @@
 #ifndef DEV_BUF_STREAM_H_INCLUDED
 #define DEV_BUF_STREAM_H_INCLUDED
 
+#include <dev/resource.h>
+
 /* Create a stream resource around of given buffer
  * of a given length.  Reading from this resource will
  * read until the NULL terminator is reached, or len
@@ -30,6 +32,6 @@
  * will sequentially write the characters to the buffer,
  * until len-1 characters have been written, leaving a
  * a NULL terminator. */
-rd_t open_buf_stream(char *buf, uint32_t len);
+struct resource *open_buf_stream(char *buf, uint32_t len);
 
 #endif

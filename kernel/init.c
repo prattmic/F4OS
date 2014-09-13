@@ -78,7 +78,7 @@ void os_start(void) {
 
     printf("\r\n%s\r\n", banner);
 
-    if (default_resources[stdout] != default_resources[stderr]) {
+    if (!resource_char_device_equal(stdout, stderr)) {
         fprintf(stderr, "\r\n%sStandard error terminal.\r\n", banner);
     }
 

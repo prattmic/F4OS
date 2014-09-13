@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <kernel/sched.h>
+#include <dev/char.h>
 #include <dev/resource.h>
 #include <dev/shared_mem.h>
 #include "test.h"
@@ -30,13 +31,16 @@
 #define IPC_MESSAGE "'Forty-two,' said Deep Thought, with infinite majesty and calm."
 
 volatile int passed = 0;
+struct resource *shared_mem;
+struct char_device *dev;
 
 static void memreader(void) {
     char buf[100] = {'\0'};
-    rd_t memrd = curr_task->resource_data.top_rd - 1;
 
-    read(memrd, buf, 99);
-    close(memrd);
+    read(dev, buf, 99);
+
+    obj_put(&dev->obj);
+    resource_close(shared_mem);
 
     if (strncmp(buf, IPC_MESSAGE, 100) == 0) {
         passed = 1;
@@ -47,13 +51,19 @@ static void memreader(void) {
 }
 
 static int shared_mem_test(char *message, int len) {
-    rd_t memrd = open_shared_mem();
-    if (memrd < 0) {
+    shared_mem = open_shared_mem();
+    if (!shared_mem) {
         strncpy(message, "Unable to open shared mem.", len);
         return FAILED;
     }
 
-    swrite(memrd, IPC_MESSAGE);
+    dev = resource_to_char_device(shared_mem);
+    if (!dev) {
+        strncpy(message, "Unable to convert shared mem.", len);
+        goto err;
+    }
+
+    swrite(dev, IPC_MESSAGE);
     new_task(&memreader, 1, 0);
 
     int count = 100000;
@@ -69,6 +79,10 @@ static int shared_mem_test(char *message, int len) {
         strncpy(message, "Timed out", len);
     }
 
+    return FAILED;
+
+err:
+    resource_close(shared_mem);
     return FAILED;
 }
 DEFINE_TEST("Shared memory resource", shared_mem_test);

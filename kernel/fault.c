@@ -24,7 +24,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <compiler.h>
-#include <dev/resource.h>
+#include <dev/char.h>
 #include <dev/hw/usart.h>
 #include <dev/hw/led.h>
 #include <kernel/sched.h>
@@ -36,7 +36,7 @@
 /*
  * These puts/putc ignore any locking on the resource.
  */
-static int printk_puts(rd_t r, char *s) {
+static int printk_puts(struct char_device *dev, char *s) {
     if (usart_ready) {
         return usart_puts(s, NULL);
     }
@@ -45,7 +45,7 @@ static int printk_puts(rd_t r, char *s) {
     }
 }
 
-static int printk_putc(rd_t r, char c) {
+static int printk_putc(struct char_device *dev, char c) {
     if (usart_ready) {
         return usart_putc(c, NULL);
     }
@@ -54,8 +54,8 @@ static int printk_putc(rd_t r, char c) {
     }
 }
 #else
-static int printk_puts(rd_t r, char *s) {return -1;}
-static int printk_putc(rd_t r, char c) {return -1;}
+static int printk_puts(struct char_device *dev, char *s) {return -1;}
+static int printk_putc(struct char_device *dev, char c) {return -1;}
 #endif
 
 static inline int vprintk(char *fmt, va_list ap) {

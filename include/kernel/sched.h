@@ -25,7 +25,7 @@
 
 #include <stdint.h>
 #include <compiler.h>
-#include <dev/resource.h>
+#include <dev/char.h>
 #include <kernel/mutex.h>
 #include <kernel/svc.h>
 
@@ -39,8 +39,10 @@ extern volatile uint8_t task_switching;
  * all generic task infomation that must be available outside
  * the scheduler. */
 typedef struct task_t {
-    struct task_resource_data   resource_data;
     struct task_mutex_data  mutex_data;
+    struct char_device      *_stdin;
+    struct char_device      *_stdout;
+    struct char_device      *_stderr;
 } task_t;
 
 /* Unique identifier of the currently executing task */

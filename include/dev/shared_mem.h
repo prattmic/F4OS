@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,6 +23,8 @@
 #ifndef DEV_SHARED_MEM_H_INCLUDED
 #define DEV_SHARED_MEM_H_INCLUDED
 
-rd_t open_shared_mem(void) __attribute__((section(".kernel")));
+#include <dev/resource.h>
+
+struct resource *open_shared_mem(void);
 
 #endif

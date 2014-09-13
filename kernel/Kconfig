@@ -11,14 +11,6 @@ config TASK_STACK_SIZE
         allocator, which must allocate 2^n sized regions, and
         will set aside one word for a header.
 
-config RESOURCE_TABLE_SIZE
-    int
-    prompt "Maximum number of resources per task"
-    default 16
-    ---help---
-        The maximum number of resources any given task will
-        be able to open at one time.
-
 config HELD_MUTEXES_MAX
     int
     prompt "Maximum number of held mutexes per task"

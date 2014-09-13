@@ -44,18 +44,14 @@ char shared_mem_read(void *env, int *error) __attribute__((section(".kernel")));
 int shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
 int shared_mem_close(resource *env) __attribute__((section(".kernel")));
 
-rd_t open_shared_mem(void) {
-    rd_t ret;
-
+struct resource *open_shared_mem(void) {
     shared_mem *mem = kmalloc(sizeof(shared_mem));
     if (!mem) {
-        ret = -1;
         goto err;
     }
 
     resource *new_r = create_new_resource();
     if (!new_r) {
-        ret = -1;
         goto err_free_mem;
     }
 
@@ -73,17 +69,11 @@ rd_t open_shared_mem(void) {
         init_mutex(new_r->read_mut);
     }
     else {
-        ret = -1;
         goto err_free_new_r;
     }
     new_r->write_mut = new_r->read_mut;
 
-    ret = add_resource(curr_task, new_r);
-    if (ret < 0) {
-        goto err_free_new_r;
-    }
-
-    return ret;
+    return new_r;
 
 err_free_new_r:
     kfree(new_r);
@@ -91,7 +81,7 @@ err_free_mem:
     kfree(mem);
 err:
     printk("OOPS: Unable to open shared mem.\r\n");
-    return ret;
+    return NULL;
 }
 
 char shared_mem_read(void *env, int *error) {

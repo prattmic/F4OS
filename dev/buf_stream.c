@@ -70,18 +70,14 @@ static int buf_stream_close(resource *resource) {
     return 0;
 }
 
-rd_t open_buf_stream(char *buf, uint32_t len) {
-    rd_t ret;
-
+struct resource *open_buf_stream(char *buf, uint32_t len) {
     struct buf_stream *env = malloc(sizeof(struct buf_stream));
     if (!env) {
-        ret = -1;
         goto err;
     }
 
     resource *new_r = create_new_resource();
     if (!new_r) {
-        ret = -1;
         goto err_free_env;
     }
 
@@ -99,17 +95,11 @@ rd_t open_buf_stream(char *buf, uint32_t len) {
         init_mutex(new_r->read_mut);
     }
     else {
-        ret = -1;
         goto err_free_new_r;
     }
     new_r->write_mut = new_r->read_mut;
 
-    ret = add_resource(curr_task, new_r);
-    if (ret < 0) {
-        goto err_free_new_r;
-    }
-
-    return ret;
+    return new_r;
 
 err_free_new_r:
     kfree(new_r);
@@ -117,5 +107,5 @@ err_free_env:
     kfree(env);
 err:
     printk("OOPS: Unable to open buffer stream.\r\n");
-    return ret;
+    return NULL;
 }

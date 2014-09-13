@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,9 +23,13 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <kernel/sched.h>
+#include <dev/char.h>
 #include <dev/resource.h>
 #include <dev/shared_mem.h>
 #include "app.h"
+
+static struct resource *shared_mem;
+static struct char_device *dev;
 
 void memreader(void);
 
@@ -35,28 +39,39 @@ void ipctest(int argc, char **argv) {
         return;
     }
 
-    rd_t memrd = open_shared_mem();
-    if (memrd < 0) {
+    shared_mem = open_shared_mem();
+    if (!shared_mem) {
         printf("Error: unable to open shared mem.\r\n");
+        return;
+    }
+
+    dev = resource_to_char_device(shared_mem);
+    if (!dev) {
+        printf("Error: unable to converty shared mem to char_device.\r\n");
+        goto err;
     }
 
     printf("WRITING MEM.\r\n");
 
-    swrite(memrd, "THIS IS A TEST OF SHARED MEMORY REGIONS N STUFF.");
+    swrite(dev, "THIS IS A TEST OF SHARED MEMORY REGIONS N STUFF.");
 
     printf("READING MEM.\r\n");
     new_task(&memreader, 5, 0);
+    return;
+
+err:
+    resource_close(shared_mem);
 }
 DEFINE_APP(ipctest)
 
 void memreader(void) {
     char buf[16];
-    rd_t memrd = curr_task->resource_data.top_rd - 1;
 
-    read(memrd, buf, 10);
+    read(dev, buf, 10);
     buf[10] = 0x00;
 
     puts(buf);
 
-    close(memrd);
+    obj_put(&dev->obj);
+    resource_close(shared_mem);
 }

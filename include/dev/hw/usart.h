@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,6 +22,8 @@
 
 #ifndef DEV_HW_USART_H_INCLUDED
 #define DEV_HW_USART_H_INCLUDED
+
+#include <dev/resource.h>
 
 void init_usart(void) __attribute__((section(".kernel")));
 int usart_putc(char c, void *env) __attribute__((section(".kernel")));
