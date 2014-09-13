@@ -25,12 +25,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dev/resource.h>
+#include <dev/char.h>
 #include <mm/mm.h>
 #include <kernel/sched.h>
 #include <kernel/mutex.h>
 #include <kernel/fault.h>
-
-#include <dev/resource.h>
 
 /* Default resources used before task switching, and inherited to all tasks */
 resource *default_resources[RESOURCE_TABLE_SIZE] = {
@@ -136,66 +136,6 @@ void task_resource_setup(task_t *task) {
     }
 }
 
-/* Return bytes written, negative on error */
-int write(rd_t rd, char* d, int n) {
-    resource *resource = get_resource(rd);
-    if (!resource) {
-        return -1;
-    }
-
-    int tot = 0;
-
-    acquire(resource->write_mut);
-
-    for(int i = 0; i < n; i++) {
-        int ret = resource->writer(d[i], resource->env);
-        if (ret > 0) {
-            tot += ret;
-        }
-        else {
-            /* Return on error */
-            tot = ret;
-            break;
-        }
-    }
-
-    release(resource->write_mut);
-
-    return tot;
-}
-
-/* Return bytes written, negative on error */
-int swrite(rd_t rd, char* s) {
-    resource *resource = get_resource(rd);
-    if (!resource) {
-        return -1;
-    }
-
-    int ret = 0;
-
-    acquire(resource->write_mut);
-
-    if (resource->swriter) {
-        ret = resource->swriter(s, resource->env);
-    }
-    else {
-        while(*s) {
-            int n = resource->writer(*s++, resource->env);
-            if (n >= 0) {
-                ret += n;
-            }
-            else {
-                ret = n;
-                break;
-            }
-        }
-    }
-
-    release(resource->write_mut);
-
-    return ret;
-}
-
 /* Returns 0 on success, else on error */
 int close(rd_t rd) {
     if (rd < 0 || rd >= RESOURCE_TABLE_SIZE) {
@@ -221,32 +161,125 @@ int close(rd_t rd) {
     return ret;
 }
 
-/* Returns number of bytes read, or negative on error */
-int read(rd_t rd, char *buf, int n) {
-    resource *resource = get_resource(rd);
-    if (!resource) {
-        return -1;
-    }
-
-    int tot = 0;
+static int resource_read(struct char_device *c, char *buf, size_t num) {
+    struct resource *resource = c->priv;
+    int total = 0;
 
     acquire(resource->read_mut);
 
-    for(int i = 0; i < n; i++) {
+    for(int i = 0; i < num; i++) {
         int error;
 
         buf[i] = resource->reader(resource->env, &error);
 
         if (!error) {
-            tot += 1;
+            total += 1;
         }
         else {
-            tot = error;
+            total = error;
             break;
         }
     }
 
     release(resource->read_mut);
 
-    return tot;
+    return total;
+}
+
+static int resource_write(struct char_device *c, char *buf, size_t num) {
+    struct resource *resource = c->priv;
+    int total = 0;
+
+    acquire(resource->write_mut);
+
+    /* swriter() is completely unused */
+
+    for (int i = 0; i < num; i++) {
+        int n = resource->writer(buf[i], resource->env);
+        if (n < 0) { /* Error */
+            total = n;
+            break;
+        }
+        else if (n == 0) { /* Can't write anymore */
+            break;
+        }
+
+        total++;
+    }
+
+    release(resource->write_mut);
+
+    return total;
+}
+
+static int resource_cleanup(struct char_device *c) {
+    /* Nothing to cleanup */
+    return 0;
+}
+
+static struct char_ops resource_ops = {
+    .read = resource_read,
+    .write = resource_write,
+    ._cleanup = resource_cleanup,
+};
+
+struct char_device *resource_to_char_device(rd_t r) {
+    struct char_device *c;
+    struct resource *resource = get_resource(r);
+    if (!resource) {
+        return NULL;
+    }
+
+    c = char_device_create(NULL, &resource_ops);
+    if (!c) {
+        return NULL;
+    }
+
+    c->priv = resource;
+
+    return c;
+}
+
+int write(rd_t rd, char *buf, int n) {
+    struct char_device *c;
+    struct char_ops *ops;
+    int ret;
+
+    /* Adapt to a char device temporarily */
+    c = resource_to_char_device(rd);
+    if (!c) {
+        return -1;
+    }
+
+    ops = c->obj.ops;
+
+    ret = ops->write(c, buf, n);
+
+    obj_put(&c->obj);
+
+    return ret;
+}
+
+int swrite(rd_t rd, char* s) {
+    return write(rd, s, strlen(s));
+}
+
+int read(rd_t rd, char *buf, int n) {
+    struct char_device *c;
+    struct char_ops *ops;
+    int ret;
+
+    /* Adapt to a char device temporarily */
+    c = resource_to_char_device(rd);
+    if (!c) {
+        return -1;
+    }
+
+    ops = c->obj.ops;
+
+    ret = ops->read(c, buf, n);
+
+    obj_put(&c->obj);
+
+    return ret;
 }
