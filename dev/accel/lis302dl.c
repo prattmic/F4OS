@@ -28,7 +28,6 @@
 #include <dev/accel.h>
 #include <dev/fdtparse.h>
 #include <dev/hw/spi.h>
-#include <dev/resource.h>
 #include <kernel/class.h>
 #include <kernel/collection.h>
 #include <kernel/fault.h>

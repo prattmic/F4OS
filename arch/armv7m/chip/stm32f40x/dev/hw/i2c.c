@@ -31,7 +31,6 @@
 #include <dev/fdtparse.h>
 #include <dev/hw/gpio.h>
 #include <dev/raw_mem.h>
-#include <dev/resource.h>
 #include <kernel/fault.h>
 #include <kernel/mutex.h>
 #include <kernel/class.h>

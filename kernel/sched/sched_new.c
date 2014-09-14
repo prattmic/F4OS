@@ -28,7 +28,6 @@
 #include <string.h>
 #include <list.h>
 #include <mm/mm.h>
-#include <dev/resource.h>
 #include <kernel/fault.h>
 
 #include <kernel/sched.h>
