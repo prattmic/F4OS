@@ -74,29 +74,20 @@ int fgetc(struct char_device *dev) {
 
 int scnprintf(char *buf, uint32_t n, char *fmt, ...) {
     va_list ap;
-    struct resource *stream;
-    struct char_device *dev;
+    struct char_device *stream;
     int ret;
 
     va_start(ap, fmt);
 
-    stream = open_buf_stream(buf, n);
+    stream = buf_stream_create(buf, n);
     if (!stream) {
         ret = -1;
         goto out;
     }
 
-    dev = resource_to_char_device(stream);
-    if (!dev) {
-        ret = -1;
-        goto close_stream;
-    }
+    ret = vfprintf(stream, fmt, ap, &fputs, &fputc);
 
-    ret = vfprintf(dev, fmt, ap, &fputs, &fputc);
-
-    obj_put(&dev->obj);
-close_stream:
-    resource_close(stream);
+    obj_put(&stream->obj);
 out:
     va_end(ap);
     return ret;

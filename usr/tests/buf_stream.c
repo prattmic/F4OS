@@ -24,7 +24,6 @@
 #include <string.h>
 #include <dev/buf_stream.h>
 #include <dev/char.h>
-#include <dev/resource.h>
 #include "test.h"
 
 #define STREAM_MESSAGE "The Guide is definitive. Reality is frequently inaccurate."
@@ -33,24 +32,16 @@
 static int buf_stream_write_test(char *message, int len) {
     int ret, written;
     char buf[BUF_LEN];
-    struct resource *stream;
-    struct char_device *dev;
+    struct char_device *stream;
 
-    stream = open_buf_stream(buf, BUF_LEN);
+    stream = buf_stream_create(buf, BUF_LEN);
     if (!stream) {
         strncpy(message, "Unable to open buf stream", len);
         ret = FAILED;
         goto out;
     }
 
-    dev = resource_to_char_device(stream);
-    if (!dev) {
-        strncpy(message, "Unable to convert buf stream", len);
-        ret = FAILED;
-        goto out_close;
-    }
-
-    written = fputs(dev, STREAM_MESSAGE);
+    written = fputs(stream, STREAM_MESSAGE);
     if (written != ARRAY_LENGTH(STREAM_MESSAGE)-1) {
         strncpy(message, "Incorrect number of characters written", len);
         ret = FAILED;
@@ -67,9 +58,7 @@ static int buf_stream_write_test(char *message, int len) {
     ret = PASSED;
 
 out_put:
-    obj_put(&dev->obj);
-out_close:
-    resource_close(stream);
+    obj_put(&stream->obj);
 out:
     return ret;
 }
@@ -79,25 +68,17 @@ static int buf_stream_read_test(char *message, int len) {
     int ret;
     char buf[BUF_LEN] = STREAM_MESSAGE;
     char read_buf[BUF_LEN];
-    struct resource *stream;
-    struct char_device *dev;
+    struct char_device *stream;
     int i = 0;
 
-    stream = open_buf_stream(buf, BUF_LEN);
+    stream = buf_stream_create(buf, BUF_LEN);
     if (!stream) {
         strncpy(message, "Unable to open buf stream", len);
         ret = FAILED;
         goto out;
     }
 
-    dev = resource_to_char_device(stream);
-    if (!dev) {
-        strncpy(message, "Unable to convert buf stream", len);
-        ret = FAILED;
-        goto out_close;
-    }
-
-    while ((read_buf[i++] = fgetc(dev)) && (i < BUF_LEN));
+    while ((read_buf[i++] = fgetc(stream)) && (i < BUF_LEN));
 
     if (strncmp(read_buf, STREAM_MESSAGE, BUF_LEN) != 0) {
         /* Avoid using scnprintf, which will end up using buffer streams */
@@ -109,9 +90,7 @@ static int buf_stream_read_test(char *message, int len) {
     ret = PASSED;
 
 out_put:
-    obj_put(&dev->obj);
-out_close:
-    resource_close(stream);
+    obj_put(&stream->obj);
 out:
     return ret;
 }
@@ -121,25 +100,17 @@ DEFINE_TEST("Buffer stream read", buf_stream_read_test);
  * as the last space is left for a NULL char */
 static int buf_stream_single_char_test(char *message, int len) {
     int ret, written;
-    struct resource *stream;
-    struct char_device *dev;
+    struct char_device *stream;
     char c = '\0';
 
-    stream = open_buf_stream(&c, 1);
+    stream = buf_stream_create(&c, 1);
     if (!stream) {
         strncpy(message, "Unable to open buf stream", len);
         ret = FAILED;
         goto out;
     }
 
-    dev = resource_to_char_device(stream);
-    if (!dev) {
-        strncpy(message, "Unable to convert buf stream", len);
-        ret = FAILED;
-        goto out_close;
-    }
-
-    written = fputs(dev, STREAM_MESSAGE);
+    written = fputs(stream, STREAM_MESSAGE);
     if (written != 0) {
         strncpy(message, "Incorrect number of characters written", len);
         ret = FAILED;
@@ -156,9 +127,7 @@ static int buf_stream_single_char_test(char *message, int len) {
     ret = PASSED;
 
 out_put:
-    obj_put(&dev->obj);
-out_close:
-    resource_close(stream);
+    obj_put(&stream->obj);
 out:
     return ret;
 }
@@ -170,24 +139,16 @@ DEFINE_TEST("Buffer stream single character", buf_stream_single_char_test);
 static int buf_stream_overfill_test(char *message, int len) {
     int ret, written;
     char buf[SHORT_BUF_LEN];
-    struct resource *stream;
-    struct char_device *dev;
+    struct char_device *stream;
 
-    stream = open_buf_stream(buf, SHORT_BUF_LEN);
+    stream = buf_stream_create(buf, SHORT_BUF_LEN);
     if (!stream) {
         strncpy(message, "Unable to open buf stream", len);
         ret = FAILED;
         goto out;
     }
 
-    dev = resource_to_char_device(stream);
-    if (!dev) {
-        strncpy(message, "Unable to convert buf stream", len);
-        ret = FAILED;
-        goto out_close;
-    }
-
-    written = fputs(dev, STREAM_MESSAGE);
+    written = fputs(stream, STREAM_MESSAGE);
     if (written != SHORT_BUF_LEN-1) {
         strncpy(message, "Incorrect number of characters written", len);
         ret = FAILED;
@@ -204,9 +165,7 @@ static int buf_stream_overfill_test(char *message, int len) {
     ret = PASSED;
 
 out_put:
-    obj_put(&dev->obj);
-out_close:
-    resource_close(stream);
+    obj_put(&stream->obj);
 out:
     return ret;
 }
