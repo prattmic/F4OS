@@ -69,6 +69,13 @@ config SHARED_MEM_SIZE
         The size of buffer to be allocated for each shared memory
         resource opened.
 
+config ADC_CLASS
+    bool "ADC Support"
+    default y
+    ---help---
+        Enable support for the ADC class and drivers.  The ADC drivers provide
+        support for analog inputs, given a GPIO object.
+
 config PWM_CLASS
     bool "PWM Support"
     default y
@@ -76,12 +83,12 @@ config PWM_CLASS
         Enable support for the PWM class and drivers.  The PWM drivers provide
         support for hardware and/or software PWM outputs, given a GPIO object.
 
-config ADC_CLASS
-    bool "ADC Support"
+config UART_CLASS
+    bool "UART Support"
     default y
     ---help---
-        Enable support for the ADC class and drivers.  The ADC drivers provide
-        support for analog inputs, given a GPIO object.
+        Enable support for the UART class and drivers.  The UART drivers provide
+        support for hardware and software UARTs.
 
 source "dev/mpu6000/Kconfig"
 
