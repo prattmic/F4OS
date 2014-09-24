@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,6 @@
 #define ARCH_CHIP_INCLUDE_I2C_H
 
 #include <stdint.h>
-#include <arch/chip/registers.h>
 
 struct stm32f4_i2c_regs {
     uint32_t CR1;       /* I2Cx Control Register 1 */
@@ -38,15 +37,6 @@ struct stm32f4_i2c_regs {
     uint32_t TRISE;     /* I2Cx TRISE Register */
     uint32_t FLTR;      /* I2Cx FLTR Register */
 };
-
-static inline struct stm32f4_i2c_regs *i2c_get_regs(int num) {
-    switch (num) {
-        case 1: return (struct stm32f4_i2c_regs *) I2C1_BASE;
-        case 2: return (struct stm32f4_i2c_regs *) I2C2_BASE;
-        case 3: return (struct stm32f4_i2c_regs *) I2C3_BASE;
-    }
-    return (struct stm32f4_i2c_regs *) INVALID_PERIPH_BASE;
-}
 
 #define I2C_CR1_PE          ((uint32_t) (1 << 0))       /* I2C peripheral enable */
 #define I2C_CR1_SMBUS       ((uint32_t) (1 << 1))       /* I2C SMBus mode */

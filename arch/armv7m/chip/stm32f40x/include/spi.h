@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,7 +23,7 @@
 #ifndef ARCH_CHIP_INCLUDE_SPI_H
 #define ARCH_CHIP_INCLUDE_SPI_H
 
-#include <arch/chip/registers.h>
+#include <stdint.h>
 
 struct stm32f4_spi_regs {
     volatile uint32_t CR1;      /* SPIx Control Register 1 */
@@ -36,18 +36,6 @@ struct stm32f4_spi_regs {
     volatile uint32_t I2SCFGR;  /* SPIx I2S Configuration Register */
     volatile uint32_t I2SPR;    /* SPIx I2S Prescaler Register */
 };
-
-static inline struct stm32f4_spi_regs *get_spi(int x) {
-    switch(x) {
-        case 1: return (struct stm32f4_spi_regs *) SPI1_BASE;
-        case 2: return (struct stm32f4_spi_regs *) SPI2_BASE;
-        case 3: return (struct stm32f4_spi_regs *) SPI3_BASE;
-        case 4: return (struct stm32f4_spi_regs *) SPI4_BASE;
-        case 5: return (struct stm32f4_spi_regs *) SPI5_BASE;
-        case 6: return (struct stm32f4_spi_regs *) SPI6_BASE;
-    }
-    return (struct stm32f4_spi_regs *) INVALID_PERIPH_BASE;
-}
 
 /* SPIx Control Register 1 bit fields */
 #define SPI_CR1_CPHA                ((uint32_t) (1 << 0))   /* SPI_CR1 Clock phase */
