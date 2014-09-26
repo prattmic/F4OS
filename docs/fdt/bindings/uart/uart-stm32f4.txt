@@ -1,0 +1,18 @@
+UART for STM32F4 chips
+
+Required properties:
+    - compatible: Must be "stmicro,stm32f407-uart"
+    - reg: register base address and register map size
+    - uart,tx-gpio: GPIO property for the RX GPIO
+    - uart,rx-gpio: GPIO property for the TX GPIO
+    - stmicro,periph-id: STM32F4 Peripheral ID associated with the bus
+
+Example:
+
+uart1: uart@40011000 {
+    compatible = "stmicro,stm32f407-uart";
+    reg = <0x40011000 0x1C>;
+    uart,tx-gpio = <&gpio 22 0>;    /* PB6 */
+    uart,rx-gpio = <&gpio 23 0>;    /* PB7 */
+    stmicro,periph-id = <29>;       /* STM32F4_PERIPH_USART1 */
+};

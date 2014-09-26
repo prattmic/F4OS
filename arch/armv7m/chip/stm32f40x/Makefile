@@ -1,9 +1,11 @@
 SRCS += vector.S
 SRCS += clock.c
-SRCS += rcc.c
 SRCS += gpio.c
-SRCS_$(CONFIG_PWM_CLASS) += pwm.c
+SRCS += rcc.c
+
 SRCS_$(CONFIG_ADC_CLASS) += adc.c
+SRCS_$(CONFIG_PWM_CLASS) += pwm.c
+SRCS_$(CONFIG_UART_CLASS) += uart.c
 
 DIRS += boards/
 DIRS += dev/

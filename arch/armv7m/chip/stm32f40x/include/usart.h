@@ -25,7 +25,7 @@
 
 #include <arch/chip/registers.h>
 
-typedef struct usart {
+typedef struct stm32f4_usart_regs {
     volatile uint32_t SR;   // USARTx Status Register
     volatile uint32_t DR;   // USARTx Data Register
     volatile uint32_t BRR;  // USARTx Baud Rate Register
@@ -77,6 +77,21 @@ static usart_t * get_usart(int x) {
 #define USART_CR1_RE                ((uint32_t) (1 << 2))           /* USART_CR1 Receive Enable */
 #define USART_CR1_RWU               ((uint32_t) (1 << 1))           /* USART_CR1 Receiver wakeup */
 #define USART_CR1_SBK               ((uint32_t) (1 << 0))           /* USART_CR1 Send break */
+
+#define USART_CR2_ADD(n)            ((uint32_t) (n << 0))           /* USART Address of USART node */
+#define USART_CR2_ADD_MASK          ((uint32_t) (0xf << 0))         /* USART Address mask */
+#define USART_CR2_LBDL              ((uint32_t) (1 << 5))           /* USART Break detection length */
+#define USART_CR2_LBDIE             ((uint32_t) (1 << 6))           /* USART Break detection interrupt enable */
+#define USART_CR2_LBCL              ((uint32_t) (1 << 8))           /* USART Last bit clock pulse */
+#define USART_CR2_CPHA              ((uint32_t) (1 << 9))           /* USART Clock phase */
+#define USART_CR2_CPOL              ((uint32_t) (1 << 10))          /* USART Clock polarity */
+#define USART_CR2_CLKEN             ((uint32_t) (1 << 11))          /* USART Clock enable */
+#define USART_CR2_STOP_MASK         ((uint32_t) (0x3 << 12))        /* USART Stop bits mask */
+#define USART_CR2_STOP_1BIT         ((uint32_t) (0 << 12))          /* USART 1 stop bit */
+#define USART_CR2_STOP_0_5BIT       ((uint32_t) (1 << 12))          /* USART 0.5 stop bits */
+#define USART_CR2_STOP_2BIT         ((uint32_t) (2 << 12))          /* USART 2 stop bits */
+#define USART_CR2_STOP_1_5BIT       ((uint32_t) (3 << 12))          /* USART 1.5 stop bits */
+#define USART_CR2_LINEN             ((uint32_t) (1 << 14))          /* USART LIN mode enable */
 
 /* USARTx Control Register 3 bit fields */
 #define USART_CR3_ONEBIT            ((uint32_t) (1 << 11))          /* USART_CR3 One sample bit method enable */

@@ -97,4 +97,28 @@
                                    <&gpio 37 0> /* PC5 */;
         };
     };
+
+    uart1: uart@40011000 {
+        compatible = "stmicro,stm32f407-uart";
+        reg = <0x40011000 0x1C>;
+        uart,tx-gpio = <&gpio 22 0>;    /* PB6 */
+        uart,rx-gpio = <&gpio 23 0>;    /* PB7 */
+        stmicro,periph-id = <29>;       /* STM32F4_PERIPH_USART1 */
+    };
+
+    uart2: uart@40004400 {
+        compatible = "stmicro,stm32f407-uart";
+        reg = <0x40004400 0x1C>;
+        uart,tx-gpio = <&gpio 2 0>;     /* PA2 */
+        uart,rx-gpio = <&gpio 3 0>;     /* PA3 */
+        stmicro,periph-id = <30>;       /* STM32F4_PERIPH_USART2 */
+    };
+
+    uart6: uart@40011400 {
+        compatible = "stmicro,stm32f407-uart";
+        reg = <0x40011400 0x1C>;
+        uart,tx-gpio = <&gpio 38 0>;    /* PC6 */
+        uart,rx-gpio = <&gpio 39 0>;    /* PC7 */
+        stmicro,periph-id = <34>;       /* STM32F4_PERIPH_USART6 */
+    };
 };
