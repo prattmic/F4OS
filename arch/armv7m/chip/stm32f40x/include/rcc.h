@@ -27,6 +27,15 @@
 #include <arch/chip/periph.h>
 #include <arch/chip/registers.h>
 
+enum stm32f4_bus {
+    STM32F4_AHB1,
+    STM32F4_AHB2,
+    STM32F4_AHB3,
+    STM32F4_APB1,
+    STM32F4_APB2,
+    STM32F4_UNKNOWN_BUS = -1,
+};
+
 struct stm32f4_rcc_regs {
     uint32_t CR;        /* Clock control register */
     uint32_t PLLCFGR;   /* PLL configuration register */
@@ -79,6 +88,22 @@ static inline struct stm32f4_rcc_regs *rcc_get_regs() {
  * @returns 0 on success, negative on error
  */
 int rcc_set_clock_enable(enum stm32f4_periph_id periphid, int enable);
+
+/*
+ * Lookup peripheral bus
+ *
+ * @param periphid  Periipheral to look up
+ * @returns system bus which the peripheral is connected to.
+ */
+enum stm32f4_bus rcc_peripheral_bus(enum stm32f4_periph_id periphid);
+
+/*
+ * Lookup bus clock
+ *
+ * @param bus   Bus to look up
+ * @returns bus clock speed in Hz, negative on error
+ */
+long rcc_bus_clock(enum stm32f4_bus bus);
 
 #define RCC_CR                      ((volatile uint32_t *) (RCC_BASE + 0x00))   /* Clock Control Register */
 #define RCC_PLLCFGR                 ((volatile uint32_t *) (RCC_BASE + 0x04))   /* PLL Configuration Register */
