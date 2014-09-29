@@ -271,54 +271,7 @@
 #define GPIO_AF_OTG                     (uint32_t) (0xA)                                        /* GPIO USB OTG mode */
 
 /* DMA */
-#define DMA_LISR_TCIF2                  (uint32_t) (1 << 21)                                    /* DMA stream 2 transfer complete flag */
-#define DMA_HISR_TCIF7                  (uint32_t) (1 << 27)                                    /* DMA stream 7 transfer complete flag */
-#define DMA_LIFCR_CTCIF2                (uint32_t) (1 << 21)                                    /* DMA clear stream 2 transfer complete flag */
-#define DMA_HIFCR_CTCIF7                (uint32_t) (1 << 27)                                    /* DMA clear stream 7 transfer complete flag */
-
-#define DMA_SxCR_EN                     (uint32_t) (1 << 0)                                     /* DMA stream enable */
-#define DMA_SxCR_DMEIE                  (uint32_t) (1 << 1)                                     /* DMA stream direct mode error interrupt enable */
-#define DMA_SxCR_TEIE                   (uint32_t) (1 << 2)                                     /* DMA stream transmit error interrupt enable */
-#define DMA_SxCR_HTIE                   (uint32_t) (1 << 3)                                     /* DMA stream half transfer interrupt enable */
-#define DMA_SxCR_TCIE                   (uint32_t) (1 << 4)                                     /* DMA stream transfer complete interrupt enable */
-#define DMA_SxCR_PFCTRL                 (uint32_t) (1 << 5)                                     /* DMA stream peripheral flow control */
-#define DMA_SxCR_DIR_PM                 (uint32_t) (0 << 6)                                     /* DMA stream peripheral-to-memory data transfer */
-#define DMA_SxCR_DIR_MP                 (uint32_t) (1 << 6)                                     /* DMA stream memory-to-peripheral data transfer */
-#define DMA_SxCR_DIR_MM                 (uint32_t) (2 << 6)                                     /* DMA stream memory-to-memory data transfer */
-#define DMA_SxCR_CIRC                   (uint32_t) (1 << 8)                                     /* DMA stream circular mode enable */
-#define DMA_SxCR_PINC                   (uint32_t) (1 << 9)                                     /* DMA stream peripheral increment mode enable */
-#define DMA_SxCR_MINC                   (uint32_t) (1 << 10)                                    /* DMA stream memory increment mode enable */
-#define DMA_SxCR_PSIZE_BYTE             (uint32_t) (0 << 11)                                    /* DMA stream peripheral data size - Byte */
-#define DMA_SxCR_PSIZE_HW               (uint32_t) (1 << 11)                                    /* DMA stream peripheral data size - Half-word */
-#define DMA_SxCR_PSIZE_WORD             (uint32_t) (2 << 11)                                    /* DMA stream peripheral data size - Word */
-#define DMA_SxCR_MSIZE_BYTE             (uint32_t) (0 << 13)                                    /* DMA stream memory data size - Byte */
-#define DMA_SxCR_MSIZE_HW               (uint32_t) (1 << 13)                                    /* DMA stream memory data size - Half-word */
-#define DMA_SxCR_MSIZE_WORD             (uint32_t) (2 << 13)                                    /* DMA stream memory data size - Word */
-#define DMA_SxCR_PINCOS_LINKED          (uint32_t) (0 << 15)                                    /* DMA stream peripheral increment offset size linked to PSIZE */
-#define DMA_SxCR_PINCOS_FIXED           (uint32_t) (1 << 15)                                    /* DMA stream peripheral increment offset size fixed */
-#define DMA_SxCR_PL_LOW                 (uint32_t) (0 << 16)                                    /* DMA stream priority level low */
-#define DMA_SxCR_PL_MED                 (uint32_t) (1 << 16)                                    /* DMA stream priority level medium */
-#define DMA_SxCR_PL_HIGH                (uint32_t) (2 << 16)                                    /* DMA stream priority level high */
-#define DMA_SxCR_PL_VHIGH               (uint32_t) (3 << 16)                                    /* DMA stream priority level very high */
-#define DMA_SxCR_DBM                    (uint32_t) (1 << 18)                                    /* DMA stream double buffer mode */
-#define DMA_SxCR_CT                     (uint32_t) (1 << 19)                                    /* DMA stream current target (M0 or M1) */
-#define DMA_SxCR_PBURST_NO              (uint32_t) (0 << 21)                                    /* DMA stream peripheral burst disable */
-#define DMA_SxCR_PBURST_4               (uint32_t) (1 << 21)                                    /* DMA stream peripheral burst of 4 beats */
-#define DMA_SxCR_PBURST_8               (uint32_t) (2 << 21)                                    /* DMA stream peripheral burst of 8 beats */
-#define DMA_SxCR_PBURST_16              (uint32_t) (3 << 21)                                    /* DMA stream peripheral burst of 16 beats */
-#define DMA_SxCR_MBURST_NO              (uint32_t) (0 << 23)                                    /* DMA stream memory burst disable */
-#define DMA_SxCR_MBURST_4               (uint32_t) (1 << 23)                                    /* DMA stream memory burst of 4 beats */
-#define DMA_SxCR_MBURST_8               (uint32_t) (2 << 23)                                    /* DMA stream memory burst of 8 beats */
-#define DMA_SxCR_MBURST_16              (uint32_t) (3 << 23)                                    /* DMA stream memory burst of 16 beats */
-#define DMA_SxCR_CHSEL(x)               (uint32_t) (x << 25)                                    /* DMA stream channel select */
-
-#define DMA_SxFCR_FTH_1                 (uint32_t) (0 << 0)                                     /* DMA stream FIFO threshold 1/4 */
-#define DMA_SxFCR_FTH_2                 (uint32_t) (1 << 0)                                     /* DMA stream FIFO threshold 1/2 */
-#define DMA_SxFCR_FTH_3                 (uint32_t) (2 << 0)                                     /* DMA stream FIFO threshold 3/4 */
-#define DMA_SxFCR_FTH_4                 (uint32_t) (3 << 0)                                     /* DMA stream FIFO threshold full*/
-#define DMA_SxFCR_DMDIS                 (uint32_t) (1 << 2)                                     /* DMA stream direct mode disable */
-#define DMA_SxFCR_FS                    (uint32_t) (7 << 3)                                     /* DMA stream FIFO status */
-#define DMA_SxFCR_FEIE                  (uint32_t) (1 << 7)                                     /* DMA stream FIFO error interrupt enable */
+#include <arch/chip/dma.h>
 
 /* USB FS */
 /* Global Registers */

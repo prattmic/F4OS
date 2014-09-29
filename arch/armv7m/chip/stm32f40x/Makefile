@@ -1,5 +1,6 @@
 SRCS += vector.S
 SRCS += clock.c
+SRCS += dma.c
 SRCS += gpio.c
 SRCS += rcc.c
 

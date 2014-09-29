@@ -9,6 +9,8 @@
         uart,tx-gpio = <&gpio 26 0>;    /* PB10 */
         uart,rx-gpio = <&gpio 27 0>;    /* PB11 */
         stmicro,periph-id = <31>;       /* STM32F4_PERIPH_USART3 */
+        dmas = <&dma1 1 4>, <&dma1 3 4>;
+        dma-names = "rx", "tx";
     };
 
     uart4: uart@40004C00 {
@@ -17,6 +19,8 @@
         uart,tx-gpio = <&gpio 0 0>;     /* PA0 */
         uart,rx-gpio = <&gpio 1 0>;     /* PA1 */
         stmicro,periph-id = <32>;       /* STM32F4_PERIPH_USART4 */
+        dmas = <&dma1 2 4>, <&dma1 4 4>;
+        dma-names = "rx", "tx";
     };
 
     uart5: uart@40005000 {
@@ -25,6 +29,8 @@
         uart,tx-gpio = <&gpio 44 0>;    /* PC12 */
         uart,rx-gpio = <&gpio 50 0>;    /* PD2 */
         stmicro,periph-id = <33>;       /* STM32F4_PERIPH_USART5 */
+        dmas = <&dma1 0 4>, <&dma1 7 4>;
+        dma-names = "rx", "tx";
     };
 };
 

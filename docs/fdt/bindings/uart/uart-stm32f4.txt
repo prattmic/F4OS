@@ -6,6 +6,8 @@ Required properties:
     - uart,tx-gpio: GPIO property for the RX GPIO
     - uart,rx-gpio: GPIO property for the TX GPIO
     - stmicro,periph-id: STM32F4 Peripheral ID associated with the bus
+    - dmas: DMA channels
+    - dma-names: "rx" and "tx", may include duplicates
 
 Example:
 
@@ -15,4 +17,6 @@ uart1: uart@40011000 {
     uart,tx-gpio = <&gpio 22 0>;    /* PB6 */
     uart,rx-gpio = <&gpio 23 0>;    /* PB7 */
     stmicro,periph-id = <29>;       /* STM32F4_PERIPH_USART1 */
+    dmas = <&dma2 2 4>, <&dma2 5 4>, <&dma2 7 4>;
+    dma-names = "rx", "rx", "tx";
 };

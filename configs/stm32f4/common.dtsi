@@ -8,6 +8,20 @@
         compatible = "stmicro,stm32f407-gpio";
     };
 
+    dma1: dma@40026000 {
+        compatible = "stmicro,stm32f407-dma";
+        reg = <0x40026000 0xD0>;
+        #dma-cells = <2>;
+        stmicro,periph-id = <41>;       /* STM32F4_PERIPH_DMA1 */
+    };
+
+    dma2: dma@40026400 {
+        compatible = "stmicro,stm32f407-dma";
+        reg = <0x40026400 0xD0>;
+        #dma-cells = <2>;
+        stmicro,periph-id = <42>;       /* STM32F4_PERIPH_DMA2 */
+    };
+
     spi1: spi@40013000 {
         #address-cells = <1>;
         #size-cells = <0>;
@@ -104,6 +118,8 @@
         uart,tx-gpio = <&gpio 22 0>;    /* PB6 */
         uart,rx-gpio = <&gpio 23 0>;    /* PB7 */
         stmicro,periph-id = <29>;       /* STM32F4_PERIPH_USART1 */
+        dmas = <&dma2 2 4>, <&dma2 5 4>, <&dma2 7 4>;
+        dma-names = "rx", "rx", "tx";
     };
 
     uart2: uart@40004400 {
@@ -112,6 +128,8 @@
         uart,tx-gpio = <&gpio 2 0>;     /* PA2 */
         uart,rx-gpio = <&gpio 3 0>;     /* PA3 */
         stmicro,periph-id = <30>;       /* STM32F4_PERIPH_USART2 */
+        dmas = <&dma1 5 4>, <&dma1 6 4>;
+        dma-names = "rx", "tx";
     };
 
     uart6: uart@40011400 {
@@ -120,5 +138,7 @@
         uart,tx-gpio = <&gpio 38 0>;    /* PC6 */
         uart,rx-gpio = <&gpio 39 0>;    /* PC7 */
         stmicro,periph-id = <34>;       /* STM32F4_PERIPH_USART6 */
+        dmas = <&dma2 1 5>, <&dma2 2 5>, <&dma2 6 5>, <&dma2 7 5>;
+        dma-names = "rx", "rx", "tx", "tx";
     };
 };

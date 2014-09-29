@@ -1,0 +1,9 @@
+DMA controller and client bindings
+
+DMA controllers required properties:
+    - #dma-cells: Number of dma property cells
+
+DMA clients required properties:
+    - dmas: List of DMA channel cells.  Each cell begins with
+        the controller phandle, followed by #dma-cells specifiers
+    - dma-names: String list of DMA names, one for each DMA channel.

@@ -1,0 +1,11 @@
+STMicro STM32F4 DMA bindings
+
+DMA controllers should specify #dma-cells = <2>.  The first cell is
+the DMA stream number.  The second cell is the stream channel number.
+Duplicate dma-names may be provided, if they offer the same functionality.
+
+Required properties:
+    - compatible: Must be "stmicro,stm32f407-dma"
+    - reg: register base address and register map size
+    - #dma-cells: Must be 2
+    - stmicro,periph-id: STM32F4 Peripheral ID associated with the peripheral
