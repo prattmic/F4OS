@@ -169,4 +169,17 @@ char *fdtparse_get_path(const void *fdt, int offset);
  */
 int fdtparse_get_interrupt_parent(const void *fdt, int nodeoffset);
 
+/**
+ * Get next string in stringlist
+ *
+ * Walks the stringlist, finding the next string before the end.
+ *
+ * @param strlist   pointer to the start of the stringlist
+ * @param curr      pointer to current string in stringlist
+ * @param listlen   length of entire stringlist
+ * @returns pointer to next string in stringlist, or NULL if none
+ */
+const char *fdtparse_stringlist_next(const char *strlist, const char *curr,
+                                     int listlen);
+
 #endif

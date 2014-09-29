@@ -200,3 +200,26 @@ int fdtparse_get_interrupt_parent(const void *fdt, int nodeoffset) {
 
     return parent_offset;
 }
+
+const char *fdtparse_stringlist_next(const char *strlist, const char *curr,
+                                     int listlen) {
+    uintptr_t offset = curr - strlist;
+    const char *end, *next;
+
+    if (offset >= listlen) {
+        return NULL;
+    }
+
+    end = memchr(curr, '\0', listlen - offset);
+    if (!end) {
+        return NULL;
+    }
+
+    next = end + 1;
+    offset = next - strlist;
+    if (offset >= listlen) {
+        return NULL;
+    }
+
+    return next;
+}
