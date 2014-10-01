@@ -110,7 +110,7 @@ static int buf_stream_single_char_test(char *message, int len) {
         goto out;
     }
 
-    written = fputs(stream, STREAM_MESSAGE);
+    written = write(stream, STREAM_MESSAGE, sizeof(STREAM_MESSAGE));
     if (written != 0) {
         strncpy(message, "Incorrect number of characters written", len);
         ret = FAILED;
@@ -148,7 +148,7 @@ static int buf_stream_overfill_test(char *message, int len) {
         goto out;
     }
 
-    written = fputs(stream, STREAM_MESSAGE);
+    written = write(stream, STREAM_MESSAGE, sizeof(STREAM_MESSAGE));
     if (written != SHORT_BUF_LEN-1) {
         strncpy(message, "Incorrect number of characters written", len);
         ret = FAILED;

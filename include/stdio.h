@@ -35,10 +35,7 @@
 
 int read(struct char_device *dev, char *buf, int num);
 int write(struct char_device *dev, char *buf, int num);
-
-static inline int swrite(struct char_device *dev, char *s) {
-    return write(dev, s, strlen(s));
-}
+int swrite(struct char_device *dev, char *s);
 
 /* Print fmt into buf, writing at most n bytes.
  * Returns number of characters written to buffer. */

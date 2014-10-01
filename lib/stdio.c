@@ -54,22 +54,57 @@ int read(struct char_device *c, char *buf, int num) {
     return ops->read(c, buf, num);
 }
 
+int swrite(struct char_device *dev, char *s) {
+    int ret;
+    size_t len = strlen(s);
+    size_t total = 0;
+
+    do {
+        ret = write(dev, s, len);
+
+        /* Next time we start later in the string, and have less to write */
+        s += ret;
+        len -= ret;
+        total += ret;
+    } while (ret >= 0 && len > 0);
+
+    /* Return bytes written unless there was an error */
+    if (ret >= 0) {
+        ret = total;
+    }
+
+    return ret;
+}
+
 int fputs(struct char_device *dev, char *s) {
     return swrite(dev, s);
 }
 
 int fputc(struct char_device *dev, char letter) {
-    return write(dev, &letter, 1);
+    int ret;
+
+    /* Keep trying until something is written or an error occurs */
+    do {
+        ret = write(dev, &letter, 1);
+    } while (ret == 0);
+
+    return ret;
 }
 
 int fgetc(struct char_device *dev) {
-    char ret;
-    if (read(dev, &ret, 1) == 1) {
-        return ret;
+    int ret;
+    char c;
+
+    do {
+        ret = read(dev, &c, 1);
+    } while (ret == 0);
+
+    /* Return character, unless there was an error */
+    if (ret >= 0) {
+        ret = c;
     }
-    else {
-        return -1;
-    }
+
+    return ret;
 }
 
 int scnprintf(char *buf, uint32_t n, char *fmt, ...) {

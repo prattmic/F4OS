@@ -182,6 +182,11 @@ static int resource_cleanup(struct char_device *c) {
     return 0;
 }
 
+/*
+ * Even though read() and write() should not block,
+ * we have no choice, because the underlying resource
+ * read() and write() do block.
+ */
 static struct char_ops resource_ops = {
     .read = resource_read,
     .write = resource_write,

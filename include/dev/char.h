@@ -48,8 +48,9 @@ struct char_ops {
     /**
      * Read from device
      *
-     * Read up to num bytes from the device into buf.  read() blocks until
-     * num bytes have been read, EOF occurs, or an error is encountered.
+     * Read up to num bytes from the device into buf.  read() does not block.
+     * It will return immediately if blocking would be required.  As such,
+     * multiple calls may be necessary to complete reading.
      *
      * @param char_device Character device to read from
      * @param buf   Buffer to read into.  Must hold at least num bytes
@@ -61,8 +62,9 @@ struct char_ops {
     /**
      * Write to device
      *
-     * Write up to num bytes to the device from buf.  write() blocks until
-     * num bytes have been written, or an error is encountered.
+     * Write up to num bytes to the device from buf.  write() does not block.
+     * It will return immediately if blocking would be required.  As such,
+     * multiple calls may be necessary to complete reading.
      *
      * @param char_device Character device to write to
      * @param buf   Buffer to write from.  Must have at least num bytes
