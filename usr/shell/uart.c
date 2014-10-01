@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dev/hw/uart.h>
+#include <dev/hw/usbdev.h>
 #include <dev/device.h>
 #include <kernel/obj.h>
 #include <kernel/sched.h>
@@ -66,21 +67,29 @@ void uart(int argc, char **argv) {
     printf("Communicating at baud: %d\r\n", baud);
 
     while (1) {
-        char c;
+        char uart_rx[128] = { '\0' };
+        int usb_c;
         int ret;
 
-        ret = ops->read(uart, &c, 1);
+        ret = ops->read(uart, uart_rx, 128);
         if (ret < 0) {
             fprintf(stderr, "Failed to read: %d\r\n", ret);
             goto out;
         }
-        else if (ret == 0) {
-            /* Nothing to read */
-            yield_if_possible();
-            continue;
+        else if (ret > 0) {
+            /* SLOOOOW, this makes us miss stuff */
+            write(stdout, uart_rx, ret);
         }
 
-        putc(c);
+        usb_c = usbdev_try_getc();
+        if (usb_c > 0) {
+            char c = usb_c;
+            ret = ops->write(uart, &c, 1);
+            if (ret < 0) {
+                fprintf(stderr, "Failed to write: %d\r\n", ret);
+                goto out;
+            }
+        }
     }
 
 out:

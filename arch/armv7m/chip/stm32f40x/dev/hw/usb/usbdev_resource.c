@@ -89,6 +89,21 @@ static char usbdev_resource_read(void *env, int *error) {
     return c;
 }
 
+int usbdev_try_getc(void) {
+    if (!usb_ready) {
+        return -1;
+    }
+
+    if (ring_buf_empty(&ep_rx.rx)) {
+        return 0;
+    }
+
+    char c = (char) ep_rx.rx.buf[ep_rx.rx.start];
+    ep_rx.rx.start = (ep_rx.rx.start + 1) % ep_rx.rx.len;
+
+    return c;
+}
+
 static int usbdev_resource_close(struct resource *resource) {
     printk("OOPS: USB is a fundamental resource, it may not be closed.");
     return -1;
