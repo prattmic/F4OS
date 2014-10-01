@@ -71,11 +71,10 @@ struct i2c_ops {
     /**
      * Write data to I2C device.
      *
-     * Write num bytes of data to I2C device dev on port i2c, setting
-     * the device chip select automatically.
+     * Write num bytes of data to I2C device dev on port i2c.
      *
      * The 7-bit device address should be given, the lower RW bit will be set
-     * outomatically.
+     * automatically.
      *
      * @param i2c   I2C peripheral the device is connected to
      * @param addr  Address of I2C device
@@ -91,7 +90,7 @@ struct i2c_ops {
      * Read num bytes of data from I2C device dev on port i2c.
      *
      * The 7-bit device address should be given, the lower RW bit will be set
-     * outomatically.
+     * automatically.
      *
      * @param i2c   I2C peripheral the device is connected to
      * @param addr  Address of I2C device
