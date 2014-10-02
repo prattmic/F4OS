@@ -20,8 +20,10 @@
  * SOFTWARE.
  */
 
+#include <dev/char.h>
 #include <dev/hw/uart.h>
 #include <kernel/class.h>
+#include <kernel/obj.h>
 #include <mm/mm.h>
 
 static void uart_dtor(struct obj *o);
@@ -44,3 +46,52 @@ static void uart_dtor(struct obj *o) {
 
     /* Deinitialize, but don't destroy the UART */
 }
+
+static int uart_read(struct char_device *dev, char *buf, size_t num) {
+    struct uart *uart;
+    struct uart_ops *ops;
+
+    if (!dev) {
+        return -1;
+    }
+
+    uart = to_uart(dev->base);
+    ops = dev->base->ops;
+
+    return ops->read(uart, buf, num);
+}
+
+static int uart_write(struct char_device *dev, char *buf, size_t num) {
+    struct uart *uart;
+    struct uart_ops *ops;
+
+    if (!dev) {
+        return -1;
+    }
+
+    uart = to_uart(dev->base);
+    ops = dev->base->ops;
+
+    return ops->write(uart, buf, num);
+}
+
+static int uart_cleanup(struct char_device *dev) {
+    /* Nothing special to do that won't be done by the uart destructor */
+    return 0;
+}
+
+static struct char_ops uart_char_ops = {
+    .read = uart_read,
+    .write = uart_write,
+    ._cleanup = uart_cleanup,
+};
+
+struct char_device *uart_to_char_device(struct obj *obj) {
+    assert_type(obj, &uart_type_s);
+    return char_device_create(obj, &uart_char_ops);
+}
+
+DECLARE_CHAR_CONVERSION(uart) = {
+    .type = &uart_type_s,
+    .cast = uart_to_char_device,
+};
