@@ -20,9 +20,13 @@
  * SOFTWARE.
  */
 
+#include <linker_array.h>
 #include <stdlib.h>
 #include <dev/char.h>
+#include <dev/device.h>
 #include <kernel/obj.h>
+
+LINKER_ARRAY_DECLARE(char_conversions)
 
 static void char_dtor(struct obj *o);
 
@@ -63,5 +67,52 @@ struct char_device *char_device_create(struct obj *base,
     c->obj.ops = ops;
     c->base = base;
 
+    if (base) {
+        obj_get(base);
+    }
+
     return c;
+}
+
+struct char_device *char_device_cast(struct obj *base) {
+    struct char_conversion *converter;
+
+    if (!base) {
+        return NULL;
+    }
+
+    /* Already a char_device! */
+    if (base->type == &char_type_s) {
+        obj_get(base);
+        return to_char_device(base);
+    }
+
+    LINKER_ARRAY_FOR_EACH(char_conversions, converter) {
+        if (converter->type == base->type) {
+            return converter->cast(base);
+        }
+    }
+
+    return NULL;
+}
+
+struct char_device *char_device_get(const char *name) {
+    struct obj *base;
+    struct char_device *dev;
+
+    base = device_get(name);
+    if (!base) {
+        return NULL;
+    }
+
+    dev = char_device_cast(base);
+
+    /*
+     * char_device maintains dedicated reference to base obj,
+     * ours is no longer necessary.  If char_device_cast() failed,
+     * we also want to put the base obj to cleanup.
+     */
+    obj_put(base);
+
+    return dev;
 }
