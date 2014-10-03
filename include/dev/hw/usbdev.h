@@ -26,6 +26,4 @@
 void init_usbdev(void) __attribute__((section(".kernel")));
 void usbdev_handler(void) __attribute__((section(".kernel")));
 
-int usbdev_try_getc(void);
-
 #endif

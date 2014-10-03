@@ -23,6 +23,8 @@
 #ifndef DEV_HW_USBDEV_DESC_H_INCLUDED
 #define DEV_HW_USBDEV_DESC_H_INCLUDED
 
+#include "usbdev_internals.h"
+
 #define USB_RX_FIFO_SIZE    128
 #define USB_TX0_FIFO_SIZE   32
 #define USB_TX1_FIFO_SIZE   16
