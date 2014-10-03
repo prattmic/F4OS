@@ -48,7 +48,7 @@ void ipctest(int argc, char **argv) {
 
     printf("WRITING MEM.\r\n");
 
-    swrite(shared_mem, "THIS IS A TEST OF SHARED MEMORY REGIONS N STUFF.");
+    fputs(shared_mem, "THIS IS A TEST OF SHARED MEMORY REGIONS N STUFF.");
 
     printf("READING MEM.\r\n");
     new_task(&memreader, 5, 0);

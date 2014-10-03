@@ -57,7 +57,7 @@ static int shared_mem_test(char *message, int len) {
     /* Make a second reservation for the other task */
     obj_get(&shared_mem->obj);
 
-    swrite(shared_mem, IPC_MESSAGE);
+    fputs(shared_mem, IPC_MESSAGE);
     new_task(&memreader, 1, 0);
 
     int count = 100000;

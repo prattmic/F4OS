@@ -54,19 +54,39 @@ int read(struct char_device *c, char *buf, int num) {
     return ops->read(c, buf, num);
 }
 
-int swrite(struct char_device *dev, char *s) {
+int read_block(struct char_device *dev, char *buf, int num) {
     int ret;
-    size_t len = strlen(s);
     size_t total = 0;
 
     do {
-        ret = write(dev, s, len);
+        ret = read(dev, buf, num);
 
-        /* Next time we start later in the string, and have less to write */
-        s += ret;
-        len -= ret;
+        /* Next time we start later in the buf, and have less to write */
+        buf += ret;
+        num -= ret;
         total += ret;
-    } while (ret >= 0 && len > 0);
+    } while (ret >= 0 && num > 0);
+
+    /* Return bytes written unless there was an error */
+    if (ret >= 0) {
+        ret = total;
+    }
+
+    return ret;
+}
+
+int write_block(struct char_device *dev, char *buf, int num) {
+    int ret;
+    size_t total = 0;
+
+    do {
+        ret = write(dev, buf, num);
+
+        /* Next time we start later in the buf, and have less to write */
+        buf += ret;
+        num -= ret;
+        total += ret;
+    } while (ret >= 0 && num > 0);
 
     /* Return bytes written unless there was an error */
     if (ret >= 0) {
@@ -77,27 +97,18 @@ int swrite(struct char_device *dev, char *s) {
 }
 
 int fputs(struct char_device *dev, char *s) {
-    return swrite(dev, s);
+    return write_block(dev, s, strlen(s));
 }
 
 int fputc(struct char_device *dev, char letter) {
-    int ret;
-
-    /* Keep trying until something is written or an error occurs */
-    do {
-        ret = write(dev, &letter, 1);
-    } while (ret == 0);
-
-    return ret;
+    return write_block(dev, &letter, 1);
 }
 
 int fgetc(struct char_device *dev) {
     int ret;
     char c;
 
-    do {
-        ret = read(dev, &c, 1);
-    } while (ret == 0);
+    ret = read_block(dev, &c, 1);
 
     /* Return character, unless there was an error */
     if (ret >= 0) {

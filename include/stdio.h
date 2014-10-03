@@ -35,7 +35,13 @@
 
 int read(struct char_device *dev, char *buf, int num);
 int write(struct char_device *dev, char *buf, int num);
-int swrite(struct char_device *dev, char *s);
+
+/*
+ * read() and write() variants which block until all bytes are
+ * read/written, or an error occurs.
+ */
+int read_block(struct char_device *dev, char *buf, int num);
+int write_block(struct char_device *dev, char *buf, int num);
 
 /* Print fmt into buf, writing at most n bytes.
  * Returns number of characters written to buffer. */
