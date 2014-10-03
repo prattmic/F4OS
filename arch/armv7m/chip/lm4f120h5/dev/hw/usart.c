@@ -28,12 +28,15 @@
 #include <arch/system.h>
 #include <arch/chip/registers.h>
 #include <arch/chip/rom.h>
+#include <dev/char.h>
+#include <dev/device.h>
 #include <dev/resource.h>
-#include <kernel/sched.h>
-#include <kernel/mutex.h>
-#include <kernel/fault.h>
-
 #include <dev/hw/usart.h>
+#include <kernel/fault.h>
+#include <kernel/init.h>
+#include <kernel/mutex.h>
+#include <kernel/sched.h>
+#include <mm/mm.h>
 
 struct mutex usart_read_mutex = INIT_MUTEX;
 struct mutex usart_write_mutex = INIT_MUTEX;
@@ -143,3 +146,40 @@ int usart_close(resource *resource) {
     printk("OOPS: USART is a fundamental resource, it may not be closed.");
     return -1;
 }
+
+static struct mutex driver_mutex = INIT_MUTEX;
+
+static int lm4f_usart_probe(const char *name) {
+    /* Statically built driver always exists */
+    return 1;
+}
+
+static struct obj *lm4f_usart_ctor(const char *name) {
+    struct char_device *dev;
+
+    dev = resource_to_char_device(&usart_resource);
+    if (!dev) {
+        return NULL;
+    }
+
+    return &dev->obj;
+}
+
+static int lm4f_usart_register(void) {
+    struct device_driver *new = kmalloc(sizeof(*new));
+    if (!new) {
+        fprintf(stderr, "%s: Unable to allocate device driver", __func__);
+        return -1;
+    }
+
+    new->name = "lm4f-static-usart";
+    new->probe = lm4f_usart_probe;
+    new->ctor = lm4f_usart_ctor;
+    new->class = NULL;
+    new->mut = &driver_mutex;
+
+    device_driver_register(new);
+
+    return 0;
+}
+CORE_INITIALIZER(lm4f_usart_register)
