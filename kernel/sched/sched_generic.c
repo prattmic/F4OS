@@ -20,14 +20,36 @@
  * SOFTWARE.
  */
 
+#include <stdio.h>
 #include <kernel/sched.h>
 #include <kernel/mutex.h>
-#include <dev/resource.h>
 
 /* Functions common to all scheduler implementations */
 
+/*
+ * Setup new task IO
+ *
+ * This means copying stdin/stdout/stderr from the current task.
+ */
+static void task_io_setup(task_t *task) {
+    if (stdin) {
+        obj_get(&stdin->obj);
+    }
+    task->_stdin = stdin;
+
+    if (stdout) {
+        obj_get(&stdout->obj);
+    }
+    task->_stdout = stdout;
+
+    if (stderr) {
+        obj_get(&stderr->obj);
+    }
+    task->_stderr = stderr;
+}
+
 /* Do non-scheduler setup for new task */
 void generic_task_setup(task_t *task) {
-    task_resource_setup(task);
+    task_io_setup(task);
     task_mutex_setup(task);
 }

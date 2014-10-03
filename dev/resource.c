@@ -59,28 +59,6 @@ out:
     return ret;
 }
 
-/*
- * Setup new task IO
- *
- * This means copying stdin/stdout/stderr from the current task.
- */
-void task_resource_setup(task_t *task) {
-    if (stdin) {
-        obj_get(&stdin->obj);
-    }
-    task->_stdin = stdin;
-
-    if (stdout) {
-        obj_get(&stdout->obj);
-    }
-    task->_stdout = stdout;
-
-    if (stderr) {
-        obj_get(&stderr->obj);
-    }
-    task->_stderr = stderr;
-}
-
 static int resource_read(struct char_device *c, char *buf, size_t num) {
     struct resource *resource = c->priv;
     int total = 0;
