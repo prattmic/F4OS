@@ -25,7 +25,7 @@
 
 #include <arch/chip/registers.h>
 
-typedef struct stm32f4_usart_regs {
+struct stm32f4_usart_regs {
     volatile uint32_t SR;   // USARTx Status Register
     volatile uint32_t DR;   // USARTx Data Register
     volatile uint32_t BRR;  // USARTx Baud Rate Register
@@ -33,21 +33,7 @@ typedef struct stm32f4_usart_regs {
     volatile uint32_t CR2;  // USARTx Control Register 2
     volatile uint32_t CR3;  // USARTx Control Register 3
     volatile uint32_t GTPR; // USARTx Guard Time and Prescaler Register
-} usart_t;
-
-static usart_t * get_usart(int x) {
-    switch(x) {
-        case 1: return (usart_t *) USART1_BASE;
-        case 2: return (usart_t *) USART2_BASE;
-        case 3: return (usart_t *) USART3_BASE;
-        case 4: return (usart_t *) UART4_BASE;
-        case 5: return (usart_t *) UART5_BASE;
-        case 6: return (usart_t *) USART6_BASE;
-        case 7: return (usart_t *) UART7_BASE;
-        case 8: return (usart_t *) UART8_BASE;
-    }
-    return (usart_t *) INVALID_PERIPH_BASE;
-}
+};
 
 /* USARTx Status Register bit fields */
 #define USART_SR_CTS                ((uint32_t) (1 << 9))           /* USART_SR CTS Flag */

@@ -1,6 +1,6 @@
 config HAVE_USART
     bool
-    prompt "USART Support"
+    prompt "(Legacy) USART Support"
 
 config HAVE_I2C
     bool
@@ -16,7 +16,7 @@ config HAVE_LED
 
 config HAVE_USBDEV
     bool
-    prompt "USB Device Support"
+    prompt "(Legacy) USB Device Support"
 
 config STDOUT_DEV
     string "Standard output device"
