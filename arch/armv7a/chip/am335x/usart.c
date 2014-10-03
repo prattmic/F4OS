@@ -22,13 +22,17 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+#include <dev/char.h>
+#include <dev/device.h>
 #include <dev/raw_mem.h>
 #include <dev/resource.h>
+#include <kernel/init.h>
 #include <kernel/mutex.h>
 #include <kernel/fault.h>
+#include <mm/mm.h>
 #include "clocks.h"
 #include "memory_map.h"
 
@@ -155,3 +159,40 @@ resource usart_resource = { .writer     = &usart_putc,
                             .read_mut   = &am335x_usart_read_mutex,
                             .write_mut  = &am335x_usart_write_mutex};
 
+
+static struct mutex driver_mutex = INIT_MUTEX;
+
+static int am335x_usart_probe(const char *name) {
+    /* Statically built driver always exists */
+    return 1;
+}
+
+static struct obj *am335x_usart_ctor(const char *name) {
+    struct char_device *dev;
+
+    dev = resource_to_char_device(&usart_resource);
+    if (!dev) {
+        return NULL;
+    }
+
+    return &dev->obj;
+}
+
+static int am335x_usart_register(void) {
+    struct device_driver *new = kmalloc(sizeof(*new));
+    if (!new) {
+        fprintf(stderr, "%s: Unable to allocate device driver", __func__);
+        return -1;
+    }
+
+    new->name = "am335x-static-usart";
+    new->probe = am335x_usart_probe;
+    new->ctor = am335x_usart_ctor;
+    new->class = NULL;
+    new->mut = &driver_mutex;
+
+    device_driver_register(new);
+
+    return 0;
+}
+CORE_INITIALIZER(am335x_usart_register)
