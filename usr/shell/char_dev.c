@@ -28,6 +28,32 @@
 
 /* Simple program to provide a passthrough for any char_device */
 
+void char_passthrough(struct char_device *dev) {
+    char read_from_char[64] = { '\0' };
+    char read_from_stdin[64] = { '\0' };
+    int ret;
+
+    while (1) {
+        ret = read(dev, read_from_char, 64);
+        if (ret < 0) {
+            fprintf(stderr, "Failed to read from dev: %d\r\n", ret);
+            return;
+        }
+        else if (ret > 0) {
+            write_block(stdout, read_from_char, ret);
+        }
+
+        ret = read(stdin, read_from_stdin, 64);
+        if (ret < 0) {
+            fprintf(stderr, "Failed to read from stdin: %d\r\n", ret);
+            return;
+        }
+        else if (ret > 0) {
+            write_block(dev, read_from_stdin, ret);
+        }
+    }
+}
+
 void char_dev(int argc, char **argv) {
     struct char_device *dev;
 
@@ -42,31 +68,8 @@ void char_dev(int argc, char **argv) {
         return;
     }
 
-    while (1) {
-        char read_from_char[64] = { '\0' };
-        char read_from_stdin[64] = { '\0' };
-        int ret;
+    char_passthrough(dev);
 
-        ret = read(dev, read_from_char, 64);
-        if (ret < 0) {
-            fprintf(stderr, "Failed to read from dev: %d\r\n", ret);
-            goto out;
-        }
-        else if (ret > 0) {
-            write_block(stdout, read_from_char, ret);
-        }
-
-        ret = read(stdin, read_from_stdin, 64);
-        if (ret < 0) {
-            fprintf(stderr, "Failed to read from stdin: %d\r\n", ret);
-            goto out;
-        }
-        else if (ret > 0) {
-            write_block(dev, read_from_stdin, ret);
-        }
-    }
-
-out:
     char_device_put(dev);
 }
 DEFINE_APP(char_dev)

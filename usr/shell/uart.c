@@ -23,16 +23,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dev/hw/uart.h>
-#include <dev/hw/usbdev.h>
+#include <dev/char.h>
 #include <dev/device.h>
 #include <kernel/obj.h>
 #include <kernel/sched.h>
 #include "app.h"
+#include "char_dev.h"
 
 void uart(int argc, char **argv) {
     struct obj *obj;
     struct uart *uart;
     struct uart_ops *ops;
+    struct char_device *dev;
     int baud;
 
     if (argc < 2 || argc > 3) {
@@ -54,45 +56,34 @@ void uart(int argc, char **argv) {
         int ret = ops->set_baud_rate(uart, baud);
         if (ret < 0) {
             fprintf(stderr, "Failed to set baud rate: %d\r\n", ret);
-            goto out;
+            goto err_put_uart;
         }
     }
 
     baud = ops->get_baud_rate(uart);
     if (baud < 0) {
         fprintf(stderr, "Failed to get baud rate: %d\r\n", baud);
-        goto out;
+        goto err_put_uart;
     }
 
     printf("Communicating at baud: %d\r\n", baud);
 
-    while (1) {
-        char uart_rx[128] = { '\0' };
-        int usb_c;
-        int ret;
-
-        ret = ops->read(uart, uart_rx, 128);
-        if (ret < 0) {
-            fprintf(stderr, "Failed to read: %d\r\n", ret);
-            goto out;
-        }
-        else if (ret > 0) {
-            /* SLOOOOW, this makes us miss stuff */
-            write(stdout, uart_rx, ret);
-        }
-
-        usb_c = usbdev_try_getc();
-        if (usb_c > 0) {
-            char c = usb_c;
-            ret = ops->write(uart, &c, 1);
-            if (ret < 0) {
-                fprintf(stderr, "Failed to write: %d\r\n", ret);
-                goto out;
-            }
-        }
+    dev = char_device_cast(&uart->obj);
+    if (!dev) {
+        fprintf(stderr, "Failed to cast uart to char_device\r\n");
+        goto err_put_uart;
     }
 
-out:
-    obj_put(obj);
+    /* Done with dedicated uart type */
+    obj_put(&uart->obj);
+
+    char_passthrough(dev);
+
+    char_device_put(dev);
+    return;
+
+err_put_uart:
+    obj_put(&uart->obj);
+    return;
 }
 DEFINE_APP(uart)
