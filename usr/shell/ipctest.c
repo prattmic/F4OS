@@ -22,14 +22,12 @@
 
 #include <stddef.h>
 #include <stdio.h>
-#include <kernel/sched.h>
 #include <dev/char.h>
-#include <dev/resource.h>
 #include <dev/shared_mem.h>
+#include <kernel/sched.h>
 #include "app.h"
 
-static struct resource *shared_mem;
-static struct char_device *dev;
+static struct char_device *shared_mem;
 
 void memreader(void);
 
@@ -39,39 +37,33 @@ void ipctest(int argc, char **argv) {
         return;
     }
 
-    shared_mem = open_shared_mem();
+    shared_mem = shared_mem_create();
     if (!shared_mem) {
         printf("Error: unable to open shared mem.\r\n");
         return;
     }
 
-    dev = resource_to_char_device(shared_mem);
-    if (!dev) {
-        printf("Error: unable to converty shared mem to char_device.\r\n");
-        goto err;
-    }
+    /* Make a second reservation for the other task */
+    obj_get(&shared_mem->obj);
 
     printf("WRITING MEM.\r\n");
 
-    swrite(dev, "THIS IS A TEST OF SHARED MEMORY REGIONS N STUFF.");
+    swrite(shared_mem, "THIS IS A TEST OF SHARED MEMORY REGIONS N STUFF.");
 
     printf("READING MEM.\r\n");
     new_task(&memreader, 5, 0);
-    return;
 
-err:
-    resource_close(shared_mem);
+    obj_put(&shared_mem->obj);
 }
 DEFINE_APP(ipctest)
 
 void memreader(void) {
     char buf[16];
 
-    read(dev, buf, 10);
+    read(shared_mem, buf, 10);
     buf[10] = 0x00;
 
     puts(buf);
 
-    obj_put(&dev->obj);
-    resource_close(shared_mem);
+    obj_put(&shared_mem->obj);
 }

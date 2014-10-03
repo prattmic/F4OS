@@ -23,8 +23,15 @@
 #ifndef DEV_SHARED_MEM_H_INCLUDED
 #define DEV_SHARED_MEM_H_INCLUDED
 
-#include <dev/resource.h>
+#include <dev/char.h>
 
-struct resource *open_shared_mem(void);
+/**
+ * Create a shared memory region
+ *
+ * Create a buffer of configurable size intended to be shared between
+ * tasks.  Reads and writes go to the same buffer, which can be used for
+ * rudimentary message passing.
+ */
+struct char_device *shared_mem_create(void);
 
 #endif

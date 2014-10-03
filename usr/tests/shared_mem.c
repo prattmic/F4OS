@@ -24,23 +24,20 @@
 #include <string.h>
 #include <kernel/sched.h>
 #include <dev/char.h>
-#include <dev/resource.h>
 #include <dev/shared_mem.h>
 #include "test.h"
 
 #define IPC_MESSAGE "'Forty-two,' said Deep Thought, with infinite majesty and calm."
 
 volatile int passed = 0;
-struct resource *shared_mem;
-struct char_device *dev;
+struct char_device *shared_mem;
 
 static void memreader(void) {
     char buf[100] = {'\0'};
 
-    read(dev, buf, 99);
+    read(shared_mem, buf, 99);
 
-    obj_put(&dev->obj);
-    resource_close(shared_mem);
+    obj_put(&shared_mem->obj);
 
     if (strncmp(buf, IPC_MESSAGE, 100) == 0) {
         passed = 1;
@@ -51,19 +48,16 @@ static void memreader(void) {
 }
 
 static int shared_mem_test(char *message, int len) {
-    shared_mem = open_shared_mem();
+    shared_mem = shared_mem_create();
     if (!shared_mem) {
         strncpy(message, "Unable to open shared mem.", len);
         return FAILED;
     }
 
-    dev = resource_to_char_device(shared_mem);
-    if (!dev) {
-        strncpy(message, "Unable to convert shared mem.", len);
-        goto err;
-    }
+    /* Make a second reservation for the other task */
+    obj_get(&shared_mem->obj);
 
-    swrite(dev, IPC_MESSAGE);
+    swrite(shared_mem, IPC_MESSAGE);
     new_task(&memreader, 1, 0);
 
     int count = 100000;
@@ -79,10 +73,6 @@ static int shared_mem_test(char *message, int len) {
         strncpy(message, "Timed out", len);
     }
 
-    return FAILED;
-
-err:
-    resource_close(shared_mem);
     return FAILED;
 }
 DEFINE_TEST("Shared memory resource", shared_mem_test);

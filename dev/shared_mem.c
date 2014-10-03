@@ -23,95 +23,107 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-#include <mm/mm.h>
-#include <kernel/mutex.h>
-#include <kernel/sched.h>
-#include <kernel/fault.h>
-#include <mm/mm.h>
-#include <dev/resource.h>
-
+#include <dev/char.h>
 #include <dev/shared_mem.h>
+#include <kernel/mutex.h>
 
 #define SM_SIZE   CONFIG_SHARED_MEM_SIZE
 
-typedef struct shared_mem {
-        char        data[SM_SIZE];
-        int         read_ctr;
-        int         write_ctr;
-} shared_mem;
+struct shared_mem {
+    char data[SM_SIZE];
+    int read_ctr;
+    int write_ctr;
+    struct mutex lock;
+};
 
-char shared_mem_read(void *env, int *error) __attribute__((section(".kernel")));
-int shared_mem_write(char c, void *env) __attribute__((section(".kernel")));
-int shared_mem_close(resource *env) __attribute__((section(".kernel")));
+static int shared_mem_read(struct char_device *dev, char *buf, size_t num) {
+    struct shared_mem *mem;
+    int total = 0;
 
-struct resource *open_shared_mem(void) {
-    shared_mem *mem = kmalloc(sizeof(shared_mem));
+    if (!dev) {
+        return -1;
+    }
+
+    mem = dev->priv;
+
+    acquire(&mem->lock);
+
+    for (int i = 0; i < num; i++) {
+        if (mem->read_ctr >= SM_SIZE) {
+            mem->read_ctr = 0;
+        }
+
+        buf[i] =  mem->data[mem->read_ctr++];
+        total++;
+    }
+
+    release(&mem->lock);
+
+    return total;
+}
+
+static int shared_mem_write(struct char_device *dev, char *buf, size_t num) {
+    struct shared_mem *mem;
+    int total = 0;
+
+    if (!dev) {
+        return -1;
+    }
+
+    mem = dev->priv;
+
+    acquire(&mem->lock);
+
+    for (int i = 0; i < num; i++) {
+        if (mem->write_ctr >= SM_SIZE) {
+            mem->write_ctr = 0;
+        }
+
+        mem->data[mem->write_ctr++] = buf[i];
+        total++;
+    }
+
+    release(&mem->lock);
+
+    return total;
+}
+
+static int shared_mem_cleanup(struct char_device *dev) {
+    free(dev->priv);
+    return 0;
+}
+
+static struct char_ops shared_mem_ops = {
+    .read = shared_mem_read,
+    .write = shared_mem_write,
+    ._cleanup = shared_mem_cleanup,
+};
+
+struct char_device *shared_mem_create(void) {
+    struct char_device *dev;
+    struct shared_mem *mem;
+
+    mem = malloc(sizeof(*mem));
     if (!mem) {
         goto err;
     }
 
-    resource *new_r = create_new_resource();
-    if (!new_r) {
+    dev = char_device_create(NULL, &shared_mem_ops);
+    if (!dev) {
         goto err_free_mem;
     }
 
     mem->read_ctr = 0;
     mem->write_ctr = 0;
     memset(mem->data, '\0', SM_SIZE);
+    init_mutex(&mem->lock);
 
-    new_r->env = mem;
-    new_r->writer = &shared_mem_write;
-    new_r->swriter = NULL;
-    new_r->reader = &shared_mem_read;
-    new_r->closer = &shared_mem_close;
-    new_r->read_mut = kmalloc(sizeof(mutex));
-    if (new_r->read_mut) {
-        init_mutex(new_r->read_mut);
-    }
-    else {
-        goto err_free_new_r;
-    }
-    new_r->write_mut = new_r->read_mut;
+    dev->priv = mem;
 
-    return new_r;
+    return dev;
 
-err_free_new_r:
-    kfree(new_r);
 err_free_mem:
-    kfree(mem);
+    free(mem);
 err:
-    printk("OOPS: Unable to open shared mem.\r\n");
     return NULL;
-}
-
-char shared_mem_read(void *env, int *error) {
-    if (error != NULL) {
-        *error = 0;
-    }
-
-    shared_mem *mem = (shared_mem *)env;
-    if(mem->read_ctr > 512) {
-        mem->read_ctr = 1;
-        return mem->data[0];
-    }
-    else return mem->data[mem->read_ctr++];
-}
-
-int shared_mem_write(char c, void *env) {
-    shared_mem *mem = (shared_mem *)env;
-    if(mem->write_ctr > 512) {
-        mem->write_ctr = 1;
-        mem->data[0] = c;
-    }
-    else mem->data[mem->write_ctr++] = c;
-
-    return 1;
-}
-
-int shared_mem_close(resource *resource) {
-    kfree(resource->env);
-    acquire_for_free(resource->read_mut);
-    kfree((void*) resource->read_mut);
-
-    return 0;
 }
