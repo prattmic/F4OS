@@ -10,6 +10,7 @@ SRCS += list_test.c
 SRCS += system_ctl.c
 SRCS += device_lookup.c
 SRCS += uart.c
+SRCS += char_dev.c
 
 SRCS_$(CONFIG_ACCELEROMETERS) += accel.c
 SRCS_$(CONFIG_BAROMETERS) += baro.c
