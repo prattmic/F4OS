@@ -26,6 +26,7 @@
 #include <arch/chip/gpio.h>
 #include <arch/chip/registers.h>
 #include <kernel/fault.h>
+#include <kernel/init.h>
 
 #include "usbdev_internals.h"
 #include "usbdev_desc.h"
@@ -33,7 +34,7 @@
 
 static inline void usbdev_clocks_init(void);
 
-void init_usbdev(void) {
+int init_usbdev(void) {
     usbdev_clocks_init();
 
     ep_tx_buf[0] = malloc(4*USB_TX0_FIFO_SIZE + 1);
@@ -69,7 +70,10 @@ void init_usbdev(void) {
 
     /* Enable VBUS B sensing and power on USB */
     *USB_FS_GCCFG |= USB_FS_GCCFG_VBUSBSEN | USB_FS_GCCFG_PWRDWN;
+
+    return 0;
 }
+CORE_INITIALIZER(init_usbdev)
 
 static inline void usbdev_clocks_init(void) {
     *RCC_AHB2ENR |= RCC_AHB2ENR_OTGFSEN;    /* Enable USB OTG FS clock */

@@ -64,14 +64,6 @@ void os_start(void) {
     init_power_led();
 #endif
 
-#ifdef CONFIG_HAVE_USART
-    init_usart();
-#endif
-
-#ifdef CONFIG_HAVE_USBDEV
-    init_usbdev();
-#endif
-
     do_core_initializers();
 
     device_driver_fdt_register();

@@ -55,7 +55,7 @@ struct mutex am335x_usart_write_mutex = INIT_MUTEX;
 
 int usart_ready = 1;
 
-void init_usart(void) {
+int init_usart(void) {
     struct am335x_clock_cmwkup *cmwkup =
         (struct am335x_clock_cmwkup *) AM335X_CM_WKUP_BASE;
 
@@ -108,7 +108,10 @@ void init_usart(void) {
     raw_mem_write(UART0_MDR1, 0);
 
     usart_ready = 1;
+
+    return 0;
 }
+CORE_INITIALIZER(init_usart)
 
 int usart_putc(char c, void *env) {
     /* Wait for space in FIFO */

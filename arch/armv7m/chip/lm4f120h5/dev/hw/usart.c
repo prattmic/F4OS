@@ -53,7 +53,7 @@ static void usart_baud(uint32_t baud) __attribute__((section(".kernel")));
 
 uint8_t usart_ready = 0;
 
-void init_usart(void) {
+int init_usart(void) {
     /* Enable UART0 clock */
     SYSCTL_RCGC1_R |= SYSCTL_RCGC1_UART0;
 
@@ -89,8 +89,10 @@ void init_usart(void) {
     UART0_CTL_R |= UART_CTL_UARTEN | UART_CTL_RXE | UART_CTL_TXE;
 
     usart_ready = 1;
-}
 
+    return 0;
+}
+CORE_INITIALIZER(init_usart)
 
 /* Sets baud rate registers */
 void usart_baud(uint32_t baud) {
