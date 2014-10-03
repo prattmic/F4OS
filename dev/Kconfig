@@ -18,41 +18,17 @@ config HAVE_USBDEV
     bool
     prompt "USB Device Support"
 
-choice
-    bool "Standard output device"
-    optional
-
-config STDOUT_USART
-    bool "USART"
-    depends on HAVE_USART
+config STDOUT_DEV
+    string "Standard output device"
     ---help---
-        Use USART as standard output
+        Device name of default stdout device; usually FDT path.  Must be
+        castable to a char_device.
 
-config STDOUT_USB
-    bool "USB"
-    depends on HAVE_USBDEV
+config STDERR_DEV
+    string "Standard error device"
     ---help---
-        Use USB as standard output
-
-endchoice
-
-choice
-    bool "Standard error device"
-    optional
-
-config STDERR_USART
-    bool "USART"
-    depends on HAVE_USART
-    ---help---
-        Use USART as standard error
-
-config STDERR_USB
-    bool "USB"
-    depends on HAVE_USBDEV
-    ---help---
-        Use USB as standard error
-
-endchoice
+        Device name of default stderr device; usually FDT path.  Must be
+        castable to a char_device.
 
 config SYSTICK_FREQ
     int

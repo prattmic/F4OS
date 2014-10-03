@@ -24,12 +24,12 @@
 #include <stdio.h>
 #include <linker_array.h>
 #include <mm/mm.h>
-#include <dev/resource.h>
 #include <kernel/sched.h>
 #include <kernel/fault.h>
 #include <kernel/init.h>
 
 #include <dev/arch.h>
+#include <dev/char.h>
 #include <dev/device.h>
 #include <dev/hw/perfcounter.h>
 #include <dev/hw/led.h>
@@ -76,9 +76,11 @@ void os_start(void) {
 
     device_driver_fdt_register();
 
+    init_io();
+
     printf("\r\n%s\r\n", banner);
 
-    if (!resource_char_device_equal(stdout, stderr)) {
+    if (!char_device_base_equal(stdout, stderr)) {
         fprintf(stderr, "\r\n%sStandard error terminal.\r\n", banner);
     }
 

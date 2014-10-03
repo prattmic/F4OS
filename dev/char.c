@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <dev/char.h>
 #include <dev/device.h>
+#include <kernel/fault.h>
 #include <kernel/obj.h>
 
 LINKER_ARRAY_DECLARE(char_conversions)
@@ -115,4 +116,24 @@ struct char_device *char_device_get(const char *name) {
     obj_put(base);
 
     return dev;
+}
+
+int char_device_base_equal(const struct char_device *d1,
+                           const struct char_device *d2) {
+    /* If there is no base pointer, we can't tell if they are equal */
+    if (!d1->base || !d2->base) {
+        return 0;
+    }
+
+    return d1->base == d2->base;
+}
+
+void init_io(void) {
+    curr_task->_stdout = char_device_get(CONFIG_STDOUT_DEV);
+    curr_task->_stdin =  curr_task->_stdout;
+    curr_task->_stderr = char_device_get(CONFIG_STDERR_DEV);
+
+    if (!curr_task->_stdout || !curr_task->_stderr) {
+        panic();
+    }
 }

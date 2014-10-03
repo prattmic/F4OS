@@ -173,4 +173,21 @@ static inline void char_device_put(struct char_device *dev) {
     obj_put(&dev->obj);
 }
 
+/**
+ * Determine if two char_devices are backed by the same base device
+ *
+ * @returns positive if the two devices share a base device, 0 otherwise.
+ */
+int char_device_base_equal(const struct char_device *d1,
+                           const struct char_device *d2);
+
+/**
+ * Initialize global default stdin/stdout/stderr
+ *
+ * Called before task switching begins to setup the global stdin/stdout/stderr
+ * based on the provided config.  If any cannot be acquired, the system will
+ * panic.
+ */
+void init_io(void);
+
 #endif

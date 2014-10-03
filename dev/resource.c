@@ -81,51 +81,6 @@ void task_resource_setup(task_t *task) {
     task->_stderr = stderr;
 }
 
-/* Use resource as default stdin and stdout */
-static void setup_stdin_stdout(struct resource *resource) {
-    struct char_device *c;
-
-    if (!resource) {
-        return;
-    }
-
-    c = resource_to_char_device(resource);
-    if (!c) {
-        panic_print("Failed to create stdin/stdout");
-    }
-
-    /* Used for stdin and stdout, so get it again */
-    obj_get(&c->obj);
-
-    curr_task->_stdin = c;
-    curr_task->_stdout = c;
-}
-
-/* Use resource as default stderr */
-static void setup_stderr(struct resource *resource) {
-    struct char_device *c;
-
-    if (!resource) {
-        return;
-    }
-
-    c = resource_to_char_device(resource);
-    if (!c) {
-        panic_print("Failed to create stderr");
-    }
-
-    curr_task->_stderr = c;
-}
-
-/* Initialize default stdin/stdout/stderr */
-static int init_io(void) {
-    setup_stdin_stdout(STDOUT_DEV);
-    setup_stderr(STDERR_DEV);
-
-    return 0;
-}
-CORE_INITIALIZER(init_io);
-
 static int resource_read(struct char_device *c, char *buf, size_t num) {
     struct resource *resource = c->priv;
     int total = 0;
