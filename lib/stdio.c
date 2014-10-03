@@ -131,7 +131,7 @@ int scnprintf(char *buf, uint32_t n, char *fmt, ...) {
         goto out;
     }
 
-    ret = vfprintf(stream, fmt, ap, &fputs, &fputc);
+    ret = vfprintf(stream, fmt, ap);
 
     obj_put(&stream->obj);
 out:
@@ -142,17 +142,16 @@ out:
 int fprintf(struct char_device *dev, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    int ret = vfprintf(dev, fmt, ap, &fputs, &fputc);
+    int ret = vfprintf(dev, fmt, ap);
     va_end(ap);
 
     return ret;
 }
 
 static inline int holding_flush(char *holding, int *hold_count,
-                                struct char_device *dev,
-                                int (*puts_fn)(struct char_device *, char *)) {
+                                struct char_device *dev) {
     if (*hold_count) {
-        int ret = puts_fn(dev, holding);
+        int ret = fputs(dev, holding);
         if (ret >= 0) {
             *hold_count = 0;
             holding[0] = '\0';
@@ -165,12 +164,11 @@ static inline int holding_flush(char *holding, int *hold_count,
 }
 
 static inline int holding_push(char c, char *holding, int hold_len,
-                               int *hold_count, struct char_device *dev,
-                               int (*puts_fn)(struct char_device *, char *)) {
+                               int *hold_count, struct char_device *dev) {
     int ret;
 
     if (*hold_count >= hold_len - 1) {
-        ret = holding_flush(holding, hold_count, dev, puts_fn);
+        ret = holding_flush(holding, hold_count, dev);
     }
     else {
         ret = 0;
@@ -183,9 +181,7 @@ static inline int holding_push(char c, char *holding, int hold_len,
 }
 
 /* Returns bytes written, negative on error */
-int vfprintf(struct char_device *dev, char *fmt, va_list ap,
-             int (*puts_fn)(struct char_device *, char *),
-             int (*putc_fn)(struct char_device *, char)) {
+int vfprintf(struct char_device *dev, char *fmt, va_list ap) {
     int total = 0;
 
     /*
@@ -210,7 +206,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
 
                     uitoa(hex, buf, 9, 16);
 
-                    ret = holding_flush(holding, &hold_count, dev, puts_fn);
+                    ret = holding_flush(holding, &hold_count, dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -218,7 +214,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                         return ret;
                     }
 
-                    ret = puts_fn(dev, buf);
+                    ret = fputs(dev, buf);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -234,7 +230,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
 
                     itoa(num, buf, 12, 10);
 
-                    ret = holding_flush(holding, &hold_count, dev, puts_fn);
+                    ret = holding_flush(holding, &hold_count, dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -242,7 +238,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                         return ret;
                     }
 
-                    ret = puts_fn(dev, buf);
+                    ret = fputs(dev, buf);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -257,7 +253,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
 
                     uitoa(num, buf, 12, 10);
 
-                    ret = holding_flush(holding, &hold_count, dev, puts_fn);
+                    ret = holding_flush(holding, &hold_count, dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -265,7 +261,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                         return ret;
                     }
 
-                    ret = puts_fn(dev, buf);
+                    ret = fputs(dev, buf);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -280,7 +276,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
 
                     ftoa(num, 0.0001f, buf, 20);
 
-                    ret = holding_flush(holding, &hold_count, dev, puts_fn);
+                    ret = holding_flush(holding, &hold_count, dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -288,7 +284,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                         return ret;
                     }
 
-                    ret = puts_fn(dev, buf);
+                    ret = fputs(dev, buf);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -301,7 +297,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                     char letter = (char) va_arg(ap, uint32_t);
 
                     ret = holding_push(letter, holding, hold_len, &hold_count,
-                                       dev, puts_fn);
+                                       dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -314,7 +310,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                 case 's': {
                     char *s = va_arg(ap, char*);
 
-                    ret = holding_flush(holding, &hold_count, dev, puts_fn);
+                    ret = holding_flush(holding, &hold_count, dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -322,7 +318,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                         return ret;
                     }
 
-                    ret = puts_fn(dev, s);
+                    ret = fputs(dev, s);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -334,7 +330,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                 }
                 case '%': { /* Just print a % */
                     ret = holding_push('%', holding, hold_len, &hold_count,
-                                       dev, puts_fn);
+                                       dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -346,7 +342,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                 }
                 default: {
                     ret = holding_push('%', holding, hold_len, &hold_count,
-                                       dev, puts_fn);
+                                       dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -355,7 +351,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
                     }
 
                     ret = holding_push(*fmt, holding, hold_len, &hold_count,
-                                       dev, puts_fn);
+                                       dev);
                     if (ret >= 0) {
                         total += ret;
                     }
@@ -368,8 +364,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
             fmt++;
         }
         else {
-            ret = holding_push(*fmt++, holding, hold_len, &hold_count, dev,
-                               puts_fn);
+            ret = holding_push(*fmt++, holding, hold_len, &hold_count, dev);
             if (ret >= 0) {
                 total += ret;
             }
@@ -379,7 +374,7 @@ int vfprintf(struct char_device *dev, char *fmt, va_list ap,
         }
     }
 
-    ret = holding_flush(holding, &hold_count, dev, puts_fn);
+    ret = holding_flush(holding, &hold_count, dev);
     if (ret >= 0) {
         total += ret;
     }

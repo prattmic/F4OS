@@ -51,9 +51,7 @@ int fputs(struct char_device *dev, char *s);
 int fputc(struct char_device *dev, char letter);
 int fgetc(struct char_device *dev);
 int fprintf(struct char_device *dev, char *fmt, ...);
-int vfprintf(struct char_device *dev, char *fmt, va_list ap,
-             int (*puts_fn)(struct char_device *, char *),
-             int (*putc_fn)(struct char_device *, char));
+int vfprintf(struct char_device *dev, char *fmt, va_list ap);
 
 #define puts(s) fputs(stdout, s)
 #define putc(c) fputc(stdout, c)

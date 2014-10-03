@@ -32,42 +32,13 @@
 
 #include <kernel/fault.h>
 
-#ifdef CONFIG_HAVE_USART
-/*
- * These puts/putc ignore any locking on the resource.
- */
-static int printk_puts(struct char_device *dev, char *s) {
-    if (usart_ready) {
-        return usart_puts(s, NULL);
-    }
-    else {
-        return -1;
-    }
-}
-
-static int printk_putc(struct char_device *dev, char c) {
-    if (usart_ready) {
-        return usart_putc(c, NULL);
-    }
-    else {
-        return -1;
-    }
-}
-#else
-static int printk_puts(struct char_device *dev, char *s) {return -1;}
-static int printk_putc(struct char_device *dev, char c) {return -1;}
-#endif
-
-static inline int vprintk(char *fmt, va_list ap) {
-    return vfprintf(stderr, fmt, ap, &printk_puts, &printk_putc);
-}
-
+/* Simply print out stderr */
 int printk(char *fmt, ...) {
     int ret;
     va_list ap;
 
     va_start(ap, fmt);
-    ret = vprintk(fmt, ap);
+    ret = vfprintf(stderr, fmt, ap);
     va_end(ap);
 
     return ret;
@@ -95,7 +66,7 @@ void panic_print(char *fmt, ...) {
 
     va_list ap;
     va_start(ap, fmt);
-    vprintk(fmt, ap);
+    vfprintf(stderr, fmt, ap);
     va_end(ap);
 
     panic();
