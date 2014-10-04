@@ -108,7 +108,7 @@ static long set_clock(struct stm32f4_spi *port, long desired_clock) {
 }
 
 /* The SPI mutex must already be held when calling this function */
-static int stm32f4_spi_init(struct spi *s) {
+static int stm32f4_spi_initialize(struct spi *s) {
     int ret = 0;
     struct stm32f4_spi *port = (struct stm32f4_spi *) s->priv;
 
@@ -135,6 +135,16 @@ static int stm32f4_spi_init(struct spi *s) {
     port->ready = 1;
 
 out:
+    return ret;
+}
+
+static int stm32f4_spi_init(struct spi *s) {
+    int ret;
+
+    acquire(&s->lock);
+    ret = stm32f4_spi_initialize(s);
+    release(&s->lock);
+
     return ret;
 }
 
@@ -217,8 +227,10 @@ static int stm32f4_spi_read_write(struct spi *spi, struct spi_dev *dev,
 
     /* Initialized? */
     if (!port->ready) {
-        struct spi_ops *ops = (struct spi_ops *) spi->obj.ops;
-        ops->init(spi);
+        ret = stm32f4_spi_initialize(spi);
+        if (ret) {
+            goto out;
+        }
     }
 
     /* Data MUST be read after each TX */
