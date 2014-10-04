@@ -21,6 +21,7 @@
  */
 
 #include <libfdt.h>
+#include <math.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -44,9 +45,67 @@
 struct stm32f4_spi {
     uint8_t                 ready;
     int                     periph_id;
+    long                    periph_clock;
     struct gpio             *gpio[3];    /* Each SPI port uses 3 GPIOs */
     struct stm32f4_spi_regs *regs;
 };
+
+static long get_clock(struct stm32f4_spi *port) {
+    switch (raw_mem_read(&port->regs->CR1) & SPI_CR1_BR_MASK) {
+    case SPI_CR1_BR_2:
+        return port->periph_clock / 2;
+    case SPI_CR1_BR_4:
+        return port->periph_clock / 4;
+    case SPI_CR1_BR_8:
+        return port->periph_clock / 8;
+    case SPI_CR1_BR_16:
+        return port->periph_clock / 16;
+    case SPI_CR1_BR_32:
+        return port->periph_clock / 32;
+    case SPI_CR1_BR_64:
+        return port->periph_clock / 64;
+    case SPI_CR1_BR_128:
+        return port->periph_clock / 128;
+    case SPI_CR1_BR_256:
+        return port->periph_clock / 256;
+    default:
+        return -1;
+    }
+}
+
+static long set_clock(struct stm32f4_spi *port, long desired_clock) {
+    int divisor = DIV_ROUND_UP(port->periph_clock, desired_clock);
+    uint32_t setting;
+
+    if (divisor <= 2) {
+        setting = SPI_CR1_BR_2;
+    }
+    else if (divisor <= 4) {
+        setting = SPI_CR1_BR_4;
+    }
+    else if (divisor <= 8) {
+        setting = SPI_CR1_BR_8;
+    }
+    else if (divisor <= 16) {
+        setting = SPI_CR1_BR_16;
+    }
+    else if (divisor <= 32) {
+        setting = SPI_CR1_BR_32;
+    }
+    else if (divisor <= 64) {
+        setting = SPI_CR1_BR_64;
+    }
+    else if (divisor <= 128) {
+        setting = SPI_CR1_BR_128;
+    }
+    else {
+        setting = SPI_CR1_BR_256;
+    }
+
+    raw_mem_set_mask(&port->regs->CR1, SPI_CR1_BR_MASK, setting);
+
+    return get_clock(port);
+}
 
 /* The SPI mutex must already be held when calling this function */
 static int stm32f4_spi_init(struct spi *s) {
@@ -64,9 +123,12 @@ static int stm32f4_spi_init(struct spi *s) {
         goto out;
     }
 
-    /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
+    /* Clock high on idle, Capture on rising edge, 16-bit data format */
     raw_mem_set_bits(&port->regs->CR1,
-                     SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI);
+                     SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI);
+
+    /* Default clock = 1MHz */
+    set_clock(port, 1 * 1000 * 1000);
 
     raw_mem_set_bits(&port->regs->CR1, SPI_CR1_SPE);
 
@@ -249,6 +311,7 @@ static struct obj *stm32f4_spi_ctor(const char *name) {
     struct spi *spi;
     struct stm32f4_spi_regs *regs;
     struct stm32f4_spi *port;
+    enum stm32f4_bus bus;
 
     offset = fdt_path_offset(blob, name);
     if (offset < 0) {
@@ -290,9 +353,19 @@ static struct obj *stm32f4_spi_ctor(const char *name) {
     port->periph_id = periph_id;
     port->regs = regs;
 
+    bus = rcc_peripheral_bus(port->periph_id);
+    if (bus == STM32F4_UNKNOWN_BUS) {
+        goto err_free_port;
+    }
+
+    port->periph_clock = rcc_bus_clock(bus);
+    if (port->periph_clock <= 0) {
+        goto err_free_port;
+    }
+
     gpio_af = gpio_periph_to_alt_func(port->periph_id);
     if (gpio_af == STM32F4_GPIO_AF_UNKNOWN) {
-        goto err_free_obj;
+        goto err_free_port;
     }
 
     /* Setup GPIOs */
@@ -348,6 +421,7 @@ err_free_gpio:
         }
     }
 
+err_free_port:
     kfree(port);
 
 err_free_obj:

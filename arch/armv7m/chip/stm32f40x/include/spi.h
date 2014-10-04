@@ -41,7 +41,7 @@ struct stm32f4_spi_regs {
 #define SPI_CR1_CPHA                ((uint32_t) (1 << 0))   /* SPI_CR1 Clock phase */
 #define SPI_CR1_CPOL                ((uint32_t) (1 << 1))   /* SPI_CR1 Clock polarity */
 #define SPI_CR1_MSTR                ((uint32_t) (1 << 2))   /* SPI_CR1 Master selection */
-#define SPI_CR1_BR_MASK             ((uint32_t) (0x38))     /* SPI_CR1 Baud rate mask */
+#define SPI_CR1_BR_MASK             ((uint32_t) (7 << 3))   /* SPI_CR1 Baud rate mask */
 #define SPI_CR1_BR_2                ((uint32_t) (0 << 3))   /* SPI_CR1 Baud rate = fPCLK/2 */
 #define SPI_CR1_BR_4                ((uint32_t) (1 << 3))   /* SPI_CR1 Baud rate = fPCLK/4 */
 #define SPI_CR1_BR_8                ((uint32_t) (2 << 3))   /* SPI_CR1 Baud rate = fPCLK/8 */
