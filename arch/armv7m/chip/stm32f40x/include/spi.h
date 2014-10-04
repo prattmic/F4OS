@@ -26,15 +26,15 @@
 #include <stdint.h>
 
 struct stm32f4_spi_regs {
-    volatile uint32_t CR1;      /* SPIx Control Register 1 */
-    volatile uint32_t CR2;      /* SPIx Control Register 2 */
-    volatile uint32_t SR;       /* SPIx Status Register */
-    volatile uint32_t DR;       /* SPIx Data Register */
-    volatile uint32_t CRCPR;    /* SPIx CRC Polynomial Register */
-    volatile uint32_t RXCRCR;   /* SPIx RX CRC Register */
-    volatile uint32_t TXCRCR;   /* SPIx TX CRC Register */
-    volatile uint32_t I2SCFGR;  /* SPIx I2S Configuration Register */
-    volatile uint32_t I2SPR;    /* SPIx I2S Prescaler Register */
+    uint32_t CR1;      /* SPIx Control Register 1 */
+    uint32_t CR2;      /* SPIx Control Register 2 */
+    uint32_t SR;       /* SPIx Status Register */
+    uint32_t DR;       /* SPIx Data Register */
+    uint32_t CRCPR;    /* SPIx CRC Polynomial Register */
+    uint32_t RXCRCR;   /* SPIx RX CRC Register */
+    uint32_t TXCRCR;   /* SPIx TX CRC Register */
+    uint32_t I2SCFGR;  /* SPIx I2S Configuration Register */
+    uint32_t I2SPR;    /* SPIx I2S Prescaler Register */
 };
 
 /* SPIx Control Register 1 bit fields */

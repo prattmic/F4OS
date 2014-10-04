@@ -29,16 +29,15 @@
 #include <arch/chip/gpio.h>
 #include <arch/chip/rcc.h>
 #include <arch/chip/spi.h>
-#include <arch/chip/registers.h>
 #include <dev/device.h>
 #include <dev/fdtparse.h>
+#include <dev/raw_mem.h>
 #include <dev/hw/gpio.h>
+#include <dev/hw/spi.h>
 #include <kernel/mutex.h>
 #include <kernel/class.h>
 #include <kernel/init.h>
 #include <mm/mm.h>
-
-#include <dev/hw/spi.h>
 
 #define STM32F4_SPI_COMPAT "stmicro,stm32f407-spi"
 
@@ -66,9 +65,10 @@ static int stm32f4_spi_init(struct spi *s) {
     }
 
     /* Baud = fPCLK/8, Clock high on idle, Capture on rising edge, 16-bit data format */
-    port->regs->CR1 |= SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI;
+    raw_mem_set_bits(&port->regs->CR1,
+                     SPI_CR1_BR_4 | SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI);
 
-    port->regs->CR1 |= SPI_CR1_SPE;
+    raw_mem_set_bits(&port->regs->CR1, SPI_CR1_SPE);
 
     port->ready = 1;
 
@@ -100,23 +100,23 @@ static int stm32f4_spi_send_receive(struct spi *spi, uint8_t send,
 
     /* Transmit data */
     count = 10000;
-    while (!(port->regs->SR & SPI_SR_TXNE)) {
+    while (!(raw_mem_read(&port->regs->SR) & SPI_SR_TXNE)) {
         if (!count--) {
             return -1;
         }
     }
-    port->regs->DR = send;
+    raw_mem_write(&port->regs->DR, send);
 
     /* Wait for response
      * Note: this "response" was transmitted while we were
      * transmitting the data above, it is not the device's response to that request. */
     count = 10000;
-    while (!(port->regs->SR & SPI_SR_RXNE)) {
+    while (!(raw_mem_read(&port->regs->SR) & SPI_SR_RXNE)) {
         if (!count--) {
             return -1;
         }
     }
-    *data = port->regs->DR;
+    *data = raw_mem_read(&port->regs->DR);
 
     return 0;
 }
@@ -162,7 +162,7 @@ static int stm32f4_spi_read_write(struct spi *spi, struct spi_dev *dev,
     /* Data MUST be read after each TX */
 
     /* Clear overrun by reading old data */
-    if (port->regs->SR & SPI_SR_OVR) {
+    if (raw_mem_read(&port->regs->SR) & SPI_SR_OVR) {
         READ_AND_DISCARD(&port->regs->DR);
         READ_AND_DISCARD(&port->regs->SR);
     }
