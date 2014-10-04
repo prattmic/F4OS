@@ -155,6 +155,58 @@ static int stm32f4_spi_deinit(struct spi *s) {
     return 0;
 }
 
+static long stm32f4_spi_get_clock(struct spi *spi) {
+    struct stm32f4_spi *port;
+    long ret;
+
+    if (!spi) {
+        return -1;
+    }
+
+    port = spi->priv;
+
+    acquire(&spi->lock);
+
+    if (!port->ready) {
+        ret = stm32f4_spi_initialize(spi);
+        if (ret) {
+            goto out;
+        }
+    }
+
+    ret = get_clock(port);
+
+out:
+    release(&spi->lock);
+    return ret;
+}
+
+static long stm32f4_spi_set_clock(struct spi *spi, long clock) {
+    struct stm32f4_spi *port;
+    long ret;
+
+    if (!spi) {
+        return -1;
+    }
+
+    port = spi->priv;
+
+    acquire(&spi->lock);
+
+    if (!port->ready) {
+        ret = stm32f4_spi_initialize(spi);
+        if (ret) {
+            goto out;
+        }
+    }
+
+    ret = set_clock(port, clock);
+
+out:
+    release(&spi->lock);
+    return ret;
+}
+
 static int stm32f4_spi_send_receive(struct spi *spi, uint8_t send,
                                     uint8_t *receive) {
     uint8_t *data;
@@ -295,6 +347,8 @@ static void stm32f4_spi_end_transaction(struct spi *spi, struct spi_dev *dev) {
 struct spi_ops stm32f4_spi_ops = {
     .init = stm32f4_spi_init,
     .deinit = stm32f4_spi_deinit,
+    .get_clock = stm32f4_spi_get_clock,
+    .set_clock = stm32f4_spi_set_clock,
     .read_write = stm32f4_spi_read_write,
     .read = stm32f4_spi_read,
     .write = stm32f4_spi_write,

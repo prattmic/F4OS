@@ -78,6 +78,24 @@ struct spi_ops {
      */
     int         (*deinit)(struct spi *);
     /**
+     * Get configured SPI SCLK frequency
+     *
+     * @param spi   SPI peripheral to get clock for
+     * @returns SCLK frequency (Hz), negative on error
+     */
+    long        (*get_clock)(struct spi *);
+    /**
+     * Set SPI SCLK frequency
+     *
+     * The actual set frequency will be the closest possible frequency
+     * less than or equal to the requested frequency.
+     *
+     * @param spi   SPI peripheral to get clock for
+     * @param clock Desired SCLK frequency (Hz)
+     * @returns Actual SCLK frequency (Hz), negative on error
+     */
+    long        (*set_clock)(struct spi *, long);
+    /**
      * Read and write data to and from SPI device.
      *
      * Read and write num bytes of data to SPI device dev on port spi,
