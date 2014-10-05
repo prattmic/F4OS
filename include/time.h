@@ -30,4 +30,12 @@ extern volatile uint32_t system_ticks;
 /* Microsecond sleep.  Max precision is system tick period (1/CONFIG_SYSTICK_FREQ). */
 int usleep(uint32_t usecs);
 
+/*
+ * Time since start time in us.
+ *
+ * start_time of 0 will indicate us since system boot.
+ * Max precision is system tick period (1/CONFIG_SYSTICK_FREQ).
+ */
+uint64_t system_time(uint64_t start_time);
+
 #endif
