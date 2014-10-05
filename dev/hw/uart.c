@@ -61,7 +61,7 @@ static int uart_read(struct char_device *dev, char *buf, size_t num) {
     return ops->read(uart, buf, num);
 }
 
-static int uart_write(struct char_device *dev, char *buf, size_t num) {
+static int uart_write(struct char_device *dev, const char *buf, size_t num) {
     struct uart *uart;
     struct uart_ops *ops;
 

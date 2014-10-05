@@ -113,7 +113,7 @@ struct uart_ops {
      *
      * @returns number of bytes written, or negative on error
      */
-    int     (*write)(struct uart *, char *, size_t);
+    int     (*write)(struct uart *, const char *, size_t);
 };
 
 extern struct class uart_class;

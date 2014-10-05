@@ -61,7 +61,8 @@ static int buf_stream_read(struct char_device *dev, char *buf, size_t num) {
     return total;
 }
 
-static int buf_stream_write(struct char_device *dev, char *buf, size_t num) {
+static int buf_stream_write(struct char_device *dev, const char *buf,
+                            size_t num) {
     struct buf_stream *stream = dev->priv;
     int i, total = 0;
 

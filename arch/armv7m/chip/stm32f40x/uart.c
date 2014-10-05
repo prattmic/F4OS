@@ -365,7 +365,7 @@ out:
     return ret;
 }
 
-static int stm32f4_uart_write(struct uart *uart, char *buf, size_t len) {
+static int stm32f4_uart_write(struct uart *uart, const char *buf, size_t len) {
     struct stm32f4_uart *port;
     struct stm32f4_dma_ops *tx_ops;
     int ret;

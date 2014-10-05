@@ -84,7 +84,7 @@ static int resource_read(struct char_device *c, char *buf, size_t num) {
     return total;
 }
 
-static int resource_write(struct char_device *c, char *buf, size_t num) {
+static int resource_write(struct char_device *c, const char *buf, size_t num) {
     struct resource *resource = c->priv;
     int total = 0;
 

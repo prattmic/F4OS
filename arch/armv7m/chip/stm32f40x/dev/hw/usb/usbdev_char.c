@@ -36,7 +36,7 @@ struct usb {
     struct mutex write_mutex;
 };
 
-static int usb_write(struct char_device *dev, char *buf, size_t num) {
+static int usb_write(struct char_device *dev, const char *buf, size_t num) {
     struct usb *usb;
     int ret;
 
@@ -48,7 +48,7 @@ static int usb_write(struct char_device *dev, char *buf, size_t num) {
 
     acquire(&usb->write_mutex);
 
-    ret = usbdev_write(&ep_tx, (uint8_t*)buf, num);
+    ret = usbdev_write(&ep_tx, (const uint8_t*)buf, num);
 
     release(&usb->write_mutex);
 

@@ -39,7 +39,7 @@ union uint8_uint32 {
 
 /* packet points to first byte in packet.  size is packet size in bytes */
 /* Returns bytes written, negative on error */
-int usbdev_write(struct endpoint *ep, uint8_t *packet, int size) {
+int usbdev_write(struct endpoint *ep, const uint8_t *packet, int size) {
     if (ep == NULL) {
         DEBUG_PRINT("Warning: Invalid endpoint in usbdev_write. ");
         return -1;

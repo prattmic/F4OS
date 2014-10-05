@@ -73,7 +73,7 @@ struct char_ops {
      *
      * @returns number of bytes written, or negative on error
      */
-    int     (*write)(struct char_device *, char *, size_t);
+    int     (*write)(struct char_device *, const char *, size_t);
     /**
      * Cleanup internal structures
      *

@@ -62,7 +62,8 @@ static int shared_mem_read(struct char_device *dev, char *buf, size_t num) {
     return total;
 }
 
-static int shared_mem_write(struct char_device *dev, char *buf, size_t num) {
+static int shared_mem_write(struct char_device *dev, const char *buf,
+                            size_t num) {
     struct shared_mem *mem;
     int total = 0;
 

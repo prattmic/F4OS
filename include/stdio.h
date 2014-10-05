@@ -34,24 +34,24 @@
 #define stderr  (curr_task->_stderr)
 
 int read(struct char_device *dev, char *buf, int num);
-int write(struct char_device *dev, char *buf, int num);
+int write(struct char_device *dev, const char *buf, int num);
 
 /*
  * read() and write() variants which block until all bytes are
  * read/written, or an error occurs.
  */
 int read_block(struct char_device *dev, char *buf, int num);
-int write_block(struct char_device *dev, char *buf, int num);
+int write_block(struct char_device *dev, const char *buf, int num);
 
 /* Print fmt into buf, writing at most n bytes.
  * Returns number of characters written to buffer. */
-int scnprintf(char *buf, uint32_t n, char *fmt, ...);
+int scnprintf(char *buf, uint32_t n, const char *fmt, ...);
 
-int fputs(struct char_device *dev, char *s);
-int fputc(struct char_device *dev, char letter);
+int fputs(struct char_device *dev, const char *s);
+int fputc(struct char_device *dev, const char letter);
 int fgetc(struct char_device *dev);
-int fprintf(struct char_device *dev, char *fmt, ...);
-int vfprintf(struct char_device *dev, char *fmt, va_list ap);
+int fprintf(struct char_device *dev, const char *fmt, ...);
+int vfprintf(struct char_device *dev, const char *fmt, va_list ap);
 
 #define puts(s) fputs(stdout, s)
 #define putc(c) fputc(stdout, c)

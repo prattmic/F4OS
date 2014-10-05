@@ -30,7 +30,7 @@
 #include <dev/char.h>
 #include <dev/resource.h>
 
-int write(struct char_device *c, char *buf, int num) {
+int write(struct char_device *c, const char *buf, int num) {
     struct char_ops *ops;
 
     if (!c) {
@@ -75,7 +75,7 @@ int read_block(struct char_device *dev, char *buf, int num) {
     return ret;
 }
 
-int write_block(struct char_device *dev, char *buf, int num) {
+int write_block(struct char_device *dev, const char *buf, int num) {
     int ret;
     size_t total = 0;
 
@@ -96,7 +96,7 @@ int write_block(struct char_device *dev, char *buf, int num) {
     return ret;
 }
 
-int fputs(struct char_device *dev, char *s) {
+int fputs(struct char_device *dev, const char *s) {
     return write_block(dev, s, strlen(s));
 }
 
@@ -118,7 +118,7 @@ int fgetc(struct char_device *dev) {
     return ret;
 }
 
-int scnprintf(char *buf, uint32_t n, char *fmt, ...) {
+int scnprintf(char *buf, uint32_t n, const char *fmt, ...) {
     va_list ap;
     struct char_device *stream;
     int ret;
@@ -139,7 +139,7 @@ out:
     return ret;
 }
 
-int fprintf(struct char_device *dev, char *fmt, ...) {
+int fprintf(struct char_device *dev, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     int ret = vfprintf(dev, fmt, ap);
@@ -181,7 +181,7 @@ static inline int holding_push(char c, char *holding, int hold_len,
 }
 
 /* Returns bytes written, negative on error */
-int vfprintf(struct char_device *dev, char *fmt, va_list ap) {
+int vfprintf(struct char_device *dev, const char *fmt, va_list ap) {
     int total = 0;
 
     /*
