@@ -108,7 +108,12 @@ void rtos_tick(void) {
 
     list_for_each_entry(task, &periodic_task_list, periodic_task_list) {
         if (task->ticks_until_wake == 0) {
-            if (!task->running) {
+            /*
+             * If this task hasn't finished (or even started) since the last
+             * period edge, it will still be in the runnable task list.  Don't
+             * add it again, as this will corrupt the list.
+             */
+            if (!task_runnable(get_task_t(task))) {
                 insert_task(runnable_task_list, task);
             }
             task->ticks_until_wake = task->period;
