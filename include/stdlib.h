@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 F4OS Authors
+ * Copyright (C) 2013, 2014 F4OS Authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -36,7 +36,7 @@ char *itoa(int number, char *buf, uint32_t len, uint32_t base);
 char *uitoa(uint32_t number, char *buf, uint32_t len, uint32_t base);
 void ftoa(float num, float tolerance, char buf[], uint32_t n);
 
-inline int abs(int n) {
+static inline int abs(int n) {
     return n > 0 ? n : -n;
 }
 
