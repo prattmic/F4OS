@@ -15,8 +15,8 @@ INSTALL=$1
 
 echo "It looks like the Kconfig tools are not installed on your system."
 echo "kconfig-frontends can be downloaded and installed automatically."
-echo "kconfig-frontends depends on (at least) autoconf, automake,"
-echo "bison, flex, gperf, libtoolize, libncurses5-dev, m4, and pkg-config."
+echo "kconfig-frontends depends on (at least) autoconf, automake, bison,"
+echo "curl, flex, gperf, libtoolize, libncurses5-dev, m4, and pkg-config."
 echo "It will be installed to $INSTALL."
 
 read -p "Download and install? (y/n) " response
