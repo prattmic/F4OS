@@ -22,16 +22,11 @@
 
 #include <stdint.h>
 #include <arch/chip.h>
-#include <dev/raw_mem.h>
-
-/* TODO: move to dedicated file */
-#define WDTCTL  ((uint16_t *)0x4000480C)
-#define WDTCTL_PW   (0x5A << 8)
-#define WDTCTL_HOLD (1 << 7)
+#include <arch/chip/driverlib/rom.h>
 
 void init_clock(void) {
     /* Disable watchdog timer */
-    raw_mem_write(WDTCTL, WDTCTL_PW | WDTCTL_HOLD);
+    ROM_WDT_A_holdTimer();
 
     /* TODO */
 }
