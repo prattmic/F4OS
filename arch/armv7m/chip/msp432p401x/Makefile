@@ -1,6 +1,8 @@
 SRCS += vector.S
 SRCS += clock.c
 
+DIRS += driverlib/
+
 binary: $(PREFIX)/$(PROJ_NAME).bin
 
 # TODO: support multiple interfaces
