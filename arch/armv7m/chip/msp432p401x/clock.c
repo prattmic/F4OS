@@ -22,11 +22,14 @@
 
 #include <stdint.h>
 #include <arch/chip.h>
+#include <arch/chip/driverlib/cs.h>
 #include <arch/chip/driverlib/rom.h>
 
 void init_clock(void) {
     /* Disable watchdog timer */
     ROM_WDT_A_holdTimer();
 
-    /* TODO */
+    /* Center internal clock on 48MHz */
+    /* TODO: use external clock */
+    CS_setDCOCenteredFrequency(CS_DCO_FREQUENCY_48);
 }
