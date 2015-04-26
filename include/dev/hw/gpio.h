@@ -86,6 +86,10 @@ struct gpio_ops {
      * can be treated as "on" and "off" rather than specifically refering to
      * the state of the pin.
      *
+     * Calling this method has no effect on the existing output status.  If the
+     * GPIO is already configured as an output, a subsequent write is necessary
+     * to change the output value.
+     *
      * The GPIO resets to an active high configuration.  Newly opened GPIOs
      * will be configured active high.
      *
