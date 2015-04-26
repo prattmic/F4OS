@@ -1,0 +1,256 @@
+/*
+ * Copyright (C) 2015 F4OS Authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#ifndef ARCH_CHIP_INCLUDE_GPIO_H_INCLUDED
+#define ARCH_CHIP_INCLUDE_GPIO_H_INCLUDED
+
+#include <stdint.h>
+
+/*
+ * MSP432 GPIOs are generally internally referred to by lettered ports that
+ * are a combination of numbered ports.  For example, Port A contains Port 1
+ * and Port 2.  The registers access the lettered ports.
+ */
+
+struct msp432_gpio_regs {
+    uint16_t IN;        /* GPIO Port x Input */
+    uint16_t OUT;       /* GPIO Port x Output */
+    uint16_t DIR;       /* GPIO Port x Direction */
+    uint16_t REN;       /* GPIO Port x Resistor Enable */
+    uint16_t DS;        /* GPIO Port x Drive Strength */
+    uint16_t SEL0;      /* GPIO Port x Select 0 */
+    uint16_t SEL1;      /* GPIO Port x Select 1 */
+    uint8_t reserved1[8];
+    uint16_t SELC;      /* GPIO Port x Complement Selection */
+    uint16_t IES;       /* GPIO Port x Interrupt Edge Select */
+    uint16_t IE;        /* GPIO Port x Interrupt Enable */
+    uint16_t IFG;       /* GPIO Port x Interrupt Flag */
+    uint8_t reserved2[2];
+};
+
+/* Single bit flags.  Must be shifted to desired pin */
+#define MSP432_GPIO_OUT_PULLDOWN 0  /* When GPIO is input, sets pull-down */
+#define MSP432_GPIO_OUT_PULLUP   1  /* When GPIO is input, sets pull-up */
+#define MSP432_GPIO_DIR_IN  0       /* GPIO input */
+#define MSP432_GPIO_DIR_OUT 1       /* GPIO output */
+#define MSP432_GPIO_REN_DISABLE 0   /* Disable pull-up/down */
+#define MSP432_GPIO_REN_ENABLE  0   /* Enable pull-up/down */
+
+/* GPIO module function */
+#define MSP432_GPIO_FDT_FUNCTION_MASK       (0x3 << 8)
+#define MSP432_GPIO_FDT_FUNCTION_GPIO       (0x0 << 8)
+#define MSP432_GPIO_FDT_FUNCTION_PRIMARY    (0x1 << 8)
+#define MSP432_GPIO_FDT_FUNCTION_SECONDARY  (0x2 << 8)
+#define MSP432_GPIO_FDT_FUNCTION_TERTIARY   (0x3 << 8)
+
+/* Valid flags for set_flags */
+enum msp432_gpio_flags {
+    MSP432_GPIO_MOD_FUNC,
+    MSP432_GPIO_PULL,
+};
+
+enum msp432_gpio_mod_funcs {
+    MSP432_GPIO_FUNCTION_GPIO       = MSP432_GPIO_FDT_FUNCTION_GPIO,
+    MSP432_GPIO_FUNCTION_PRIMARY    = MSP432_GPIO_FDT_FUNCTION_PRIMARY,
+    MSP432_GPIO_FUNCTION_SECONDARY  = MSP432_GPIO_FDT_FUNCTION_SECONDARY,
+    MSP432_GPIO_FUNCTION_TERTIARY   = MSP432_GPIO_FDT_FUNCTION_TERTIARY,
+};
+
+enum msp432_gpio_pull {
+    MSP432_GPIO_PULL_DISABLE,
+    MSP432_GPIO_PULL_UP,
+    MSP432_GPIO_PULL_DOWN,
+};
+
+/* Enumerate all of the GPIOs */
+enum msp432_gpios {
+    MSP432_GPIO_P1_0 = 0,
+    MSP432_GPIO_P1_1,
+    MSP432_GPIO_P1_2,
+    MSP432_GPIO_P1_3,
+    MSP432_GPIO_P1_4,
+    MSP432_GPIO_P1_5,
+    MSP432_GPIO_P1_6,
+    MSP432_GPIO_P1_7,
+    MSP432_GPIO_P2_0,
+    MSP432_GPIO_P2_1,
+    MSP432_GPIO_P2_2,
+    MSP432_GPIO_P2_3,
+    MSP432_GPIO_P2_4,
+    MSP432_GPIO_P2_5,
+    MSP432_GPIO_P2_6,
+    MSP432_GPIO_P2_7,
+    MSP432_GPIO_P3_0,
+    MSP432_GPIO_P3_1,
+    MSP432_GPIO_P3_2,
+    MSP432_GPIO_P3_3,
+    MSP432_GPIO_P3_4,
+    MSP432_GPIO_P3_5,
+    MSP432_GPIO_P3_6,
+    MSP432_GPIO_P3_7,
+    MSP432_GPIO_P4_0,
+    MSP432_GPIO_P4_1,
+    MSP432_GPIO_P4_2,
+    MSP432_GPIO_P4_3,
+    MSP432_GPIO_P4_4,
+    MSP432_GPIO_P4_5,
+    MSP432_GPIO_P4_6,
+    MSP432_GPIO_P4_7,
+    MSP432_GPIO_P5_0,
+    MSP432_GPIO_P5_1,
+    MSP432_GPIO_P5_2,
+    MSP432_GPIO_P5_3,
+    MSP432_GPIO_P5_4,
+    MSP432_GPIO_P5_5,
+    MSP432_GPIO_P5_6,
+    MSP432_GPIO_P5_7,
+    MSP432_GPIO_P6_0,
+    MSP432_GPIO_P6_1,
+    MSP432_GPIO_P6_2,
+    MSP432_GPIO_P6_3,
+    MSP432_GPIO_P6_4,
+    MSP432_GPIO_P6_5,
+    MSP432_GPIO_P6_6,
+    MSP432_GPIO_P6_7,
+    MSP432_GPIO_P7_0,
+    MSP432_GPIO_P7_1,
+    MSP432_GPIO_P7_2,
+    MSP432_GPIO_P7_3,
+    MSP432_GPIO_P7_4,
+    MSP432_GPIO_P7_5,
+    MSP432_GPIO_P7_6,
+    MSP432_GPIO_P7_7,
+    MSP432_GPIO_P8_0,
+    MSP432_GPIO_P8_1,
+    MSP432_GPIO_P8_2,
+    MSP432_GPIO_P8_3,
+    MSP432_GPIO_P8_4,
+    MSP432_GPIO_P8_5,
+    MSP432_GPIO_P8_6,
+    MSP432_GPIO_P8_7,
+    MSP432_GPIO_P9_0,
+    MSP432_GPIO_P9_1,
+    MSP432_GPIO_P9_2,
+    MSP432_GPIO_P9_3,
+    MSP432_GPIO_P9_4,
+    MSP432_GPIO_P9_5,
+    MSP432_GPIO_P9_6,
+    MSP432_GPIO_P9_7,
+    MSP432_GPIO_P10_0,
+    MSP432_GPIO_P10_1,
+    MSP432_GPIO_P10_2,
+    MSP432_GPIO_P10_3,
+    MSP432_GPIO_P10_4,
+    MSP432_GPIO_P10_5,
+    MSP432_GPIO_P10_6,
+    MSP432_GPIO_P10_7,
+    MSP432_NUM_GPIOS,
+    /* GPIOs can be referred to by lettered ports as well. */
+    MSP432_GPIO_PA0  = MSP432_GPIO_P1_0,
+    MSP432_GPIO_PA1  = MSP432_GPIO_P1_1,
+    MSP432_GPIO_PA2  = MSP432_GPIO_P1_2,
+    MSP432_GPIO_PA3  = MSP432_GPIO_P1_3,
+    MSP432_GPIO_PA4  = MSP432_GPIO_P1_4,
+    MSP432_GPIO_PA5  = MSP432_GPIO_P1_5,
+    MSP432_GPIO_PA6  = MSP432_GPIO_P1_6,
+    MSP432_GPIO_PA7  = MSP432_GPIO_P1_7,
+    MSP432_GPIO_PA8  = MSP432_GPIO_P2_0,
+    MSP432_GPIO_PA9  = MSP432_GPIO_P2_1,
+    MSP432_GPIO_PA10 = MSP432_GPIO_P2_2,
+    MSP432_GPIO_PA11 = MSP432_GPIO_P2_3,
+    MSP432_GPIO_PA12 = MSP432_GPIO_P2_4,
+    MSP432_GPIO_PA13 = MSP432_GPIO_P2_5,
+    MSP432_GPIO_PA14 = MSP432_GPIO_P2_6,
+    MSP432_GPIO_PA15 = MSP432_GPIO_P2_7,
+    MSP432_GPIO_PB0  = MSP432_GPIO_P3_0,
+    MSP432_GPIO_PB1  = MSP432_GPIO_P3_1,
+    MSP432_GPIO_PB2  = MSP432_GPIO_P3_2,
+    MSP432_GPIO_PB3  = MSP432_GPIO_P3_3,
+    MSP432_GPIO_PB4  = MSP432_GPIO_P3_4,
+    MSP432_GPIO_PB5  = MSP432_GPIO_P3_5,
+    MSP432_GPIO_PB6  = MSP432_GPIO_P3_6,
+    MSP432_GPIO_PB7  = MSP432_GPIO_P3_7,
+    MSP432_GPIO_PB8  = MSP432_GPIO_P4_0,
+    MSP432_GPIO_PB9  = MSP432_GPIO_P4_1,
+    MSP432_GPIO_PB10 = MSP432_GPIO_P4_2,
+    MSP432_GPIO_PB11 = MSP432_GPIO_P4_3,
+    MSP432_GPIO_PB12 = MSP432_GPIO_P4_4,
+    MSP432_GPIO_PB13 = MSP432_GPIO_P4_5,
+    MSP432_GPIO_PB14 = MSP432_GPIO_P4_6,
+    MSP432_GPIO_PB15 = MSP432_GPIO_P4_7,
+    MSP432_GPIO_PC0  = MSP432_GPIO_P5_0,
+    MSP432_GPIO_PC1  = MSP432_GPIO_P5_1,
+    MSP432_GPIO_PC2  = MSP432_GPIO_P5_2,
+    MSP432_GPIO_PC3  = MSP432_GPIO_P5_3,
+    MSP432_GPIO_PC4  = MSP432_GPIO_P5_4,
+    MSP432_GPIO_PC5  = MSP432_GPIO_P5_5,
+    MSP432_GPIO_PC6  = MSP432_GPIO_P5_6,
+    MSP432_GPIO_PC7  = MSP432_GPIO_P5_7,
+    MSP432_GPIO_PC8  = MSP432_GPIO_P6_0,
+    MSP432_GPIO_PC9  = MSP432_GPIO_P6_1,
+    MSP432_GPIO_PC10 = MSP432_GPIO_P6_2,
+    MSP432_GPIO_PC11 = MSP432_GPIO_P6_3,
+    MSP432_GPIO_PC12 = MSP432_GPIO_P6_4,
+    MSP432_GPIO_PC13 = MSP432_GPIO_P6_5,
+    MSP432_GPIO_PC14 = MSP432_GPIO_P6_6,
+    MSP432_GPIO_PC15 = MSP432_GPIO_P6_7,
+    MSP432_GPIO_PD0  = MSP432_GPIO_P7_0,
+    MSP432_GPIO_PD1  = MSP432_GPIO_P7_1,
+    MSP432_GPIO_PD2  = MSP432_GPIO_P7_2,
+    MSP432_GPIO_PD3  = MSP432_GPIO_P7_3,
+    MSP432_GPIO_PD4  = MSP432_GPIO_P7_4,
+    MSP432_GPIO_PD5  = MSP432_GPIO_P7_5,
+    MSP432_GPIO_PD6  = MSP432_GPIO_P7_6,
+    MSP432_GPIO_PD7  = MSP432_GPIO_P7_7,
+    MSP432_GPIO_PD8  = MSP432_GPIO_P8_0,
+    MSP432_GPIO_PD9  = MSP432_GPIO_P8_1,
+    MSP432_GPIO_PD10 = MSP432_GPIO_P8_2,
+    MSP432_GPIO_PD11 = MSP432_GPIO_P8_3,
+    MSP432_GPIO_PD12 = MSP432_GPIO_P8_4,
+    MSP432_GPIO_PD13 = MSP432_GPIO_P8_5,
+    MSP432_GPIO_PD14 = MSP432_GPIO_P8_6,
+    MSP432_GPIO_PD15 = MSP432_GPIO_P8_7,
+    MSP432_GPIO_PE0  = MSP432_GPIO_P9_0,
+    MSP432_GPIO_PE1  = MSP432_GPIO_P9_1,
+    MSP432_GPIO_PE2  = MSP432_GPIO_P9_2,
+    MSP432_GPIO_PE3  = MSP432_GPIO_P9_3,
+    MSP432_GPIO_PE4  = MSP432_GPIO_P9_4,
+    MSP432_GPIO_PE5  = MSP432_GPIO_P9_5,
+    MSP432_GPIO_PE6  = MSP432_GPIO_P9_6,
+    MSP432_GPIO_PE7  = MSP432_GPIO_P9_7,
+    MSP432_GPIO_PE8  = MSP432_GPIO_P10_0,
+    MSP432_GPIO_PE9  = MSP432_GPIO_P10_1,
+    MSP432_GPIO_PE10 = MSP432_GPIO_P10_2,
+    MSP432_GPIO_PE11 = MSP432_GPIO_P10_3,
+    MSP432_GPIO_PE12 = MSP432_GPIO_P10_4,
+    MSP432_GPIO_PE13 = MSP432_GPIO_P10_5,
+    MSP432_GPIO_PE14 = MSP432_GPIO_P10_6,
+    MSP432_GPIO_PE15 = MSP432_GPIO_P10_7,
+    MSP432_GPIO_PJ0  = 144,
+    MSP432_GPIO_PJ1,
+    MSP432_GPIO_PJ2,
+    MSP432_GPIO_PJ3,
+    MSP432_GPIO_PJ4,
+    MSP432_GPIO_PJ5,
+};
+
+#endif

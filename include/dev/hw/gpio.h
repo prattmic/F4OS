@@ -30,6 +30,7 @@
 struct gpio {
     int         num;
     uint8_t     active_low;
+    void        *priv;
     struct obj  obj;
 };
 
@@ -55,6 +56,7 @@ enum gpio_error {
     GPIO_ERR_UNAVAIL,       /* GPIO is currently unavailable */
     GPIO_ERR_DIR_UNSUPPT,   /* Direction unsupported for this GPIO */
     GPIO_ERR_FLG_UNSUPPT,   /* Unsupported implementation flag */
+    GPIO_ERR_FLG_INVAL,     /* Invalid implementation flag value */
 };
 
 struct gpio_ops {

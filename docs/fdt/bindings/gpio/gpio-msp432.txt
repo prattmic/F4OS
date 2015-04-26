@@ -1,0 +1,16 @@
+GPIO for MSP432 chips
+
+Required properties:
+    - compatible: Must be "ti,msp432p401-gpio"
+
+When referencing GPIOs in a GPIO property, the valid GPIO numbers can be found
+in arch/armv7m/chip/msp432p401x/include/gpio.h in enum msp432_gpios.
+
+In addition to the global GPIO flags documented in gpio-prop.txt, the following
+flags are supported (and found in arch/armv7m/chip/msp432p401x/include/gpio.h):
+    - MSP432_GPIO_FDT_FUNCTION_MASK (bits 10:8): Set to indicate GPIO module
+      function:
+        - MSP432_GPIO_FDT_FUNCTION_GPIO (0x0) = GPIO
+        - MSP432_GPIO_FDT_FUNCTION_PRIMARY (0x1) = Primary module function
+        - MSP432_GPIO_FDT_FUNCTION_SECONDARY (0x2) = Secondary module function
+        - MSP432_GPIO_FDT_FUNCTION_TERTIARY (0x3) = Tertiary module function

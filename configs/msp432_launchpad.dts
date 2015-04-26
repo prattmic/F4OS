@@ -4,6 +4,9 @@
     compatible = "ti,msp432p401r_launchpad", "ti,msp432p401r",
         "ti,msp432p401", "ti,msp432p", "ti,msp432";
 
+    #address-cells = <1>;
+    #size-cells = <1>;
+
     memory {
         compatible = "address-layout";
         #address-cells = <1>;
@@ -20,5 +23,10 @@
             attr = "rwx";
             reg = <0x20000000 0x10000>;
         };
+    };
+
+    gpio: gpio@40004C00 {
+        compatible = "ti,msp432p401-gpio";
+        reg = <0x40004C00 0x138>;
     };
 };

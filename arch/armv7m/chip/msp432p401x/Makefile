@@ -1,5 +1,6 @@
 SRCS += vector.S
 SRCS += clock.c
+SRCS += gpio.c
 
 DIRS += driverlib/
 
