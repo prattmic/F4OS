@@ -23,6 +23,7 @@
 #ifndef INCLUDE_DEV_RAW_MEM_H_INCLUDED
 #define INCLUDE_DEV_RAW_MEM_H_INCLUDED
 
+#include <atomic.h>
 #include <stdint.h>
 
 /* Prevent the compiler from reordering memory access */
@@ -36,6 +37,12 @@
 } while (0)
 
 /*
+ * Adding a volatile qualifier ensures that the compiler does not optimize the
+ * access away.
+ */
+#define raw_mem_cast(__address) ((volatile typeof(__address))(__address))
+
+/*
  * Safely read raw memory.
  *
  * Perform a read of raw memory, including a memory barrier.
@@ -44,7 +51,7 @@
  * @returns Value at __address
  */
 #define raw_mem_read(__address) ({    \
-    typeof(*__address) __val = *(volatile typeof(__address))(__address); \
+    typeof(*__address) __val = *raw_mem_cast(__address); \
     memory_barrier();   \
     __val;              \
 })
@@ -58,7 +65,7 @@
  * @param __val     Value to write
  */
 #define raw_mem_write(__address, __val) ({    \
-    *((volatile typeof(__address))(__address)) = __val; \
+    *raw_mem_cast(__address) = __val; \
     memory_barrier();   \
 })
 
@@ -78,6 +85,23 @@
 })
 
 /*
+ * Raw memory set bits (atomic)
+ *
+ * Perform an atomic write of raw memory, setting the specified bits.
+ *
+ * @param __address Pointer to location to write
+ * @param __bits    Bits to set
+ */
+#define raw_mem_set_bits_atomic(__address, __bits) do {    \
+    typeof(*__address) __val;   \
+    do {    \
+        __val = load_link(raw_mem_cast(__address)); \
+        __val |= __bits;    \
+    } while (store_conditional(raw_mem_cast(__address), __val));    \
+    memory_barrier();   \
+} while (0)
+
+/*
  * Raw memory clear bits
  *
  * Perform a write of raw memory, including a memory barrier,
@@ -91,6 +115,23 @@
     __val &= ~(__bits);    \
     raw_mem_write(__address, __val);    \
 })
+
+/*
+ * Raw memory clear bits (atomic)
+ *
+ * Perform an atomic write of raw memory, clearing the specified bits.
+ *
+ * @param __address Pointer to location to write
+ * @param __bits    Bits to set
+ */
+#define raw_mem_clear_bits_atomic(__address, __bits) do {    \
+    typeof(*__address) __val;   \
+    do {    \
+        __val = load_link(raw_mem_cast(__address)); \
+        __val &= ~(__bits);    \
+    } while (store_conditional(raw_mem_cast(__address), __val));    \
+    memory_barrier();   \
+} while (0)
 
 /*
  * Raw memory set masked region
@@ -115,5 +156,31 @@
     __tmp |= __val;    \
     raw_mem_write(__address, __tmp);    \
 })
+
+/*
+ * Raw memory set masked region (atomic)
+ *
+ * Perform an atomic write of raw memory, clearing a masked region first.
+ *
+ * This is equivalent to the following pseudocode:
+ *
+ * tmp = *reg;
+ * tmp &= ~mask;
+ * tmp |= val;
+ * *reg = tmp;
+ *
+ * @param __address Pointer to location to write
+ * @param __mask    Mask to clear
+ * @param __value   Value to write
+ */
+#define raw_mem_set_mask_atomic(__address, __mask, __val) do {    \
+    typeof(*__address) __tmp;   \
+    do {    \
+        __tmp = load_link(raw_mem_cast(__address)); \
+        __tmp &= ~(__mask); \
+        __tmp |= __val;    \
+    } while (store_conditional(raw_mem_cast(__address), __tmp));    \
+    memory_barrier();   \
+} while (0)
 
 #endif
