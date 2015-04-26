@@ -98,7 +98,7 @@ static __always_inline uint8_t store_conditional(volatile uint32_t *address, uin
     asm volatile (
         "strex  %[failed], %[val], [%[ptr]]\n\t"
         "dmb\n\r"
-        : [failed] "=r" (failed)
+        : [failed] "=&r" (failed)
         : [ptr] "r" (address), [val] "r" (value)
         : "memory"
     );

@@ -44,7 +44,7 @@ static inline int atomic_add(atomic_t *v, int i) {
         "   strex  %[failed], %[ret], [%[num]] \n\t"
         "   cmp    %[failed], #0               \n\t"
         "   bne    0b                          \n\t"
-        : [ret] "=&r" (ret), [failed] "=r" (failed)
+        : [ret] "=&r" (ret), [failed] "=&r" (failed)
         : [num] "r" (&v->num), [i] "ri" (i)
         : "memory"
     );
@@ -62,7 +62,7 @@ static inline int atomic_sub(atomic_t *v, int i) {
         "   strex  %[failed], %[ret], [%[num]] \n\t"
         "   cmp    %[failed], #0               \n\t"
         "   bne    0b                          \n\t"
-        : [ret] "=&r" (ret), [failed] "=r" (failed)
+        : [ret] "=&r" (ret), [failed] "=&r" (failed)
         : [num] "r" (&v->num), [i] "ri" (i)
         : "memory"
     );
@@ -91,7 +91,7 @@ static inline uint32_t atomic_spin_swap(uint32_t *ptr, uint32_t update) {
         "   strex  %[failed], %[new], [%[ptr]]  \n\t"
         "   cmp    %[failed], #0                \n\t"
         "   bne    0b                           \n\t"
-        : [ret] "=r" (ret), [ptr] "=r" (ptr), [failed] "=r" (failed)
+        : [ret] "=r" (ret), [ptr] "=r" (ptr), [failed] "=&r" (failed)
         : [new] "r" (update)
         : "memory"
     );
@@ -109,7 +109,7 @@ static inline uint32_t atomic_or(uint32_t *ptr, uint32_t val) {
         "   strex %[failed], %[ret], [%[ptr]]   \n\t"
         "   cmp %[failed], #0                   \n\t"
         "   bne 0b                              \n\t"
-        : [failed] "=r" (failed), [ret] "=&r" (ret)
+        : [failed] "=&r" (failed), [ret] "=&r" (ret)
         : [ptr] "r" (ptr), [val] "ri" (val)
         : "memory"
     );
@@ -127,7 +127,7 @@ static inline uint32_t atomic_and(uint32_t *ptr, uint32_t val) {
         "   strex %[failed], %[ret], [%[ptr]]   \n\t"
         "   cmp %[failed], #0                   \n\t"
         "   bne 0b                              \n\t"
-        : [failed] "=r" (failed), [ret] "=&r" (ret)
+        : [failed] "=&r" (failed), [ret] "=&r" (ret)
         : [ptr] "r" (ptr), [val] "ri" (val)
         : "memory"
     );
@@ -140,7 +140,7 @@ static __always_inline uint32_t load_link(volatile uint32_t *address) {
 
     asm volatile (
         "ldrex  %[val], [%[ptr]]\n\t"
-        : [val] "=r" (val)
+        : [val] "=&r" (val)
         : [ptr] "r" (address)
     );
 
@@ -152,7 +152,7 @@ static __always_inline uint8_t store_conditional(volatile uint32_t *address, uin
 
     asm volatile (
         "strex  %[failed], %[val], [%[ptr]]\n\t"
-        : [failed] "=r" (failed)
+        : [failed] "=&r" (failed)
         : [ptr] "r" (address), [val] "r" (value)
         : "memory"
     );
