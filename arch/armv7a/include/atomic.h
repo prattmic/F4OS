@@ -79,7 +79,7 @@ static inline uint32_t atomic_and(uint32_t *ptr, uint32_t val) {
     return __atomic_and_fetch(ptr, val, __ATOMIC_SEQ_CST);
 }
 
-static __always_inline uint32_t load_link(volatile uint32_t *address) {
+static __always_inline uint32_t load_link32(volatile uint32_t *address) {
     uint32_t val;
 
     asm volatile (
@@ -92,11 +92,68 @@ static __always_inline uint32_t load_link(volatile uint32_t *address) {
     return val;
 }
 
-static __always_inline uint8_t store_conditional(volatile uint32_t *address, uint32_t value) {
+static __always_inline uint8_t store_conditional32(volatile uint32_t *address,
+                                                   uint32_t value) {
     uint32_t failed;
 
     asm volatile (
         "strex  %[failed], %[val], [%[ptr]]\n\t"
+        "dmb\n\r"
+        : [failed] "=&r" (failed)
+        : [ptr] "r" (address), [val] "r" (value)
+        : "memory"
+    );
+
+    return failed;
+}
+
+static __always_inline uint16_t load_link16(volatile uint16_t *address) {
+    uint16_t val;
+
+    asm volatile (
+        "dmb\n\r"
+        "ldrexh %[val], [%[ptr]]\n\t"
+        : [val] "=r" (val)
+        : [ptr] "r" (address)
+    );
+
+    return val;
+}
+
+static __always_inline uint8_t store_conditional16(volatile uint16_t *address,
+                                                   uint16_t value) {
+    uint32_t failed;
+
+    asm volatile (
+        "strexh %[failed], %[val], [%[ptr]]\n\t"
+        "dmb\n\r"
+        : [failed] "=&r" (failed)
+        : [ptr] "r" (address), [val] "r" (value)
+        : "memory"
+    );
+
+    return failed;
+}
+
+static __always_inline uint8_t load_link8(volatile uint8_t *address) {
+    uint8_t val;
+
+    asm volatile (
+        "dmb\n\r"
+        "ldrexb %[val], [%[ptr]]\n\t"
+        : [val] "=r" (val)
+        : [ptr] "r" (address)
+    );
+
+    return val;
+}
+
+static __always_inline uint8_t store_conditional8(volatile uint8_t *address,
+                                                  uint8_t value) {
+    uint32_t failed;
+
+    asm volatile (
+        "strexb %[failed], %[val], [%[ptr]]\n\t"
         "dmb\n\r"
         : [failed] "=&r" (failed)
         : [ptr] "r" (address), [val] "r" (value)
