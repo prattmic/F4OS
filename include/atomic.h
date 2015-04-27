@@ -155,7 +155,9 @@ static uint32_t atomic_and(uint32_t *ptr, uint32_t val);
  * @param address   Memory address to load from
  * @returns Contents at address
  */
-static uint32_t load_link(volatile uint32_t *address);
+static uint32_t load_link32(volatile uint32_t *address);
+static uint16_t load_link16(volatile uint16_t *address);
+static uint8_t load_link8(volatile uint8_t *address);
 
 /**
  * Store-conditional
@@ -169,7 +171,13 @@ static uint32_t load_link(volatile uint32_t *address);
  * @param value     Value to store at address
  * @returns 0 on successful store
  */
-static uint8_t store_conditional(volatile uint32_t *address, uint32_t value);
+static uint8_t store_conditional32(volatile uint32_t *address, uint32_t value);
+static uint8_t store_conditional16(volatile uint16_t *address, uint16_t value);
+static uint8_t store_conditional8(volatile uint8_t *address, uint8_t value);
+
+/* 32-bit default implementation */
+#define load_link           load_link32
+#define store_conditional   store_conditional32
 
 /* Include actual arch implementation */
 #include <arch/atomic.h>
