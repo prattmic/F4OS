@@ -25,6 +25,17 @@
 
 #include "buddy_mm_internals.h"
 
+/*
+ * The top level of the buddy heap is 2^(max_order) bytes.
+ * It is a configuration error if this does not fit within the defined heap.
+ */
+_Static_assert((1 << CONFIG_MM_USER_MAX_ORDER) <=
+               (CONFIG_EUSERHEAP - CONFIG_SUSERHEAP),
+               "CONFIG_MM_USER_MAX_ORDER is too large to fit in user heap");
+_Static_assert((1 << CONFIG_MM_KERNEL_MAX_ORDER) <=
+               (CONFIG_EKERNELHEAP - CONFIG_SKERNELHEAP),
+               "CONFIG_MM_KERNEL_MAX_ORDER is too large to fit in kernel heap");
+
 struct buddy user_buddy;
 /* Use one extra word so that we index with order directly, instead of order-1 */
 struct heapnode *user_buddy_list[CONFIG_MM_USER_MAX_ORDER+1];
