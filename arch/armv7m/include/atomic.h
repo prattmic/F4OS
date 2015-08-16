@@ -27,47 +27,19 @@
 
 /* word aligned reads/writes of words are atomic */
 static __always_inline int atomic_read(atomic_t *v) {
-    return v->num;
+    return __atomic_load_n(&v->num, __ATOMIC_SEQ_CST);
 }
 
 static __always_inline void atomic_set(atomic_t *v, int i) {
-    v->num = i;
+    __atomic_store(&v->num, &i, __ATOMIC_SEQ_CST);
 }
 
 static inline int atomic_add(atomic_t *v, int i) {
-    int ret;
-    uint8_t failed;
-
-    asm volatile(
-        "0: ldrex  %[ret], [%[num]]            \n\t"
-        "   add    %[ret], %[ret], %[i]        \n\t"
-        "   strex  %[failed], %[ret], [%[num]] \n\t"
-        "   cmp    %[failed], #0               \n\t"
-        "   bne    0b                          \n\t"
-        : [ret] "=&r" (ret), [failed] "=&r" (failed)
-        : [num] "r" (&v->num), [i] "ri" (i)
-        : "memory"
-    );
-
-    return ret;
+    return __atomic_add_fetch(&v->num, i, __ATOMIC_SEQ_CST);
 }
 
 static inline int atomic_sub(atomic_t *v, int i) {
-    int ret;
-    uint8_t failed;
-
-    asm volatile(
-        "0: ldrex  %[ret], [%[num]]            \n\t"
-        "   sub    %[ret], %[ret], %[i]        \n\t"
-        "   strex  %[failed], %[ret], [%[num]] \n\t"
-        "   cmp    %[failed], #0               \n\t"
-        "   bne    0b                          \n\t"
-        : [ret] "=&r" (ret), [failed] "=&r" (failed)
-        : [num] "r" (&v->num), [i] "ri" (i)
-        : "memory"
-    );
-
-    return ret;
+    return __atomic_sub_fetch(&v->num, i, __ATOMIC_SEQ_CST);
 }
 
 static __always_inline int atomic_inc(atomic_t *v) {
@@ -83,56 +55,15 @@ static __always_inline int atomic_dec_and_test(atomic_t *v) {
 }
 
 static inline uint32_t atomic_spin_swap(uint32_t *ptr, uint32_t update) {
-    unsigned int ret;
-    uint8_t failed;
-
-    asm volatile(
-        "0: ldrex  %[ret], [%[ptr]]             \n\t"
-        "   strex  %[failed], %[new], [%[ptr]]  \n\t"
-        "   cmp    %[failed], #0                \n\t"
-        "   bne    0b                           \n\t"
-        : [ret] "=r" (ret), [ptr] "=r" (ptr), [failed] "=&r" (failed)
-        : [new] "r" (update)
-        : "memory"
-    );
-
-    return ret;
+    return __atomic_exchange_n(ptr, &update, __ATOMIC_SEQ_CST);
 }
 
 static inline uint32_t atomic_or(uint32_t *ptr, uint32_t val) {
-    uint32_t ret;
-    uint32_t failed;
-
-    asm volatile (
-        "0: ldrex %[ret], [%[ptr]]              \n\t"
-        "   orr %[ret], %[ret], %[val]          \n\t"
-        "   strex %[failed], %[ret], [%[ptr]]   \n\t"
-        "   cmp %[failed], #0                   \n\t"
-        "   bne 0b                              \n\t"
-        : [failed] "=&r" (failed), [ret] "=&r" (ret)
-        : [ptr] "r" (ptr), [val] "ri" (val)
-        : "memory"
-    );
-
-    return ret;
+    return __atomic_or_fetch(ptr, val, __ATOMIC_SEQ_CST);
 }
 
 static inline uint32_t atomic_and(uint32_t *ptr, uint32_t val) {
-    uint32_t ret;
-    uint8_t failed;
-
-    asm volatile (
-        "0: ldrex %[ret], [%[ptr]]              \n\t"
-        "   and %[ret], %[ret], %[val]          \n\t"
-        "   strex %[failed], %[ret], [%[ptr]]   \n\t"
-        "   cmp %[failed], #0                   \n\t"
-        "   bne 0b                              \n\t"
-        : [failed] "=&r" (failed), [ret] "=&r" (ret)
-        : [ptr] "r" (ptr), [val] "ri" (val)
-        : "memory"
-    );
-
-    return ret;
+    return __atomic_and_fetch(ptr, val, __ATOMIC_SEQ_CST);
 }
 
 static __always_inline uint32_t load_link32(volatile uint32_t *address) {

@@ -32,11 +32,7 @@
 
 /* word aligned reads/writes of words are atomic */
 static __always_inline int atomic_read(atomic_t *v) {
-    int ret = 0;
-
-    __atomic_load(&v->num, &ret, __ATOMIC_SEQ_CST);
-
-    return ret;
+    return __atomic_load_n(&v->num, __ATOMIC_SEQ_CST);
 }
 
 static __always_inline void atomic_set(atomic_t *v, int i) {
@@ -64,11 +60,7 @@ static __always_inline int atomic_dec_and_test(atomic_t *v) {
 }
 
 static inline uint32_t atomic_spin_swap(uint32_t *ptr, uint32_t update) {
-    unsigned int ret = 0;
-
-    __atomic_exchange(ptr, &update, &ret, __ATOMIC_SEQ_CST);
-
-    return ret;
+    return __atomic_exchange_n(ptr, &update, __ATOMIC_SEQ_CST);
 }
 
 static inline uint32_t atomic_or(uint32_t *ptr, uint32_t val) {
