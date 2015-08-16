@@ -70,6 +70,7 @@ static __always_inline uint32_t load_link32(volatile uint32_t *address) {
     uint32_t val;
 
     asm volatile (
+        "dmb\n\t"
         "ldrex  %[val], [%[ptr]]\n\t"
         : [val] "=&r" (val)
         : [ptr] "r" (address)
@@ -84,6 +85,7 @@ static __always_inline uint8_t store_conditional32(volatile uint32_t *address,
 
     asm volatile (
         "strex  %[failed], %[val], [%[ptr]]\n\t"
+        "dmb\n\t"
         : [failed] "=&r" (failed)
         : [ptr] "r" (address), [val] "r" (value)
         : "memory"
@@ -96,6 +98,7 @@ static __always_inline uint8_t load_link8(volatile uint8_t *address) {
     uint8_t val;
 
     asm volatile (
+        "dmb\n\t"
         "ldrexb %[val], [%[ptr]]\n\t"
         : [val] "=r" (val)
         : [ptr] "r" (address)
@@ -110,6 +113,7 @@ static __always_inline uint8_t store_conditional8(volatile uint8_t *address,
 
     asm volatile (
         "strexb %[failed], %[val], [%[ptr]]\n\t"
+        "dmb\n\t"
         : [failed] "=&r" (failed)
         : [ptr] "r" (address), [val] "r" (value)
         : "memory"
@@ -122,6 +126,7 @@ static __always_inline uint16_t load_link16(volatile uint16_t *address) {
     uint16_t val;
 
     asm volatile (
+        "dmb\n\t"
         "ldrexh %[val], [%[ptr]]\n\t"
         : [val] "=r" (val)
         : [ptr] "r" (address)
@@ -136,6 +141,7 @@ static __always_inline uint8_t store_conditional16(volatile uint16_t *address,
 
     asm volatile (
         "strexh %[failed], %[val], [%[ptr]]\n\t"
+        "dmb\n\t"
         : [failed] "=&r" (failed)
         : [ptr] "r" (address), [val] "r" (value)
         : "memory"
