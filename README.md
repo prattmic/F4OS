@@ -180,7 +180,7 @@ dependent upon the task priority, so if a higher priority task is available,
 task deadlines may be missed.
 
 Tasks are created using the `new_task()` function defined in
-`include/kerne/sched.h`:
+`include/kernel/sched.h`:
 
     task_t *new_task(void (*fptr)(void), uint8_t priority, uint32_t period);
 
