@@ -307,7 +307,7 @@ For information on porting to a new chip on a supported architecture, see the
 architecture file in `docs/`.
 
 For information on porting to a new architecture, see the
-[architectyre porting document](docs/arch_porting.md).
+[architecture porting document](docs/arch_porting.md).
 
 ## Contributing
 
